@@ -3,6 +3,7 @@ local UEHelpers = require("UEHelpers")
 local socket_conn = require("tsw5_gamepad_lua_socket_connection")
 
 local ControlState = {}
+ControlState.VehicleID = nil
 ControlState.IsDirty = false
 ControlState.Components = {}
 
@@ -55,6 +56,12 @@ socket_conn.set_callback(function(var)
   if player:IsValid() and controller:IsValid() then
     local drivable_actor = player:GetDrivableActor()
     if drivable_actor:IsValid() then
+      -- reset component state if vehicle changed
+      if drivable_actor:GetAddress() ~= ControlState.VehicleID then
+        ControlState.VehicleID = drivable_actor:GetAddress()
+        ControlState.Components = {}
+      end
+      
       -- 0 = front, 1 = back
       local train_side = 0
       if player:GetAttachedSeatComponent().SeatSide == 1 then
