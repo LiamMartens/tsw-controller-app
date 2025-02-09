@@ -55,6 +55,7 @@ async fn main() -> eframe::Result {
 
     let mut config = config_loader::ConfigLoader::new();
     config.load_from_dir(Some(".config"));
+    config.load_from_dir(Some("config"));
     let shared_config = Arc::new(config);
 
     let sequencer = Arc::new(action_sequencer::ActionSequencer::new());
