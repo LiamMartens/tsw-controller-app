@@ -1,0 +1,279 @@
+{
+  "name": "m3a",
+  "controls": [
+    {
+      "name": "Lever2",
+      "description": "Throttle",
+      "assignment": {
+        "type": "linear",
+        "thresholds": [
+          {
+            "value": 0.2,
+            "action_activate": {
+              "keys": "a",
+              "press_time": 0.3,
+              "wait_time": 0.3
+            },
+            "action_deactivate": {
+              "keys": "d",
+              "press_time": 0.6,
+              "wait_time": 0.3
+            }
+          },
+          {
+            "value": 0.4,
+            "value_end": 0.9,
+            "value_step": 0.25,
+            "action_activate": {
+              "keys": "a",
+              "press_time": 0.2,
+              "wait_time": 0.2
+            },
+            "action_deactivate": {
+              "keys": "d",
+              "press_time": 0.2,
+              "wait_time": 0.2
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "name": "Lever3",
+      "description": "Combined Handle - Brake",
+      "assignment": {
+        "type": "linear",
+        "thresholds": [
+          {
+            "value": 0.1,
+            "action_activate": {
+              "keys": "d",
+              "press_time": 0.3,
+              "wait_time": 0.3
+            },
+            "action_deactivate": {
+              "keys": "a",
+              "press_time": 0.3,
+              "wait_time": 0.3
+            }
+          },
+          {
+            "value": 0.2,
+            "action_activate": {
+              "keys": "d",
+              "press_time": 0.3,
+              "wait_time": 0.3
+            },
+            "action_deactivate": {
+              "keys": "a",
+              "press_time": 0.3,
+              "wait_time": 0.3
+            }
+          },
+          {
+            "value": 0.3,
+            "value_end": 0.9,
+            "value_step": 0.1,
+            "action_activate": {
+              "keys": "d",
+              "press_time": 0.16,
+              "wait_time": 0.15
+            },
+            "action_deactivate": {
+              "keys": "a",
+              "press_time": 0.16,
+              "wait_time": 0.15
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "name": "Lever1",
+      "description": "Master key",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.5,
+        "action_activate": {
+          "keys": "ctrl+w",
+          "press_time": 0.3
+        },
+        "action_deactivate": {
+          "keys": "ctrl+w",
+          "press_time": 0.3
+        }
+      }
+    },
+
+    {
+      "name": "Lever3Button1",
+      "description": "Increase Brake",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "d"
+        }
+      }
+    },
+    {
+      "name": "Lever3Trigger1",
+      "description": "Decrease Brake",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "a"
+        }
+      }
+    },
+
+    {
+      "name": "Dial1Button",
+      "description": "AWS/Safety Reset",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "Q+PageDown"
+        }
+      }
+    },
+    {
+      "name": "Dial1CW",
+      "description": "Reverser Increase",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "w",
+          "press_time": 0.3,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "Dial1CCW",
+      "description": "Reverser Decrease",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "s",
+          "press_time": 0.3,
+          "wait_time": 0.2
+        }
+      }
+    },
+
+    {
+      "name": "Lever2Trigger1",
+      "description": "Horn",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "space"
+        }
+      }
+    },
+    {
+      "name": "Lever2Button1",
+      "description": "Sand",
+      "assignment": {
+        "type": "toggle",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "x"
+        },
+        "action_deactivate": {
+          "keys": "shift+x"
+        }
+      }
+    },
+
+    {
+      "name": "Dial2State1",
+      "description": "Open Close Left Doors",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "y"
+        }
+      }
+    },
+    {
+      "name": "Dial2State3",
+      "description": "Open Close Right Doors",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "u"
+        }
+      }
+    },
+
+    {
+      "name": "Button3",
+      "description": "Wipers Increase/Decrease",
+      "assignment": {
+        "type": "toggle",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "v"
+        },
+        "action_deactivate": {
+          "keys": "shift+v"
+        }
+      }
+    },
+    {
+      "name": "Button5",
+      "description": "Cab Light",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "l"
+        }
+      }
+    },
+    {
+      "name": "Button2",
+      "description": "Bell",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "b"
+        }
+      }
+    },
+    {
+      "name": "Button1",
+      "description": "Headlights Increase",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "h"
+        }
+      }
+    },
+    {
+      "name": "Button4",
+      "description": "Charge Brakes",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": ";"
+        }
+      }
+    }
+  ]
+}

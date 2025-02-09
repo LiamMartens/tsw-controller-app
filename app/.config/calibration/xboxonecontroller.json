@@ -1,0 +1,9 @@
+{
+  "id": "0300e8fb5e040000ea02000001030000",
+  "data": [
+    { "id": "LeftTrigger", "min": -32768, "max": 32767, "idle": -32768 },
+    { "id": "RightTrigger", "min": -32768, "max": 32767, "idle": -32768 },
+    { "id": "LeftStickX", "min": -30349, "max": 32767, "idle": 1209, "deadzone": 2000 },
+    { "id": "LeftStickY", "min": -32768, "max": 32767, "idle": 1209, "deadzone": 2000 }
+  ]
+}
