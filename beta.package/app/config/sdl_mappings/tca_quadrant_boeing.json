@@ -1,0 +1,29 @@
+{
+  "name": "TCA Quadrant Boeing",
+  "id": "0300c4ce4f0400000a04000011010000",
+  "data": [
+    { "kind": "axis", "index": 3, "name": "Lever1" },
+    { "kind": "axis", "index": 4, "name": "Lever2" },
+    { "kind": "axis", "index": 5, "name": "Lever3" },
+
+    { "kind": "button", "index": 1, "name": "Lever2Button1" },
+    { "kind": "button", "index": 2, "name": "Lever3Button1" },
+
+    { "kind": "button", "index": 4, "name": "Lever2Trigger1" },
+    { "kind": "button", "index": 5, "name": "Lever3Trigger1" },
+
+    { "kind": "button", "index": 6, "name": "Button1" },
+    { "kind": "button", "index": 7, "name": "Button2" },
+    { "kind": "button", "index": 8, "name": "Button3" },
+    { "kind": "button", "index": 9, "name": "Button4" },
+    { "kind": "button", "index": 10, "name": "Button5" },
+
+    { "kind": "button", "index": 11, "name": "Dial2State1" },
+    { "kind": "button", "index": 12, "name": "Dial2State2" },
+    { "kind": "button", "index": 13, "name": "Dial2State3" },
+
+    { "kind": "button", "index": 16, "name": "Dial1Button" },
+    { "kind": "button", "index": 14, "name": "Dial1CCW" },
+    { "kind": "button", "index": 15, "name": "Dial1CW" }
+  ]
+}
