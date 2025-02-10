@@ -21,7 +21,7 @@ mod profile_runner;
 #[derive(Subcommand, Debug, Clone)]
 enum Commands {
     Calibrate {
-        #[arg(short, long, default_value = ".config")]
+        #[arg(short, long, default_value = "config")]
         config_dir: String,
     },
 }
@@ -54,7 +54,6 @@ async fn main() -> eframe::Result {
         tokio::sync::watch::channel::<Option<String>>(None);
 
     let mut config = config_loader::ConfigLoader::new();
-    config.load_from_dir(Some(".config"));
     config.load_from_dir(Some("config"));
     let shared_config = Arc::new(config);
 

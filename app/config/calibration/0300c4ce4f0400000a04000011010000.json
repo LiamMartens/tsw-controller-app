@@ -1,0 +1,32 @@
+{
+  "id": "0300c4ce4f0400000a04000011010000",
+  "data": [
+    {
+      "id": "Axis3",
+      "deadzone": 0.0,
+      "invert": false,
+      "min": -32660.0,
+      "max": 32767.0,
+      "idle": -32660.0,
+      "easing_curve": null
+    },
+    {
+      "id": "Axis4",
+      "deadzone": 0.0,
+      "invert": false,
+      "min": -32657.0,
+      "max": 32767.0,
+      "idle": -32657.0,
+      "easing_curve": null
+    },
+    {
+      "id": "Axis5",
+      "deadzone": 0.0,
+      "invert": false,
+      "min": -32668.0,
+      "max": 32635.0,
+      "idle": -32668.0,
+      "easing_curve": null
+    }
+  ]
+}

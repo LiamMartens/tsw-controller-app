@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, io, sync::Arc};
 use tokio::sync::Mutex;
 use tokio_util::sync::CancellationToken;
 
@@ -62,12 +62,23 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
 
                   match raw_event.event {
                     Event::JoyAxisMotion { axis_idx, value, .. } => {
+                      println!("[{}] Axis {} moved to {}",  raw_event.joystick_guid, axis_idx, value);
+
                       let control_name = format!("Axis{}", axis_idx);
                       if !controller_sdl_map.data.iter().any(|c| c.kind == SDLControlKind::Axis && c.index == axis_idx) {
+                        let mut input = String::new();
+                        print!("Enter common name for this axis:");
+                        io::stdin()
+                        .read_line(&mut input)
+                        .expect("Failed to read input");
+
                         controller_sdl_map.data.push(ControllerSdlMapControl {
                           kind: SDLControlKind::Axis,
                           index: axis_idx,
-                          name: control_name.clone(),
+                          name: match input.trim().to_string() {
+                            s if s.is_empty() => control_name.clone(),
+                            s => s,
+                          },
                         });
                       }
 
@@ -94,24 +105,44 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
                       } else {
                           controller_calibration.data.push(control_calibration);
                       }
-
-                      println!("[{}] Axis {} moved to {}",  raw_event.joystick_guid, axis_idx, value);
                     },
                     Event::JoyButtonDown {button_idx, ..} | Event::JoyButtonUp {button_idx, ..} => {
+                      println!("[{}] Button {} triggered",  raw_event.joystick_guid, button_idx);
+
                       if !controller_sdl_map.data.iter().any(|c| c.kind == SDLControlKind::Axis && c.index == button_idx) {
+                        let mut input = String::new();
+                        print!("Enter common name for this button:");
+                        io::stdin()
+                          .read_line(&mut input)
+                          .expect("Failed to read input");
+
                         controller_sdl_map.data.push(ControllerSdlMapControl {
                           kind: SDLControlKind::Button,
                           index: button_idx,
-                          name: format!("Button{}", button_idx),
+                          name: match input.trim().to_string() {
+                            s if s.is_empty() => format!("Button{}", button_idx),
+                            s => s,
+                          },
                         });
                       }
                     },
                     Event::JoyHatMotion {hat_idx, ..}  => {
+                      println!("[{}] Hat {} triggered",  raw_event.joystick_guid, hat_idx);
+
                       if !controller_sdl_map.data.iter().any(|c| c.kind == SDLControlKind::Hat && c.index == hat_idx) {
+                        let mut input = String::new();
+                        print!("Enter common name for this hat:");
+                        io::stdin()
+                          .read_line(&mut input)
+                          .expect("Failed to read input");
+
                         controller_sdl_map.data.push(ControllerSdlMapControl {
                           kind: SDLControlKind::Hat,
                           index: hat_idx,
-                          name: format!("Hat{}", hat_idx),
+                          name: match input.trim().to_string() {
+                            s if s.is_empty() => format!("Hat{}", hat_idx),
+                            s => s,
+                          },
                         });
                       }
                     }

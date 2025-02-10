@@ -35,7 +35,7 @@ impl ConfigLoader {
         let config_dir_option = config_dir.as_ref();
         let config_dir = match config_dir_option {
             Some(dir) => dir.as_ref(),
-            None => ".config",
+            None => "config",
         };
         // read the calibration, sdl mappings and profile files from the provided config dir
         let sdl_mappings_path = Path::new(config_dir).join("sdl_mappings");
