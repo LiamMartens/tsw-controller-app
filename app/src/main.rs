@@ -1,6 +1,3 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
-#![allow(rustdoc::missing_crate_level_docs)] // it's an example
-
 use clap::{Parser, Subcommand};
 use direct_controller::DirectControlCommand;
 use std::sync::Arc;
