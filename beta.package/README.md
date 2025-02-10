@@ -10,7 +10,7 @@ To start the calibration mode you will need to run the `tsw5-gamepad.{linux/wind
 
 Once you are done, you can press Q and hit `[Enter]` to exit calibration mode and write the new configuration files. You should now see a new file in the `app/config/sdl_mappings` directory. This is the mapping of your controls to the common names. If you already had a configuration for the same controller ID (such as the TCA Quadrant Boeing Edition) you should make sure you only keep 1 configuration. Additionally, you will also see a new file in the `app/config/calibration` directory. This contains the min and max calibration values of your levers. You should once again make sure there is only 1 calibration file for each controller ID.
 
-**Note**: You can customize the calibration file with some additional options like `invert` (to invert the lever values) and `easing_curve` to change the lever behavior either to be more linear, less linear etc.. You can check out the `tca_quadrant_boeing.json` calibration file for some examples.
+**Note**: You can customize the calibration file with some additional options like `invert` (to invert the lever values) and `easing_curve` to change the lever behavior either to be more linear, less linear etc.. You can check out the `tca_quadrant_boeing.json` calibration file for some examples. Additionally it can be a good idea to adjust the max and min values in the calibration file as they are the absolute extremes which are sometimes not easily reached in normal gameplay. For example, I have my controller configured at 2000 below and 2000 above the max and min values respectively in order to reach the 1.0 value more consistently.
 
 That's all the required configuration for your controller.
 
