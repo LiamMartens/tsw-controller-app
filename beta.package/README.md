@@ -26,7 +26,8 @@ Once you have the `ue4ss` directory in the right place you can simply copy the `
 
 ## Enable steam controller support and clear the bindings
 
-To ensure the game doesn't pick up your controller natively you will need to enable Steam Input and clear out all the default assigned controls in the game specific controller configuration. If you don't do this the game will make a feable attempt at interacting with the controller.  
+To ensure the game doesn't pick up your controller natively you will need to enable Steam Input and clear out all the default assigned controls in the game specific controller configuration. If you don't do this the game will make a feable attempt at interacting with the controller. To make your throttle work with steam input you will likely also need to do an initial calibration in the Steam Settings > Controller menu. Since this is a non "standard" controller steam will not fully detect it until calibrated. You only need to set the A and B buttons during calibration everything else can be skipped.   
+![Steam Game Options](https://i.ibb.co/Dfvj9WSB/Screenshot-from-2025-02-10-07-56-09.png)  
 ![Steam Game Options](https://i.ibb.co/YBdkZ74V/Screenshot-from-2025-02-09-22-11-04.png)  
 ![Empty Configuration](https://i.ibb.co/DPF6P3GM/Screenshot-from-2025-02-09-22-11-40.png)  
 ![Empty Configuration](https://i.ibb.co/0Rh3kLnV/Screenshot-from-2025-02-09-22-11-52.png)  
