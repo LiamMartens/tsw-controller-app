@@ -1,4 +1,5 @@
-use std::{collections::HashMap, io, sync::Arc};
+use std::{collections::HashMap, sync::Arc};
+use tokio::io::{self, AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::sync::Mutex;
 use tokio_util::sync::CancellationToken;
 
@@ -13,6 +14,8 @@ use crate::{
 };
 
 pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
+    println!("Running calibration mode; press Q and hit enter to stop and write config files.");
+
     let config = config_loader::ConfigLoader::new();
     let config_arc = Arc::new(config);
     let mut controller_manager =
@@ -29,11 +32,32 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
     let controller_sdl_mappings_task_arc = Arc::clone(&controller_sdl_mappings);
     let controller_calibrations_task_arc = Arc::clone(&controller_calibrations);
     let event_listener_task = tokio::task::spawn(async move {
+        let stdin = io::stdin();
+        let mut stdout = io::stdout();
+        let mut stdin_reader = BufReader::new(stdin);
+        let (stdin_read_channel_tx, mut stdin_read_channel_rx) =
+            tokio::sync::mpsc::channel::<Result<String, String>>(10);
+
         loop {
+            let mut last_line_input = String::new();
             tokio::select! {
                 _ = cancel_token_clone.cancelled() => {
                         break;
                 }
+              read_result = stdin_reader.read_line(&mut last_line_input) => {
+                match read_result {
+                  Ok(_) => {
+                    if last_line_input.to_lowercase().trim() == "q" {
+                      cancel_token_clone.cancel();
+                      break;
+                    }
+                    stdin_read_channel_tx.send(Ok(last_line_input.clone())).await.unwrap();
+                  },
+                  Err(_) => {
+                    stdin_read_channel_tx.send(Err("Could not read line".to_string())).await.unwrap();
+                  }
+                };
+              },
                 _ = async {
                   use sdl2::event::Event;
 
@@ -62,15 +86,14 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
 
                   match raw_event.event {
                     Event::JoyAxisMotion { axis_idx, value, .. } => {
-                      println!("[{}] Axis {} moved to {}",  raw_event.joystick_guid, axis_idx, value);
+                      stdout.write_all(format!("[{}] Axis {} moved to {}\n",  raw_event.joystick_guid, axis_idx, value).as_bytes()).await.unwrap();
+                      stdout.flush().await.unwrap();
 
                       let control_name = format!("Axis{}", axis_idx);
                       if !controller_sdl_map.data.iter().any(|c| c.kind == SDLControlKind::Axis && c.index == axis_idx) {
-                        let mut input = String::new();
-                        print!("Enter common name for this axis:");
-                        io::stdin()
-                        .read_line(&mut input)
-                        .expect("Failed to read input");
+                        stdout.write_all(b"Enter common name for this axis: ").await.unwrap();
+                        stdout.flush().await.unwrap();
+                        let input = stdin_read_channel_rx.recv().await.unwrap().expect("Could not read input");
 
                         controller_sdl_map.data.push(ControllerSdlMapControl {
                           kind: SDLControlKind::Axis,
@@ -107,14 +130,13 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
                       }
                     },
                     Event::JoyButtonDown {button_idx, ..} | Event::JoyButtonUp {button_idx, ..} => {
-                      println!("[{}] Button {} triggered",  raw_event.joystick_guid, button_idx);
+                      stdout.write_all(format!("[{}] Button {} triggered\n",  raw_event.joystick_guid, button_idx).as_bytes()).await.unwrap();
+                      stdout.flush().await.unwrap();
 
                       if !controller_sdl_map.data.iter().any(|c| c.kind == SDLControlKind::Axis && c.index == button_idx) {
-                        let mut input = String::new();
-                        print!("Enter common name for this button:");
-                        io::stdin()
-                          .read_line(&mut input)
-                          .expect("Failed to read input");
+                        stdout.write_all(b"Enter common name for this button: ").await.unwrap();
+                        stdout.flush().await.unwrap();
+                        let input = stdin_read_channel_rx.recv().await.unwrap().expect("Could not read input");
 
                         controller_sdl_map.data.push(ControllerSdlMapControl {
                           kind: SDLControlKind::Button,
@@ -127,14 +149,13 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
                       }
                     },
                     Event::JoyHatMotion {hat_idx, ..}  => {
-                      println!("[{}] Hat {} triggered",  raw_event.joystick_guid, hat_idx);
+                      stdout.write_all(format!("[{}] Hat {} triggered\n",  raw_event.joystick_guid, hat_idx).as_bytes()).await.unwrap();
+                      stdout.flush().await.unwrap();
 
                       if !controller_sdl_map.data.iter().any(|c| c.kind == SDLControlKind::Hat && c.index == hat_idx) {
-                        let mut input = String::new();
-                        print!("Enter common name for this hat:");
-                        io::stdin()
-                          .read_line(&mut input)
-                          .expect("Failed to read input");
+                        stdout.write_all(b"Enter common name for this hat: ").await.unwrap();
+                        stdout.flush().await.unwrap();
+                        let input = stdin_read_channel_rx.recv().await.unwrap().expect("Could not read input");
 
                         controller_sdl_map.data.push(ControllerSdlMapControl {
                           kind: SDLControlKind::Hat,
@@ -160,7 +181,7 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
     cancel_token.cancel();
     event_listener_task.await.unwrap();
 
-    println!("Writing new config files");
+    println!("Writing new config files..");
     let mut config = config_loader::ConfigLoader::new();
     let sdl_mappings_lock = controller_sdl_mappings.lock().await;
     let calibrations_lock = controller_calibrations.lock().await;

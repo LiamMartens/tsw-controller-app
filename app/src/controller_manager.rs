@@ -4,11 +4,7 @@ use tokio::sync::broadcast::{Receiver, Sender};
 use tokio::sync::Mutex;
 use tokio_util::sync::CancellationToken;
 
-use sdl2::{
-    event::Event,
-    joystick::{Guid, Joystick},
-    Sdl,
-};
+use sdl2::{event::Event, joystick::Joystick, Sdl};
 
 use crate::{
     config_defs::{
@@ -498,14 +494,27 @@ impl ControllerManager {
 
                     use sdl2::event::Event;
 
+                    // SDL on windows sends some initial movement events which causes issues
+                    let initial_events_threshold = 500;
+
                     match event {
                         Event::JoyDeviceAdded { .. } => self.handle_joy_device_added(event),
                         Event::JoyDeviceRemoved { .. } => self.handle_joy_device_removed(event),
-                        Event::JoyAxisMotion { .. } => self.handle_joy_axis_motion(event),
-                        Event::JoyButtonDown { .. } | Event::JoyButtonUp { .. } => {
-                            self.handle_joy_button_down_or_up(event)
+                        Event::JoyAxisMotion { .. } => {
+                            if event.get_timestamp() > initial_events_threshold {
+                                self.handle_joy_axis_motion(event);
+                            }
                         }
-                        Event::JoyHatMotion { .. } => self.handle_joy_hat_motion(event),
+                        Event::JoyButtonDown { .. } | Event::JoyButtonUp { .. } => {
+                            if event.get_timestamp() > initial_events_threshold {
+                                self.handle_joy_button_down_or_up(event)
+                            }
+                        }
+                        Event::JoyHatMotion { .. } => {
+                            if event.get_timestamp() > initial_events_threshold {
+                                self.handle_joy_hat_motion(event)
+                            }
+                        }
                         Event::Quit { .. } => break,
                         _ => {}
                     }
