@@ -27,7 +27,7 @@ pub struct ControllerManagerRawEvent {
     pub event: Event,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct ControllerManagerControllerControlState {
     /* can be -1 | 0 | 1 depending on the direction; also contains the value at which the direction last changed */
     pub direction: (isize, f32),

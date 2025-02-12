@@ -23,15 +23,27 @@ pub struct ControllerProfileDirectControlInputValueConfigAssignment {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ControllerProfileDirectControlAssignment {
     pub controls: String, /* the HID control component as per the UE4SS API */
-    pub neutral: Option<f32>,
     pub input_value: ControllerProfileDirectControlInputValueConfigAssignment,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ControllerProfileControlAssignmentAction {
+pub struct ControllerProfileControlAssignmentKeysAction {
     pub keys: String,
     pub press_time: Option<f32>,
     pub wait_time: Option<f32>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ControllerProfileControlAssignmentDirectControlAction {
+    pub controls: String,
+    pub value: f32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum ControllerProfileControlAssignmentAction {
+    Keys(ControllerProfileControlAssignmentKeysAction),
+    DirectControl(ControllerProfileControlAssignmentDirectControlAction),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

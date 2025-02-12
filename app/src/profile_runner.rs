@@ -5,18 +5,20 @@ use tokio::sync::{broadcast::Sender, Mutex};
 use crate::{
     action_sequencer::ActionSequencer,
     config_defs::controller_profile::{
-        ControllerProfileControlAssignment, ControllerProfileControlLinearAssignmentThreshold,
+        ControllerProfileControlAssignment, ControllerProfileControlAssignmentAction,
+        ControllerProfileControlLinearAssignmentThreshold,
     },
     config_loader::ConfigLoader,
     controller_manager::{ControllerManagerChangeEvent, ControllerManagerControllerControlState},
     direct_controller::DirectControlCommand,
 };
 
+#[derive(Clone)]
 pub struct ProfileRunnerAssignmentCall {
     pub control_name: String,
     pub control_state: ControllerManagerControllerControlState,
     pub assignment: ControllerProfileControlAssignment,
-    pub action: super::action_sequencer::ActionSequencerAction,
+    pub action: ControllerProfileControlAssignmentAction,
 }
 
 pub struct ProfileRunner {
@@ -64,24 +66,53 @@ impl ProfileRunner {
         }
     }
 
-    pub async fn call_assignment_action_for_control<T: AsRef<str>>(
+    pub async fn call_assignment_action<T: AsRef<str>>(
         &mut self,
         control_name: T,
         control_state: &ControllerManagerControllerControlState,
-        assignment: &ControllerProfileControlAssignment,
-        action: super::action_sequencer::ActionSequencerAction,
+        control_assignment: &ControllerProfileControlAssignment,
+        assignment_action: &ControllerProfileControlAssignmentAction,
+        should_release_keys: Option<bool>,
     ) {
-        self.control_calls.insert(
-            String::from(control_name.as_ref()),
-            ProfileRunnerAssignmentCall {
-                control_name: String::from(control_name.as_ref()),
-                control_state: control_state.clone(),
-                assignment: assignment.clone(),
-                action: action.clone(),
-            },
-        );
+        match assignment_action {
+            ControllerProfileControlAssignmentAction::Keys(action) => {
+                let sequencer_action = super::action_sequencer::ActionSequencerAction {
+                    keys: action.keys.clone(),
+                    press_time: action.press_time,
+                    wait_time: action.wait_time,
+                    release: Some(should_release_keys.unwrap_or(false)),
+                };
+                self.control_calls.insert(
+                    String::from(control_name.as_ref()),
+                    ProfileRunnerAssignmentCall {
+                        control_name: String::from(control_name.as_ref()),
+                        control_state: control_state.clone(),
+                        assignment: control_assignment.clone(),
+                        action: assignment_action.clone(),
+                    },
+                );
+                self.sequencer.add_action(sequencer_action).await;
+            }
+            ControllerProfileControlAssignmentAction::DirectControl(action) => {
+                self.control_calls.insert(
+                    String::from(control_name.as_ref()),
+                    ProfileRunnerAssignmentCall {
+                        control_name: String::from(control_name.as_ref()),
+                        control_state: control_state.clone(),
+                        assignment: control_assignment.clone(),
+                        action: assignment_action.clone(),
+                    },
+                );
 
-        self.sequencer.add_action(action).await;
+                let direct_control_sender = self.direct_control_sender.lock().await;
+                direct_control_sender
+                    .send(DirectControlCommand {
+                        controls: action.controls.clone(),
+                        input_value: action.value,
+                    })
+                    .unwrap();
+            }
+        }
     }
 
     pub async fn run(&mut self, event: ControllerManagerChangeEvent) {
@@ -104,53 +135,43 @@ impl ProfileRunner {
         let control_definition = controller_config
             .unwrap()
             .find_control(control_name.clone());
-        let last_called_assignment = self.control_calls.get(&control_name.clone());
+        let last_called_assignment = match self.control_calls.get(&control_name.clone()) {
+            Some(last_call) => Some(last_call.clone()),
+            None => None,
+        };
 
         match control_definition {
             Some(control) => match &control.assignment {
                 ControllerProfileControlAssignment::Momentary(assignment) => {
                     if control_state.value >= assignment.threshold {
                         // call if there was no prior call or if the prior call was not this threshold
-                        let should_call = last_called_assignment.is_none()
-                            || last_called_assignment.unwrap().control_state.value
+                        let should_call = last_called_assignment.as_ref().is_none()
+                            || last_called_assignment.clone().unwrap().control_state.value
                                 < assignment.threshold;
                         if should_call {
-                            self.call_assignment_action_for_control(
+                            self.call_assignment_action(
                                 control_name.clone(),
                                 &control_state,
                                 &control.assignment,
-                                super::action_sequencer::ActionSequencerAction {
-                                    keys: assignment.action_activate.keys.clone(),
-                                    press_time: assignment.action_activate.press_time,
-                                    wait_time: assignment.action_activate.wait_time,
-                                    release: Some(false),
-                                },
+                                &assignment.action_activate,
+                                None,
                             )
                             .await;
                         }
-                    } else if last_called_assignment.is_some()
-                        && last_called_assignment.unwrap().control_state.value
+                    } else if last_called_assignment.as_ref().is_some()
+                        && last_called_assignment.clone().unwrap().control_state.value
                             >= assignment.threshold
                     {
                         // when below the threshold only call action if the last call was above or equal to the threshold
-                        self.call_assignment_action_for_control(
+                        self.call_assignment_action(
                             control_name.clone(),
                             &control_state,
                             &control.assignment,
                             match &assignment.action_deactivate {
-                                Some(action) => super::action_sequencer::ActionSequencerAction {
-                                    keys: action.keys.clone(),
-                                    press_time: action.press_time,
-                                    wait_time: action.wait_time,
-                                    release: Some(false),
-                                },
-                                None => super::action_sequencer::ActionSequencerAction {
-                                    keys: assignment.action_activate.keys.clone(),
-                                    press_time: assignment.action_activate.press_time,
-                                    wait_time: assignment.action_activate.wait_time,
-                                    release: Some(true),
-                                },
+                                Some(action) => action,
+                                None => &assignment.action_activate,
                             },
+                            None,
                         )
                         .await;
                     }
@@ -178,7 +199,7 @@ impl ProfileRunner {
                         .collect();
                     let thresholds_passed: Vec<
                         &&ControllerProfileControlLinearAssignmentThreshold,
-                    > = match &last_called_assignment {
+                    > = match last_called_assignment.as_ref() {
                         Some(last_call) => thresholds
                             .iter()
                             .filter(|t| {
@@ -204,16 +225,12 @@ impl ProfileRunner {
                         let thresholds_to_activate =
                             &thresholds[thresholds_passed.len()..exceeding_thresholds.len()];
                         for threshold in thresholds_to_activate {
-                            self.call_assignment_action_for_control(
+                            self.call_assignment_action(
                                 control_name.clone(),
                                 &control_state,
                                 &control.assignment,
-                                super::action_sequencer::ActionSequencerAction {
-                                    keys: threshold.action_activate.keys.clone(),
-                                    press_time: threshold.action_activate.press_time,
-                                    wait_time: threshold.action_activate.wait_time,
-                                    release: Some(false),
-                                },
+                                &threshold.action_activate,
+                                None,
                             )
                             .await;
                         }
@@ -226,26 +243,15 @@ impl ProfileRunner {
                             .rev()
                             .collect();
                         for threshold in thresholds_to_deactivate {
-                            self.call_assignment_action_for_control(
+                            self.call_assignment_action(
                                 control_name.clone(),
                                 &control_state,
                                 &control.assignment,
                                 match &threshold.action_deactivate {
-                                    Some(action) => {
-                                        super::action_sequencer::ActionSequencerAction {
-                                            keys: action.keys.clone(),
-                                            press_time: action.press_time,
-                                            wait_time: action.wait_time,
-                                            release: Some(false),
-                                        }
-                                    }
-                                    None => super::action_sequencer::ActionSequencerAction {
-                                        keys: threshold.action_activate.keys.clone(),
-                                        press_time: threshold.action_activate.press_time,
-                                        wait_time: threshold.action_activate.wait_time,
-                                        release: Some(true),
-                                    },
+                                    Some(action) => action,
+                                    None => &threshold.action_activate,
                                 },
+                                None,
                             )
                             .await;
                         }
@@ -253,46 +259,53 @@ impl ProfileRunner {
                 }
                 ControllerProfileControlAssignment::Toggle(assignment) => {
                     if control_state.value >= assignment.threshold {
-                        // call if there was no prior call or if the prior call was not this threshold
-                        let action_to_call = match last_called_assignment {
+                        let action_to_call = match last_called_assignment.as_ref() {
                             Some(last_call) => {
                                 /* if last call was below threshold -> activate */
-                                if last_call.action.keys == assignment.action_activate.keys {
-                                    &assignment.action_deactivate
-                                } else {
-                                    &assignment.action_activate
+                                match &last_call.action {
+                                    ControllerProfileControlAssignmentAction::Keys(action) => match &assignment.action_activate {
+                                        ControllerProfileControlAssignmentAction::Keys(activate_action) => match activate_action.keys == action.keys {
+                                            true => &assignment.action_deactivate,
+                                            false => &assignment.action_activate,
+                                        }
+                                        ControllerProfileControlAssignmentAction::DirectControl(_) => {
+                                            &assignment.action_activate
+                                        }
+                                    }
+                                    ControllerProfileControlAssignmentAction::DirectControl(
+                                        action,
+                                    ) =>  match &assignment.action_activate {
+                                        ControllerProfileControlAssignmentAction::Keys(_) => &assignment.action_activate,
+                                        ControllerProfileControlAssignmentAction::DirectControl(action_activate) => match action_activate.value == action.value {
+                                            true => &assignment.action_deactivate,
+                                            false => &assignment.action_activate,
+                                        }
+                                    }
                                 }
                             }
                             None => &assignment.action_activate,
                         };
-                        self.call_assignment_action_for_control(
+
+                        self.call_assignment_action(
                             control_name.clone(),
                             &control_state,
                             &control.assignment,
-                            super::action_sequencer::ActionSequencerAction {
-                                keys: action_to_call.keys.clone(),
-                                press_time: action_to_call.press_time,
-                                wait_time: action_to_call.wait_time,
-                                release: Some(false),
-                            },
+                            action_to_call,
+                            None,
                         )
                         .await;
-                    } else if last_called_assignment.is_some()
-                        && last_called_assignment.unwrap().control_state.value
+                    } else if last_called_assignment.as_ref().is_some()
+                        && last_called_assignment.clone().unwrap().control_state.value
                             >= assignment.threshold
                     {
-                        let last_action_taken = &last_called_assignment.unwrap().action;
+                        let last_action_taken = last_called_assignment.clone().unwrap().action;
                         // when below the threshold only call action if the last call was above or equal to the threshold
-                        self.call_assignment_action_for_control(
+                        self.call_assignment_action(
                             control_name.clone(),
                             &control_state,
                             &control.assignment,
-                            super::action_sequencer::ActionSequencerAction {
-                                keys: last_action_taken.keys.clone(),
-                                press_time: last_action_taken.press_time,
-                                wait_time: last_action_taken.wait_time,
-                                release: Some(true),
-                            },
+                            &last_action_taken.clone(),
+                            Some(true),
                         )
                         .await;
                     }
