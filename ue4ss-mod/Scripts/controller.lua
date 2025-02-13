@@ -29,7 +29,16 @@ LoopAsync(200, function()
     ControlState.IsDirty = false
     Helpers.InsertDirectControlPresetIfNotExists(drivable_actor)
     for control_name, target_value in pairs(ControlState.Components) do
-      Helpers.InsertOrUpdateDirectControlPresetControlIfNotExists(drivable_actor, control_name, target_value)
+      if drivable_actor[control_name]:IsValid() then
+        -- the 1972 tube stock DeadmansHandleButton has a weird resetting logic when using VHID presets
+        -- so we need to set the pushed state manually (SetPushedState doesn't work with other UPushButtonComponent's though oddly)
+        if control_name == "DeadmansHandleButton" then
+          drivable_actor[control_name]:SetPushedState(true, true)
+        else
+          -- levers are controlled using VHID presets because it's more stable
+          Helpers.InsertOrUpdateDirectControlPresetControlIfNotExists(drivable_actor, control_name, target_value)
+        end
+      end
     end
 
     drivable_actor.RailVehiclePhysicsComponent:ApplyVHIDPreset(
@@ -61,7 +70,7 @@ socket_conn.set_callback(function(var)
         ControlState.VehicleID = drivable_actor:GetAddress()
         ControlState.Components = {}
       end
-      
+
       -- 0 = front, 1 = back
       local train_side = 0
       if player:GetAttachedSeatComponent().SeatSide == 1 then
@@ -74,7 +83,6 @@ socket_conn.set_callback(function(var)
     end
   end
 end)
-
 
 RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:InputValueChanged", function(self, oldValue, newValue)
   print("InputValueChanged", newValue.ToFloat)
