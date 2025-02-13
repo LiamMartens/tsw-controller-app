@@ -92,8 +92,6 @@ impl ProfileRunner {
         action: Option<ProfileRunnerAssignmentCallAction>,
     ) {
         if action.is_none() {
-            /* remove last call */
-            self.control_calls.remove(control_name.as_ref());
             return;
         }
 

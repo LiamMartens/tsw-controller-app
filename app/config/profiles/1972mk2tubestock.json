@@ -2,22 +2,6 @@
   "name": "1972mk2tubestock",
   "controls": [
     {
-      "name": "Button2",
-      "description": "Control key",
-      "assignment": {
-        "type": "toggle",
-        "threshold": 0.9,
-        "action_activate": {
-          "controls": "ControlSwitchKey",
-          "value": 1.0
-        },
-        "action_deactivate": {
-          "controls": "ControlSwitchKey",
-          "value": 0.0
-        }
-      }
-    },
-    {
       "name": "Lever1",
       "description": "DeadmansHandleButton",
       "assignment": {
@@ -107,23 +91,50 @@
 
     {
       "name": "Lever2Trigger1",
-      "description": "Horn",
+      "description": "Deadman's Switch",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
-          "keys": "space"
+          "controls": "DeadmansHandleButton",
+          "value": 1.0
+        },
+        "action_deactivate": {
+          "controls": "DeadmansHandleButton",
+          "value": 0.0
+        }
+      }
+    },
+
+    {
+      "name": "Button3",
+      "description": "Control Key In/Out",
+      "assignment": {
+        "type": "toggle",
+        "threshold": 0.9,
+        "action_activate": {
+          "controls": "ControlSwitchKey",
+          "value": 1.0
+        },
+        "action_deactivate": {
+          "controls": "ControlSwitchKey",
+          "value": 0.0
         }
       }
     },
     {
-      "name": "Lever2Button1",
-      "description": "Sand",
+      "name": "Button5",
+      "description": "Direction Selector Key In/Out",
       "assignment": {
-        "type": "momentary",
+        "type": "toggle",
         "threshold": 0.9,
         "action_activate": {
-          "keys": "x"
+          "controls": "DirectionSelectorKey",
+          "value": 1.0
+        },
+        "action_deactivate": {
+          "controls": "DirectionSelectorKey",
+          "value": 0.0
         }
       }
     },
@@ -147,29 +158,6 @@
         "threshold": 0.9,
         "action_activate": {
           "keys": "u"
-        }
-      }
-    },
-
-    {
-      "name": "Button3",
-      "description": "Wipers Increase",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "v"
-        }
-      }
-    },
-    {
-      "name": "Button5",
-      "description": "Wipers Decrease",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "shift+v"
         }
       }
     },
