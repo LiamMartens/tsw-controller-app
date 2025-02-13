@@ -87,6 +87,17 @@ pub struct ControllerProfile {
     pub controller_id: Option<SDLGuid>,
 }
 
+impl ControllerProfileControlAssignmentAction {
+    pub fn get_compare_value(&self) -> String {
+        match self {
+            ControllerProfileControlAssignmentAction::Keys(action) => format!("{}", action.keys),
+            ControllerProfileControlAssignmentAction::DirectControl(action) => {
+                format!("{}:{}", action.controls, action.value)
+            }
+        }
+    }
+}
+
 impl ControllerProfileControlLinearAssignmentThreshold {
     pub fn is_exceeding_threshold(&self, value: f32) -> bool {
         if self.value < 0.0 {
