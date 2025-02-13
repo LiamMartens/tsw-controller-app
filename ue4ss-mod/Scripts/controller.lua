@@ -33,7 +33,7 @@ LoopAsync(200, function()
         -- the 1972 tube stock DeadmansHandleButton has a weird resetting logic when using VHID presets
         -- so we need to set the pushed state manually (SetPushedState doesn't work with other UPushButtonComponent's though oddly)
         if control_name == "DeadmansHandleButton" then
-          drivable_actor[control_name]:SetPushedState(true, true)
+          drivable_actor[control_name]:SetPushedState(target_value > 0.5, true)
         else
           -- levers are controlled using VHID presets because it's more stable
           Helpers.InsertOrUpdateDirectControlPresetControlIfNotExists(drivable_actor, control_name, target_value)
