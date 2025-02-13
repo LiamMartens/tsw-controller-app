@@ -71,7 +71,7 @@
         "action_activate": {
           "keys": "s",
           "press_time": 0.3,
-          "wait_time": 0.2
+          "wait_time": 0.1
         }
       }
     },
@@ -84,7 +84,7 @@
         "action_activate": {
           "keys": "w",
           "press_time": 0.3,
-          "wait_time": 0.2
+          "wait_time": 0.1
         }
       }
     },
@@ -181,6 +181,20 @@
         "threshold": 0.9,
         "action_activate": {
           "keys": "l"
+        }
+      }
+    },
+    {
+      "name": "Button2",
+      "description": "Wipers",
+      "assignment": {
+        "type": "toggle",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "v"
+        },
+        "action_deactivate": {
+          "keys": "shift+v"
         }
       }
     }
