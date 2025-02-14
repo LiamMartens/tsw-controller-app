@@ -1,60 +1,48 @@
 {
-  "name": "db766",
+  "name": "acs64",
   "controls": [
     {
       "name": "Lever2",
       "description": "Throttle",
       "assignment": {
         "type": "direct_control",
-        "controls": "Throttle",
+        "controls": "MasterController_{SIDE} (IrregularLever)",
         "input_value": {
           "min": 0.0,
           "max": 1.0
         }
       }
     },
+
     {
       "name": "Lever3",
-      "description": "TrainBrake",
-      "assignments": [
-        {
-          "type": "direct_control",
-          "controls": "TrainBrake",
-          "input_value": {
-            "min": 0.1,
-            "max": 0.8,
-            "step": 0.05
-          }
-        },
-        {
-          "type": "direct_control",
-          "controls": "DynamicBrake",
-          "input_value": {
-            "min": 0.1,
-            "max": 0.8,
-            "step": 0.05
-          }
+      "description": "Automatic Brake",
+      "assignment": {
+        "type": "direct_control",
+        "controls": "AutomaticBrake_{SIDE} (IrregularLever)",
+        "input_value": {
+          "min": 0.0,
+          "max": 0.75
         }
-      ]
+      }
     },
 
     {
       "name": "Lever1",
-      "description": "DirectBrake",
+      "description": "Independent Brake",
       "assignment": {
         "type": "direct_control",
-        "controls": "DirectBrake",
+        "controls": "IndependentBrake_{SIDE} (IrregularLever)",
         "input_value": {
-          "min": 0.0,
-          "max": 1.0,
-          "step": 0.5
+          "min": 0.1,
+          "max": 1.0
         }
       }
     },
 
     {
       "name": "Lever3Button1",
-      "description": "Increase brake",
+      "description": "Increase Brake",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
@@ -65,7 +53,7 @@
     },
     {
       "name": "Lever3Trigger1",
-      "description": "Decrease brake",
+      "description": "Decrease Brake",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
@@ -94,7 +82,7 @@
         "threshold": 0.9,
         "action_activate": {
           "keys": "w",
-          "press_time": 0.2,
+          "press_time": 0.3,
           "wait_time": 0.2
         }
       }
@@ -107,7 +95,7 @@
         "threshold": 0.9,
         "action_activate": {
           "keys": "s",
-          "press_time": 0.2,
+          "press_time": 0.3,
           "wait_time": 0.2
         }
       }
@@ -166,8 +154,7 @@
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
-          "keys": "v",
-          "press_time": 0.1
+          "keys": "v"
         }
       }
     },
@@ -178,13 +165,13 @@
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
-          "keys": "shift+v",
-          "press_time": 0.1
+          "keys": "shift+v"
         }
       }
     },
+
     {
-      "name": "Button4",
+      "name": "Button2",
       "description": "Cab Light",
       "assignment": {
         "type": "momentary",
@@ -195,24 +182,24 @@
       }
     },
     {
-      "name": "Button2",
-      "description": "PZB Release",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "end"
-        }
-      }
-    },
-    {
       "name": "Button1",
-      "description": "Headlights",
+      "description": "Headlights Increase",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
           "keys": "h"
+        }
+      }
+    },
+    {
+      "name": "Button4",
+      "description": "Headlights Decrease",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "shift+h"
         }
       }
     }
