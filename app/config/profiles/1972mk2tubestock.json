@@ -3,10 +3,10 @@
   "controls": [
     {
       "name": "Lever1",
-      "description": "DeadmansHandleButton",
+      "description": "Control Key Switch",
       "assignment": {
         "type": "direct_control",
-        "controls": "DeadmansHandleButton",
+        "controls": "ControlSwitch",
         "input_value": {
           "min": 0.0,
           "max": 1.0,
@@ -22,7 +22,7 @@
         "type": "direct_control",
         "controls": "TractionBrakeController",
         "input_value": {
-          "min": -0.7,
+          "min": -0.5,
           "max": 0.35
         }
       }
@@ -71,7 +71,7 @@
         "action_activate": {
           "keys": "s",
           "press_time": 0.3,
-          "wait_time": 0.2
+          "wait_time": 0.1
         }
       }
     },
@@ -84,7 +84,7 @@
         "action_activate": {
           "keys": "w",
           "press_time": 0.3,
-          "wait_time": 0.2
+          "wait_time": 0.1
         }
       }
     },
@@ -102,6 +102,17 @@
         "action_deactivate": {
           "controls": "DeadmansHandleButton",
           "value": 0.0
+        }
+      }
+    },
+    {
+      "name": "Lever2Button1",
+      "description": "Whistle",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "space"
         }
       }
     },
@@ -181,6 +192,20 @@
         "threshold": 0.9,
         "action_activate": {
           "keys": "l"
+        }
+      }
+    },
+    {
+      "name": "Button2",
+      "description": "Wipers",
+      "assignment": {
+        "type": "toggle",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "v"
+        },
+        "action_deactivate": {
+          "keys": "shift+v"
         }
       }
     }

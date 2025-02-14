@@ -77,7 +77,8 @@ pub struct ControllerProfileControlLinearAssignment {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ControllerProfileControl {
     pub name: String,
-    pub assignment: ControllerProfileControlAssignment,
+    pub assignment: Option<ControllerProfileControlAssignment>,
+    pub assignments: Option<Vec<ControllerProfileControlAssignment>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

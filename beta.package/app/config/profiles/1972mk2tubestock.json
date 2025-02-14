@@ -22,7 +22,7 @@
         "type": "direct_control",
         "controls": "TractionBrakeController",
         "input_value": {
-          "min": -0.7,
+          "min": -0.5,
           "max": 0.35
         }
       }
@@ -102,6 +102,17 @@
         "action_deactivate": {
           "controls": "DeadmansHandleButton",
           "value": 0.0
+        }
+      }
+    },
+    {
+      "name": "Lever2Button1",
+      "description": "Whistle",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "space"
         }
       }
     },
