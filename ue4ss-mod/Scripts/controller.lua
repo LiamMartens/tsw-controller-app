@@ -76,7 +76,7 @@ socket_conn.set_callback(function(var)
 
   local command_split = Helpers.SplitString(var, ",")
   --- only respond to direct control commands
-  if command_split[0] ~= "direct_control" then
+  if command_split[1] ~= "direct_control" then
     return
   end
 
