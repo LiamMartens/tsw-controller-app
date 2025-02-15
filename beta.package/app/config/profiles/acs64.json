@@ -22,7 +22,7 @@
         "controls": "AutomaticBrake_{SIDE} (IrregularLever)",
         "input_value": {
           "min": 0.0,
-          "max": 0.75
+          "max": 0.45
         }
       }
     },

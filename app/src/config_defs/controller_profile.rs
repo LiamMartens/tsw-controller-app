@@ -142,19 +142,25 @@ impl ControllerProfileControlLinearAssignment {
 }
 
 impl ControllerProfileDirectControlInputValueConfigAssignment {
+    /**
+     * The incoming value here can only be [-1, 1]
+     */
     pub fn calculate_normal_value(&self, value: f32) -> f32 {
-        let total_distance = (self.max - self.min).abs();
-        let normal = (value * total_distance) + self.min;
-        let actual_value = match self.invert {
-            Some(true) => self.max - normal,
-            _ => normal,
+        let input_value: f32 = match self.invert {
+            Some(true) => match value < 0.0 {
+                true => -1.0 - value,
+                false => 1.0 - value,
+            },
+            _ => value,
         };
+        let total_distance = (self.max - self.min).abs();
+        let normal = (input_value * total_distance) + self.min;
         match self.step {
             Some(step) => {
-                let step_count = (actual_value / step).round();
+                let step_count = (normal / step).round();
                 return (step_count * step).clamp(self.min, self.max);
             }
-            None => actual_value.clamp(self.min, self.max),
+            None => normal.clamp(self.min, self.max),
         }
     }
 }
