@@ -23,13 +23,17 @@ fn init(lua: Arc<&Lua>) -> Result<Table> {
             while message_queue.len() > 0 {
                 let message = message_queue.pop_front().unwrap();
                 let parts: Vec<&str> = message.split(",").collect();
-                if parts.len() == 2 {
-                    control_value_map.insert(parts[0].to_string(), parts[1].to_string());
+                if parts.len() == 3 && parts[0] == "direct_control" {
+                    control_value_map.insert(parts[1].to_string(), parts[2].to_string());
                 }
             }
             // send all control values to lua - wait a tick each time
             control_value_map.iter().for_each(|(control, value)| {
-                callback_lock.as_ref().unwrap().call::<()>(format!("{},{}", control, value)).unwrap();
+                callback_lock
+                    .as_ref()
+                    .unwrap()
+                    .call::<()>(format!("direct_control,{},{}", control, value))
+                    .unwrap();
                 // wait between each sending of the message
                 thread::sleep(Duration::from_millis(1000 / 15));
             });
@@ -43,29 +47,33 @@ fn init(lua: Arc<&Lua>) -> Result<Table> {
     let message_queue_arc_clone = Arc::clone(&message_queue_arc);
     thread::spawn(move || loop {
         match connect("ws://127.0.0.1:63241") {
-            Ok((mut socket, _)) => loop {
+            Ok((mut socket, _)) => {
                 println!("Connected..");
-                let msg = socket.read();
-                match msg {
-                    Ok(msg) => match msg {
-                        tungstenite::Message::Text(text) => {
-                            println!("Queueing Message: {}", text.to_string());
-                            let mut message_queue_lock = message_queue_arc_clone.lock().unwrap();
-                            message_queue_lock.push_back(text.to_string());
-                            drop(message_queue_lock);
-                        }
-                        tungstenite::Message::Close(_) => {
-                            socket.close(None).unwrap();
+
+                loop {
+                    let msg = socket.read();
+                    match msg {
+                        Ok(msg) => match msg {
+                            tungstenite::Message::Text(text) => {
+                                println!("Queueing Message: {}", text.to_string());
+                                let mut message_queue_lock =
+                                    message_queue_arc_clone.lock().unwrap();
+                                message_queue_lock.push_back(text.to_string());
+                                drop(message_queue_lock);
+                            }
+                            tungstenite::Message::Close(_) => {
+                                socket.close(None).unwrap();
+                                break;
+                            }
+                            _ => {}
+                        },
+                        Err(e) => {
+                            eprintln!("Error receiving message: {}", e);
                             break;
                         }
-                        _ => {}
-                    },
-                    Err(e) => {
-                        eprintln!("Error receiving message: {}", e);
-                        break;
                     }
                 }
-            },
+            }
             Err(e) => {
                 println!("Connection error: {}", e);
             }
