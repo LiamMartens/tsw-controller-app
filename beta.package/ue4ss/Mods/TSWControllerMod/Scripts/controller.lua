@@ -107,23 +107,24 @@ socket_conn.set_callback(function(var)
   end
 end)
 
-RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:InputValueChanged", function(self, oldValue, newValue)
-  local player = UEHelpers.GetPlayer()
-  local controller = player.Controller
-  if not player:IsValid() or not controller:IsValid() then
-    return
-  end
+--- enable this code to listen to value changes
+-- RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:InputValueChanged", function(self, oldValue, newValue)
+--   local player = UEHelpers.GetPlayer()
+--   local controller = player.Controller
+--   if not player:IsValid() or not controller:IsValid() then
+--     return
+--   end
 
-  local drivable_actor = player:GetDrivableActor()
-  if not drivable_actor:IsValid() then
-    return
-  end
+--   local drivable_actor = player:GetDrivableActor()
+--   if not drivable_actor:IsValid() then
+--     return
+--   end
 
-  local vhid_component = self:get()
-  local vhid_component_identifier = vhid_component.InputIdentifier.Identifier:ToString()
+--   local vhid_component = self:get()
+--   local vhid_component_identifier = vhid_component.InputIdentifier.Identifier:ToString()
 
-  print("InputValueChanged:" .. vhid_component_identifier .. ":" .. newValue.ToFloat .. "\n")
-end)
+--   print("InputValueChanged:" .. vhid_component_identifier .. ":" .. newValue.ToFloat .. "\n")
+-- end)
 
 -- RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:OutputValueChanged", function(self, oldValue, newValue)
 --   print("OutputValueChanged", newValue.ToFloat)
