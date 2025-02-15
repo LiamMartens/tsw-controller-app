@@ -66,9 +66,6 @@ impl DirectController {
                           Some(next) = read.next() => {
                             match next {
                               Ok(message) => match message {
-                                tungstenite::Message::Text(text) => {
-                                  println!("Received message: {}", text);
-                                },
                                 tungstenite::Message::Close(_) => { break },
                                 _ => {},
                               },
@@ -79,8 +76,9 @@ impl DirectController {
                             }
                           },
                           Ok(message) = command_receiver_lock.recv() => {
-                            println!("Received command: {:?}", message);
-                            write.send(Message::text(format!("direct_control,{},{}", message.controls, message.input_value))).await.unwrap();
+                            let command_to_send = format!("direct_control,{},{}", message.controls, message.input_value);
+                            println!("Sending command: {:?}", command_to_send);
+                            write.send(Message::text(command_to_send)).await.unwrap();
                           }
                         }
                       }
