@@ -7,17 +7,21 @@ use std::{
 };
 use tungstenite::connect;
 
+static WS_ADDR: &str = "ws://127.0.0.1:63241";
+
 fn init(lua: Arc<&Lua>) -> Result<Table> {
     let exports = lua.create_table()?;
     let callback_arc: Arc<Mutex<Option<Function>>> = Arc::new(Mutex::new(None));
-    let message_queue_arc: Arc<Mutex<VecDeque<String>>> = Arc::new(Mutex::new(VecDeque::new()));
+    let incoming_message_queue_arc: Arc<Mutex<VecDeque<String>>> =
+        Arc::new(Mutex::new(VecDeque::new()));
 
+    /* loop to send forward incoming messages to Lua */
     let callback_arc_clone = Arc::clone(&callback_arc);
-    let message_queue_arc_clone = Arc::clone(&message_queue_arc);
+    let incoming_message_queue_arc_clone = Arc::clone(&incoming_message_queue_arc);
     thread::spawn(move || loop {
         loop {
             let callback_lock = callback_arc_clone.lock().unwrap();
-            let mut message_queue = message_queue_arc_clone.lock().unwrap();
+            let mut message_queue = incoming_message_queue_arc_clone.lock().unwrap();
             // only take latest of current tick
             let mut control_value_map: HashMap<String, String> = HashMap::new();
             while message_queue.len() > 0 {
@@ -29,7 +33,11 @@ fn init(lua: Arc<&Lua>) -> Result<Table> {
             }
             // send all control values to lua - wait a tick each time
             control_value_map.iter().for_each(|(control, value)| {
-                callback_lock.as_ref().unwrap().call::<()>(format!("{},{}", control, value)).unwrap();
+                callback_lock
+                    .as_ref()
+                    .unwrap()
+                    .call::<()>(format!("{},{}", control, value))
+                    .unwrap();
                 // wait between each sending of the message
                 thread::sleep(Duration::from_millis(1000 / 15));
             });
@@ -40,39 +48,44 @@ fn init(lua: Arc<&Lua>) -> Result<Table> {
         }
     });
 
-    let message_queue_arc_clone = Arc::clone(&message_queue_arc);
+    /* loop to listen to socket incoming messages */
+    let incoming_message_queue_arc_clone = Arc::clone(&incoming_message_queue_arc);
     thread::spawn(move || loop {
-        match connect("ws://127.0.0.1:63241") {
-            Ok((mut socket, _)) => loop {
-                println!("Connected..");
-                let msg = socket.read();
-                match msg {
-                    Ok(msg) => match msg {
-                        tungstenite::Message::Text(text) => {
-                            println!("Queueing Message: {}", text.to_string());
-                            let mut message_queue_lock = message_queue_arc_clone.lock().unwrap();
-                            message_queue_lock.push_back(text.to_string());
-                            drop(message_queue_lock);
-                        }
-                        tungstenite::Message::Close(_) => {
-                            socket.close(None).unwrap();
+        match connect(WS_ADDR) {
+            Ok((mut socket, _)) => {
+                println!("[Listener] Connected..");
+
+                loop {
+                    let msg = socket.read();
+                    match msg {
+                        Ok(msg) => match msg {
+                            tungstenite::Message::Text(text) => {
+                                println!("[Listener] Queueing Message: {}", text.to_string());
+                                let mut message_queue_lock =
+                                    incoming_message_queue_arc_clone.lock().unwrap();
+                                message_queue_lock.push_back(text.to_string());
+                                drop(message_queue_lock);
+                            }
+                            tungstenite::Message::Close(_) => {
+                                socket.close(None).unwrap();
+                                break;
+                            }
+                            _ => {}
+                        },
+                        Err(e) => {
+                            eprintln!("[Listener] Error receiving message: {}", e);
                             break;
                         }
-                        _ => {}
-                    },
-                    Err(e) => {
-                        eprintln!("Error receiving message: {}", e);
-                        break;
                     }
                 }
-            },
+            }
             Err(e) => {
-                println!("Connection error: {}", e);
+                println!("[Listener] Connection error: {}", e);
             }
         }
 
         thread::sleep(Duration::from_secs(5));
-        println!("Reconnecting...");
+        println!("[Listener] Reconnecting...");
     });
 
     let callback_arc_clone = Arc::clone(&callback_arc);

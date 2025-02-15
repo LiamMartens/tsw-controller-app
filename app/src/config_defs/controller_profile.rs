@@ -12,25 +12,35 @@ pub enum ControllerProfileControlAssignment {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ControllerProfileDirectControlInputValueConfigAssignment {
+pub struct ControllerProfileControlAssignmentKeysAction {
+    pub keys: String,
+    pub press_time: Option<f32>,
+    pub wait_time: Option<f32>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ControllerProfileDirectControlAssignmentInputValue {
     pub min: f32,
     pub max: f32,
     pub step: Option<f32>,
     pub invert: Option<bool>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ControllerProfileDirectControAssignmentSyncMode {
+    /** this is the VHID Identifier Name - differs from the direct control name */
+    pub identifier: String,
+    pub increase: ControllerProfileControlAssignmentKeysAction,
+    pub decrease: ControllerProfileControlAssignmentKeysAction,
+}
+
 /* defines a direct UE4ss control -> through websockets */
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ControllerProfileDirectControlAssignment {
     pub controls: String, /* the HID control component as per the UE4SS API */
-    pub input_value: ControllerProfileDirectControlInputValueConfigAssignment,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ControllerProfileControlAssignmentKeysAction {
-    pub keys: String,
-    pub press_time: Option<f32>,
-    pub wait_time: Option<f32>,
+    pub input_value: ControllerProfileDirectControlAssignmentInputValue,
+    /** only used when in sync mode */
+    pub sync_mode: Option<ControllerProfileDirectControAssignmentSyncMode>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -141,7 +151,7 @@ impl ControllerProfileControlLinearAssignment {
     }
 }
 
-impl ControllerProfileDirectControlInputValueConfigAssignment {
+impl ControllerProfileDirectControlAssignmentInputValue {
     /**
      * The incoming value here can only be [-1, 1]
      */

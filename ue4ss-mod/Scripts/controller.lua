@@ -72,9 +72,16 @@ LoopAsync(200, function()
 end)
 
 socket_conn.set_callback(function(var)
+  print("Received message: " .. var)
+
   local command_split = Helpers.SplitString(var, ",")
-  local command_control = command_split[1]
-  local command_value = tonumber(command_split[2])
+  --- only respond to direct control commands
+  if command_split[0] ~= "direct_control" then
+    return
+  end
+
+  local command_control = command_split[2]
+  local command_value = tonumber(command_split[3])
 
   local player = UEHelpers.GetPlayer()
   local controller = player.Controller
@@ -101,7 +108,21 @@ socket_conn.set_callback(function(var)
 end)
 
 RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:InputValueChanged", function(self, oldValue, newValue)
-  print("InputValueChanged", newValue.ToFloat)
+  local player = UEHelpers.GetPlayer()
+  local controller = player.Controller
+  if not player:IsValid() or not controller:IsValid() then
+    return
+  end
+
+  local drivable_actor = player:GetDrivableActor()
+  if not drivable_actor:IsValid() then
+    return
+  end
+
+  local vhid_component = self:get()
+  local vhid_component_identifier = vhid_component.InputIdentifier.Identifier:ToString()
+
+  print("InputValueChanged:" .. vhid_component_identifier .. ":" .. newValue.ToFloat .. "\n")
 end)
 
 -- RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:OutputValueChanged", function(self, oldValue, newValue)
