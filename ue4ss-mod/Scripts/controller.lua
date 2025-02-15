@@ -3,27 +3,41 @@ local UEHelpers = require("UEHelpers")
 local socket_conn = require("tsw5_gamepad_lua_socket_connection")
 
 local ControlState = {}
+ControlState.ThreadLocked = false
 ControlState.VehicleID = nil
 ControlState.IsDirty = false
 ControlState.Components = {}
 
+function ControlState:IsLocked()
+  return self.ThreadLocked
+end
+
+function ControlState:ThreadLock()
+  self.ThreadLocked = true
+  return function()
+    self.ThreadLocked = false
+  end
+end
+
 -- run this action at 5fps
 LoopAsync(200, function()
-  -- do nothing if not dirty
-  if not ControlState.IsDirty then
+  -- do nothing if not dirty or is locked
+  if not ControlState.IsDirty or ControlState:IsLocked() then
     return false
   end
 
   ExecuteInGameThread(function()
+    local unlock = ControlState:ThreadLock()
+
     local player = UEHelpers.GetPlayer()
     local controller = player.Controller
     if not player:IsValid() or not controller:IsValid() then
-      return
+      return unlock()
     end
 
     local drivable_actor = player:GetDrivableActor()
     if not drivable_actor:IsValid() then
-      return
+      return unlock()
     end
 
     ControlState.IsDirty = false
@@ -51,6 +65,8 @@ LoopAsync(200, function()
       0.0,       -- MaxMoveTime
       10000000.0 -- RateOfChange
     )
+
+    return unlock()
   end)
   return false
 end)
