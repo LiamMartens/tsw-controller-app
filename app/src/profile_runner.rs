@@ -472,6 +472,9 @@ impl ProfileRunner {
                             )
                             .await;
                         }
+                        _ => {
+                            /* @TODO implement sync control */
+                        }
                     }
                 }
             }

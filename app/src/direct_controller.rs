@@ -47,7 +47,7 @@ impl DirectController {
                       break;
                   },
                   Ok((tcp_stream, _)) = accept_incoming_clients_server.accept() => {
-                    println!("New client connected");
+                    println!("[DC] New client connected");
                     let socket_cancel_token = cancel_token_clone.clone();
                     /* create a new subscriber for each client */
                     let direct_control_command_tx_lock = direct_control_command_tx.lock().await;
@@ -56,7 +56,7 @@ impl DirectController {
                     tokio::task::spawn(async move {
                       let ws_stream = tokio_tungstenite::accept_async(tcp_stream)
                         .await
-                        .expect("Error during the websocket handshake occurred");
+                        .expect("[DC] Error during the websocket handshake occurred");
                       let (mut write, mut read) = ws_stream.split();
 
                       loop {

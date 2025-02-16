@@ -14,6 +14,7 @@ mod config_loader;
 mod controller_manager;
 mod direct_controller;
 mod profile_runner;
+mod sync_controller;
 
 #[derive(Subcommand, Debug, Clone)]
 enum Commands {
@@ -60,6 +61,8 @@ async fn main() -> eframe::Result {
         tokio::sync::broadcast::channel::<DirectControlCommand>(10000);
     let direct_controller_sender_arc = Arc::new(Mutex::new(direct_controller_sender.clone()));
     let direct_controller = direct_controller::DirectController::new().await;
+
+    let sync_controller = sync_controller::SyncController::new().await;
 
     let profile_runner = Arc::new(Mutex::new(profile_runner::ProfileRunner::new(
         Arc::clone(&shared_config),

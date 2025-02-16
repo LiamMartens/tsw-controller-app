@@ -9,6 +9,7 @@ pub enum ControllerProfileControlAssignment {
     Linear(ControllerProfileControlLinearAssignment),
     Toggle(ControllerProfileControlToggleAssignment),
     DirectControl(ControllerProfileDirectControlAssignment),
+    SyncControl(ControllerProfileDirectControAssignmentSyncMode),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -30,8 +31,8 @@ pub struct ControllerProfileDirectControlAssignmentInputValue {
 pub struct ControllerProfileDirectControAssignmentSyncMode {
     /** this is the VHID Identifier Name - differs from the direct control name */
     pub identifier: String,
-    pub increase: ControllerProfileControlAssignmentKeysAction,
-    pub decrease: ControllerProfileControlAssignmentKeysAction,
+    pub action_increase: ControllerProfileControlAssignmentKeysAction,
+    pub action_decrease: ControllerProfileControlAssignmentKeysAction,
 }
 
 /* defines a direct UE4ss control -> through websockets */
@@ -39,8 +40,6 @@ pub struct ControllerProfileDirectControAssignmentSyncMode {
 pub struct ControllerProfileDirectControlAssignment {
     pub controls: String, /* the HID control component as per the UE4SS API */
     pub input_value: ControllerProfileDirectControlAssignmentInputValue,
-    /** only used when in sync mode */
-    pub sync_mode: Option<ControllerProfileDirectControAssignmentSyncMode>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
