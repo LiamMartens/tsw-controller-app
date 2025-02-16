@@ -2,6 +2,12 @@
 
 There are 2 parts to this software; the actual software that listens to your controller and the UE4SS mod that receives the commands and sends them to the game. This guide will help you set everything up to work with your controller and locos.
 
+## Summary: Different control types
+There are 3 base ways of controlling the trains in game.
+1. **Normal keybinds**; these are just key actions that are triggered by certain controller actions. Eg, when a lever exceeds a threshold or a button is pushed. This is useful for normal component interactions such as headlights, doors, ...
+2. **Direct Control**; this is a way of directly controlling the components in the game by sending the lever values to the game itself. This is the most accurate control but is not supported in all trains. Some trains, especially older ones, become unstable when trying to interact with it using this method.
+3. **Sync Control**; this is a middle ground between normal keybinds and direct control. All the train interaction is done using keybindings (such as `a` and `d` for increasing and decreasing the power handle), but the game will send the current value back to the program. This means the program can activate and release the keys depending on the target value which is still more accurate then setting up manual keybindings to be triggered at regular intervals, but less accurate than the direct control method. However this control method is more stable and thus works with all trains.
+
 ## Calibrating/configuring a new controller
 
 To start you will need to configure and calibrate your controller. The configuration is used to map each button and lever to a common name which will be used in the train profiles. The calibration is used to determine the min and max values of your levers/axes. By default you will find a configuration for the TCA Quadrant Boeing edition since that's the controller I have. If you are using the same controller you can use that SDL mapping and just keep the calibration file. If you have a different controller you will need to keep both generated files after running the calibration.
@@ -43,14 +49,20 @@ Now you are ready to go so you can fire up the game and run the `tsw5-gamepad` p
 
 It is possible to customize or set-up your own train profiles. To start you can copy an existing profile and rename it. Have a look at the existing profiles to determine how to configure your own settings like keypresses, holds etc... The configuration is very versatile.
 
-The most advanced configuration is the `direct_control` assignment option. This is the option that allows you to send controller inputs directly to the game. In order to configure these you will need to know the internal names of the train components and their min,max values to set it up as desired. You can follow the rough steps below to do so:
+The most advanced configurations are the `direct_control` and `sync_control` assignment options. These are the options that allow you to have more direct control over the inputs the game. In order to configure these you will need to know the internal names of the train components and their min,max values to set it up as desired. You can follow the rough steps below to do so:
 
 1. Enable the UE4SS debugging consoles by setting the `ConsoleEnabled`, `GuiConsoleEnabled`, `GuiConsoleVisible` to 1 in the `UE4SS-settings.ini` file.
 2. In the `TSWControllerMod` add the following lines to `main.lua`
 
 ```
 RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:InputValueChanged", function(self, oldValue, newValue)
-  print("InputValueChanged", newValue.ToFloat)
+  local vhid_component = self:get()
+  local changing_controller = vhid_component:GetCurrentlyChangingController()
+  local vhid_component_identifier = vhid_component.InputIdentifier.Identifier:ToString()
+  -- ignore any None components or controls that aren't being controlled by the current player
+  if vhid_component_identifier ~= "None" and changing_controller:GetAddress() == UEHelpers.GetPlayerController():GetAddress() then
+    print("InputValueChanged:" .. vhid_component_identifier .. ":" .. newValue.ToFloat .. "\n")
+  end
 end)
 ```
 
@@ -66,3 +78,6 @@ end)
 7. Lastly, you can play around with the lever in game using your normal controls and monitor the output in the `UE4SS` console window. This will help you figure out the min/max values of the control. They are normally always 0-1, however I like to set-up my brake levers to only go from 0-max brake instead of handle off or emergency and add additional controls to reach emergency manually. This makes driving the train easier imo. (eg: On the BR423/425 the default profile is set up to go from 100% power to Max Brake and the trigger and button on the lever are used to manually reach emergency braking when required)
 
 That should be all; you can just close and re-open the program (you don't need to restart the game) to load the new profile and you can test out whether it works as expected. Rinse and repeat until you have everything configured correctly.
+
+### In case direct control doesn't work
+Some trains are not stable when using direct control. The Amtrak Acela is one of those. For this reason it can only be set-up using `sync_control` (or normal keybinds). The sync control set-up is largely the identical but the identifier you use is not the `@field [NAME]` but rather the VHID component idetifier as we previously logged.
