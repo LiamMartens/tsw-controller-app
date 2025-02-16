@@ -58,7 +58,7 @@ async fn main() -> eframe::Result {
 
     let (direct_controller_sender, _) =
         tokio::sync::broadcast::channel::<DirectControlCommand>(10000);
-    let direct_controller_sender_arc = Arc::new(Mutex::new(direct_controller_sender));
+    let direct_controller_sender_arc = Arc::new(Mutex::new(direct_controller_sender.clone()));
     let direct_controller = direct_controller::DirectController::new().await;
 
     let profile_runner = Arc::new(Mutex::new(profile_runner::ProfileRunner::new(

@@ -27,6 +27,8 @@ LoopAsync(200, function()
   end
 
   ExecuteInGameThread(function()
+    print("[TSW5GamepadMod] Running control state update\n")
+
     local unlock = ControlState:ThreadLock()
 
     local player = UEHelpers.GetPlayer()
@@ -40,14 +42,17 @@ LoopAsync(200, function()
       return unlock()
     end
 
+    print("[TSW5GamepadMod] Checking components\n")
     ControlState.IsDirty = false
     for control_name, control_state in pairs(ControlState.Components) do
       if control_state.IsDirty then
         control_state.IsDirty = false
 
-        Helpers.InsertDirectControlPresetIfNotExists(drivable_actor, control_name)
-
+        print("[TSW5GamepadMod] Control name valid check (" .. control_name .. ")\n")
         if drivable_actor[control_name]:IsValid() then
+          print("[TSW5GamepadMod] Insert preset if not exists\n")
+          Helpers.InsertDirectControlPresetIfNotExists(drivable_actor, control_name)
+          print("[TSW5GamepadMod] Update preset target value\n")
           -- the 1972 tube stock DeadmansHandleButton has a weird resetting logic when using VHID presets
           -- so we need to set the pushed state manually (SetPushedState doesn't work with other UPushButtonComponent's though oddly)
           if control_name == "DeadmansHandleButton" then
@@ -57,27 +62,34 @@ LoopAsync(200, function()
             Helpers.InsertOrUpdateDirectControlPresetControlIfNotExists(drivable_actor, control_name, control_state.TargetValue)
           end
 
+          local preset_name = string.format("DirectControl:%s", control_name)
+          print("[TSW5GamepadMod] Apply VHID Preset (" .. preset_name .. ")\n")
+          -- Begin interacting?
+          controller:NotifyBeginInteraction(drivable_actor[control_name])
           drivable_actor.RailVehiclePhysicsComponent:ApplyVHIDPreset(
             drivable_actor.GameplayTasksComponent,
             controller,
-            FName(string.format("DirectControl:%s", control_name)),
+            FName(preset_name),
             control_state.TargetValue,       -- TargetInputValue
-            0.0,       -- ErrorTolerance
-            0.0,       -- MinMoveTime
-            0.05,       -- MaxMoveTime
-            100.0 -- RateOfChange
+            0.05,       -- ErrorTolerance
+            0.05,       -- MinMoveTime
+            0.15,       -- MaxMoveTime
+            20.0 -- RateOfChange
           )
+          controller:NotifyEndInteraction(drivable_actor[control_name])
+          print("[TSW5GamepadMod] Applied VHID Preset (" .. preset_name .. ")\n")
         end
       end
     end
 
+    print("[TSW5GamepadMod] Unlocking thread logic\n")
     return unlock()
   end)
   return false
 end)
 
 socket_conn.set_callback(function(var)
-  print("Received message: " .. var)
+  print("[TSW5GamepadMod] Received message: " .. var .. "\n")
 
   local command_split = Helpers.SplitString(var, ",")
   --- only respond to direct control commands

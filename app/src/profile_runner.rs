@@ -112,7 +112,12 @@ impl ProfileRunner {
             }
             ProfileRunnerAssignmentCallAction::DirectControlAction(action) => {
                 let direct_control_sender = self.direct_control_sender.lock().await;
-                direct_control_sender.send(action.clone()).unwrap();
+                match direct_control_sender.send(action.clone()) {
+                    Ok(_) => {}
+                    Err(e) => {
+                        println!("Error sending direct control command: {}", e);
+                    }
+                }
             }
         }
     }
