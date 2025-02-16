@@ -5,7 +5,8 @@ use tokio::sync::{broadcast::Sender, Mutex};
 use crate::{
     action_sequencer::ActionSequencer,
     config_defs::controller_profile::{
-        ControllerProfileControlAssignment, ControllerProfileControlAssignmentAction,
+        ControllerProfile, ControllerProfileControlAssignment,
+        ControllerProfileControlAssignmentAction,
         ControllerProfileControlLinearAssignmentThreshold,
     },
     config_loader::ConfigLoader,
@@ -82,6 +83,16 @@ impl ProfileRunner {
                 Ok(())
             }
             None => Err(format!("Profile {} not found", name)),
+        }
+    }
+
+    pub fn get_current_profile(
+        &self,
+        controller_guid: Option<String>,
+    ) -> Option<&ControllerProfile> {
+        match self.profile_name {
+            Some(ref name) => self.config.find_controller_profile(name, controller_guid),
+            None => None,
         }
     }
 
@@ -472,9 +483,7 @@ impl ProfileRunner {
                             )
                             .await;
                         }
-                        _ => {
-                            /* @TODO implement sync control */
-                        }
+                        _ => { /* @TODO implement sync control */ }
                     }
                 }
             }

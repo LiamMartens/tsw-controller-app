@@ -31,6 +31,7 @@ pub struct ControllerProfileDirectControlAssignmentInputValue {
 pub struct ControllerProfileDirectControAssignmentSyncMode {
     /** this is the VHID Identifier Name - differs from the direct control name */
     pub identifier: String,
+    pub input_value: ControllerProfileDirectControlAssignmentInputValue,
     pub action_increase: ControllerProfileControlAssignmentKeysAction,
     pub action_decrease: ControllerProfileControlAssignmentKeysAction,
 }
@@ -155,6 +156,7 @@ impl ControllerProfileDirectControlAssignmentInputValue {
      * The incoming value here can only be [-1, 1]
      */
     pub fn calculate_normal_value(&self, value: f32) -> f32 {
+        println!("Calculating normal value: {}", value);
         let input_value: f32 = match self.invert {
             Some(true) => match value < 0.0 {
                 true => -1.0 - value,
@@ -170,6 +172,18 @@ impl ControllerProfileDirectControlAssignmentInputValue {
                 return (step_count * step).clamp(self.min, self.max);
             }
             None => normal.clamp(self.min, self.max),
+        }
+    }
+}
+
+impl ControllerProfileControl {
+    pub fn get_assignments(&self) -> Vec<ControllerProfileControlAssignment> {
+        match &self.assignment {
+            Some(assignment) => vec![assignment.clone()],
+            None => match &self.assignments {
+                Some(assignments) => assignments.clone(),
+                None => Vec::new(),
+            },
         }
     }
 }

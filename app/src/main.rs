@@ -62,24 +62,31 @@ async fn main() -> eframe::Result {
     let direct_controller_sender_arc = Arc::new(Mutex::new(direct_controller_sender.clone()));
     let direct_controller = direct_controller::DirectController::new().await;
 
-    let sync_controller = sync_controller::SyncController::new().await;
-
     let profile_runner = Arc::new(Mutex::new(profile_runner::ProfileRunner::new(
         Arc::clone(&shared_config),
         Arc::clone(&sequencer),
         Arc::clone(&direct_controller_sender_arc),
     )));
 
-    let (controller_manager_event_channel_sender, mut controller_manager_event_channel_receiver) =
+    let sync_controller = sync_controller::SyncController::new(
+        Arc::clone(&shared_config),
+        Arc::clone(&sequencer),
+        Arc::clone(&profile_runner),
+    )
+    .await;
+
+    let (controller_manager_event_channel_sender, _) =
         tokio::sync::broadcast::channel::<ControllerManagerChangeEvent>(10000);
 
+    let controller_manager_event_channel_sender_clone =
+        controller_manager_event_channel_sender.clone();
     let controller_manager_config: Arc<config_loader::ConfigLoader> = Arc::clone(&shared_config);
     let controller_manager_cancel_token = cancel_token.clone();
     tokio::task::spawn_blocking(move || {
         let mut controller_manager =
             controller_manager::ControllerManager::new(controller_manager_config);
         controller_manager.subscribe(
-            controller_manager_event_channel_sender,
+            controller_manager_event_channel_sender_clone,
             controller_manager_cancel_token.clone(),
         );
         controller_manager.attach(controller_manager_cancel_token.clone());
@@ -110,6 +117,8 @@ async fn main() -> eframe::Result {
         }
     });
 
+    let mut controller_manager_event_channel_receiver =
+        controller_manager_event_channel_sender.subscribe();
     let event_listener_cancel_token = cancel_token.clone();
     tokio::task::spawn(async move {
         loop {
@@ -129,6 +138,11 @@ async fn main() -> eframe::Result {
     direct_controller.start(
         cancel_token.clone(),
         Arc::clone(&direct_controller_sender_arc),
+    );
+
+    sync_controller.start(
+        cancel_token.clone(),
+        controller_manager_event_channel_sender.subscribe(),
     );
 
     let options = eframe::NativeOptions {
