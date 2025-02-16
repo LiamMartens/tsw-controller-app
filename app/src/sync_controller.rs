@@ -164,6 +164,7 @@ impl SyncController {
                   Ok(event) = controller_receiver.recv() => {
                     let profile_runner_lock = profile_runner.lock().await;
                     let profile = profile_runner_lock.get_current_profile(Some(event.joystick_guid));
+                    let preferred_control_mode = profile_runner_lock.get_preferred_control_mode();
                     match profile {
                       Some(profile) => {
                         let controls_state_profile_lock = controls_state_profile.lock().await;
@@ -176,7 +177,7 @@ impl SyncController {
 
                         let control = profile.find_control(event.control_name);
                         if let Some(control_config) = control {
-                          let assignments = control_config.get_assignments();
+                          let assignments = control_config.get_assignments(preferred_control_mode);
                           for assignment in assignments.iter() {
                             if let ControllerProfileControlAssignment::SyncControl(sync_control_action) = assignment {
                               let target_value = sync_control_action.input_value.calculate_normal_value(event.control_state.value);

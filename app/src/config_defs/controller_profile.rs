@@ -2,6 +2,12 @@ use serde::{Deserialize, Serialize};
 
 use super::serde_sdl_guid::SDLGuid;
 
+#[derive(PartialEq, Clone, Copy)]
+pub enum PreferredControlMode {
+    DirectControl,
+    SyncControl,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum ControllerProfileControlAssignment {
@@ -177,13 +183,43 @@ impl ControllerProfileDirectControlAssignmentInputValue {
 }
 
 impl ControllerProfileControl {
-    pub fn get_assignments(&self) -> Vec<ControllerProfileControlAssignment> {
-        match &self.assignment {
+    pub fn get_assignments(&self, preferred_control_mode: PreferredControlMode) -> Vec<ControllerProfileControlAssignment> {
+        let assignments = match &self.assignment {
             Some(assignment) => vec![assignment.clone()],
             None => match &self.assignments {
                 Some(assignments) => assignments.clone(),
                 None => Vec::new(),
             },
+        };
+        let has_direct_control = assignments.iter().any(|a| match a {
+            ControllerProfileControlAssignment::DirectControl(_) => true,
+            _ => false,
+        });
+        let has_sync_control = assignments.iter().any(|a| match a {
+            ControllerProfileControlAssignment::SyncControl(_) => true,
+            _ => false,
+        });
+
+        if preferred_control_mode == PreferredControlMode::DirectControl && has_direct_control {
+            return assignments
+                .iter()
+                .filter(|a| match a {
+                    ControllerProfileControlAssignment::DirectControl(_) => true,
+                    _ => false,
+                })
+                .cloned()
+                .collect();
+        } else if preferred_control_mode == PreferredControlMode::SyncControl && has_sync_control {
+            return assignments
+                .iter()
+                .filter(|a| match a {
+                    ControllerProfileControlAssignment::SyncControl(_) => true,
+                    _ => false,
+                })
+                .cloned()
+                .collect();
+        } else {
+            return assignments;
         }
     }
 }

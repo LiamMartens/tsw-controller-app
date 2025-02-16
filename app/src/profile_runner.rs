@@ -7,7 +7,7 @@ use crate::{
     config_defs::controller_profile::{
         ControllerProfile, ControllerProfileControlAssignment,
         ControllerProfileControlAssignmentAction,
-        ControllerProfileControlLinearAssignmentThreshold,
+        ControllerProfileControlLinearAssignmentThreshold, PreferredControlMode,
     },
     config_loader::ConfigLoader,
     controller_manager::{ControllerManagerChangeEvent, ControllerManagerControllerControlState},
@@ -32,7 +32,9 @@ pub struct ProfileRunner {
     config: Arc<ConfigLoader>,
     sequencer: Arc<ActionSequencer>,
     direct_control_sender: Arc<Mutex<Sender<DirectControlCommand>>>,
+    /* current config */
     profile_name: Option<String>,
+    preferred_control_mode: PreferredControlMode,
     /* keeps track of the last called assignments */
     control_calls: HashMap<String, ProfileRunnerAssignmentCall>,
 }
@@ -61,6 +63,7 @@ impl ProfileRunner {
             sequencer,
             direct_control_sender,
             profile_name: None,
+            preferred_control_mode: PreferredControlMode::DirectControl,
             control_calls: HashMap::new(),
         }
     }
@@ -86,6 +89,10 @@ impl ProfileRunner {
         }
     }
 
+    pub fn set_preferred_control_mode(&mut self, mode: PreferredControlMode) {
+        self.preferred_control_mode = mode;
+    }
+
     pub fn get_current_profile(
         &self,
         controller_guid: Option<String>,
@@ -94,6 +101,10 @@ impl ProfileRunner {
             Some(ref name) => self.config.find_controller_profile(name, controller_guid),
             None => None,
         }
+    }
+
+    pub fn get_preferred_control_mode(&self) -> PreferredControlMode {
+        self.preferred_control_mode
     }
 
     pub async fn call_assignment_action_for_control<T: AsRef<str>>(
@@ -160,14 +171,7 @@ impl ProfileRunner {
 
         match control_definition {
             Some(control) => {
-                let assignments: Vec<ControllerProfileControlAssignment> =
-                    match &control.assignments {
-                        Some(assignments) => assignments.clone(),
-                        None => match &control.assignment {
-                            Some(assignment) => vec![assignment.clone()],
-                            None => Vec::new(),
-                        },
-                    };
+                let assignments = control.get_assignments(self.preferred_control_mode);
 
                 for control_assignment_item in assignments.iter() {
                     let last_called_assignment = last_called_assignment.as_ref();
