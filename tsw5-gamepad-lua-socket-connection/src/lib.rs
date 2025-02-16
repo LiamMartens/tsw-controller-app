@@ -166,7 +166,8 @@ fn init(lua: Arc<&Lua>) -> Result<Table> {
     exports.set(
         "send_sync_control_state",
         lua.create_function(move |_, message: String| {
-            tokio_runtime_arc_clone.block_on(sync_control_channel_tx.send(message.clone())).unwrap();
+            println!("Sending SC Message: {}", message.clone());
+            tokio_runtime_arc_clone.block_on(sync_control_channel_tx.send(format!("sync_control,{}", message.clone()))).unwrap();
             Ok(())
         })?,
     )?;

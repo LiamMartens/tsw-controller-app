@@ -36,6 +36,7 @@ pub struct SyncController {
     sequencer: Arc<ActionSequencer>,
     profile_runner: Arc<Mutex<ProfileRunner>>,
     server: Arc<TcpListener>,
+    controls_state_profile: Arc<Mutex<Option<String>>>,
     controls_state: Arc<Mutex<HashMap<String, SyncControllerControlState>>>,
     control_state_changed_channel: (
         Sender<SyncControllerControlState>,
@@ -56,6 +57,7 @@ impl SyncController {
             sequencer,
             profile_runner,
             server: Arc::new(direct_control_server),
+            controls_state_profile: Arc::new(Mutex::new(None)),
             controls_state: Arc::new(Mutex::new(HashMap::new())),
             control_state_changed_channel: broadcast::channel::<SyncControllerControlState>(10000),
         }
@@ -91,15 +93,16 @@ impl SyncController {
                     let mut control_state_lock = controls_state.lock().await;
                     /* unwrapping since it should always exist */
                     let mut_control_state = control_state_lock.get_mut(state.identifier.as_str()).unwrap();
+                    let MARGIN_OF_ERROR = 0.03;
                     let should_stop_moving =
                       /* was increasing and has now exceeded value */
                       (mut_control_state.current_value > mut_control_state.target_value && mut_control_state.moving == 1)
                       /* was decreasing and has now subceeded value */
                       || (mut_control_state.current_value < mut_control_state.target_value && mut_control_state.moving == -1
                       /* otherwise is within margin of error and was moving */
-                      || (mut_control_state.current_value - mut_control_state.target_value).abs() < 0.05 && mut_control_state.moving != 0);
-                    let should_start_increasing = mut_control_state.target_value > mut_control_state.current_value && (mut_control_state.current_value - mut_control_state.target_value).abs() > 0.05 && mut_control_state.moving != 1;
-                    let should_start_decreasing =  mut_control_state.target_value < mut_control_state.current_value && (mut_control_state.current_value - mut_control_state.target_value).abs() > 0.05 && mut_control_state.moving != -1;
+                      || (mut_control_state.current_value - mut_control_state.target_value).abs() < MARGIN_OF_ERROR && mut_control_state.moving != 0);
+                    let should_start_increasing = mut_control_state.target_value > mut_control_state.current_value && (mut_control_state.current_value - mut_control_state.target_value).abs() > MARGIN_OF_ERROR && mut_control_state.moving != 1;
+                    let should_start_decreasing =  mut_control_state.target_value < mut_control_state.current_value && (mut_control_state.current_value - mut_control_state.target_value).abs() > MARGIN_OF_ERROR && mut_control_state.moving != -1;
                     /* stop moving */
                     if should_stop_moving {
                       let action_to_release = match mut_control_state.moving {
@@ -148,6 +151,7 @@ impl SyncController {
 
         /* listen to incoming controller receiver to update target values */
         let controls_state = Arc::clone(&self.controls_state);
+        let controls_state_profile = Arc::clone(&self.controls_state_profile);
         let profile_runner = Arc::clone(&self.profile_runner);
         let target_value_changed_cancel_token = cancel_token.clone();
         let control_state_changed_channel_sender = self.control_state_changed_channel.0.clone();
@@ -162,6 +166,14 @@ impl SyncController {
                     let profile = profile_runner_lock.get_current_profile(Some(event.joystick_guid));
                     match profile {
                       Some(profile) => {
+                        let controls_state_profile_lock = controls_state_profile.lock().await;
+                        if controls_state_profile_lock.is_some() && controls_state_profile_lock.as_ref().unwrap() != &profile.name {
+                          /* profile changed - clear current state */
+                          let mut controls_state_lock = controls_state.lock().await;
+                          controls_state_lock.clear();
+                          drop(controls_state_lock);
+                        }
+
                         let control = profile.find_control(event.control_name);
                         if let Some(control_config) = control {
                           let assignments = control_config.get_assignments();
@@ -192,7 +204,8 @@ impl SyncController {
                           }
                         }
                       },
-                      None => {},
+                      None => {
+                      },
                     }
                   },
                 }
