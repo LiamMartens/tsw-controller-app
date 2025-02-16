@@ -9,13 +9,13 @@
         "neutral": 0.5,
         "thresholds": [
           {
-            "value": -0.8,
+            "value": -0.6,
             "action_activate": {
               "keys": "d"
             }
           },
           {
-            "value": 0.8,
+            "value": 0.6,
             "action_activate": {
               "keys": "a"
             }

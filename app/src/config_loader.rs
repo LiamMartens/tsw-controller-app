@@ -108,6 +108,8 @@ impl ConfigLoader {
                 }
             }
         }
+        /* sort */
+        self.controller_profiles.sort_by(|a, b| a.name.cmp(&b.name));
     }
 
     pub fn export<T: AsRef<str>>(&self, config_dir: T) {
