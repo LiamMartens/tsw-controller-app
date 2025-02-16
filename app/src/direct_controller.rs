@@ -4,7 +4,7 @@ use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
 use tokio::{
     net::TcpListener,
-    sync::{broadcast::Receiver, Mutex},
+    sync::{broadcast::Sender, Mutex},
     task::JoinHandle,
 };
 use tokio_util::sync::CancellationToken;
@@ -32,11 +32,10 @@ impl DirectController {
     pub fn start(
         &self,
         cancel_token: CancellationToken,
-        command_receiver: Arc<Mutex<Receiver<DirectControlCommand>>>,
+        direct_control_command_tx: Arc<Mutex<Sender<DirectControlCommand>>>,
     ) -> JoinHandle<()> {
         let server = Arc::clone(&self.server);
 
-        let command_receiver_clone = Arc::clone(&command_receiver);
         let accept_incoming_clients_server = Arc::clone(&server);
         let accept_incoming_clients_cancel_token = cancel_token.clone();
         tokio::task::spawn(async move {
@@ -50,9 +49,11 @@ impl DirectController {
                   Ok((tcp_stream, _)) = accept_incoming_clients_server.accept() => {
                     println!("New client connected");
                     let socket_cancel_token = cancel_token_clone.clone();
-                    let command_receiver_clone = Arc::clone(&command_receiver_clone);
+                    /* create a new subscriber for each client */
+                    let direct_control_command_tx_lock = direct_control_command_tx.lock().await;
+                    let mut client_direct_control_command_receiver = direct_control_command_tx_lock.subscribe();
+                    drop(direct_control_command_tx_lock);
                     tokio::task::spawn(async move {
-                      let mut command_receiver_lock = command_receiver_clone.lock().await;
                       let ws_stream = tokio_tungstenite::accept_async(tcp_stream)
                         .await
                         .expect("Error during the websocket handshake occurred");
@@ -75,7 +76,7 @@ impl DirectController {
                               }
                             }
                           },
-                          Ok(message) = command_receiver_lock.recv() => {
+                          Ok(message) = client_direct_control_command_receiver.recv() => {
                             let command_to_send = format!("direct_control,{},{}", message.controls, message.input_value);
                             println!("Sending command: {:?}", command_to_send);
                             write.send(Message::text(command_to_send)).await.unwrap();

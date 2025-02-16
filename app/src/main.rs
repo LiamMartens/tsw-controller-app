@@ -56,14 +56,15 @@ async fn main() -> eframe::Result {
 
     let sequencer = Arc::new(action_sequencer::ActionSequencer::new());
 
-    let (direct_controller_sender, direct_controller_receiver) =
+    let (direct_controller_sender, _) =
         tokio::sync::broadcast::channel::<DirectControlCommand>(10000);
+    let direct_controller_sender_arc = Arc::new(Mutex::new(direct_controller_sender));
     let direct_controller = direct_controller::DirectController::new().await;
 
     let profile_runner = Arc::new(Mutex::new(profile_runner::ProfileRunner::new(
         Arc::clone(&shared_config),
         Arc::clone(&sequencer),
-        Arc::new(Mutex::new(direct_controller_sender)),
+        Arc::clone(&direct_controller_sender_arc),
     )));
 
     let (controller_manager_event_channel_sender, mut controller_manager_event_channel_receiver) =
@@ -124,7 +125,7 @@ async fn main() -> eframe::Result {
     sequencer.run(cancel_token.clone());
     direct_controller.start(
         cancel_token.clone(),
-        Arc::new(Mutex::new(direct_controller_receiver)),
+        Arc::clone(&direct_controller_sender_arc),
     );
 
     let options = eframe::NativeOptions {
