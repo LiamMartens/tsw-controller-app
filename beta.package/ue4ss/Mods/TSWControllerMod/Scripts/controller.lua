@@ -41,30 +41,35 @@ LoopAsync(200, function()
     end
 
     ControlState.IsDirty = false
-    Helpers.InsertDirectControlPresetIfNotExists(drivable_actor)
-    for control_name, target_value in pairs(ControlState.Components) do
-      if drivable_actor[control_name]:IsValid() then
-        -- the 1972 tube stock DeadmansHandleButton has a weird resetting logic when using VHID presets
-        -- so we need to set the pushed state manually (SetPushedState doesn't work with other UPushButtonComponent's though oddly)
-        if control_name == "DeadmansHandleButton" then
-          drivable_actor[control_name]:SetPushedState(target_value > 0.5, true)
-        else
-          -- levers are controlled using VHID presets because it's more stable
-          Helpers.InsertOrUpdateDirectControlPresetControlIfNotExists(drivable_actor, control_name, target_value)
+    for control_name, control_state in pairs(ControlState.Components) do
+      if control_state.IsDirty then
+        control_state.IsDirty = false
+
+        Helpers.InsertDirectControlPresetIfNotExists(drivable_actor, control_name)
+
+        if drivable_actor[control_name]:IsValid() then
+          -- the 1972 tube stock DeadmansHandleButton has a weird resetting logic when using VHID presets
+          -- so we need to set the pushed state manually (SetPushedState doesn't work with other UPushButtonComponent's though oddly)
+          if control_name == "DeadmansHandleButton" then
+            drivable_actor[control_name]:SetPushedState(control_state.TargetValue > 0.5, true)
+          else
+            -- levers are controlled using VHID presets because it's more stable
+            Helpers.InsertOrUpdateDirectControlPresetControlIfNotExists(drivable_actor, control_name, control_state.TargetValue)
+          end
+
+          drivable_actor.RailVehiclePhysicsComponent:ApplyVHIDPreset(
+            drivable_actor.GameplayTasksComponent,
+            controller,
+            FName(string.format("DirectControl:%s", control_name)),
+            control_state.TargetValue,       -- TargetInputValue
+            0.0,       -- ErrorTolerance
+            0.0,       -- MinMoveTime
+            0.05,       -- MaxMoveTime
+            100.0 -- RateOfChange
+          )
         end
       end
     end
-
-    drivable_actor.RailVehiclePhysicsComponent:ApplyVHIDPreset(
-      drivable_actor.GameplayTasksComponent,
-      controller,
-      FName("DirectControl"),
-      0.0,       -- TargetInputValue
-      0.0,       -- ErrorTolerance
-      0.0,       -- MinMoveTime
-      0.0,       -- MaxMoveTime
-      10000000.0 -- RateOfChange
-    )
 
     return unlock()
   end)
@@ -101,28 +106,19 @@ socket_conn.set_callback(function(var)
       end
       local control_name = train_side == 0 and string.gsub(command_control, "{SIDE}", "F") or
           string.gsub(command_control, "{SIDE}", "B")
-      ControlState.Components[control_name] = command_value
+      if ControlState.Components[control_name] == nil then
+        ControlState.Components[control_name] = {}
+      end
+      ControlState.Components[control_name].TargetValue = command_value
+      ControlState.Components[control_name].IsDirty = true
       ControlState.IsDirty = true
     end
   end
 end)
 
---- enable this code to listen to value changes
 -- RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:InputValueChanged", function(self, oldValue, newValue)
---   local player = UEHelpers.GetPlayer()
---   local controller = player.Controller
---   if not player:IsValid() or not controller:IsValid() then
---     return
---   end
-
---   local drivable_actor = player:GetDrivableActor()
---   if not drivable_actor:IsValid() then
---     return
---   end
-
 --   local vhid_component = self:get()
 --   local vhid_component_identifier = vhid_component.InputIdentifier.Identifier:ToString()
-
 --   print("InputValueChanged:" .. vhid_component_identifier .. ":" .. newValue.ToFloat .. "\n")
 -- end)
 
