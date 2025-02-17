@@ -54,9 +54,13 @@ impl DirectController {
                     let mut client_direct_control_command_receiver = direct_control_command_tx_lock.subscribe();
                     drop(direct_control_command_tx_lock);
                     tokio::task::spawn(async move {
-                      let ws_stream = tokio_tungstenite::accept_async(tcp_stream)
-                        .await
-                        .expect("[DC] Error during the websocket handshake occurred");
+                      let ws_stream = match tokio_tungstenite::accept_async(tcp_stream).await {
+                        Ok(ws_stream) => ws_stream,
+                        Err(e) => {
+                          eprintln!("[DC] Error during the websocket handshake occurred: {}", e);
+                          return;
+                        }
+                      };
                       let (mut write, mut read) = ws_stream.split();
 
                       loop {

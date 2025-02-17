@@ -1,34 +1,48 @@
 use futures_util::{SinkExt, StreamExt};
 use mlua::{Function, Lua, Result, Table};
-use tungstenite::Utf8Bytes;
+use once_cell::sync::Lazy;
 use std::{
     collections::{HashMap, VecDeque},
     sync::Arc,
     thread,
     time::Duration,
 };
-use tokio::{runtime::Runtime, sync::{mpsc, Mutex}};
+use tokio::{
+    runtime::Runtime,
+    sync::{mpsc, Mutex},
+};
 use tokio_tungstenite::connect_async;
+use tungstenite::Utf8Bytes;
 
 const DIRECT_CONTROL_WS_ADDR: &str = "ws://127.0.0.1:63241";
 const SYNC_CONTROL_WS_ADDR: &str = "ws://127.0.0.1:63242";
+static TOKIO_RUNTIME: Lazy<Runtime> = Lazy::new(|| {
+    tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .expect("Failed to create runtime")
+});
 
 fn init(lua: Arc<&Lua>) -> Result<Table> {
-    let tokio_runtime = Runtime::new().unwrap();
-    let tokio_runtime_arc = Arc::new(tokio_runtime);
+    // let tokio_runtime = Runtime::new().unwrap();
+    // let tokio_runtime_arc = Arc::new(tokio_runtime);
 
     let exports = lua.create_table()?;
-    let callback_arc: Arc<Mutex<Option<Function>>> = Arc::new(Mutex::new(None));
+    let (socket_callback_tx, socket_callback_rx) =
+        tokio::sync::watch::channel::<Option<Function>>(None);
     let direct_control_message_queue_arc: Arc<Mutex<VecDeque<String>>> =
         Arc::new(Mutex::new(VecDeque::new()));
     let (sync_control_channel_tx, mut sync_control_channel_rx) = mpsc::channel::<String>(10000);
 
     /* thread to send states up to Lua */
-    let callback_arc_clone = Arc::clone(&callback_arc);
     let direct_control_message_queue_arc_clone = Arc::clone(&direct_control_message_queue_arc);
-    tokio_runtime_arc.spawn(async move {
+    TOKIO_RUNTIME.spawn(async move {
         loop {
-            let callback_lock = callback_arc_clone.lock().await;
+            let callback_lock = socket_callback_rx.borrow().clone();
+            if callback_lock.is_none() {
+                continue;
+            }
+
             let mut message_queue = direct_control_message_queue_arc_clone.lock().await;
             // only take latest of current tick
             let mut control_value_map: HashMap<String, String> = HashMap::new();
@@ -47,18 +61,18 @@ fn init(lua: Arc<&Lua>) -> Result<Table> {
                     .call::<()>(format!("direct_control,{},{}", control, value))
                     .unwrap();
                 // wait between each sending of the message
-                tokio::time::sleep(Duration::from_millis(1000 / 15)).await;
+                tokio::time::sleep(Duration::from_millis(1000 / 30)).await;
             }
             // drop locks before waiting
             drop(callback_lock);
             drop(message_queue);
-            thread::sleep(Duration::from_millis(1000 / 15));
+            thread::sleep(Duration::from_millis(1000 / 30));
         }
     });
 
     /* thread to listen to DC WS and propagate into VecDequeue */
     let direct_control_message_queue_arc_clone = Arc::clone(&direct_control_message_queue_arc);
-    tokio_runtime_arc.spawn(async move {
+    TOKIO_RUNTIME.spawn(async move {
         loop {
             match connect_async(DIRECT_CONTROL_WS_ADDR).await {
                 Ok((mut socket, _)) => {
@@ -102,7 +116,7 @@ fn init(lua: Arc<&Lua>) -> Result<Table> {
     });
 
     /* thread to listen to SC channel and forward state to SC WS */
-    tokio_runtime_arc.spawn(async move {
+    TOKIO_RUNTIME.spawn(async move {
         loop {
             match connect_async(SYNC_CONTROL_WS_ADDR).await {
                 Ok((mut socket, _)) => {
@@ -144,30 +158,35 @@ fn init(lua: Arc<&Lua>) -> Result<Table> {
                     println!("[SC] Connection error: {}", e);
                 }
             }
-    
+
             thread::sleep(Duration::from_secs(5));
             println!("[SC] Reconnecting...");
         }
     });
 
-    let tokio_runtime_arc_clone = Arc::clone(&tokio_runtime_arc);
-    let callback_arc_clone = Arc::clone(&callback_arc);
     exports.set(
         "set_callback",
         lua.create_function(move |_, callback: Function| {
-            let mut callback_lock = tokio_runtime_arc_clone.block_on(callback_arc_clone.lock());
-            callback_lock.replace(callback);
-            drop(callback_lock);
+            match socket_callback_tx.send(Some(callback)) {
+                Ok(_) => {}
+                Err(e) => {
+                    eprintln!("Error setting callback: {}", e);
+                }
+            };
             Ok(())
         })?,
     )?;
 
-    let tokio_runtime_arc_clone = Arc::clone(&tokio_runtime_arc);
     exports.set(
         "send_sync_control_state",
         lua.create_function(move |_, message: String| {
             println!("Sending SC Message: {}", message.clone());
-            tokio_runtime_arc_clone.block_on(sync_control_channel_tx.send(format!("sync_control,{}", message.clone()))).unwrap();
+            match sync_control_channel_tx.blocking_send(format!("sync_control,{}", message.clone())) {
+                Ok(_) => { println!("[SC] Sent message"); }
+                Err(e) => {
+                    eprintln!("[SC] Error sending SC message: {}", e);
+                }
+            }
             Ok(())
         })?,
     )?;
