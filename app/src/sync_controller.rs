@@ -63,6 +63,11 @@ impl SyncController {
         }
     }
 
+    pub async fn reset_control_state(&self) {
+        let mut controls_state_lock = self.controls_state.lock().await;
+        controls_state_lock.clear();
+    }
+
     pub fn start(
         &self,
         cancel_token: CancellationToken,

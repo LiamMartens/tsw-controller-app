@@ -71,12 +71,14 @@ async fn main() -> eframe::Result {
         Arc::clone(&direct_controller_sender_arc),
     )));
 
-    let sync_controller = sync_controller::SyncController::new(
-        Arc::clone(&shared_config),
-        Arc::clone(&sequencer),
-        Arc::clone(&profile_runner),
-    )
-    .await;
+    let sync_controller = Arc::new(
+        sync_controller::SyncController::new(
+            Arc::clone(&shared_config),
+            Arc::clone(&sequencer),
+            Arc::clone(&profile_runner),
+        )
+        .await,
+    );
 
     let (controller_manager_event_channel_sender, _) =
         tokio::sync::broadcast::channel::<ControllerManagerChangeEvent>(10000);
@@ -98,6 +100,7 @@ async fn main() -> eframe::Result {
     /* update profile settings task */
     let profile_listener_cancel_token = cancel_token.clone();
     let profile_listener_profile_runner_clone = Arc::clone(&profile_runner);
+    let sync_controller_clone = Arc::clone(&sync_controller);
     tokio::task::spawn(async move {
         loop {
             tokio::select! {
@@ -120,6 +123,7 @@ async fn main() -> eframe::Result {
                 _ = on_preferred_control_mode_change_receiver.changed() => {
                     let control_mode = on_preferred_control_mode_change_receiver.borrow().clone();
                     profile_listener_profile_runner_clone.lock().await.set_preferred_control_mode(control_mode);
+                    sync_controller_clone.reset_control_state().await;
                 }
             }
         }

@@ -66,7 +66,7 @@ fn init(lua: Arc<&Lua>) -> Result<Table> {
             // drop locks before waiting
             drop(callback_lock);
             drop(message_queue);
-            thread::sleep(Duration::from_millis(1000 / 30));
+            tokio::time::sleep(Duration::from_millis(1000 / 30)).await;
         }
     });
 

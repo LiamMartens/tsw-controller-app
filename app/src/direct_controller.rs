@@ -82,11 +82,13 @@ impl DirectController {
                           },
                           Ok(message) = client_direct_control_command_receiver.recv() => {
                             let command_to_send = format!("direct_control,{},{}", message.controls, message.input_value);
-                            println!("Sending command: {:?}", command_to_send);
-                            match write.send(Message::text(command_to_send)).await {
-                              Ok(_) => {},
+                            println!("[DC] Sending command: {:?}", command_to_send);
+                            match write.send(Message::text(command_to_send.clone())).await {
+                              Ok(_) => {
+                                println!("[DC] Message sent: {}", command_to_send.clone());
+                              },
                               Err(e) => {
-                                eprintln!("Error sending message: {:?}", e);
+                                eprintln!("[DC] Error sending message: {:?}", e);
                               }
                             }
                           }
