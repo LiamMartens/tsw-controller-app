@@ -14,7 +14,7 @@ use crate::{
     action_sequencer::{ActionSequencer, ActionSequencerAction},
     config_defs::controller_profile::{
         ControllerProfileControlAssignment, ControllerProfileControlAssignmentKeysAction,
-        ControllerProfileDirectControAssignmentSyncMode,
+        ControllerProfileDirectControAssignmentSyncMode, PreferredControlMode,
     },
     config_loader::ConfigLoader,
     controller_manager::ControllerManagerChangeEvent,
@@ -84,7 +84,6 @@ impl SyncController {
                     break;
                   },
                   Ok(state) = control_state_changed_channel_receiver.recv() => {
-                    // println!("[SC] Current value changed: {:?}", state);
                     /* ignore if there is no target profile */
                     if state.target_profile.is_none() {
                       continue;

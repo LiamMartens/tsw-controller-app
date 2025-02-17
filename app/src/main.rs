@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use config_defs::controller_profile::PreferredControlMode;
 use direct_controller::DirectControlCommand;
 use std::sync::Arc;
 
@@ -50,6 +51,8 @@ async fn main() -> eframe::Result {
 
     let (on_selected_profile_change_sender, mut on_selected_profile_change_receiver) =
         tokio::sync::watch::channel::<Option<String>>(None);
+    let (on_preferred_control_mode_change_sender, mut on_preferred_control_mode_change_receiver) =
+        tokio::sync::watch::channel::<PreferredControlMode>(PreferredControlMode::DirectControl);
 
     let mut config = config_loader::ConfigLoader::new();
     config.load_from_dir(Some("config"));
@@ -92,6 +95,7 @@ async fn main() -> eframe::Result {
         controller_manager.attach(controller_manager_cancel_token.clone());
     });
 
+    /* update profile settings task */
     let profile_listener_cancel_token = cancel_token.clone();
     let profile_listener_profile_runner_clone = Arc::clone(&profile_runner);
     tokio::task::spawn(async move {
@@ -112,6 +116,10 @@ async fn main() -> eframe::Result {
                             profile_listener_profile_runner_clone.lock().await.reset_profile().unwrap();
                         }
                     }
+                },
+                _ = on_preferred_control_mode_change_receiver.changed() => {
+                    let control_mode = on_preferred_control_mode_change_receiver.borrow().clone();
+                    profile_listener_profile_runner_clone.lock().await.set_preferred_control_mode(control_mode);
                 }
             }
         }
@@ -157,7 +165,9 @@ async fn main() -> eframe::Result {
                 config: shared_config,
                 ui_close_token: cancel_token,
                 selected_profile: None,
+                prefer_sync_control_mode: false,
                 on_selected_profile_change_sender,
+                on_preferred_control_mode_change_sender,
             }))
         }),
     )
@@ -169,14 +179,17 @@ struct MainApp {
 
     /* local state */
     selected_profile: Option<String>,
+    prefer_sync_control_mode: bool,
 
     /* channels */
     on_selected_profile_change_sender: tokio::sync::watch::Sender<Option<String>>,
+    on_preferred_control_mode_change_sender: tokio::sync::watch::Sender<PreferredControlMode>,
 }
 
 impl eframe::App for MainApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         let mut selected_profile = self.selected_profile.clone();
+        let mut prefer_sync_control_mode = self.prefer_sync_control_mode;
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.vertical(|ui| {
@@ -198,6 +211,10 @@ impl eframe::App for MainApp {
                             );
                         }
                     });
+
+                ui.checkbox(&mut prefer_sync_control_mode, "Prefer sync control mode");
+
+                ui.label("Sync Control Mode is less accurate but more stable. If you are having problems using direct control mode you can enable the \"Prefer sync control mode\" option.");
             });
         });
 
@@ -205,6 +222,16 @@ impl eframe::App for MainApp {
             self.selected_profile = selected_profile.clone();
             self.on_selected_profile_change_sender
                 .send(selected_profile.clone())
+                .unwrap();
+        }
+
+        if prefer_sync_control_mode != self.prefer_sync_control_mode {
+            self.prefer_sync_control_mode = prefer_sync_control_mode;
+            self.on_preferred_control_mode_change_sender
+                .send(match prefer_sync_control_mode {
+                    true => PreferredControlMode::SyncControl,
+                    false => PreferredControlMode::DirectControl,
+                })
                 .unwrap();
         }
     }
