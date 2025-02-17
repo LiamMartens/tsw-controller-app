@@ -12,6 +12,7 @@ use tokio::{
     sync::{mpsc, Mutex},
 };
 use tokio_tungstenite::connect_async;
+use tokio_util::sync::CancellationToken;
 use tungstenite::Utf8Bytes;
 
 const DIRECT_CONTROL_WS_ADDR: &str = "ws://127.0.0.1:63241";
@@ -24,8 +25,7 @@ static TOKIO_RUNTIME: Lazy<Runtime> = Lazy::new(|| {
 });
 
 fn init(lua: Arc<&Lua>) -> Result<Table> {
-    // let tokio_runtime = Runtime::new().unwrap();
-    // let tokio_runtime_arc = Arc::new(tokio_runtime);
+    let restart_token = CancellationToken::new();
 
     let exports = lua.create_table()?;
     let (socket_callback_tx, socket_callback_rx) =
@@ -35,9 +35,15 @@ fn init(lua: Arc<&Lua>) -> Result<Table> {
     let (sync_control_channel_tx, mut sync_control_channel_rx) = mpsc::channel::<String>(10000);
 
     /* thread to send states up to Lua */
+    let task_cancel_token = restart_token.child_token();
     let direct_control_message_queue_arc_clone = Arc::clone(&direct_control_message_queue_arc);
     TOKIO_RUNTIME.spawn(async move {
         loop {
+            /* stop task if cancelled */
+            if task_cancel_token.is_cancelled() {
+                break;
+            }
+
             let callback_lock = socket_callback_rx.borrow().clone();
             if callback_lock.is_none() {
                 continue;
@@ -71,15 +77,27 @@ fn init(lua: Arc<&Lua>) -> Result<Table> {
     });
 
     /* thread to listen to DC WS and propagate into VecDequeue */
+    let task_cancel_token = restart_token.child_token();
     let direct_control_message_queue_arc_clone = Arc::clone(&direct_control_message_queue_arc);
     TOKIO_RUNTIME.spawn(async move {
         loop {
+            /* don't reconnect if cancelled */
+            if task_cancel_token.is_cancelled() {
+                break;
+            }
+
+            let inner_cancel_token = task_cancel_token.child_token();
             match connect_async(DIRECT_CONTROL_WS_ADDR).await {
                 Ok((mut socket, _)) => {
                     println!("[DC] Connected..");
 
                     loop {
                         tokio::select! {
+                            _ = inner_cancel_token.cancelled() => {
+                                /* stop continuous read loop and close socket if cancelled */
+                                socket.close(None).await.unwrap();
+                                break;
+                            },
                             Some(msg) = socket.next() => {
                                 match msg {
                                     Ok(msg) => match msg {
@@ -116,13 +134,25 @@ fn init(lua: Arc<&Lua>) -> Result<Table> {
     });
 
     /* thread to listen to SC channel and forward state to SC WS */
+    let task_cancel_token = restart_token.child_token();
     TOKIO_RUNTIME.spawn(async move {
         loop {
+            /* don't reconnect if cancelled */
+            if task_cancel_token.is_cancelled() {
+                break;
+            }
+
+            let inner_cancel_token = task_cancel_token.child_token();
             match connect_async(SYNC_CONTROL_WS_ADDR).await {
                 Ok((mut socket, _)) => {
                     println!("[SC] Connected..");
                     loop {
                         tokio::select! {
+                            _ = inner_cancel_token.cancelled() => {
+                                /* stop continuous read loop and close socket if cancelled */
+                                socket.close(None).await.unwrap();
+                                break;
+                            },
                             Some(msg) = sync_control_channel_rx.recv() => {
                                 println!("[SC] Sending Message: {}", msg.clone());
                                 match socket.send(tungstenite::Message::Text(Utf8Bytes::from(msg))).await {
@@ -165,6 +195,14 @@ fn init(lua: Arc<&Lua>) -> Result<Table> {
     });
 
     exports.set(
+        "restart",
+        lua.create_function(move |_, _: ()| {
+            restart_token.cancel();
+            Ok(())
+        })?,
+    )?;
+
+    exports.set(
         "set_callback",
         lua.create_function(move |_, callback: Function| {
             match socket_callback_tx.send(Some(callback)) {
@@ -181,8 +219,11 @@ fn init(lua: Arc<&Lua>) -> Result<Table> {
         "send_sync_control_state",
         lua.create_function(move |_, message: String| {
             println!("Sending SC Message: {}", message.clone());
-            match sync_control_channel_tx.blocking_send(format!("sync_control,{}", message.clone())) {
-                Ok(_) => { println!("[SC] Sent message"); }
+            match sync_control_channel_tx.blocking_send(format!("sync_control,{}", message.clone()))
+            {
+                Ok(_) => {
+                    println!("[SC] Sent message");
+                }
                 Err(e) => {
                     eprintln!("[SC] Error sending SC message: {}", e);
                 }
