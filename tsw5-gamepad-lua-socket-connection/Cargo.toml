@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 async-tungstenite = "0.28.2"
 futures-util = "0.3.31"
+lazy_static = "1.5.0"
 mlua = { version = "0.10.3", features = [
   "lua54",
   "vendored",

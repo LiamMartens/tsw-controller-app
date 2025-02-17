@@ -1,23 +1,51 @@
 local Helpers = require("Helpers")
 local UEHelpers = require("UEHelpers")
+local ControlStateClass = require("ControlState")
 local socket_conn = require("tsw5_gamepad_lua_socket_connection")
 
-local ControlState = {}
-ControlState.ThreadLocked = false
-ControlState.VehicleID = nil
-ControlState.IsDirty = false
-ControlState.Components = {}
+local ControlState = ControlStateClass.New()
+local SocketConnection = socket_conn.init()
 
-function ControlState:IsLocked()
-  return self.ThreadLocked
-end
+-- set socket connection callback
+SocketConnection.set_callback(function(var)
+  print("[TSW5GamepadMod] Received message: " .. var .. "\n")
 
-function ControlState:ThreadLock()
-  self.ThreadLocked = true
-  return function()
-    self.ThreadLocked = false
+  local command_split = Helpers.SplitString(var, ",")
+  --- only respond to direct control commands
+  if command_split[1] ~= "direct_control" then
+    return
   end
-end
+
+  local command_control = command_split[2]
+  local command_value = tonumber(command_split[3])
+
+  local player = UEHelpers.GetPlayer()
+  local controller = player.Controller
+  if player:IsValid() and controller:IsValid() then
+    local drivable_actor = player:GetDrivableActor()
+    if drivable_actor:IsValid() then
+      -- reset component state if vehicle changed
+      if drivable_actor:GetAddress() ~= ControlState.VehicleID then
+        ControlState.VehicleID = drivable_actor:GetAddress()
+        ControlState.Components = {}
+      end
+
+      -- 0 = front, 1 = back
+      local train_side = 0
+      if player:GetAttachedSeatComponent().SeatSide == 1 then
+        train_side = 1
+      end
+      local control_name = train_side == 0 and string.gsub(command_control, "{SIDE}", "F") or
+          string.gsub(command_control, "{SIDE}", "B")
+      if ControlState.Components[control_name] == nil then
+        ControlState.Components[control_name] = {}
+      end
+      ControlState.Components[control_name].TargetValue = command_value
+      ControlState.Components[control_name].IsDirty = true
+      ControlState.IsDirty = true
+    end
+  end
+end)
 
 -- run this action at 5fps
 LoopAsync(200, function()
@@ -59,7 +87,8 @@ LoopAsync(200, function()
             drivable_actor[control_name]:SetPushedState(control_state.TargetValue > 0.5, true)
           else
             -- levers are controlled using VHID presets because it's more stable
-            Helpers.InsertOrUpdateDirectControlPresetControlIfNotExists(drivable_actor, control_name, control_state.TargetValue)
+            Helpers.InsertOrUpdateDirectControlPresetControlIfNotExists(drivable_actor, control_name,
+              control_state.TargetValue)
           end
 
           local preset_name = string.format("DirectControl:%s", control_name)
@@ -70,11 +99,11 @@ LoopAsync(200, function()
             drivable_actor.GameplayTasksComponent,
             controller,
             FName(preset_name),
-            control_state.TargetValue,       -- TargetInputValue
-            0.05,       -- ErrorTolerance
-            0.05,       -- MinMoveTime
-            0.15,       -- MaxMoveTime
-            20.0 -- RateOfChange
+            control_state.TargetValue, -- TargetInputValue
+            0.05,                      -- ErrorTolerance
+            0.05,                      -- MinMoveTime
+            0.15,                      -- MaxMoveTime
+            20.0                       -- RateOfChange
           )
           controller:NotifyEndInteraction(drivable_actor[control_name])
           print("[TSW5GamepadMod] Applied VHID Preset (" .. preset_name .. ")\n")
@@ -88,46 +117,7 @@ LoopAsync(200, function()
   return false
 end)
 
-socket_conn.set_callback(function(var)
-  print("[TSW5GamepadMod] Received message: " .. var .. "\n")
-
-  local command_split = Helpers.SplitString(var, ",")
-  --- only respond to direct control commands
-  if command_split[1] ~= "direct_control" then
-    return
-  end
-
-  local command_control = command_split[2]
-  local command_value = tonumber(command_split[3])
-
-  local player = UEHelpers.GetPlayer()
-  local controller = player.Controller
-  if player:IsValid() and controller:IsValid() then
-    local drivable_actor = player:GetDrivableActor()
-    if drivable_actor:IsValid() then
-      -- reset component state if vehicle changed
-      if drivable_actor:GetAddress() ~= ControlState.VehicleID then
-        ControlState.VehicleID = drivable_actor:GetAddress()
-        ControlState.Components = {}
-      end
-
-      -- 0 = front, 1 = back
-      local train_side = 0
-      if player:GetAttachedSeatComponent().SeatSide == 1 then
-        train_side = 1
-      end
-      local control_name = train_side == 0 and string.gsub(command_control, "{SIDE}", "F") or
-          string.gsub(command_control, "{SIDE}", "B")
-      if ControlState.Components[control_name] == nil then
-        ControlState.Components[control_name] = {}
-      end
-      ControlState.Components[control_name].TargetValue = command_value
-      ControlState.Components[control_name].IsDirty = true
-      ControlState.IsDirty = true
-    end
-  end
-end)
-
+-- attach handlers
 RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:InputValueChanged", function(self, oldValue, newValue)
   local vhid_component = self:get()
   local changing_controller = vhid_component:GetCurrentlyChangingController()
@@ -136,49 +126,10 @@ RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:InputValueChanged", funct
   if vhid_component_identifier ~= "None" and changing_controller:GetAddress() == UEHelpers.GetPlayerController():GetAddress() then
     local sync_state_message = string.format("%s,%.3f", vhid_component_identifier, newValue.ToFloat)
     ExecuteAsync(function()
-      print("[SC] Forwarding message: " .. sync_state_message .. " \n")
-      socket_conn.send_sync_control_state(sync_state_message)
+      if SocketConnection ~= nil then
+        print("[SC] Forwarding message: " .. sync_state_message .. " \n")
+        SocketConnection.send_sync_control_state(sync_state_message)
+      end
     end)
-    -- print("InputValueChanged:" .. vhid_component_identifier .. ":" .. newValue.ToFloat .. "\n")
   end
 end)
-
--- RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:OutputValueChanged", function(self, oldValue, newValue)
---   print("OutputValueChanged", newValue.ToFloat)
--- end)
-
--- RegisterHook("/Script/TS2Prototype.TS2PrototypePlayerController:EndUsingVHIDComponent", function(self, component)
---   print("EndUsingVHIDComponent")
--- end)
-
--- RegisterHook("/Script/TS2Prototype.TS2PrototypePlayerController:BeginDraggingVHIDComponent", function(self, component)
---   print("BeginDraggingVHIDComponent")
--- end)
-
--- RegisterHook("/Script/TS2Prototype.TS2PrototypePlayerController:ToggleVHIDComponent", function(self)
---   print("ToggleVHIDComponent")
--- end)
-
--- RegisterHook("/Script/TS2Prototype.TS2PrototypePlayerController:NotifyBeginInteraction", function(self)
---   print("NotifyBeginInteraction")
--- end)
-
--- RegisterHook("/Script/TS2Prototype.TS2PrototypePlayerController:NotifyEndInteraction", function(self)
---   print("NotifyEndInteraction")
--- end)
-
--- RegisterHook("/Script/TS2Prototype.TS2PrototypePlayerController:SetDragDeltaVHIDComponent", function(self, component, newValue)
---   print("SetDragDeltaVHIDComponent", newValue.ToFloat)
--- end)
-
--- RegisterHook("/Script/TS2Prototype.TS2PrototypePlayerController:BeginIncreasingVHIDComponent", function(self)
---   print("BeginIncreasingVHIDComponent")
--- end)
-
--- RegisterHook("/Script/TS2Prototype.TS2PrototypePlayerController:BeginDecreasingVHIDComponent", function(self)
---   print("BeginDecreasingVHIDComponent")
--- end)
-
--- RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:BeginIncreaseDigital", function(self)
---   print("BeginIncreaseDigital")
--- end)
