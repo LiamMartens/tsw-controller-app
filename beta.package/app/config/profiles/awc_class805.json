@@ -4,15 +4,32 @@
     {
       "name": "Lever3",
       "description": "Combined Power and brake",
-      "assignment": {
-        "type": "direct_control",
-        "controls": "PowerHandle(IrregularLever)",
-        "input_value": {
-          "min": -0.9,
-          "max": 1.0,
-          "invert": true
+      "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "PowerHandle(IrregularLever)",
+          "input_value": {
+            "min": -0.9,
+            "max": 1.0,
+            "invert": true
+          }
+        },
+        {
+          "type": "sync_control",
+          "identifier": "Throttle",
+          "input_value": {
+            "min": -0.9,
+            "max": 1.0,
+            "invert": true
+          },
+          "action_increase": {
+            "keys": "a"
+          },
+          "action_decrease": {
+            "keys": "d"
+          }
         }
-      }
+      ]
     },
 
     {

@@ -134,7 +134,7 @@ RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:InputValueChanged", funct
   local vhid_component_identifier = vhid_component.InputIdentifier.Identifier:ToString()
   -- ignore any None components or controls that aren't being controlled by the current player
   if vhid_component_identifier ~= "None" and changing_controller:GetAddress() == UEHelpers.GetPlayerController():GetAddress() then
-    local sync_state_message = string.format("%s,%3f", vhid_component_identifier, newValue.ToFloat)
+    local sync_state_message = string.format("%s,%.3f", vhid_component_identifier, newValue.ToFloat)
     ExecuteAsync(function()
       print("[SC] Forwarding message: " .. sync_state_message .. " \n")
       socket_conn.send_sync_control_state(sync_state_message)
