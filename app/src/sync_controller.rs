@@ -13,8 +13,8 @@ use tokio_util::sync::CancellationToken;
 use crate::{
     action_sequencer::{ActionSequencer, ActionSequencerAction},
     config_defs::controller_profile::{
-        ControllerProfileControlAssignment, ControllerProfileControlAssignmentKeysAction,
-        ControllerProfileDirectControAssignmentSyncMode, PreferredControlMode,
+        ControllerProfileControlAssignment,
+        ControllerProfileDirectControAssignmentSyncMode,
     },
     config_loader::ConfigLoader,
     controller_manager::ControllerManagerChangeEvent,
@@ -97,7 +97,7 @@ impl SyncController {
                     let mut control_state_lock = controls_state.lock().await;
                     /* unwrapping since it should always exist */
                     let mut_control_state = control_state_lock.get_mut(state.identifier.as_str()).unwrap();
-                    let MARGIN_OF_ERROR = 0.03;
+                    let MARGIN_OF_ERROR = 0.005;
                     let should_stop_moving =
                       /* was increasing and has now exceeded value */
                       (mut_control_state.current_value > mut_control_state.target_value && mut_control_state.moving == 1)
