@@ -8,7 +8,7 @@ local DirectControlState = DirectControlStateClass.New()
 local SyncControlState = SyncControlStateClass.New()
 
 -- set socket connection callback
-socket_conn.set_callback(function(var)
+socket_conn.direct_controller_task.set_callback(function(var)
   print("[TSW5GamepadMod] Received message: " .. var .. "\n")
 
   local command_split = Helpers.SplitString(var, ",")
@@ -99,9 +99,6 @@ LoopAsync(100, function()
             100.0                       -- RateOfChange
           )
           print("[TSW5GamepadMod] Applied VHID Preset (" .. preset_name .. ")\n")
-          -- only apply 1 VHIDPreset at a time
-          print("[TSW5GamepadMod] Unlocking thread logic\n")
-          return unlock()
         end
       end
     end
@@ -114,13 +111,12 @@ end)
 
 -- this loop handles sending the current input values to the SC WS server
 LoopAsync(100, function()
-  print("[SC] Any dirty? " .. tostring(SyncControlState:AnyDirty()) .. "\n")
   if SyncControlState:AnyDirty() then
     for vhid_component_identifier, control_state in pairs(SyncControlState.Components) do
       control_state.IsDirty = false
       local sync_state_message = string.format("%s,%.3f", vhid_component_identifier, control_state.InputValue)
       print("[SC] Forwarding message: " .. sync_state_message .. " \n")
-      socket_conn.send_sync_control_state(sync_state_message)
+      socket_conn.sync_controller_task.send(sync_state_message)
     end
   end
   return false

@@ -15,7 +15,7 @@ function Struct_SyncControlState.New()
 
   ---@param control string
   ---@param value number
-  function SyncControlState:SetTargetInptuValue(control, value)
+  function SyncControlState:SetCurrentInputValue(control, value)
     if self.Components[control] == nil then
       self.Components[control] = {}
     end
