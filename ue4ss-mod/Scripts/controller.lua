@@ -41,15 +41,14 @@ socket_conn.set_callback(function(var)
       end
       ControlState.Components[control_name].TargetValue = command_value
       ControlState.Components[control_name].IsDirty = true
-      ControlState.IsDirty = true
     end
   end
 end)
 
--- run this action at 5fps
-LoopAsync(200, function()
+-- run this action at 10fps
+LoopAsync(100, function()
   -- do nothing if not dirty or is locked
-  if not ControlState.IsDirty or ControlState:IsLocked() then
+  if not ControlState:AnyDirty() or ControlState:IsLocked() then
     return false
   end
 
@@ -70,7 +69,6 @@ LoopAsync(200, function()
     end
 
     print("[TSW5GamepadMod] Checking components\n")
-    ControlState.IsDirty = false
     for control_name, control_state in pairs(ControlState.Components) do
       if control_state.IsDirty then
         control_state.IsDirty = false
@@ -104,6 +102,9 @@ LoopAsync(200, function()
             100.0                       -- RateOfChange
           )
           print("[TSW5GamepadMod] Applied VHID Preset (" .. preset_name .. ")\n")
+          -- only apply 1 VHIDPreset at a time
+          print("[TSW5GamepadMod] Unlocking thread logic\n")
+          return unlock()
         end
       end
     end

@@ -18,6 +18,15 @@ function Struct_ControlState.New()
     end
   end
 
+  function ControlState:AnyDirty()
+    for _, control_state in pairs(self.Components) do
+      if control_state.IsDirty then
+        return true
+      end
+    end
+    return false
+  end
+
   return ControlState
 end
 
