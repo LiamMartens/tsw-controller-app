@@ -101,7 +101,7 @@ LoopAsync(200, function()
             0.05,                      -- ErrorTolerance
             0.05,                      -- MinMoveTime
             0.15,                      -- MaxMoveTime
-            20.0                       -- RateOfChange
+            100.0                       -- RateOfChange
           )
           print("[TSW5GamepadMod] Applied VHID Preset (" .. preset_name .. ")\n")
         end
