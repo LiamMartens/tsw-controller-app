@@ -95,7 +95,7 @@ LoopAsync(100, function()
             control_state.TargetValue, -- TargetInputValue
             0.05,                      -- ErrorTolerance
             0.05,                      -- MinMoveTime
-            0.15,                      -- MaxMoveTime
+            0.05,                      -- MaxMoveTime
             100.0                       -- RateOfChange
           )
           print("[TSW5GamepadMod] Applied VHID Preset (" .. preset_name .. ")\n")
@@ -114,8 +114,9 @@ end)
 
 -- this loop handles sending the current input values to the SC WS server
 LoopAsync(100, function()
+  print("[SC] Any dirty? " .. tostring(SyncControlState:AnyDirty()) .. "\n")
   if SyncControlState:AnyDirty() then
-    for vhid_component_identifier, control_state in pairs(SyncControlState.InputValues) do
+    for vhid_component_identifier, control_state in pairs(SyncControlState.Components) do
       control_state.IsDirty = false
       local sync_state_message = string.format("%s,%.3f", vhid_component_identifier, control_state.InputValue)
       print("[SC] Forwarding message: " .. sync_state_message .. " \n")
@@ -132,6 +133,7 @@ RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:InputValueChanged", funct
   local vhid_component_identifier = vhid_component.InputIdentifier.Identifier:ToString()
   -- ignore any None components or controls that aren't being controlled by the current player
   if vhid_component_identifier ~= "None" and changing_controller:GetAddress() == UEHelpers.GetPlayerController():GetAddress() then
-    SyncControlState:SetTargetInptuValue(vhid_component_identifier, newValue.ToFloat)
+    print("[SC] InputValueChanged: " .. vhid_component_identifier .. " " .. newValue.ToFloat .. "\n")
+    SyncControlState:SetCurrentInputValue(vhid_component_identifier, newValue.ToFloat)
   end
 end)
