@@ -9,20 +9,22 @@ function Helpers.SplitString(str, sep)
 end
 
 ---@param vehicle ARailVehicle
-function Helpers.InsertDirectControlPresetIfNotExists(vehicle)
+---@param control_name string
+function Helpers.InsertDirectControlPresetIfNotExists(vehicle, control_name)
   local has_direct_control_preset = false
+  local preset_name = string.format("DirectControl:%s", control_name)
   local presets = vehicle.RailVehiclePhysicsComponent.VHIDPresets
   -- this is obviously not ideal to loop over presets twice but it's the only way to properly save into it
   presets:ForEach(function(index, remote)
     local element = remote:get()
-    if element.PresetName:ToString() == "DirectControl" then
+    if element.PresetName:ToString() == preset_name then
       has_direct_control_preset = true
     end
   end)
   if not has_direct_control_preset then
     local direct_control_preset = {}
-    direct_control_preset.PresetName = FName("DirectControl")
-    direct_control_preset.DisplayName = FText("DirectControl")
+    direct_control_preset.PresetName = FName(preset_name)
+    direct_control_preset.DisplayName = FText(preset_name)
     direct_control_preset.Presets = {}
     table.insert(presets, direct_control_preset)
   end
@@ -32,11 +34,12 @@ end
 ---@param control string
 ---@param target_value float
 function Helpers.InsertOrUpdateDirectControlPresetControlIfNotExists(vehicle, control, target_value)
+  local preset_name = string.format("DirectControl:%s", control)
   local presets = vehicle.RailVehiclePhysicsComponent.VHIDPresets
   -- this is obviously not ideal to loop over presets twice but it's the only way to properly save into it
   presets:ForEach(function(index, remote)
     local element = remote:get()
-    if element.PresetName:ToString() == "DirectControl" then
+    if element.PresetName:ToString() == preset_name then
       local has_control_preset = false
       element.Presets:ForEach(function(index, preset)
         if preset:get().Component.ComponentName:ToString() == control then

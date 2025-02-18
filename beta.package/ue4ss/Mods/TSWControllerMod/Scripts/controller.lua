@@ -1,9 +1,11 @@
 local Helpers = require("Helpers")
 local UEHelpers = require("UEHelpers")
-local ControlStateClass = require("ControlState")
+local DirectControlStateClass = require("DirectControlState")
+local SyncControlStateClass = require("SyncControlState")
 local socket_conn = require("tsw5_gamepad_lua_socket_connection")
 
-local ControlState = ControlStateClass.New()
+local DirectControlState = DirectControlStateClass.New()
+local SyncControlState = SyncControlStateClass.New()
 
 -- set socket connection callback
 socket_conn.set_callback(function(var)
@@ -24,9 +26,8 @@ socket_conn.set_callback(function(var)
     local drivable_actor = player:GetDrivableActor()
     if drivable_actor:IsValid() then
       -- reset component state if vehicle changed
-      if drivable_actor:GetAddress() ~= ControlState.VehicleID then
-        ControlState.VehicleID = drivable_actor:GetAddress()
-        ControlState.Components = {}
+      if drivable_actor:GetAddress() ~= DirectControlState.VehicleID then
+        DirectControlState:Reset(drivable_actor:GetAddress())
       end
 
       -- 0 = front, 1 = back
@@ -36,26 +37,22 @@ socket_conn.set_callback(function(var)
       end
       local control_name = train_side == 0 and string.gsub(command_control, "{SIDE}", "F") or
           string.gsub(command_control, "{SIDE}", "B")
-      if ControlState.Components[control_name] == nil then
-        ControlState.Components[control_name] = {}
-      end
-      ControlState.Components[control_name].TargetValue = command_value
-      ControlState.Components[control_name].IsDirty = true
+      DirectControlState:SetComponentTargetValue(control_name, command_value)
     end
   end
 end)
 
--- run this action at 10fps
+-- this loop handles applying the dirty control states to the VHID
 LoopAsync(100, function()
   -- do nothing if not dirty or is locked
-  if not ControlState:AnyDirty() or ControlState:IsLocked() then
+  if not DirectControlState:AnyDirty() or DirectControlState:IsLocked() then
     return false
   end
 
   ExecuteInGameThread(function()
     print("[TSW5GamepadMod] Running control state update\n")
 
-    local unlock = ControlState:ThreadLock()
+    local unlock = DirectControlState:ThreadLock()
 
     local player = UEHelpers.GetPlayer()
     local controller = player.Controller
@@ -69,7 +66,7 @@ LoopAsync(100, function()
     end
 
     print("[TSW5GamepadMod] Checking components\n")
-    for control_name, control_state in pairs(ControlState.Components) do
+    for control_name, control_state in pairs(DirectControlState.Components) do
       if control_state.IsDirty then
         control_state.IsDirty = false
 
@@ -115,6 +112,19 @@ LoopAsync(100, function()
   return false
 end)
 
+-- this loop handles sending the current input values to the SC WS server
+LoopAsync(100, function()
+  if SyncControlState:AnyDirty() then
+    for vhid_component_identifier, control_state in pairs(SyncControlState.InputValues) do
+      control_state.IsDirty = false
+      local sync_state_message = string.format("%s,%.3f", vhid_component_identifier, control_state.InputValue)
+      print("[SC] Forwarding message: " .. sync_state_message .. " \n")
+      socket_conn.send_sync_control_state(sync_state_message)
+    end
+  end
+  return false
+end)
+
 -- attach handlers
 RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:InputValueChanged", function(self, oldValue, newValue)
   local vhid_component = self:get()
@@ -122,10 +132,6 @@ RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:InputValueChanged", funct
   local vhid_component_identifier = vhid_component.InputIdentifier.Identifier:ToString()
   -- ignore any None components or controls that aren't being controlled by the current player
   if vhid_component_identifier ~= "None" and changing_controller:GetAddress() == UEHelpers.GetPlayerController():GetAddress() then
-    local sync_state_message = string.format("%s,%.3f", vhid_component_identifier, newValue.ToFloat)
-    ExecuteAsync(function()
-      print("[SC] Forwarding message: " .. sync_state_message .. " \n")
-      socket_conn.send_sync_control_state(sync_state_message)
-    end)
+    SyncControlState:SetTargetInptuValue(vhid_component_identifier, newValue.ToFloat)
   end
 end)
