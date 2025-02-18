@@ -1,5 +1,5 @@
 {
-  "name": "bnsf_es44c4",
+  "name": "bnsf_sd40",
   "controls": [
     {
       "name": "Lever2",
@@ -31,7 +31,7 @@
           "identifier": "AutomaticBrake",
           "input_value": {
             "min": 0.0,
-            "max": 0.6
+            "max": 0.7
           },
           "action_increase": {
             "keys": "'"

@@ -1,5 +1,5 @@
 {
-  "name": "bnsf_es44c4",
+  "name": "br111",
   "controls": [
     {
       "name": "Lever2",
@@ -21,17 +21,17 @@
         }
       ]
     },
-
     {
       "name": "Lever3",
-      "description": "Automatic Brake",
+      "description": "TrainBrake",
       "assignments": [
         {
           "type": "sync_control",
           "identifier": "AutomaticBrake",
           "input_value": {
-            "min": 0.0,
-            "max": 0.6
+            "min": 0.1,
+            "max": 0.8,
+            "step": 0.05
           },
           "action_increase": {
             "keys": "'"
@@ -45,28 +45,30 @@
 
     {
       "name": "Lever1",
-      "description": "Independent Brake",
-      "assignments": [
-        {
-          "type": "sync_control",
-          "identifier": "IndependentBrake",
-          "input_value": {
-            "min": 0.25,
-            "max": 1.0
+      "description": "DirectBrake",
+      "assignment": {
+        "type": "linear",
+        "neutral": 0.5,
+        "thresholds": [
+          {
+            "value": -0.6,
+            "action_activate": {
+              "keys": "["
+            }
           },
-          "action_increase": {
-            "keys": "]"
-          },
-          "action_decrease": {
-            "keys": "["
+          {
+            "value": 0.6,
+            "action_activate": {
+              "keys": "]"
+            }
           }
-        }
-      ]
+        ]
+      }
     },
 
     {
       "name": "Lever3Button1",
-      "description": "Increase Brake",
+      "description": "Increase brake",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
@@ -77,7 +79,7 @@
     },
     {
       "name": "Lever3Trigger1",
-      "description": "Decrease Brake",
+      "description": "Decrease brake",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
@@ -106,7 +108,7 @@
         "threshold": 0.9,
         "action_activate": {
           "keys": "w",
-          "press_time": 0.3,
+          "press_time": 0.2,
           "wait_time": 0.2
         }
       }
@@ -119,7 +121,7 @@
         "threshold": 0.9,
         "action_activate": {
           "keys": "s",
-          "press_time": 0.3,
+          "press_time": 0.2,
           "wait_time": 0.2
         }
       }
@@ -149,13 +151,37 @@
     },
 
     {
+      "name": "Dial2State1",
+      "description": "Open Close Left Doors",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "y"
+        }
+      }
+    },
+    {
+      "name": "Dial2State3",
+      "description": "Open Close Right Doors",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "u"
+        }
+      }
+    },
+
+    {
       "name": "Button3",
       "description": "Wipers Increase",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
-          "keys": "v"
+          "keys": "v",
+          "press_time": 0.1
         }
       }
     },
@@ -166,13 +192,13 @@
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
-          "keys": "shift+v"
+          "keys": "shift+v",
+          "press_time": 0.1
         }
       }
     },
-
     {
-      "name": "Button2",
+      "name": "Button4",
       "description": "Cab Light",
       "assignment": {
         "type": "momentary",
@@ -183,24 +209,24 @@
       }
     },
     {
+      "name": "Button2",
+      "description": "PZB Release",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "end"
+        }
+      }
+    },
+    {
       "name": "Button1",
-      "description": "Headlights Increase",
+      "description": "Headlights",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
           "keys": "h"
-        }
-      }
-    },
-    {
-      "name": "Button4",
-      "description": "Headlights Decrease",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "shift+h"
         }
       }
     }
