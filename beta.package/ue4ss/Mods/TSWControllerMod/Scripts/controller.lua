@@ -4,10 +4,9 @@ local ControlStateClass = require("ControlState")
 local socket_conn = require("tsw5_gamepad_lua_socket_connection")
 
 local ControlState = ControlStateClass.New()
-local SocketConnection = socket_conn.init()
 
 -- set socket connection callback
-SocketConnection.set_callback(function(var)
+socket_conn.set_callback(function(var)
   print("[TSW5GamepadMod] Received message: " .. var .. "\n")
 
   local command_split = Helpers.SplitString(var, ",")
@@ -126,10 +125,8 @@ RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:InputValueChanged", funct
   if vhid_component_identifier ~= "None" and changing_controller:GetAddress() == UEHelpers.GetPlayerController():GetAddress() then
     local sync_state_message = string.format("%s,%.3f", vhid_component_identifier, newValue.ToFloat)
     ExecuteAsync(function()
-      if SocketConnection ~= nil then
-        print("[SC] Forwarding message: " .. sync_state_message .. " \n")
-        SocketConnection.send_sync_control_state(sync_state_message)
-      end
+      print("[SC] Forwarding message: " .. sync_state_message .. " \n")
+      socket_conn.send_sync_control_state(sync_state_message)
     end)
   end
 end)
