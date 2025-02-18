@@ -93,7 +93,6 @@ LoopAsync(200, function()
           local preset_name = string.format("DirectControl:%s", control_name)
           print("[TSW5GamepadMod] Apply VHID Preset (" .. preset_name .. ")\n")
           -- Begin interacting?
-          controller:NotifyBeginInteraction(drivable_actor[control_name])
           drivable_actor.RailVehiclePhysicsComponent:ApplyVHIDPreset(
             drivable_actor.GameplayTasksComponent,
             controller,
@@ -104,7 +103,6 @@ LoopAsync(200, function()
             0.15,                      -- MaxMoveTime
             20.0                       -- RateOfChange
           )
-          controller:NotifyEndInteraction(drivable_actor[control_name])
           print("[TSW5GamepadMod] Applied VHID Preset (" .. preset_name .. ")\n")
         end
       end
