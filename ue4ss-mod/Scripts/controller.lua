@@ -83,22 +83,26 @@ LoopAsync(100, function()
             -- levers are controlled using VHID presets because it's more stable
             Helpers.InsertOrUpdateDirectControlPresetControlIfNotExists(drivable_actor, control_name,
               control_state.TargetValue)
-          end
 
-          local preset_name = string.format("DirectControl:%s", control_name)
-          print("[TSW5GamepadMod] Apply VHID Preset (" .. preset_name .. ")\n")
-          -- Begin interacting?
-          drivable_actor.RailVehiclePhysicsComponent:ApplyVHIDPreset(
-            drivable_actor.GameplayTasksComponent,
-            controller,
-            FName(preset_name),
-            control_state.TargetValue, -- TargetInputValue
-            0.05,                      -- ErrorTolerance
-            0.05,                      -- MinMoveTime
-            0.05,                      -- MaxMoveTime
-            100.0                       -- RateOfChange
-          )
-          print("[TSW5GamepadMod] Applied VHID Preset (" .. preset_name .. ")\n")
+            local preset_name = string.format("DirectControl:%s", control_name)
+            print("[TSW5GamepadMod] Apply VHID Preset (" .. preset_name .. ")\n")
+            -- Begin interacting?
+            controller:NotifyBeginInteraction(drivable_actor[control_name])
+            drivable_actor.RailVehiclePhysicsComponent:ApplyVHIDPreset(
+              drivable_actor.GameplayTasksComponent,
+              controller,
+              FName(preset_name),
+              control_state.TargetValue, -- TargetInputValue
+              0.05,                      -- ErrorTolerance
+              0.05,                      -- MinMoveTime
+              0.05,                      -- MaxMoveTime
+              100.0                      -- RateOfChange
+            )
+            print("[TSW5GamepadMod] Applied VHID Preset (" .. preset_name .. ")\n")
+            controller:NotifyEndInteraction(drivable_actor[control_name])
+            --- only apply 1 VHID preset per cycle for stability
+            return unlock()
+          end
         end
       end
     end
