@@ -6,10 +6,10 @@
 
 extern "C" {
 
-void start();
+void tsw_controller_mod_start();
 
-void set_direct_controller_callback(void (*callback)(const char*));
+void tsw_controller_mod_set_direct_controller_callback(void (*callback)(const char*));
 
-void send_sync_controller_message(const char *message);
+void tsw_controller_mod_send_sync_controller_message(const char *message);
 
 }  // extern "C"

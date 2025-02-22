@@ -37,19 +37,21 @@ socket_conn.direct_controller_task.set_callback(function(var)
       end
       local control_name = train_side == 0 and string.gsub(command_control, "{SIDE}", "F") or
           string.gsub(command_control, "{SIDE}", "B")
-      DirectControlState:SetComponentTargetValue(control_name, command_value)
+      -- async data access can cause Lua state corroption; any shared data access should go through the main thread
+      ExecuteInGameThread(function()
+        DirectControlState:SetComponentTargetValue(control_name, command_value)
+      end)
     end
   end
 end)
 
 -- this loop handles applying the dirty control states to the VHID
 LoopAsync(100, function()
-  -- do nothing if not dirty or is locked
-  if not DirectControlState:AnyDirty() or DirectControlState:IsLocked() then
-    return false
-  end
+  ExecuteInGameThread(function() -- do nothing if not dirty or is locked
+    if not DirectControlState:AnyDirty() or DirectControlState:IsLocked() then
+      return false
+    end
 
-  ExecuteInGameThread(function()
     print("[TSW5GamepadMod] Running control state update\n")
 
     local unlock = DirectControlState:ThreadLock()
@@ -115,14 +117,16 @@ end)
 
 -- this loop handles sending the current input values to the SC WS server
 LoopAsync(100, function()
-  if SyncControlState:AnyDirty() then
-    for vhid_component_identifier, control_state in pairs(SyncControlState.Components) do
-      control_state.IsDirty = false
-      local sync_state_message = string.format("%s,%.3f", vhid_component_identifier, control_state.InputValue)
-      print("[SC] Forwarding message: " .. sync_state_message .. " \n")
-      socket_conn.sync_controller_task.send(sync_state_message)
+  ExecuteInGameThread(function()
+    if SyncControlState:AnyDirty() then
+      for vhid_component_identifier, control_state in pairs(SyncControlState.Components) do
+        control_state.IsDirty = false
+        local sync_state_message = string.format("%s,%.3f", vhid_component_identifier, control_state.InputValue)
+        print("[SC] Forwarding message: " .. sync_state_message .. " \n")
+        socket_conn.sync_controller_task.send(sync_state_message)
+      end
     end
-  end
+  end)
   return false
 end)
 
@@ -134,6 +138,8 @@ RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:InputValueChanged", funct
   -- ignore any None components or controls that aren't being controlled by the current player
   if vhid_component_identifier ~= "None" and changing_controller:GetAddress() == UEHelpers.GetPlayerController():GetAddress() then
     print("[SC] InputValueChanged: " .. vhid_component_identifier .. " " .. newValue.ToFloat .. "\n")
-    SyncControlState:SetCurrentInputValue(vhid_component_identifier, newValue.ToFloat)
+    ExecuteInGameThread(function()
+      SyncControlState:SetCurrentInputValue(vhid_component_identifier, newValue.ToFloat)
+    end)
   end
 end)
