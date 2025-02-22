@@ -93,19 +93,17 @@ impl DirectControllerTask {
                         control_value_map.insert(parts[1].to_string(), parts[2].to_string());
                     }
                 }
-                // send all control values to lua - wait a tick each time
+                // forward all control values
                 for (control, value) in control_value_map.iter() {
                     callback_option.as_ref().unwrap()(
                         CString::new(format!("direct_control,{},{}", control, value))
                             .unwrap()
                             .as_ptr(),
                     );
-                    // wait between each sending of the message
-                    tokio::time::sleep(Duration::from_millis(1000 / 30)).await;
                 }
                 // drop locks before waiting
                 drop(message_queue);
-                tokio::time::sleep(Duration::from_millis(1000 / 30)).await;
+                tokio::time::sleep(Duration::from_millis(1000 / 5)).await;
             }
         });
     }

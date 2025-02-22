@@ -111,6 +111,8 @@
     "bindgen-test": "cpp",
     "*.tcc": "cpp",
     "memory_resource": "cpp",
-    "numbers": "cpp"
+    "numbers": "cpp",
+    "semaphore": "cpp",
+    "stop_token": "cpp"
   }
 }
