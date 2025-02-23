@@ -103,7 +103,7 @@ impl DirectControllerTask {
                 }
                 // drop locks before waiting
                 drop(message_queue);
-                tokio::time::sleep(Duration::from_millis(1000 / 5)).await;
+                tokio::time::sleep(Duration::from_millis(1000 / 10)).await;
             }
         });
     }

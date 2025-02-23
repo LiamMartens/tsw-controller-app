@@ -50,6 +50,7 @@ struct DriverPawn_GetDrivableActorParams { Unreal::UObject* DrivableActor; };
 struct RailVehicle_FindVirtualHIDComponentParams { Unreal::FName Name; Unreal::UObject* VirtualHIDComponent; };
 struct VirtualHIDComponent_SetCurrentInputValueParams { float Value; };
 struct VirtualHIDComponent_SetPushedStateParams { bool IsPushed; bool SkipTransition; };
+struct VirtualHIDComponent_IsChangingParams { bool IsChanging; };
 struct PlayerController_BeginChangingVHIDComponentParams { Unreal::UObject* Component; };
 struct PlayerController_EndUsingVHIDComponentParams { Unreal::UObject* Component; };
 struct GameplayStatistics_GetPlayerControllerParams { Unreal::UWorld* World; int32_t PlayerIndex; Unreal::UObject* PlayerController; };
@@ -59,6 +60,9 @@ class TSWControllerMod : public RC::CppUserModBase
 private:
   static inline std::shared_mutex DIRECT_CONTROL_QUEUE_MUTEX;
   static inline std::queue<RC::StringType> DIRECT_CONTROL_QUEUE;
+
+  static inline std::shared_mutex DIRECT_CONTROL_USING_VHID_COMPONENTS_MUTEX;
+  static inline std::vector<RC::StringType> DIRECT_CONTROL_USING_VHID_COMPONENTS;
 
   static bool is_player_controller(Unreal::UObject* controller)
   {
@@ -179,6 +183,8 @@ private:
     }
 
     std::shared_lock<std::shared_mutex> lock(TSWControllerMod::DIRECT_CONTROL_QUEUE_MUTEX);
+    std::shared_lock<std::shared_mutex> lock(TSWControllerMod::DIRECT_CONTROL_USING_VHID_COMPONENTS_MUTEX);
+
     if (TSWControllerMod::DIRECT_CONTROL_QUEUE.empty()) return;
 
     /* aggregate all dc messages if more than one*/
@@ -218,12 +224,18 @@ private:
       drivable_actor_result.DrivableActor->ProcessEvent(find_virtual_hid_component_func, &find_virtualhid_component_params);
       if (!find_virtualhid_component_params.VirtualHIDComponent) continue;
 
-      /* @TODO begin changing*/
       Unreal::UFunction* begin_changing_func = controller->GetFunctionByNameInChain(STR("BeginChangingVHIDComponent"));
       Unreal::UFunction* end_using_func = controller->GetFunctionByNameInChain(STR("EndUsingVHIDComponent"));
       Unreal::UFunction* set_pushed_state_func = find_virtualhid_component_params.VirtualHIDComponent->GetFunctionByNameInChain(STR("SetPushedState"));
       Unreal::UFunction* set_current_input_value_fn = find_virtualhid_component_params.VirtualHIDComponent->GetFunctionByNameInChain(STR("SetCurrentInputValue"));
-      if (begin_changing_func)
+      bool is_already_changing = TSWControllerMod::DIRECT_CONTROL_USING_VHID_COMPONENTS.end() != std::find(
+        TSWControllerMod::DIRECT_CONTROL_USING_VHID_COMPONENTS.begin(),
+        TSWControllerMod::DIRECT_CONTROL_USING_VHID_COMPONENTS.end(),
+        control_pair.first
+      );
+
+      /* begin changing if not already */
+      if (!is_already_changing && begin_changing_func)
       {
         PlayerController_BeginChangingVHIDComponentParams params{ find_virtualhid_component_params.VirtualHIDComponent };
         controller->ProcessEvent(begin_changing_func, &params);
@@ -232,6 +244,7 @@ private:
       {
         VirtualHIDComponent_SetPushedStateParams set_pushed_state_params = { control_pair.second > 0.5f, true };
         find_virtualhid_component_params.VirtualHIDComponent->ProcessEvent(set_pushed_state_func, &set_pushed_state_params);
+        TSWControllerMod::DIRECT_CONTROL_USING_VHID_COMPONENTS.push_back(control_pair.first);
       }
       else if (set_current_input_value_fn)
       {
