@@ -2,6 +2,7 @@
 #include <format>
 #include <mutex>
 #include <queue>
+#include <cmath>
 #include <shared_mutex>
 #include <unordered_map>
 
@@ -51,6 +52,7 @@ struct RailVehicle_FindVirtualHIDComponentParams { Unreal::FName Name; Unreal::U
 struct VirtualHIDComponent_SetCurrentInputValueParams { float Value; };
 struct VirtualHIDComponent_SetPushedStateParams { bool IsPushed; bool SkipTransition; };
 struct VirtualHIDComponent_IsChangingParams { bool IsChanging; };
+struct VirtualHIDComponent_GetCurrentInputValueParams { float InputValue; };
 struct PlayerController_BeginChangingVHIDComponentParams { Unreal::UObject* Component; };
 struct PlayerController_EndUsingVHIDComponentParams { Unreal::UObject* Component; };
 struct GameplayStatistics_GetPlayerControllerParams { Unreal::UWorld* World; int32_t PlayerIndex; Unreal::UObject* PlayerController; };
@@ -61,8 +63,13 @@ private:
   static inline std::shared_mutex DIRECT_CONTROL_QUEUE_MUTEX;
   static inline std::queue<RC::StringType> DIRECT_CONTROL_QUEUE;
 
-  static inline std::shared_mutex DIRECT_CONTROL_USING_VHID_COMPONENTS_MUTEX;
-  static inline std::vector<RC::StringType> DIRECT_CONTROL_USING_VHID_COMPONENTS;
+  static inline std::shared_mutex VHID_COMPONENTS_CHANGING_MUTEX;
+  static inline std::vector<Unreal::UObject*> VHID_COMPONENTS_CHANGING;
+
+  static bool is_within_margin_of_error(float current, float target)
+  {
+    return abs(target - current) < 0.05f;
+  }
 
   static bool is_player_controller(Unreal::UObject* controller)
   {
@@ -154,6 +161,30 @@ private:
     return input_identifier_identifier_prop->ContainerPtrToValuePtr<Unreal::FName>(input_identifier);
   }
 
+  static bool is_vhid_component_changing(Unreal::UObject* vhid_component)
+  {
+    if (!vhid_component) return false;
+
+    Unreal::UFunction* is_changing_func = vhid_component->GetFunctionByNameInChain(STR("IsChanging"));
+    if (!is_changing_func) return false;
+
+    VirtualHIDComponent_IsChangingParams params;
+    vhid_component->ProcessEvent(is_changing_func, &params);
+    return params.IsChanging;
+  }
+
+  static float get_current_vhid_component_input_value(Unreal::UObject* vhid_component)
+  {
+    if (!vhid_component) return 0.0f;
+
+    Unreal::UFunction* get_current_input_value_func = vhid_component->GetFunctionByNameInChain(STR("GetCurrentInputValue"));
+    if (!get_current_input_value_func) return false;
+
+    VirtualHIDComponent_GetCurrentInputValueParams params;
+    vhid_component->ProcessEvent(get_current_input_value_func, &params);
+    return params.InputValue;
+  }
+
   static std::vector<RC::StringType> wstring_split(RC::StringType s, RC::StringType delimiter)
   {
     size_t pos_start = 0, pos_end, delim_len = delimiter.length();
@@ -182,10 +213,30 @@ private:
       return;
     }
 
-    std::shared_lock<std::shared_mutex> lock(TSWControllerMod::DIRECT_CONTROL_QUEUE_MUTEX);
-    std::shared_lock<std::shared_mutex> lock(TSWControllerMod::DIRECT_CONTROL_USING_VHID_COMPONENTS_MUTEX);
+    std::shared_lock<std::shared_mutex> direct_control_queue_lock(TSWControllerMod::DIRECT_CONTROL_QUEUE_MUTEX);
+    std::shared_lock<std::shared_mutex> vhid_components_changing_lock(TSWControllerMod::VHID_COMPONENTS_CHANGING_MUTEX);
 
-    if (TSWControllerMod::DIRECT_CONTROL_QUEUE.empty()) return;
+    if (TSWControllerMod::DIRECT_CONTROL_QUEUE.empty()) {
+      /* check to stop using components */
+      if (!TSWControllerMod::VHID_COMPONENTS_CHANGING.empty())
+      {
+        /* skip if no controller or pawn */
+        Unreal::UObject* controller = TSWControllerMod::get_player_controller_from(context);
+        Unreal::UObject* pawn = TSWControllerMod::get_driver_pawn_from_controller(controller);
+        if (!controller || !pawn) return;
+
+        Unreal::UFunction* end_using_func = controller->GetFunctionByNameInChain(STR("EndUsingVHIDComponent"));
+        if (!end_using_func) return;
+
+        for (auto vhid_component : TSWControllerMod::VHID_COMPONENTS_CHANGING)
+        {
+          PlayerController_EndUsingVHIDComponentParams params{ vhid_component };
+          controller->ProcessEvent(end_using_func, &params);
+        }
+        TSWControllerMod::VHID_COMPONENTS_CHANGING.clear();
+      }
+      return;
+    }
 
     /* aggregate all dc messages if more than one*/
     std::unordered_map<RC::StringType, float> target_input_values;
@@ -224,37 +275,37 @@ private:
       drivable_actor_result.DrivableActor->ProcessEvent(find_virtual_hid_component_func, &find_virtualhid_component_params);
       if (!find_virtualhid_component_params.VirtualHIDComponent) continue;
 
-      Unreal::UFunction* begin_changing_func = controller->GetFunctionByNameInChain(STR("BeginChangingVHIDComponent"));
-      Unreal::UFunction* end_using_func = controller->GetFunctionByNameInChain(STR("EndUsingVHIDComponent"));
+      Unreal::UFunction* begin_changing_func = controller->GetFunctionByNameInChain(STR("BeginDraggingVHIDComponent"));
       Unreal::UFunction* set_pushed_state_func = find_virtualhid_component_params.VirtualHIDComponent->GetFunctionByNameInChain(STR("SetPushedState"));
       Unreal::UFunction* set_current_input_value_fn = find_virtualhid_component_params.VirtualHIDComponent->GetFunctionByNameInChain(STR("SetCurrentInputValue"));
-      bool is_already_changing = TSWControllerMod::DIRECT_CONTROL_USING_VHID_COMPONENTS.end() != std::find(
-        TSWControllerMod::DIRECT_CONTROL_USING_VHID_COMPONENTS.begin(),
-        TSWControllerMod::DIRECT_CONTROL_USING_VHID_COMPONENTS.end(),
-        control_pair.first
-      );
 
       /* begin changing if not already */
-      if (!is_already_changing && begin_changing_func)
+      if (begin_changing_func && !TSWControllerMod::is_vhid_component_changing(find_virtualhid_component_params.VirtualHIDComponent))
       {
         PlayerController_BeginChangingVHIDComponentParams params{ find_virtualhid_component_params.VirtualHIDComponent };
         controller->ProcessEvent(begin_changing_func, &params);
+        TSWControllerMod::VHID_COMPONENTS_CHANGING.push_back(find_virtualhid_component_params.VirtualHIDComponent);
       }
+
+      /* apply incoming value */
       if (set_pushed_state_func)
       {
         VirtualHIDComponent_SetPushedStateParams set_pushed_state_params = { control_pair.second > 0.5f, true };
         find_virtualhid_component_params.VirtualHIDComponent->ProcessEvent(set_pushed_state_func, &set_pushed_state_params);
-        TSWControllerMod::DIRECT_CONTROL_USING_VHID_COMPONENTS.push_back(control_pair.first);
       }
       else if (set_current_input_value_fn)
       {
-        VirtualHIDComponent_SetCurrentInputValueParams set_current_input_value_params = { control_pair.second };
-        find_virtualhid_component_params.VirtualHIDComponent->ProcessEvent(set_current_input_value_fn, &set_current_input_value_params);
-      }
-      if (end_using_func)
-      {
-        PlayerController_EndUsingVHIDComponentParams params{ find_virtualhid_component_params.VirtualHIDComponent };
-        controller->ProcessEvent(end_using_func, &params);
+        /* keep applying until value is reached within margin of error or  the attmpets has reached >3*/
+        uint8_t num_attempts = 0;
+        do
+        {
+          num_attempts++;
+          VirtualHIDComponent_SetCurrentInputValueParams set_current_input_value_params = { control_pair.second };
+          find_virtualhid_component_params.VirtualHIDComponent->ProcessEvent(set_current_input_value_fn, &set_current_input_value_params);
+        } while (
+          num_attempts < 3
+          && !TSWControllerMod::is_within_margin_of_error(control_pair.second, TSWControllerMod::get_current_vhid_component_input_value(find_virtualhid_component_params.VirtualHIDComponent))
+          );
       }
     }
   }
