@@ -6,11 +6,21 @@
       "description": "Throttle",
       "assignments": [
         {
+          "type": "direct_control",
+          "controls": "Throttle",
+          "input_value": {
+            "min": 0.0,
+            "max": 1.0,
+            "step": 0.125
+          }
+        },
+        {
           "type": "sync_control",
           "identifier": "Throttle",
           "input_value": {
             "min": 0.0,
-            "max": 1.0
+            "max": 1.0,
+            "step": 0.125
           },
           "action_increase": {
             "keys": "a"
@@ -26,6 +36,14 @@
       "name": "Lever3",
       "description": "Automatic Brake",
       "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "AutomaticBrake",
+          "input_value": {
+            "min": 0.0,
+            "max": 0.7
+          }
+        },
         {
           "type": "sync_control",
           "identifier": "AutomaticBrake",
@@ -47,6 +65,14 @@
       "name": "Lever1",
       "description": "Independent Brake",
       "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "IndependentBrake",
+          "input_value": {
+            "min": 0.25,
+            "max": 1.0
+          }
+        },
         {
           "type": "sync_control",
           "identifier": "IndependentBrake",
