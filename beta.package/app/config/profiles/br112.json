@@ -1,5 +1,5 @@
 {
-  "name": "br111",
+  "name": "br112",
   "controls": [
     {
       "name": "Lever2",
@@ -7,7 +7,7 @@
       "assignments": [
         {
           "type": "direct_control",
-          "controls": "Throttle_{SIDE}",
+          "controls": "SpeedSelector_{SIDE}",
           "input_value": {
             "min": 0.0,
             "max": 1.0
@@ -35,20 +35,11 @@
       "assignments": [
         {
           "type": "direct_control",
-          "controls": "TrainBrake_{SIDE}",
+          "controls": "DriversBrake_{SIDE}",
           "input_value": {
             "min": 0.1,
-            "max": 0.8,
-            "steps": [0.1, 0.3, 0.38, 0.46, 0.55, 0.63, 0.71, 0.8]
-          }
-        },
-        {
-          "type": "direct_control",
-          "controls": "DynamicBrake_{SIDE}",
-          "input_value": {
-            "min": 0.0,
-            "max": 1.0,
-            "steps": [0.0, 0.15, 0.3, 0.43, 0.57, 0.72, 0.85, 1.0]
+            "max": 0.75,
+            "steps": [0.1, 0.2, 0.34, 0.4, 0.46, 0.53, 0.6, 0.65, 0.75]
           }
         },
         {
@@ -56,8 +47,8 @@
           "identifier": "AutomaticBrake",
           "input_value": {
             "min": 0.1,
-            "max": 0.8,
-            "steps": [0.0, 0.15, 0.3, 0.43, 0.57, 0.72, 0.85, 1.0]
+            "max": 0.75,
+            "steps": [0.1, 0.2, 0.34, 0.4, 0.46, 0.53, 0.6, 0.65, 0.75]
           },
           "action_increase": {
             "keys": "'"
@@ -71,25 +62,31 @@
 
     {
       "name": "Lever1",
-      "description": "DirectBrake",
-      "assignment": {
-        "type": "linear",
-        "neutral": 0.5,
-        "thresholds": [
-          {
-            "value": -0.6,
-            "action_activate": {
-              "keys": "["
-            }
-          },
-          {
-            "value": 0.6,
-            "action_activate": {
-              "keys": "]"
-            }
+      "description": "CruiseControlForceSelector",
+      "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "ForceSelector_{SIDE}",
+          "input_value": {
+            "min": 0.0,
+            "max": 1.0
           }
-        ]
-      }
+        },
+        {
+          "type": "sync_control",
+          "identifier": "CruiseControlAdjust",
+          "input_value": {
+            "min": 0.0,
+            "max": 1.0
+          },
+          "action_increase": {
+            "keys": "r"
+          },
+          "action_decrease": {
+            "keys": "f"
+          }
+        }
+      ]
     },
 
     {
