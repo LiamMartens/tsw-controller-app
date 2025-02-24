@@ -1,115 +1,98 @@
 {
-  "name": "br_146",
+  "name": "br146",
   "controls": [
     {
       "name": "Lever2",
       "description": "Throttle",
-      "assignment": {
-        "type": "linear",
-        "thresholds": [
-          {
-            "value": 0.1,
-            "action_activate": {
-              "keys": "a",
-              "press_time": 0.2,
-              "wait_time": 0.1
-            },
-            "action_deactivate": {
-              "keys": "d",
-              "press_time": 0.2,
-              "wait_time": 0.1
-            }
-          },
-          {
-            "value": 0.2,
-            "action_activate": {
-              "keys": "a",
-              "press_time": 0.2,
-              "wait_time": 0.1
-            },
-            "action_deactivate": {
-              "keys": "d",
-              "press_time": 0.3,
-              "wait_time": 0.1
-            }
-          },
-          {
-            "value": 0.3,
-            "value_end": 0.95,
-            "value_step": 0.065,
-            "action_activate": {
-              "keys": "a",
-              "press_time": 0.18,
-              "wait_time": 0.1
-            },
-            "action_deactivate": {
-              "keys": "d",
-              "press_time": 0.18,
-              "wait_time": 0.1
-            }
+      "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "Throttle_{SIDE}",
+          "input_value": {
+            "min": 0.0,
+            "max": 1.0
           }
-        ]
-      }
+        },
+        {
+          "type": "sync_control",
+          "identifier": "Throttle",
+          "input_value": {
+            "min": 0.0,
+            "max": 1.0
+          },
+          "action_increase": {
+            "keys": "a"
+          },
+          "action_decrease": {
+            "keys": "d"
+          }
+        }
+      ]
     },
     {
       "name": "Lever3",
       "description": "Brake Handle",
-      "assignment": {
-        "type": "linear",
-        "thresholds": [
-          {
-            "value": 0.1,
-            "action_activate": {
-              "keys": "'",
-              "press_time": 0.2,
-              "wait_time": 0.15
-            },
-            "action_deactivate": {
-              "keys": ";",
-              "press_time": 0.2,
-              "wait_time": 0.15
-            }
-          },
-          {
-            "value": 0.2,
-            "value_end": 0.9,
-            "value_step": 0.1,
-            "action_activate": {
-              "keys": "'",
-              "press_time": 0.15,
-              "wait_time": 0.15
-            },
-            "action_deactivate": {
-              "keys": ";",
-              "press_time": 0.15,
-              "wait_time": 0.15
-            }
+      "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "TrainBrake_{SIDE}",
+          "input_value": {
+            "min": 0.1,
+            "max": 0.8
           }
-        ]
-      }
+        },
+        {
+          "type": "direct_control",
+          "controls": "DynamicBrake",
+          "input_value": {
+            "min": 0.1,
+            "max": 0.8
+          }
+        },
+        {
+          "type": "sync_control",
+          "identifier": "AutomaticBrake",
+          "input_value": {
+            "min": 0.1,
+            "max": 0.8
+          },
+          "action_increase": {
+            "keys": "'"
+          },
+          "action_decrease": {
+            "keys": ";"
+          }
+        }
+      ]
     },
 
     {
       "name": "Lever1",
       "description": "AFB",
-      "assignment": {
-        "type": "linear",
-        "neutral": 0.5,
-        "thresholds": [
-          {
-            "value": -0.8,
-            "action_activate": {
-              "keys": "f"
-            }
-          },
-          {
-            "value": 0.8,
-            "action_activate": {
-              "keys": "r"
-            }
+      "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "AFB_Speed_{SIDE}",
+          "input_value": {
+            "min": 0.0,
+            "max": 1.0
           }
-        ]
-      }
+        },
+        {
+          "type": "sync_control",
+          "identifier": "CruiseControlAdjust",
+          "input_value": {
+            "min": 0.0,
+            "max": 1.0
+          },
+          "action_increase": {
+            "keys": "a"
+          },
+          "action_decrease": {
+            "keys": "d"
+          }
+        }
+      ]
     },
 
     {
