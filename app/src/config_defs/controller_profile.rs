@@ -30,6 +30,7 @@ pub struct ControllerProfileDirectControlAssignmentInputValue {
     pub min: f32,
     pub max: f32,
     pub step: Option<f32>,
+    pub steps: Option<Vec<f32>>,
     pub invert: Option<bool>,
 }
 
@@ -140,9 +141,7 @@ impl ControllerProfileControlLinearAssignment {
                         action_activate: threshold.action_activate.clone(),
                         action_deactivate: threshold.action_deactivate.clone(),
                     });
-                    current_value = ((current_value + threshold.value_step.unwrap()) * 10000.0)
-                        .round()
-                        / 10000.0;
+                    current_value = ((current_value + threshold.value_step.unwrap()) * 10000.0).round() / 10000.0;
                 }
             }
         }
@@ -172,10 +171,34 @@ impl ControllerProfileDirectControlAssignmentInputValue {
         };
         let total_distance = (self.max - self.min).abs();
         let normal = (input_value * total_distance) + self.min;
-        match self.step {
-            Some(step) => {
-                let step_count = (normal / step).round();
-                return (step_count * step).clamp(self.min, self.max);
+        let steps: Option<Vec<f32>> = match &self.steps {
+            Some(steps) => Some(steps.clone()),
+            None => match self.step {
+                Some(step) => {
+                    let mut steps: Vec<f32> = Vec::new();
+                    let mut current_value = self.min;
+                    loop {
+                        steps.push(current_value);
+                        current_value = (current_value + step).min(self.max);
+                        if current_value >= self.max {
+                            break;
+                        }
+                    }
+                    Some(steps)
+                }
+                None => None,
+            },
+        };
+
+        match steps {
+            Some(steps) => {
+                let mut closest = steps[0];
+                for step in steps.iter() {
+                    if (normal - step).abs() < (normal - closest).abs() {
+                        closest = *step;
+                    }
+                }
+                return closest;
             }
             None => normal.clamp(self.min, self.max),
         }

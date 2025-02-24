@@ -6,6 +6,14 @@
       "description": "Throttle",
       "assignments": [
         {
+          "type": "direct_control",
+          "controls": "Throttle_{SIDE}",
+          "input_value": {
+            "min": 0.0,
+            "max": 1.0
+          }
+        },
+        {
           "type": "sync_control",
           "identifier": "Throttle",
           "input_value": {
@@ -25,6 +33,24 @@
       "name": "Lever3",
       "description": "TrainBrake",
       "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "TrainBrake_{SIDE}",
+          "input_value": {
+            "min": 0.1,
+            "max": 0.8,
+            "steps": [0.1, 0.3, 0.38, 0.46, 0.55, 0.63, 0.71, 0.8]
+          }
+        },
+        {
+          "type": "direct_control",
+          "controls": "DynamicBrake_{SIDE}",
+          "input_value": {
+            "min": 0.0,
+            "max": 1.0,
+            "steps": [0.0, 0.15, 0.3, 0.43, 0.57, 0.72, 0.85, 1.0]
+          }
+        },
         {
           "type": "sync_control",
           "identifier": "AutomaticBrake",
