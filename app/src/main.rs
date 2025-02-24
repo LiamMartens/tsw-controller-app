@@ -218,7 +218,7 @@ impl eframe::App for MainApp {
 
                 ui.checkbox(&mut prefer_sync_control_mode, "Prefer sync control mode");
 
-                ui.label("Sync Control Mode is less accurate but more stable. If you are having problems using direct control mode you can enable the \"Prefer sync control mode\" option.");
+                ui.label("Sync Control Mode is less accurate but might be more stable. If you are having problems using direct control mode you can enable the \"Prefer sync control mode\" option.");
             });
         });
 
