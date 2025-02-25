@@ -258,9 +258,6 @@ private:
 
   static void on_process_event_pre_callback(Unreal::UObject *context, Unreal::UFunction *function, void *params)
   {
-    context->GetWorld();
-    /* this is functional but slow when called too many times */
-
     if (function->GetName() != STR("Tick"))
     {
       /* only run on ticks to prevent clogging*/
