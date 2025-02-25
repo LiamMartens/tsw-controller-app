@@ -74,6 +74,13 @@ impl SyncControllerTask {
 
     pub unsafe fn send(&self, raw: *const std::ffi::c_char) {
         let sync_control_channel_tx = Arc::clone(&self.sync_control_channel_tx);
+
+        let has_capacity = sync_control_channel_tx.capacity() > 0;
+        if !has_capacity {
+            eprintln!("[SyncControllerTask] Channel is full, dropping message");
+            return;
+        }
+
         let message = String::from(CStr::from_ptr(raw).to_str().unwrap());
         println!(
             "[SyncControllerTask] Sending SC Message: {}",
@@ -89,7 +96,7 @@ impl SyncControllerTask {
     }
 
     pub fn new(tokio_runtime: &'static Runtime) -> SyncControllerTask {
-        let (sync_control_channel_tx, sync_control_channel_rx) = mpsc::channel::<String>(1000);
+        let (sync_control_channel_tx, sync_control_channel_rx) = mpsc::channel::<String>(50);
         SyncControllerTask {
             tokio_runtime,
             sync_control_channel_tx: Arc::new(sync_control_channel_tx),
