@@ -79,5 +79,3 @@ end)
 
 That should be all; you can just close and re-open the program (you don't need to restart the game) to load the new profile and you can test out whether it works as expected. Rinse and repeat until you have everything configured correctly.
 
-### In case direct control doesn't work
-Some trains are not stable when using direct control. The Amtrak Acela is one of those. For this reason it can only be set-up using `sync_control` (or normal keybinds). The sync control set-up is largely the identical but the identifier you use is not the `@field [NAME]` but rather the VHID component idetifier as we previously logged.
