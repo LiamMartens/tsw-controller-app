@@ -28,6 +28,14 @@
           }
         },
         {
+          "type": "direct_control",
+          "controls": "DeadmansHandleButton",
+          "input_value": {
+            "min": 1.0,
+            "max": 1.0
+          }
+        },
+        {
           "type": "sync_control",
           "identifier": "Throttle",
           "input_value": {
@@ -42,6 +50,22 @@
           }
         }
       ]
+    },
+    {
+      "name": "Lever2Trigger1",
+      "description": "Deadman's Switch",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "controls": "DeadmansHandleButton",
+          "value": 1.0
+        },
+        "action_deactivate": {
+          "controls": "DeadmansHandleButton",
+          "value": 0.0
+        }
+      }
     },
 
     {
@@ -105,22 +129,6 @@
       }
     },
 
-    {
-      "name": "Lever2Trigger1",
-      "description": "Deadman's Switch",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "controls": "DeadmansHandleButton",
-          "value": 1.0
-        },
-        "action_deactivate": {
-          "controls": "DeadmansHandleButton",
-          "value": 0.0
-        }
-      }
-    },
     {
       "name": "Lever2Button1",
       "description": "Whistle",

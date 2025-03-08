@@ -228,8 +228,8 @@ impl ControllerProfileControl {
             return assignments
                 .iter()
                 .filter(|a| match a {
-                    ControllerProfileControlAssignment::DirectControl(_) => true,
-                    _ => false,
+                    ControllerProfileControlAssignment::SyncControl(_) => false,
+                    _ => true,
                 })
                 .cloned()
                 .collect();
@@ -237,8 +237,8 @@ impl ControllerProfileControl {
             return assignments
                 .iter()
                 .filter(|a| match a {
-                    ControllerProfileControlAssignment::SyncControl(_) => true,
-                    _ => false,
+                    ControllerProfileControlAssignment::DirectControl(_) => false,
+                    _ => true,
                 })
                 .cloned()
                 .collect();
