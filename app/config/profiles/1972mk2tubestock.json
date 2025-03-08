@@ -23,8 +23,9 @@
           "type": "direct_control",
           "controls": "TractionBrakeController",
           "input_value": {
-            "min": -0.5,
-            "max": 0.35
+            "min": -0.45,
+            "max": 0.35,
+            "steps": [-0.45, -0.33, -0.22, -0.11, 0.0, 0.11, 0.22, 0.35]
           }
         },
         {
