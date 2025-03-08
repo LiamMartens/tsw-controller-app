@@ -181,6 +181,7 @@ impl ControllerProfileDirectControlAssignmentInputValue {
                         steps.push(current_value);
                         current_value = (current_value + step).min(self.max);
                         if current_value >= self.max {
+                            steps.push(self.max);
                             break;
                         }
                     }

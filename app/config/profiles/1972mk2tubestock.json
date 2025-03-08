@@ -18,14 +18,30 @@
     {
       "name": "Lever3",
       "description": "Combined Power and brake",
-      "assignment": {
-        "type": "direct_control",
-        "controls": "TractionBrakeController",
-        "input_value": {
-          "min": -0.5,
-          "max": 0.35
+      "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "TractionBrakeController",
+          "input_value": {
+            "min": -0.5,
+            "max": 0.35
+          }
+        },
+        {
+          "type": "sync_control",
+          "identifier": "Throttle",
+          "input_value": {
+            "min": -0.5,
+            "max": 0.35
+          },
+          "action_increase": {
+            "keys": "a"
+          },
+          "action_decrease": {
+            "keys": "d"
+          }
         }
-      }
+      ]
     },
 
     {

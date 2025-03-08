@@ -128,7 +128,7 @@ impl ProfileRunner {
                 match direct_control_sender.send(action.clone()) {
                     Ok(_) => {}
                     Err(e) => {
-                        println!("Error sending direct control command: {}", e);
+                        println!("Error sending direct control command ({:?}): {}", action, e);
                     }
                 }
             }
