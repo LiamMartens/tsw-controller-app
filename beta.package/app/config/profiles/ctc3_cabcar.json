@@ -1,0 +1,253 @@
+{
+  "name": "ctc3_cabcar",
+  "controls": [
+    {
+      "name": "Lever2",
+      "description": "Throttle",
+      "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "Throttle",
+          "input_value": {
+            "min": 0.0,
+            "max": 1.0,
+            "step": 0.125
+          }
+        },
+        {
+          "type": "sync_control",
+          "identifier": "Throttle",
+          "input_value": {
+            "min": 0.0,
+            "max": 1.0,
+            "step": 0.125
+          },
+          "action_increase": {
+            "keys": "a"
+          },
+          "action_decrease": {
+            "keys": "d"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Lever3",
+      "description": "Automatic Brake",
+      "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "AutomaticBrake_26C",
+          "input_value": {
+            "min": 0.0,
+            "max": 0.7
+          }
+        },
+        {
+          "type": "sync_control",
+          "identifier": "AutomaticBrake",
+          "input_value": {
+            "min": 0.0,
+            "max": 0.7
+          },
+          "action_increase": {
+            "keys": "'"
+          },
+          "action_decrease": {
+            "keys": ";"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Lever1",
+      "description": "Parking Brake",
+      "assignment": {
+        "type": "linear",
+        "thresholds": [
+          {
+            "value": 0.5,
+            "action_activate": {
+              "keys": "\\",
+              "press_time": 0.2,
+              "wait_time": 0.2
+            },
+            "action_deactivate": {
+              "keys": "shift+\\",
+              "press_time": 0.2,
+              "wait_time": 0.2
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "name": "Lever3Button1",
+      "description": "Increase Brake",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "'"
+        }
+      }
+    },
+    {
+      "name": "Lever3Trigger1",
+      "description": "Decrease Brake",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": ";"
+        }
+      }
+    },
+
+    {
+      "name": "Dial1Button",
+      "description": "AWS/Safety Reset",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "Q+PageDown"
+        }
+      }
+    },
+    {
+      "name": "Dial1CW",
+      "description": "Reverser Increase",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "s",
+          "press_time": 0.2,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "Dial1CCW",
+      "description": "Reverser Decrease",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "w",
+          "press_time": 0.2,
+          "wait_time": 0.2
+        }
+      }
+    },
+
+    {
+      "name": "Lever2Trigger1",
+      "description": "Horn",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "space"
+        }
+      }
+    },
+    {
+      "name": "Lever2Button1",
+      "description": "Sand",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "x"
+        }
+      }
+    },
+
+    {
+      "name": "Dial2State1",
+      "description": "Open Close Left Doors",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "y"
+        }
+      }
+    },
+    {
+      "name": "Dial2State3",
+      "description": "Open Close Right Doors",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "u"
+        }
+      }
+    },
+
+    {
+      "name": "Button3",
+      "description": "Wipers Increase/Decrease",
+      "assignment": {
+        "type": "toggle",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "v"
+        },
+        "action_deactivate": {
+          "keys": "shift+v"
+        }
+      }
+    },
+    {
+      "name": "Button5",
+      "description": "Cab Light",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "l"
+        }
+      }
+    },
+    {
+      "name": "Button2",
+      "description": "Bell",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "b"
+        }
+      }
+    },
+    {
+      "name": "Button1",
+      "description": "Headlights Increase",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "h"
+        }
+      }
+    },
+    {
+      "name": "Button4",
+      "description": "Headlights Decrease",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "shift+h"
+        }
+      }
+    }
+  ]
+}
