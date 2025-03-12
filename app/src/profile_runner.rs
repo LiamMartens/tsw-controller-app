@@ -34,7 +34,7 @@ pub struct ProfileRunner {
     profile_name: Option<String>,
     preferred_control_mode: PreferredControlMode,
     /* keeps track of the last called assignments */
-    control_calls: HashMap<String, ProfileRunnerAssignmentCall>,
+    control_calls: HashMap<String, Vec<Option<ProfileRunnerAssignmentCall>>>,
 }
 
 impl ProfileRunnerAssignmentCallAction {
@@ -101,6 +101,7 @@ impl ProfileRunner {
     pub async fn call_assignment_action_for_control<T: AsRef<str>>(
         &mut self,
         control_name: T,
+        assignment_index: usize,
         control_state: &ControllerManagerControllerControlState,
         assignment: &ControllerProfileControlAssignment,
         action: Option<ProfileRunnerAssignmentCallAction>,
@@ -109,15 +110,16 @@ impl ProfileRunner {
             return;
         }
 
-        self.control_calls.insert(
-            String::from(control_name.as_ref()),
-            ProfileRunnerAssignmentCall {
-                control_name: String::from(control_name.as_ref()),
-                control_state: control_state.clone(),
-                assignment: assignment.clone(),
-                action: action.as_ref().unwrap().clone(),
-            },
-        );
+        let entry = self.control_calls.entry(String::from(control_name.as_ref())).or_insert_with(|| Vec::new());
+        while entry.len() <= assignment_index {
+            entry.push(None);
+        }
+        entry[assignment_index] = Some(ProfileRunnerAssignmentCall {
+            control_name: String::from(control_name.as_ref()),
+            control_state: control_state.clone(),
+            assignment: assignment.clone(),
+            action: action.as_ref().unwrap().clone(),
+        });
 
         match action.as_ref().unwrap() {
             ProfileRunnerAssignmentCallAction::SequencerAction(action) => {
@@ -150,17 +152,18 @@ impl ProfileRunner {
         let control_name = event.control_name.clone();
         let control_state = event.control_state.clone();
         let control_definition = controller_config.unwrap().find_control(control_name.clone());
-        let last_called_assignment = match self.control_calls.get(&control_name.clone()) {
-            Some(call) => Some(call.clone()),
-            None => None,
-        };
 
         match control_definition {
             Some(control) => {
                 let assignments = control.get_assignments(self.preferred_control_mode);
 
-                for control_assignment_item in assignments.iter() {
-                    let last_called_assignment = last_called_assignment.as_ref();
+                let last_called_assignment_list = match self.control_calls.get(&control_name.clone()) {
+                    Some(call) => call.clone(),
+                    None => Vec::new(),
+                };
+
+                for (assignment_index, control_assignment_item) in assignments.iter().enumerate() {
+                    let last_called_assignment = last_called_assignment_list[assignment_index].as_ref();
                     let control_assignment = control_assignment_item.clone();
                     match &control_assignment {
                         ControllerProfileControlAssignment::Momentary(assignment) => {
@@ -170,6 +173,7 @@ impl ProfileRunner {
                                 if should_call {
                                     self.call_assignment_action_for_control(
                                         control_name.clone(),
+                                        assignment_index,
                                         &control_state,
                                         &control_assignment,
                                         match &assignment.action_activate {
@@ -195,6 +199,7 @@ impl ProfileRunner {
                                 // when below the threshold only call action if the last call was above or equal to the threshold
                                 self.call_assignment_action_for_control(
                                     control_name.clone(),
+                                    assignment_index,
                                     &control_state,
                                     &control_assignment,
                                     match &assignment.action_deactivate {
@@ -262,6 +267,7 @@ impl ProfileRunner {
                                 for threshold in thresholds_to_activate {
                                     self.call_assignment_action_for_control(
                                         control_name.clone(),
+                                        assignment_index,
                                         &control_state,
                                         &control_assignment,
                                         match &threshold.action_activate {
@@ -290,6 +296,7 @@ impl ProfileRunner {
                                 for threshold in thresholds_to_deactivate {
                                     self.call_assignment_action_for_control(
                                         control_name.clone(),
+                                        assignment_index,
                                         &control_state,
                                         &control_assignment,
                                         match &threshold.action_deactivate {
@@ -341,6 +348,7 @@ impl ProfileRunner {
                                 };
                                 self.call_assignment_action_for_control(
                                     control_name.clone(),
+                                    assignment_index,
                                     &control_state,
                                     &control_assignment,
                                     match action_to_call {
@@ -366,6 +374,7 @@ impl ProfileRunner {
                                 // when below the threshold only call action if the last call was above or equal to the threshold
                                 self.call_assignment_action_for_control(
                                     control_name.clone(),
+                                    assignment_index,
                                     &control_state,
                                     &control_assignment,
                                     match last_action_taken {
@@ -387,6 +396,7 @@ impl ProfileRunner {
                             let input_value = assignment.input_value.calculate_normal_value(control_state.value);
                             self.call_assignment_action_for_control(
                                 control_name.clone(),
+                                assignment_index,
                                 &control_state,
                                 &control_assignment,
                                 Some(ProfileRunnerAssignmentCallAction::DirectControlAction(DirectControlCommand {
