@@ -163,7 +163,10 @@ impl ProfileRunner {
                 };
 
                 for (assignment_index, control_assignment_item) in assignments.iter().enumerate() {
-                    let last_called_assignment = last_called_assignment_list[assignment_index].as_ref();
+                    let last_called_assignment = match last_called_assignment_list.len() > assignment_index {
+                        true => last_called_assignment_list[assignment_index].as_ref(),
+                        false => None,
+                    };
                     let control_assignment = control_assignment_item.clone();
                     match &control_assignment {
                         ControllerProfileControlAssignment::Momentary(assignment) => {
