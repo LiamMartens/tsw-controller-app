@@ -34,23 +34,23 @@
 
     {
       "name": "Lever3Button1",
-      "description": "Increase brake",
+      "description": "Decrease Throttle (Increase Brake)",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
-          "keys": "'"
+          "keys": "d"
         }
       }
     },
     {
       "name": "Lever3Trigger1",
-      "description": "Decrease brake",
+      "description": "Increase Throttle (Decrease Brake)",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
-          "keys": ";"
+          "keys": "a"
         }
       }
     },
