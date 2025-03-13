@@ -1,5 +1,5 @@
 {
-  "name": "class101bldg",
+  "name": "class101",
   "controls": [
     {
       "name": "Lever3",
@@ -21,10 +21,10 @@
             "max": 1.0
           },
           "action_increase": {
-            "keys": "a"
+            "keys": ";"
           },
           "action_decrease": {
-            "keys": "d"
+            "keys": "'"
           }
         }
       ]
@@ -125,7 +125,7 @@
       }
     },
     {
-      "name": "Dial1CCW",
+      "name": "Dial1CW",
       "description": "Reverser Increase",
       "assignment": {
         "type": "momentary",
@@ -138,7 +138,7 @@
       }
     },
     {
-      "name": "Dial1CW",
+      "name": "Dial1CCW",
       "description": "Reverser Decrease",
       "assignment": {
         "type": "momentary",
