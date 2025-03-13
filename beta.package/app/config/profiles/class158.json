@@ -1,16 +1,17 @@
 {
-  "name": "class101",
+  "name": "class158",
   "controls": [
     {
       "name": "Lever3",
-      "description": "Driver Brake",
+      "description": "Automatic Brake",
       "assignments": [
         {
           "type": "direct_control",
-          "controls": "DriversBrakeValve",
+          "controls": "AutoBrake",
           "input_value": {
             "min": 0.0,
-            "max": 1.0
+            "max": 0.75,
+            "step": 0.25
           }
         },
         {
@@ -18,7 +19,8 @@
           "identifier": "AutomaticBrake",
           "input_value": {
             "min": 0.0,
-            "max": 1.0
+            "max": 0.75,
+            "step": 0.25
           },
           "action_increase": {
             "keys": ";"
@@ -39,7 +41,7 @@
           "input_value": {
             "min": 0.0,
             "max": 1.0,
-            "step": 0.25
+            "step": 0.142
           }
         },
         {
@@ -48,43 +50,13 @@
           "input_value": {
             "min": 0.0,
             "max": 1.0,
-            "step": 0.25
+            "step": 0.142
           },
           "action_increase": {
             "keys": "a"
           },
           "action_decrease": {
             "keys": "d"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Lever1",
-      "description": "Gear Selector",
-      "assignments": [
-        {
-          "type": "direct_control",
-          "controls": "GearSelector",
-          "input_value": {
-            "min": 0.0,
-            "max": 1.0,
-            "step": 0.25
-          }
-        },
-        {
-          "type": "sync_control",
-          "identifier": "Gear",
-          "input_value": {
-            "min": 0.0,
-            "max": 1.0,
-            "step": 0.25
-          },
-          "action_increase": {
-            "keys": "ctrl+a"
-          },
-          "action_decrease": {
-            "keys": "ctrl+d"
           }
         }
       ]
@@ -199,23 +171,12 @@
 
     {
       "name": "Button3",
-      "description": "Wipers Increase",
+      "description": "Wipers Toggle",
       "assignment": {
         "type": "momentary",
         "threshold": 0.5,
         "action_activate": {
           "keys": "v"
-        }
-      }
-    },
-    {
-      "name": "Button5",
-      "description": "Wipers Decrease",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.5,
-        "action_activate": {
-          "keys": "shift+v"
         }
       }
     },
@@ -235,62 +196,13 @@
     {
       "name": "Button1",
       "description": "Headlights Toggle",
-      "assignments": [
-        {
-          "type": "toggle",
-          "threshold": 0.6,
-          "action_activate": {
-            "controls": "MarkerLight_R",
-            "value": 1.0
-          },
-          "action_deactivate": {
-            "controls": "MarkerLight_R",
-            "value": 0.5
-          }
-        },
-        {
-          "type": "toggle",
-          "threshold": 0.6,
-          "action_activate": {
-            "controls": "MarkerLight_L",
-            "value": 1.0
-          },
-          "action_deactivate": {
-            "controls": "MarkerLight_L",
-            "value": 0.5
-          }
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "h"
         }
-      ]
-    },
-    {
-      "name": "Button4",
-      "description": "Marker Lights Toggle",
-      "assignments": [
-        {
-          "type": "toggle",
-          "threshold": 0.6,
-          "action_activate": {
-            "controls": "MarkerLight_R",
-            "value": 0.0
-          },
-          "action_deactivate": {
-            "controls": "MarkerLight_R",
-            "value": 0.5
-          }
-        },
-        {
-          "type": "toggle",
-          "threshold": 0.6,
-          "action_activate": {
-            "controls": "MarkerLight_L",
-            "value": 0.0
-          },
-          "action_deactivate": {
-            "controls": "MarkerLight_L",
-            "value": 0.5
-          }
-        }
-      ]
+      }
     }
   ]
 }
