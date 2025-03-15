@@ -274,14 +274,18 @@ class TSWControllerMod : public RC::CppUserModBase
             Unreal::UFunction* end_using_func = controller->GetFunctionByNameInChain(STR("EndUsingVHIDComponent"));
             if (!end_using_func) return;
 
-            for (const auto entry : TSWControllerMod::VHID_COMPONENTS_TO_RELEASE)
+            for (auto it = TSWControllerMod::VHID_COMPONENTS_TO_RELEASE.begin(); it != TSWControllerMod::VHID_COMPONENTS_TO_RELEASE.end();)
             {
-                if (!TSWControllerMod::DIRECT_CONTROL_TARGET_STATE.contains(entry.first))
+                if (!TSWControllerMod::DIRECT_CONTROL_TARGET_STATE.contains(it->first))
                 {
-                    Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Releasing control: {}\n"), entry.first);
-                    PlayerController_EndUsingVHIDComponentParams params{entry.second};
+                    Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Releasing control: {}\n"), it->first);
+                    PlayerController_EndUsingVHIDComponentParams params{it->second};
                     controller->ProcessEvent(end_using_func, &params);
-                    TSWControllerMod::VHID_COMPONENTS_TO_RELEASE.erase(entry.first);
+                    it = TSWControllerMod::VHID_COMPONENTS_TO_RELEASE.erase(it);
+                }
+                else
+                {
+                    ++it;
                 }
             }
         }
