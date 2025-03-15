@@ -113,7 +113,7 @@ class TSWControllerMod : public RC::CppUserModBase
     static inline std::unordered_map<RC::StringType, std::tuple<float, std::vector<RC::StringType>>> DIRECT_CONTROL_TARGET_STATE;
 
     static inline std::shared_mutex VHID_COMPONENTS_TO_RELEASE_MUTEX;
-    static inline std::vector<Unreal::UObject*> VHID_COMPONENTS_TO_RELEASE;
+    static inline std::vector<std::tuple<RC::StringType, Unreal::UObject*>> VHID_COMPONENTS_TO_RELEASE;
 
     static bool is_within_margin_of_error(float current, float target)
     {
@@ -263,28 +263,27 @@ class TSWControllerMod : public RC::CppUserModBase
         std::shared_lock<std::shared_mutex> direct_control_queue_lock(TSWControllerMod::DIRECT_CONTROL_TARGET_STATE_MUTEX);
         std::shared_lock<std::shared_mutex> vhid_components_to_release_lock(TSWControllerMod::VHID_COMPONENTS_TO_RELEASE_MUTEX);
 
-        /* if no states to be met*/
-        if (TSWControllerMod::DIRECT_CONTROL_TARGET_STATE.empty())
+        /* release components if they don't have a target state */
+        if (!TSWControllerMod::VHID_COMPONENTS_TO_RELEASE.empty())
         {
-            /* check to stop using components */
-            if (!TSWControllerMod::VHID_COMPONENTS_TO_RELEASE.empty())
+            /* skip if no controller or pawn */
+            Unreal::UObject* controller = TSWControllerMod::get_player_controller_from(context);
+            Unreal::UObject* pawn = TSWControllerMod::get_driver_pawn_from_controller(controller);
+            if (!controller || !pawn) return;
+
+            Unreal::UFunction* end_using_func = controller->GetFunctionByNameInChain(STR("EndUsingVHIDComponent"));
+            if (!end_using_func) return;
+
+            for (auto [control_name, vhid_component] : TSWControllerMod::VHID_COMPONENTS_TO_RELEASE)
             {
-                /* skip if no controller or pawn */
-                Unreal::UObject* controller = TSWControllerMod::get_player_controller_from(context);
-                Unreal::UObject* pawn = TSWControllerMod::get_driver_pawn_from_controller(controller);
-                if (!controller || !pawn) return;
-
-                Unreal::UFunction* end_using_func = controller->GetFunctionByNameInChain(STR("EndUsingVHIDComponent"));
-                if (!end_using_func) return;
-
-                for (auto vhid_component : TSWControllerMod::VHID_COMPONENTS_TO_RELEASE)
+                if (!TSWControllerMod::DIRECT_CONTROL_TARGET_STATE.contains(control_name))
                 {
+                    Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Releasing control: {}\n"), control_name);
                     PlayerController_EndUsingVHIDComponentParams params{vhid_component};
                     controller->ProcessEvent(end_using_func, &params);
                 }
-                TSWControllerMod::VHID_COMPONENTS_TO_RELEASE.clear();
             }
-            return;
+            TSWControllerMod::VHID_COMPONENTS_TO_RELEASE.clear();
         }
 
         /* skip if no controller or pawn */
@@ -317,18 +316,16 @@ class TSWControllerMod : public RC::CppUserModBase
             Unreal::UFunction* set_pushed_state_func = find_virtualhid_component_params.VirtualHIDComponent->GetFunctionByNameInChain(STR("SetPushedState"));
             Unreal::UFunction* set_current_input_value_fn =
                     find_virtualhid_component_params.VirtualHIDComponent->GetFunctionByNameInChain(STR("SetCurrentInputValue"));
+
             auto [target_value, flags] = control_pair.second;
+            bool should_hold = std::find(flags.begin(), flags.end(), STR("hold")) != flags.end();
 
             /* begin changing if not already */
             if (begin_changing_func && !TSWControllerMod::is_vhid_component_changing(find_virtualhid_component_params.VirtualHIDComponent))
             {
                 PlayerController_BeginChangingVHIDComponentParams params{find_virtualhid_component_params.VirtualHIDComponent};
                 controller->ProcessEvent(begin_changing_func, &params);
-                /* only add to release list if hold flag is not added */
-                if (std::find(flags.begin(), flags.end(), STR("hold")) == flags.end())
-                {
-                  TSWControllerMod::VHID_COMPONENTS_TO_RELEASE.push_back(find_virtualhid_component_params.VirtualHIDComponent);
-                }
+                TSWControllerMod::VHID_COMPONENTS_TO_RELEASE.push_back(std::make_tuple(control_name, find_virtualhid_component_params.VirtualHIDComponent));
                 /* continue to next tick to start applying target value */
                 continue;
             }
@@ -339,7 +336,10 @@ class TSWControllerMod : public RC::CppUserModBase
                 VirtualHIDComponent_SetPushedStateParams set_pushed_state_params = {target_value > 0.5f, true};
                 find_virtualhid_component_params.VirtualHIDComponent->ProcessEvent(set_pushed_state_func, &set_pushed_state_params);
                 /* remove value from target states */
-                TSWControllerMod::DIRECT_CONTROL_TARGET_STATE.erase(control_pair.first);
+                if (!should_hold)
+                {
+                    TSWControllerMod::DIRECT_CONTROL_TARGET_STATE.erase(control_pair.first);
+                }
             }
             else if (set_current_input_value_fn)
             {
@@ -347,7 +347,7 @@ class TSWControllerMod : public RC::CppUserModBase
                 find_virtualhid_component_params.VirtualHIDComponent->ProcessEvent(set_current_input_value_fn, &set_current_input_value_params);
                 /* check if value was reached within margin of error*/
                 auto current_input_value = TSWControllerMod::get_current_vhid_component_input_value(find_virtualhid_component_params.VirtualHIDComponent);
-                if (!TSWControllerMod::is_within_margin_of_error(target_value, current_input_value))
+                if (!should_hold && !TSWControllerMod::is_within_margin_of_error(target_value, current_input_value))
                 {
                     /* remove value from target states */
                     TSWControllerMod::DIRECT_CONTROL_TARGET_STATE.erase(control_pair.first);

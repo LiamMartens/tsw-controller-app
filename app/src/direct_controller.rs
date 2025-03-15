@@ -23,12 +23,16 @@ pub struct DirectController {
 }
 
 impl fmt::Display for DirectControlCommand {
-  /**
-   * Formats the direct control command
-   * {control_name},{input_value},{flag|flag}
-   */
+    /**
+     * Formats the direct control command
+     * {control_name},{input_value},{flag|flag}
+     */
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let flags = vec![self.hold.unwrap_or(false).to_string()];
+        let hold_flag = match self.hold {
+            Some(true) => "hold".to_string(),
+            _ => "".to_string(),
+        };
+        let flags = vec![hold_flag].iter().filter(|x| !x.is_empty()).map(|x| x.to_string()).collect::<Vec<String>>();
         write!(f, "{},{},{}", self.controls, self.input_value, flags.join("|"))
     }
 }

@@ -200,6 +200,23 @@
           "keys": "h"
         }
       }
+    },
+    {
+      "name": "Button4",
+      "description": "HillStart",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "controls": "HillStart",
+          "value": 1.0,
+          "hold": true
+        },
+        "action_deactivate": {
+          "controls": "HillStart",
+          "value": 0.0
+        }
+      }
     }
   ]
 }
