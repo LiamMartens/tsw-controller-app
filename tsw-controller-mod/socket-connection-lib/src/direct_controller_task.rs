@@ -95,9 +95,9 @@ impl DirectControllerTask {
                 }
 
                 // forward all control values
-                for (control, message) in control_value_map.iter() {
+                for (_, message) in control_value_map.iter() {
                     callback_option.as_ref().unwrap()(
-                        CString::new(message).unwrap().as_ptr(),
+                        CString::new(message.clone()).unwrap().as_ptr(),
                     );
                 }
                 // drop locks before waiting
