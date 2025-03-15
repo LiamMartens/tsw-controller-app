@@ -276,7 +276,7 @@ class TSWControllerMod : public RC::CppUserModBase
 
             for (auto it = TSWControllerMod::VHID_COMPONENTS_TO_RELEASE.begin(); it != TSWControllerMod::VHID_COMPONENTS_TO_RELEASE.end();)
             {
-                if (!TSWControllerMod::DIRECT_CONTROL_TARGET_STATE.contains(it->first))
+                if (TSWControllerMod::DIRECT_CONTROL_TARGET_STATE.find(it->first) == TSWControllerMod::DIRECT_CONTROL_TARGET_STATE.end())
                 {
                     Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Releasing control: {}\n"), it->first);
                     PlayerController_EndUsingVHIDComponentParams params{it->second};
@@ -329,7 +329,7 @@ class TSWControllerMod : public RC::CppUserModBase
             {
                 PlayerController_BeginChangingVHIDComponentParams params{find_virtualhid_component_params.VirtualHIDComponent};
                 controller->ProcessEvent(begin_changing_func, &params);
-                TSWControllerMod::VHID_COMPONENTS_TO_RELEASE.insert({control_name, find_virtualhid_component_params.VirtualHIDComponent});
+                TSWControllerMod::VHID_COMPONENTS_TO_RELEASE[control_pair.first] = find_virtualhid_component_params.VirtualHIDComponent;
                 /* continue to next tick to start applying target value */
                 continue;
             }
