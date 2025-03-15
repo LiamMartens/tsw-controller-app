@@ -214,17 +214,6 @@
           "keys": "h"
         }
       }
-    },
-    {
-      "name": "Button4",
-      "description": "Tail Lights Toggle",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "ctrl+h"
-        }
-      }
     }
   ]
 }
