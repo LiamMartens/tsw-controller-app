@@ -113,7 +113,7 @@ class TSWControllerMod : public RC::CppUserModBase
     static inline std::unordered_map<RC::StringType, std::tuple<float, std::vector<RC::StringType>>> DIRECT_CONTROL_TARGET_STATE;
 
     static inline std::shared_mutex VHID_COMPONENTS_TO_RELEASE_MUTEX;
-    static inline std::vector<std::tuple<RC::StringType, Unreal::UObject*>> VHID_COMPONENTS_TO_RELEASE;
+    static inline std::unordered_map<RC::StringType, Unreal::UObject*> VHID_COMPONENTS_TO_RELEASE;
 
     static bool is_within_margin_of_error(float current, float target)
     {
@@ -274,16 +274,16 @@ class TSWControllerMod : public RC::CppUserModBase
             Unreal::UFunction* end_using_func = controller->GetFunctionByNameInChain(STR("EndUsingVHIDComponent"));
             if (!end_using_func) return;
 
-            for (auto [control_name, vhid_component] : TSWControllerMod::VHID_COMPONENTS_TO_RELEASE)
+            for (const auto entry : TSWControllerMod::VHID_COMPONENTS_TO_RELEASE)
             {
-                if (!TSWControllerMod::DIRECT_CONTROL_TARGET_STATE.contains(control_name))
+                if (!TSWControllerMod::DIRECT_CONTROL_TARGET_STATE.contains(entry.first))
                 {
-                    Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Releasing control: {}\n"), control_name);
-                    PlayerController_EndUsingVHIDComponentParams params{vhid_component};
+                    Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Releasing control: {}\n"), entry.first);
+                    PlayerController_EndUsingVHIDComponentParams params{entry.second};
                     controller->ProcessEvent(end_using_func, &params);
+                    TSWControllerMod::VHID_COMPONENTS_TO_RELEASE.erase(entry.first);
                 }
             }
-            TSWControllerMod::VHID_COMPONENTS_TO_RELEASE.clear();
         }
 
         /* skip if no controller or pawn */
@@ -325,7 +325,7 @@ class TSWControllerMod : public RC::CppUserModBase
             {
                 PlayerController_BeginChangingVHIDComponentParams params{find_virtualhid_component_params.VirtualHIDComponent};
                 controller->ProcessEvent(begin_changing_func, &params);
-                TSWControllerMod::VHID_COMPONENTS_TO_RELEASE.push_back(std::make_tuple(control_name, find_virtualhid_component_params.VirtualHIDComponent));
+                TSWControllerMod::VHID_COMPONENTS_TO_RELEASE.insert({control_name, find_virtualhid_component_params.VirtualHIDComponent});
                 /* continue to next tick to start applying target value */
                 continue;
             }
@@ -368,7 +368,7 @@ class TSWControllerMod : public RC::CppUserModBase
 
         Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Processing Direct Control message: {}\n"), message);
         std::vector<RC::StringType> flags = TSWControllerMod::wstring_split(parts[3], STR("|"));
-        // TSWControllerMod::DIRECT_CONTROL_TARGET_STATE[parts[1]] = std::make_tuple(std::stof(parts[2]), flags);
+        TSWControllerMod::DIRECT_CONTROL_TARGET_STATE[parts[1]] = std::make_tuple(std::stof(parts[2]), flags);
     }
 
     static void on_ts2_virtualhidcomponent_inputvaluechanged(Unreal::UnrealScriptFunctionCallableContext context, void* custom_data)
