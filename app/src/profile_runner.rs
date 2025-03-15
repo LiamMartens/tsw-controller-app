@@ -44,7 +44,7 @@ impl ProfileRunnerAssignmentCallAction {
                 format!("{}", action.keys)
             }
             ProfileRunnerAssignmentCallAction::DirectControlAction(action) => {
-                format!("{}:{}", action.controls, action.input_value)
+                format!("{}", action)
             }
         }
     }
@@ -192,6 +192,7 @@ impl ProfileRunner {
                                                 Some(ProfileRunnerAssignmentCallAction::DirectControlAction(super::direct_controller::DirectControlCommand {
                                                     controls: action.controls.clone(),
                                                     input_value: action.value,
+                                                    hold: action.hold,
                                                 }))
                                             }
                                         },
@@ -219,6 +220,7 @@ impl ProfileRunner {
                                                 Some(ProfileRunnerAssignmentCallAction::DirectControlAction(super::direct_controller::DirectControlCommand {
                                                     controls: action.controls.clone(),
                                                     input_value: action.value,
+                                                    hold: action.hold,
                                                 }))
                                             }
                                         },
@@ -286,6 +288,7 @@ impl ProfileRunner {
                                                 Some(ProfileRunnerAssignmentCallAction::DirectControlAction(super::direct_controller::DirectControlCommand {
                                                     controls: action.controls.clone(),
                                                     input_value: action.value,
+                                                    hold: action.hold,
                                                 }))
                                             }
                                         },
@@ -316,6 +319,7 @@ impl ProfileRunner {
                                                     Some(ProfileRunnerAssignmentCallAction::DirectControlAction(super::direct_controller::DirectControlCommand {
                                                         controls: action.controls.clone(),
                                                         input_value: action.value,
+                                                        hold: action.hold,
                                                     }))
                                                 }
                                             },
@@ -367,6 +371,7 @@ impl ProfileRunner {
                                             Some(ProfileRunnerAssignmentCallAction::DirectControlAction(super::direct_controller::DirectControlCommand {
                                                 controls: action.controls.clone(),
                                                 input_value: action.value,
+                                                hold: action.hold,
                                             }))
                                         }
                                     },
@@ -405,6 +410,7 @@ impl ProfileRunner {
                                 Some(ProfileRunnerAssignmentCallAction::DirectControlAction(DirectControlCommand {
                                     controls: assignment.controls.clone(),
                                     input_value,
+                                    hold: assignment.hold,
                                 })),
                             )
                             .await;

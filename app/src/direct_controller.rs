@@ -1,3 +1,4 @@
+use core::fmt;
 use std::sync::Arc;
 
 use futures_util::{SinkExt, StreamExt};
@@ -14,10 +15,22 @@ use tungstenite::protocol::Message;
 pub struct DirectControlCommand {
     pub controls: String,
     pub input_value: f32,
+    pub hold: Option<bool>,
 }
 
 pub struct DirectController {
     server: Arc<TcpListener>,
+}
+
+impl fmt::Display for DirectControlCommand {
+  /**
+   * Formats the direct control command
+   * {control_name},{input_value},{flag|flag}
+   */
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let flags = vec![self.hold.unwrap_or(false).to_string()];
+        write!(f, "{},{},{}", self.controls, self.input_value, flags.join("|"))
+    }
 }
 
 impl DirectController {
@@ -29,18 +42,13 @@ impl DirectController {
         }
     }
 
-    pub fn start(
-        &self,
-        cancel_token: CancellationToken,
-        direct_control_command_tx: Arc<Mutex<Sender<DirectControlCommand>>>,
-    ) -> JoinHandle<()> {
+    pub fn start(&self, cancel_token: CancellationToken, direct_control_command_tx: Arc<Mutex<Sender<DirectControlCommand>>>) -> JoinHandle<()> {
         let server = Arc::clone(&self.server);
 
         let accept_incoming_clients_server = Arc::clone(&server);
         let accept_incoming_clients_cancel_token = cancel_token.clone();
         tokio::task::spawn(async move {
-            let cancel_token_clone: CancellationToken =
-                accept_incoming_clients_cancel_token.clone();
+            let cancel_token_clone: CancellationToken = accept_incoming_clients_cancel_token.clone();
             loop {
                 tokio::select! {
                     _ = cancel_token_clone.cancelled() => {
@@ -81,7 +89,7 @@ impl DirectController {
                             }
                           },
                           Ok(message) = client_direct_control_command_receiver.recv() => {
-                            let command_to_send = format!("direct_control,{},{}", message.controls, message.input_value);
+                            let command_to_send = format!("direct_control,{}", message);
                             println!("[DC] Sending command: {:?}", command_to_send);
                             match write.send(Message::text(command_to_send.clone())).await {
                               Ok(_) => {

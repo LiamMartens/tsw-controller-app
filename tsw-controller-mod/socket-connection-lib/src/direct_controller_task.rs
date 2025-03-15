@@ -89,16 +89,15 @@ impl DirectControllerTask {
                 while message_queue.len() > 0 {
                     let message = message_queue.pop_front().unwrap();
                     let parts: Vec<&str> = message.split(",").collect();
-                    if parts.len() == 3 && parts[0] == "direct_control" {
-                        control_value_map.insert(parts[1].to_string(), parts[2].to_string());
+                    if parts.len() >= 3 && parts[0] == "direct_control" {
+                        control_value_map.insert(parts[1].to_string(), message);
                     }
                 }
+
                 // forward all control values
-                for (control, value) in control_value_map.iter() {
+                for (control, message) in control_value_map.iter() {
                     callback_option.as_ref().unwrap()(
-                        CString::new(format!("direct_control,{},{}", control, value))
-                            .unwrap()
-                            .as_ptr(),
+                        CString::new(message).unwrap().as_ptr(),
                     );
                 }
                 // drop locks before waiting

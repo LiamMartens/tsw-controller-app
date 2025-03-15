@@ -1,3 +1,5 @@
+use core::fmt;
+
 use serde::{Deserialize, Serialize};
 
 use super::serde_sdl_guid::SDLGuid;
@@ -46,7 +48,8 @@ pub struct ControllerProfileDirectControAssignmentSyncMode {
 /* defines a direct UE4ss control -> through websockets */
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ControllerProfileDirectControlAssignment {
-    pub controls: String, /* the HID control component as per the UE4SS API */
+    pub controls: String,   /* the HID control component as per the UE4SS API */
+    pub hold: Option<bool>, /* will hold the control in changing */
     pub input_value: ControllerProfileDirectControlAssignmentInputValue,
 }
 
@@ -54,6 +57,8 @@ pub struct ControllerProfileDirectControlAssignment {
 pub struct ControllerProfileControlAssignmentDirectControlAction {
     pub controls: String,
     pub value: f32,
+    /* determine whether to hold the value or not */
+    pub hold: Option<bool>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -105,12 +110,23 @@ pub struct ControllerProfile {
     pub controller_id: Option<SDLGuid>,
 }
 
+impl fmt::Display for ControllerProfileControlAssignmentDirectControlAction {
+    /**
+     * Formats the direct control command
+     * {control_name},{input_value},{flag|flag}
+     */
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let flags = vec![self.hold.unwrap_or(false).to_string()];
+        write!(f, "{},{},{}", self.controls, self.value, flags.join("|"))
+    }
+}
+
 impl ControllerProfileControlAssignmentAction {
     pub fn get_compare_value(&self) -> String {
         match self {
             ControllerProfileControlAssignmentAction::Keys(action) => format!("{}", action.keys),
             ControllerProfileControlAssignmentAction::DirectControl(action) => {
-                format!("{}:{}", action.controls, action.value)
+                format!("{}", action)
             }
         }
     }
