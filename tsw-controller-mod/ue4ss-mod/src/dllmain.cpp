@@ -347,7 +347,7 @@ class TSWControllerMod : public RC::CppUserModBase
                 find_virtualhid_component_params.VirtualHIDComponent->ProcessEvent(set_current_input_value_fn, &set_current_input_value_params);
                 /* check if value was reached within margin of error*/
                 auto current_input_value = TSWControllerMod::get_current_vhid_component_input_value(find_virtualhid_component_params.VirtualHIDComponent);
-                if (!should_hold && !TSWControllerMod::is_within_margin_of_error(target_value, current_input_value))
+                if (!should_hold && TSWControllerMod::is_within_margin_of_error(target_value, current_input_value))
                 {
                     /* remove value from target states */
                     TSWControllerMod::DIRECT_CONTROL_TARGET_STATE.erase(control_pair.first);
