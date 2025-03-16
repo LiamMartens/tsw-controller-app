@@ -1,26 +1,32 @@
 {
-  "name": "class801",
+  "name": "m7",
   "controls": [
     {
-      "name": "Lever3",
-      "description": "Combined Power and brake",
+      "name": "Lever2",
+      "description": "MasterController",
       "assignments": [
         {
           "type": "direct_control",
-          "controls": "PowerHandle(IrregularLever)",
+          "controls": "MasterController",
           "input_value": {
-            "min": -0.9,
-            "max": 1.0,
-            "invert": true
+            "min": 0.1,
+            "max": 1.0
+          }
+        },
+        {
+          "type": "direct_control",
+          "controls": "MasterController",
+          "input_value": {
+            "min": 0.1,
+            "max": 1.0
           }
         },
         {
           "type": "sync_control",
           "identifier": "Throttle",
           "input_value": {
-            "min": -0.9,
-            "max": 1.0,
-            "invert": true
+            "min": 0.0,
+            "max": 1.0
           },
           "action_increase": {
             "keys": "a"
@@ -51,7 +57,7 @@
 
     {
       "name": "Lever3Button1",
-      "description": "Decrease throttle",
+      "description": "Increase Brake",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
@@ -62,7 +68,7 @@
     },
     {
       "name": "Lever3Trigger1",
-      "description": "Increase throttle",
+      "description": "Decrease Brake",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
@@ -79,7 +85,7 @@
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
-          "keys": "Q"
+          "keys": "Q+PageDown"
         }
       }
     },
@@ -90,7 +96,7 @@
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
-          "keys": "s",
+          "keys": "w",
           "press_time": 0.3,
           "wait_time": 0.2
         }
@@ -103,7 +109,7 @@
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
-          "keys": "w",
+          "keys": "s",
           "press_time": 0.3,
           "wait_time": 0.2
         }
@@ -123,12 +129,18 @@
     },
     {
       "name": "Lever2Button1",
-      "description": "Sand",
+      "description": "Charge Brakes",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
-          "keys": "x"
+          "controls": "BrakeCharging",
+          "value": 1.0,
+          "hold": true
+        },
+        "action_deactivate": {
+          "controls": "BrakeCharging",
+          "value": 0.0
         }
       }
     },
@@ -161,7 +173,7 @@
       "description": "Wipers Increase",
       "assignment": {
         "type": "momentary",
-        "threshold": 0.5,
+        "threshold": 0.9,
         "action_activate": {
           "keys": "v"
         }
@@ -172,32 +184,34 @@
       "description": "Wipers Decrease",
       "assignment": {
         "type": "momentary",
-        "threshold": 0.5,
+        "threshold": 0.9,
         "action_activate": {
           "keys": "shift+v"
         }
       }
     },
-
-    {
-      "name": "Button2",
-      "description": "Cab Light",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "l"
-        }
-      }
-    },
     {
       "name": "Button1",
-      "description": "Headlights Toggle",
+      "description": "Headlights Dial Right",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
           "keys": "h"
+        }
+      }
+    },
+    {
+      "name": "Button2",
+      "description": "Cab Light",
+      "assignment": {
+        "type": "toggle",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "l"
+        },
+        "action_deactivate": {
+          "keys": "shift+l"
         }
       }
     }
