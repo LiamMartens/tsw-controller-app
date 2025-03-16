@@ -252,6 +252,17 @@
         }
       }
     },
+    {
+      "name": "Lever3Trigger1",
+      "description": "Release Brake",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": ";"
+        }
+      }
+    },
 
     {
       "name": "Button3",
