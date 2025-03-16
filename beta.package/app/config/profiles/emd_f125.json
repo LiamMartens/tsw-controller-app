@@ -1,5 +1,5 @@
 {
-  "name": "br363",
+  "name": "emd_f125",
   "controls": [
     {
       "name": "Lever2",
@@ -7,20 +7,20 @@
       "assignments": [
         {
           "type": "direct_control",
-          "controls": "Throttle_R",
+          "controls": "MasterController",
           "input_value": {
-            "min": 0.0,
-            "max": 0.67,
-            "steps": [0.0, 0.33, 0.67]
+            "min": 0.5,
+            "max": 1.0,
+            "steps": [0.5, 0.55, 0.615, 0.678, 0.742, 0.807, 0.871, 0.936, 1.0]
           }
         },
         {
           "type": "sync_control",
           "identifier": "Throttle",
           "input_value": {
-            "min": 0.0,
-            "max": 0.67,
-            "steps": [0.0, 0.33, 0.67]
+            "min": 0.5,
+            "max": 1.0,
+            "steps": [0.5, 0.55, 0.615, 0.678, 0.742, 0.807, 0.871, 0.936, 1.0]
           },
           "action_increase": {
             "keys": "a"
@@ -31,26 +31,25 @@
         }
       ]
     },
+
     {
       "name": "Lever3",
-      "description": "Drivers Brake",
+      "description": "Automatic Brake",
       "assignments": [
         {
           "type": "direct_control",
-          "controls": "DriversBrakeValve_R",
+          "controls": "AutomaticBrakeLever",
           "input_value": {
-            "min": 0.25,
-            "max": 0.73,
-            "steps": [0.25, 0.4, 0.57, 0.73]
+            "min": 0.0,
+            "max": 0.4
           }
         },
         {
           "type": "sync_control",
           "identifier": "AutomaticBrake",
           "input_value": {
-            "min": 0.25,
-            "max": 0.73,
-            "steps": [0.25, 0.4, 0.57, 0.73]
+            "min": 0.0,
+            "max": 0.4
           },
           "action_increase": {
             "keys": "'"
@@ -64,15 +63,28 @@
 
     {
       "name": "Lever1",
-      "description": "GearSelector",
+      "description": "Independent Brake",
       "assignments": [
         {
           "type": "direct_control",
-          "controls": "GearSelector",
+          "controls": "IndependentBrakeLever",
           "input_value": {
-            "min": 0.0,
-            "max": 1.0,
-            "step": 1.0
+            "min": 0.1,
+            "max": 1.0
+          }
+        },
+        {
+          "type": "sync_control",
+          "identifier": "IndependentBrake",
+          "input_value": {
+            "min": 0.1,
+            "max": 1.0
+          },
+          "action_increase": {
+            "keys": "]"
+          },
+          "action_decrease": {
+            "keys": "["
           }
         }
       ]
@@ -80,7 +92,7 @@
 
     {
       "name": "Lever3Button1",
-      "description": "Increase brake",
+      "description": "Increase Brake",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
@@ -91,7 +103,7 @@
     },
     {
       "name": "Lever3Trigger1",
-      "description": "Decrease brake",
+      "description": "Decrease Brake",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
@@ -120,7 +132,7 @@
         "threshold": 0.9,
         "action_activate": {
           "keys": "w",
-          "press_time": 0.2,
+          "press_time": 0.3,
           "wait_time": 0.2
         }
       }
@@ -133,7 +145,7 @@
         "threshold": 0.9,
         "action_activate": {
           "keys": "s",
-          "press_time": 0.2,
+          "press_time": 0.3,
           "wait_time": 0.2
         }
       }
@@ -141,23 +153,23 @@
 
     {
       "name": "Lever2Trigger1",
-      "description": "Increase throttle",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "a"
-        }
-      }
-    },
-    {
-      "name": "Lever2Button1",
       "description": "Horn",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
           "keys": "space"
+        }
+      }
+    },
+    {
+      "name": "Lever2Button1",
+      "description": "Sand",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "x"
         }
       }
     },
@@ -186,22 +198,8 @@
     },
 
     {
-      "name": "Button5",
-      "description": "Cab Lights Toggle",
-      "assignment": {
-        "type": "toggle",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "l"
-        },
-        "action_deactivate": {
-          "keys": "shift+l"
-        }
-      }
-    },
-    {
       "name": "Button3",
-      "description": "Wipers Toggle",
+      "description": "Wipers Increase/Decrease",
       "assignment": {
         "type": "toggle",
         "threshold": 0.9,
@@ -214,24 +212,24 @@
       }
     },
     {
-      "name": "Button4",
-      "description": "Headlights Decrease",
+      "name": "Button5",
+      "description": "Cab Light",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
-          "keys": "shift+h"
+          "keys": "l"
         }
       }
     },
     {
       "name": "Button2",
-      "description": "PZB Release",
+      "description": "Bell",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
-          "keys": "end"
+          "keys": "b"
         }
       }
     },
@@ -243,6 +241,17 @@
         "threshold": 0.9,
         "action_activate": {
           "keys": "h"
+        }
+      }
+    },
+    {
+      "name": "Button4",
+      "description": "Headlights Decrease",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "shift+h"
         }
       }
     }
