@@ -1,15 +1,15 @@
 {
-  "name": "acs64",
+  "name": "tgv_duplex",
   "controls": [
     {
       "name": "Lever2",
-      "description": "Throttle",
+      "description": "Power Handle",
       "assignments": [
         {
           "type": "direct_control",
-          "controls": "MasterController_{SIDE} (IrregularLever)",
+          "controls": "PowerHandle",
           "input_value": {
-            "min": 0.0,
+            "min": -1.0,
             "max": 1.0
           }
         },
@@ -17,7 +17,7 @@
           "type": "sync_control",
           "identifier": "Throttle",
           "input_value": {
-            "min": 0.0,
+            "min": -1.0,
             "max": 1.0
           },
           "action_increase": {
@@ -29,31 +29,64 @@
         }
       ]
     },
-
     {
       "name": "Lever3",
-      "description": "Automatic Brake",
+      "description": "Train Brake",
+      "assignment": {
+        "type": "linear",
+        "thresholds": [
+          {
+            "value": 0.4,
+            "action_activate": {
+              "controls": "TrainBrake",
+              "value": 1.0,
+              "hold": true
+            },
+            "action_deactivate": {
+              "controls": "TrainBrake",
+              "value": 0.0
+            }
+          },
+          {
+            "value": 0.8,
+            "action_activate": {
+              "controls": "TrainBrake",
+              "value": 2.0,
+              "hold": true
+            },
+            "action_deactivate": {
+              "controls": "TrainBrake",
+              "value": 1.0,
+              "hold": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Lever1",
+      "description": "Cruise Control",
       "assignments": [
         {
           "type": "direct_control",
-          "controls": "AutomaticBrake_{SIDE} (IrregularLever)",
+          "controls": "SpeedSelector",
           "input_value": {
             "min": 0.0,
-            "max": 0.45
+            "max": 1.0
           }
         },
         {
           "type": "sync_control",
-          "identifier": "AutomaticBrake",
+          "identifier": "CruiseControlAdjust",
           "input_value": {
             "min": 0.0,
-            "max": 0.45
+            "max": 1.0
           },
           "action_increase": {
-            "keys": "'"
+            "keys": "r"
           },
           "action_decrease": {
-            "keys": ";"
+            "keys": "f"
           }
         }
       ]
@@ -61,53 +94,24 @@
 
     {
       "name": "Lever1",
-      "description": "Independent Brake",
-      "assignments": [
-        {
-          "type": "direct_control",
-          "controls": "IndependentBrake_{SIDE} (IrregularLever)",
-          "input_value": {
-            "min": 0.1,
-            "max": 1.0
-          }
-        },
-        {
-          "type": "sync_control",
-          "identifier": "IndependentBrake",
-          "input_value": {
-            "min": 0.1,
-            "max": 1.0
-          },
-          "action_increase": {
-            "keys": "]"
-          },
-          "action_decrease": {
-            "keys": "["
-          }
-        }
-      ]
-    },
-
-    {
-      "name": "Lever3Button1",
-      "description": "Increase Brake",
+      "description": "Parking Brake",
       "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "'"
-        }
-      }
-    },
-    {
-      "name": "Lever3Trigger1",
-      "description": "Decrease Brake",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": ";"
-        }
+        "type": "linear",
+        "thresholds": [
+          {
+            "value": 0.5,
+            "action_activate": {
+              "keys": "\\",
+              "press_time": 0.2,
+              "wait_time": 0.2
+            },
+            "action_deactivate": {
+              "keys": "shift+\\",
+              "press_time": 0.2,
+              "wait_time": 0.2
+            }
+          }
+        ]
       }
     },
 
@@ -130,7 +134,7 @@
         "threshold": 0.9,
         "action_activate": {
           "keys": "w",
-          "press_time": 0.3,
+          "press_time": 0.2,
           "wait_time": 0.2
         }
       }
@@ -143,7 +147,7 @@
         "threshold": 0.9,
         "action_activate": {
           "keys": "s",
-          "press_time": 0.3,
+          "press_time": 0.2,
           "wait_time": 0.2
         }
       }
@@ -173,7 +177,7 @@
     },
 
     {
-      "name": "Dial2State1",
+      "name": "Button4",
       "description": "Open Close Left Doors",
       "assignment": {
         "type": "momentary",
@@ -184,7 +188,7 @@
       }
     },
     {
-      "name": "Dial2State3",
+      "name": "Button5",
       "description": "Open Close Right Doors",
       "assignment": {
         "type": "momentary",
@@ -196,28 +200,73 @@
     },
 
     {
-      "name": "Button3",
-      "description": "Wipers Increase",
+      "name": "Dial2State1",
+      "description": "Pantograph Mode AC",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
-          "keys": "v"
+          "controls": "PantographMode",
+          "value": 0.0
         }
       }
     },
     {
-      "name": "Button5",
-      "description": "Wipers Decrease",
+      "name": "Dial2State2",
+      "description": "Pantograph Mode DC",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
-          "keys": "shift+v"
+          "controls": "PantographMode",
+          "value": 0.5
+        }
+      }
+    },
+    {
+      "name": "Dial2State3",
+      "description": "Pantograph Mode LGV",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "controls": "PantographMode",
+          "value": 1.0
         }
       }
     },
 
+    {
+      "name": "Lever3Button1",
+      "description": "Panto Selector Lower/Normal",
+      "assignment": {
+        "type": "toggle",
+        "threshold": 0.9,
+        "action_activate": {
+          "controls": "PantographSelector",
+          "value": 0.3
+        },
+        "action_deactivate": {
+          "controls": "PantographSelector",
+          "value": 0.0
+        }
+      }
+    },
+
+    {
+      "name": "Button3",
+      "description": "Wiper Toggle",
+      "assignment": {
+        "type": "toggle",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "v"
+        },
+        "action_deactivate": {
+          "keys": "shift+v"
+        }
+      }
+    },
     {
       "name": "Button2",
       "description": "Cab Light",
@@ -230,24 +279,24 @@
       }
     },
     {
+      "name": "Button2",
+      "description": "PZB Release",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "end"
+        }
+      }
+    },
+    {
       "name": "Button1",
-      "description": "Headlights Increase",
+      "description": "Headlights Toggle",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
           "keys": "h"
-        }
-      }
-    },
-    {
-      "name": "Button4",
-      "description": "Headlights Decrease",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "shift+h"
         }
       }
     }

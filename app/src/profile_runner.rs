@@ -106,26 +106,31 @@ impl ProfileRunner {
         assignment: &ControllerProfileControlAssignment,
         action: Option<ProfileRunnerAssignmentCallAction>,
     ) {
-        if action.is_none() {
-            return;
-        }
-
         let entry = self.control_calls.entry(String::from(control_name.as_ref())).or_insert_with(|| Vec::new());
         while entry.len() <= assignment_index {
             entry.push(None);
         }
+
+        if action.is_none() && entry[assignment_index].is_none() {
+            return;
+        }
+
         entry[assignment_index] = Some(ProfileRunnerAssignmentCall {
             control_name: String::from(control_name.as_ref()),
             control_state: control_state.clone(),
             assignment: assignment.clone(),
-            action: action.as_ref().unwrap().clone(),
+            action: match action.as_ref() {
+                Some(action) => action.clone(),
+                /* should always be available - None action should only be set as none for deactivation calls */
+                None => entry[assignment_index].as_ref().unwrap().action.clone(),
+            },
         });
 
-        match action.as_ref().unwrap() {
-            ProfileRunnerAssignmentCallAction::SequencerAction(action) => {
+        match action.as_ref() {
+            Some(ProfileRunnerAssignmentCallAction::SequencerAction(action)) => {
                 self.sequencer.add_action(action.clone()).await;
             }
-            ProfileRunnerAssignmentCallAction::DirectControlAction(action) => {
+            Some(ProfileRunnerAssignmentCallAction::DirectControlAction(action)) => {
                 let direct_control_sender = self.direct_control_sender.lock().await;
                 match direct_control_sender.send(action.clone()) {
                     Ok(_) => {}
@@ -134,6 +139,7 @@ impl ProfileRunner {
                     }
                 }
             }
+            _ => {}
         }
     }
 
