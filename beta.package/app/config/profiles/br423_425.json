@@ -1,15 +1,15 @@
 {
-  "name": "br_411_403_406",
+  "name": "br423_425",
   "controls": [
     {
-      "name": "Lever2",
-      "description": "Throttle",
+      "name": "Lever3",
+      "description": "Combined Power and brake",
       "assignments": [
         {
           "type": "direct_control",
-          "controls": "Throttle",
+          "controls": "MasterController",
           "input_value": {
-            "min": 0.0,
+            "min": 0.1,
             "max": 1.0
           }
         },
@@ -17,7 +17,7 @@
           "type": "sync_control",
           "identifier": "Throttle",
           "input_value": {
-            "min": 0.0,
+            "min": 0.1,
             "max": 1.0
           },
           "action_increase": {
@@ -25,34 +25,6 @@
           },
           "action_decrease": {
             "keys": "d"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Lever3",
-      "description": "Brake Handle",
-      "assignments": [
-        {
-          "type": "direct_control",
-          "controls": "TrainBrake",
-          "input_value": {
-            "min": 0.0,
-            "max": 0.81
-          }
-        },
-        {
-          "type": "sync_control",
-          "identifier": "AutomaticBrake",
-          "input_value": {
-            "min": 0.1,
-            "max": 0.81
-          },
-          "action_increase": {
-            "keys": "'"
-          },
-          "action_decrease": {
-            "keys": ";"
           }
         }
       ]
@@ -60,52 +32,46 @@
 
     {
       "name": "Lever1",
-      "description": "AFB",
-      "assignments": [
-        {
-          "type": "direct_control",
-          "controls": "AFB_Controller",
-          "input_value": {
-            "min": 0.0,
-            "max": 1.0
+      "description": "Parking Brake",
+      "assignment": {
+        "type": "linear",
+        "thresholds": [
+          {
+            "value": 0.5,
+            "action_activate": {
+              "keys": "\\",
+              "press_time": 0.2,
+              "wait_time": 0.2
+            },
+            "action_deactivate": {
+              "keys": "shift+\\",
+              "press_time": 0.2,
+              "wait_time": 0.2
+            }
           }
-        },
-        {
-          "type": "sync_control",
-          "identifier": "CruiseControlAdjust",
-          "input_value": {
-            "min": 0.0,
-            "max": 1.0
-          },
-          "action_increase": {
-            "keys": "a"
-          },
-          "action_decrease": {
-            "keys": "d"
-          }
-        }
-      ]
+        ]
+      }
     },
 
     {
       "name": "Lever3Button1",
-      "description": "Increase brake",
+      "description": "Decrease throttle",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
-          "keys": "'"
+          "keys": "d"
         }
       }
     },
     {
       "name": "Lever3Trigger1",
-      "description": "Decrease brake",
+      "description": "Increase throttle",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
-          "keys": ";"
+          "keys": "a"
         }
       }
     },
@@ -163,9 +129,12 @@
       "name": "Lever2Button1",
       "description": "Sand",
       "assignment": {
-        "type": "momentary",
+        "type": "toggle",
         "threshold": 0.9,
         "action_activate": {
+          "keys": "x"
+        },
+        "action_deactivate": {
           "keys": "shift+x"
         }
       }
@@ -196,36 +165,27 @@
 
     {
       "name": "Button3",
-      "description": "Wipers Increase",
+      "description": "Wiper",
       "assignment": {
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
           "keys": "v",
-          "press_time": 0.2
+          "press_time": 0.1
         }
       }
     },
     {
       "name": "Button5",
-      "description": "Wipers Decrease",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "shift+v",
-          "press_time": 0.2
-        }
-      }
-    },
-    {
-      "name": "Button4",
       "description": "Cab Light",
       "assignment": {
-        "type": "momentary",
+        "type": "toggle",
         "threshold": 0.9,
         "action_activate": {
           "keys": "l"
+        },
+        "action_deactivate": {
+          "keys": "shift+l"
         }
       }
     },
@@ -242,14 +202,22 @@
     },
     {
       "name": "Button1",
-      "description": "Headlights",
+      "description": "Headlights Increase",
       "assignment": {
-        "type": "toggle",
+        "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
           "keys": "h"
-        },
-        "action_deactivate": {
+        }
+      }
+    },
+    {
+      "name": "Button4",
+      "description": "Headlights Decrease",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
           "keys": "shift+h"
         }
       }
