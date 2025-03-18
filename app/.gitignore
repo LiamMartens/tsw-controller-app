@@ -1,1 +1,2 @@
-/target
+**/target/**
+**/vcpkg_installed/**
