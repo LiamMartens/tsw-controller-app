@@ -52,25 +52,12 @@ It is possible to customize or set-up your own train profiles. To start you can 
 The most advanced configurations are the `direct_control` and `sync_control` assignment options. These are the options that allow you to have more direct control over the inputs the game. In order to configure these you will need to know the internal names of the train components and their min,max values to set it up as desired. You can follow the rough steps below to do so:
 
 1. Enable the UE4SS debugging consoles by setting the `ConsoleEnabled`, `GuiConsoleEnabled`, `GuiConsoleVisible` to 1 in the `UE4SS-settings.ini` file.
-2. In the `TSWControllerMod` add the following lines to `main.lua`
 
-```
-RegisterHook("/Script/TS2Prototype.VirtualHIDComponent:InputValueChanged", function(self, oldValue, newValue)
-  local vhid_component = self:get()
-  local changing_controller = vhid_component:GetCurrentlyChangingController()
-  local vhid_component_identifier = vhid_component.InputIdentifier.Identifier:ToString()
-  -- ignore any None components or controls that aren't being controlled by the current player
-  if vhid_component_identifier ~= "None" and changing_controller:GetAddress() == UEHelpers.GetPlayerController():GetAddress() then
-    print("InputValueChanged:" .. vhid_component_identifier .. ":" .. newValue.ToFloat .. "\n")
-  end
-end)
-```
+2. Now startup the game and go to the training center and spawn the loco you want to configure.
 
-3. Now startup the game and go to the training center and spawn the loco you want to configure.
+3. Switch to the UE4SS debugging tools and go to the "Dumpers" menu. Click "Generate LUA Types".
 
-4. Switch to the UE4SS debugging tools and go to the "Dumpers" menu. Click "Generate LUA Types".
-
-5. Now you will have to open up a code editor inside the `ue4ss` directory and you are going to need to look for the loco class which inherits the `ARailVehicle` class in Lua. You will be looking for something like this: `---@class ARVM_BPE_AMTK_Acela_PowerCarBase_C : ARailVehicle` (this is from the Acela pak).  
+4. Now you will have to open up a code editor inside the `ue4ss` directory and you are going to need to look for the loco class which inherits the `ARailVehicle` class in Lua. You will be looking for something like this: `---@class ARVM_BPE_AMTK_Acela_PowerCarBase_C : ARailVehicle` (this is from the Acela pak).  
 ![Code Example](https://i.ibb.co/zVzXMNkc/Screenshot-from-2025-02-09-22-23-30.png)  
 
 6. In this class you will find a bunch of properties (called `@field`) - each corresponding to in game controls. Here you should look for the control you need; usually this is of the type `UIrregularLeverComponent`, for the Acela it's called `---@field ThrottleLever UIrregularLeverComponent`. That will be the name of the control you need to add to your `direct_control` assignment.
