@@ -133,7 +133,7 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
                       stdout.write_all(format!("[{}] Button {} triggered\n",  raw_event.joystick_guid, button_idx).as_bytes()).await.unwrap();
                       stdout.flush().await.unwrap();
 
-                      if !controller_sdl_map.data.iter().any(|c| c.kind == SDLControlKind::Axis && c.index == button_idx) {
+                      if !controller_sdl_map.data.iter().any(|c| c.kind == SDLControlKind::Button && c.index == button_idx) {
                         stdout.write_all(b"Enter common name for this button: ").await.unwrap();
                         stdout.flush().await.unwrap();
                         let input = stdin_read_channel_rx.recv().await.unwrap().expect("Could not read input");
