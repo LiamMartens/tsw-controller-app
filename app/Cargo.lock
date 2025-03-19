@@ -947,6 +947,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0e60eed09d8c01d3cee5b7d30acb059b76614c918fa0f992e0dd6eeb10daad6f"
 
 [[package]]
+name = "deunicode"
+version = "1.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc55fe0d1f6c107595572ec8b107c0999bb1a2e0b75e37429a4fb0d6474a0e7d"
+
+[[package]]
 name = "digest"
 version = "0.10.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2105,6 +2111,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "libusb1-sys"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "da050ade7ac4ff1ba5379af847a10a10a8e284181e060105bf8d86960ce9ce0f"
+dependencies = [
+ "cc",
+ "libc",
+ "pkg-config",
+ "vcpkg",
+]
+
+[[package]]
 name = "linux-raw-sys"
 version = "0.4.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2903,6 +2921,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "19b30a45b0cd0bcca8037f3d0dc3421eaf95327a17cad11964fb8179b4fc4832"
 
 [[package]]
+name = "rusb"
+version = "0.9.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ab9f9ff05b63a786553a4c02943b74b34a988448671001e9a27e2f0565cc05a4"
+dependencies = [
+ "libc",
+ "libusb1-sys",
+]
+
+[[package]]
 name = "rustc-demangle"
 version = "0.1.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3147,6 +3175,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dbff4acf519f630b3a3ddcfaea6c06b42174d9a44bc70c620e9ed1649d58b82a"
 dependencies = [
  "version_check",
+]
+
+[[package]]
+name = "slug"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "882a80f72ee45de3cc9a5afeb2da0331d58df69e4e7d8eeb5d3c7784ae67e724"
+dependencies = [
+ "deunicode",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -3594,9 +3632,12 @@ dependencies = [
  "futures-util",
  "gilrs",
  "log",
+ "rusb",
  "sdl2",
+ "sdl2-sys",
  "serde",
  "serde_json",
+ "slug",
  "tokio",
  "tokio-tungstenite",
  "tokio-util",
@@ -3723,6 +3764,12 @@ name = "uuid"
 version = "1.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b3758f5e68192bb96cc8f9b7e2c2cfdabb435499a28499a42f8f984092adad4b"
+
+[[package]]
+name = "vcpkg"
+version = "0.2.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "vec_map"

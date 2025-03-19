@@ -1,6 +1,6 @@
 {
   "name": "TCA Quadrant Boeing",
-  "sdl_name": "TCA Quadrant Boeing 1&2",
+  "usb_id": "044F:040A",
   "data": [
     { "kind": "axis", "index": 3, "name": "Lever1" },
     { "kind": "axis", "index": 4, "name": "Lever2" },

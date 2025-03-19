@@ -22,8 +22,8 @@ pub struct ControllerSdlMapControl {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ControllerSdlMap {
     pub name: String,
-    pub sdl_id: Option<SDLGuid>,
-    pub sdl_name: String,
+    /* {0xVENDOR_ID}:{0xPRODUCT_ID} */
+    pub usb_id: String,
     pub data: Vec<ControllerSdlMapControl>,
 }
 

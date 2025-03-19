@@ -23,6 +23,7 @@ pub struct ControllerManagerChangeEvent {
 
 #[derive(Clone, Debug)]
 pub struct ControllerManagerRawEvent {
+    pub joystick_index: u32,
     pub joystick_guid: String,
     pub joystick_name: String,
     pub event: Event,
@@ -259,14 +260,13 @@ impl ControllerManagerControllerControl {
 impl ControllerManagerController {
     pub fn new(
         config: Arc<ConfigLoader>,
+        usb_id: String,
         joystick: Joystick,
         change_event_channel: (Arc<Sender<ControllerManagerChangeEvent>>, Arc<Mutex<Receiver<ControllerManagerChangeEvent>>>),
     ) -> ControllerManagerController {
         let joystick_arc = Arc::new(joystick);
-        let joystick_guid = joystick_arc.guid();
-        let joystick_name = joystick_arc.name();
-        let sdl_mapping = config.find_sdl_mapping(&joystick_guid, &joystick_name);
-        let calibration = config.find_controller_calibration(&joystick_guid, &joystick_name);
+        let sdl_mapping = config.find_sdl_mapping(&usb_id);
+        let calibration = config.find_controller_calibration(&usb_id);
         let all_controls_calibration_data = calibration.map(|x| x.data.clone()).unwrap_or(Vec::new());
 
         let mut gamepad_controls = HashMap::new();
@@ -353,8 +353,16 @@ impl ControllerManager {
         match event {
             Event::JoyDeviceAdded { which, .. } => {
                 let joystick = self.joystick_subsystem.open(which).unwrap();
-                println!("Joystick Opened: {} - {}", joystick.guid().string(), joystick.name());
-                let controller = ControllerManagerController::new(Arc::clone(&self.config), joystick, (Arc::clone(&self.change_event_channel.0), Arc::clone(&self.change_event_channel.1)));
+                let product_id = unsafe { sdl2_sys::SDL_JoystickGetDeviceProduct(which as i32) };
+                let vendor_id = unsafe { sdl2_sys::SDL_JoystickGetDeviceVendor(which as i32) };
+                let usb_id: String = format!("{:04X}:{:04X}", vendor_id, product_id);
+                println!("Joystick Opened ({}) {}", joystick.name(), usb_id);
+                let controller = ControllerManagerController::new(
+                    Arc::clone(&self.config),
+                    usb_id,
+                    joystick,
+                    (Arc::clone(&self.change_event_channel.0), Arc::clone(&self.change_event_channel.1)),
+                );
                 self.devices.insert(which, controller);
             }
             _ => panic!("Invalid event type"),
@@ -377,6 +385,7 @@ impl ControllerManager {
                     self.raw_event_channel
                         .0
                         .send(ControllerManagerRawEvent {
+                            joystick_index: which,
                             joystick_guid: controller.joystick.guid().string(),
                             joystick_name: controller.joystick.name(),
                             event: event.clone(),
@@ -396,6 +405,7 @@ impl ControllerManager {
                     self.raw_event_channel
                         .0
                         .send(ControllerManagerRawEvent {
+                            joystick_index: which,
                             joystick_guid: controller.joystick.guid().string(),
                             joystick_name: controller.joystick.name(),
                             event: event.clone(),
@@ -416,6 +426,7 @@ impl ControllerManager {
                     self.raw_event_channel
                         .0
                         .send(ControllerManagerRawEvent {
+                            joystick_index: which,
                             joystick_guid: controller.joystick.guid().string(),
                             joystick_name: controller.joystick.name(),
                             event: event.clone(),

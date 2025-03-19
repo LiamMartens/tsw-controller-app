@@ -126,7 +126,7 @@ impl ConfigLoader {
         }
 
         for calibration in self.controller_calibrations.iter() {
-            let file_path = calibration_path.join(format!("{}.json", calibration.sdl_id.as_ref().unwrap().string()));
+            let file_path = calibration_path.join(format!("{}.json", calibration.usb_id));
             let json = serde_json::to_string_pretty(calibration).unwrap();
             fs::write(file_path, json).unwrap();
         }
@@ -138,18 +138,12 @@ impl ConfigLoader {
         }
     }
 
-    pub fn find_sdl_mapping(&self, guid: &Guid, name: &String) -> Option<&ControllerSdlMap> {
-        self.controller_sdl_mappings
-            .iter()
-            .find(|m| m.sdl_id.is_some() && m.sdl_id.as_ref().unwrap() == guid)
-            .or(self.controller_sdl_mappings.iter().find(|m| &m.sdl_name == name))
+    pub fn find_sdl_mapping(&self, usb_id: &String) -> Option<&ControllerSdlMap> {
+        self.controller_sdl_mappings.iter().find(|m| &m.usb_id == usb_id)
     }
 
-    pub fn find_controller_calibration(&self, guid: &Guid, name: &String) -> Option<&ControllerCalibration> {
-        self.controller_calibrations
-            .iter()
-            .find(|m| m.sdl_id.is_some() && m.sdl_id.as_ref().unwrap() == guid)
-            .or(self.controller_calibrations.iter().find(|m| &m.sdl_name == name))
+    pub fn find_controller_calibration(&self, usb_id: &String) -> Option<&ControllerCalibration> {
+        self.controller_calibrations.iter().find(|m| &m.usb_id == usb_id)
     }
 
     pub fn find_controller_profile<T: AsRef<str>>(&self, name: T, controller_guid: Option<String>) -> Option<&ControllerProfile> {

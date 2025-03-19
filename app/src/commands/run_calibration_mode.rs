@@ -65,11 +65,13 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
                   let existing_sdl_map = sdl_mapping_lock.get_mut(&raw_event.joystick_guid);
                   let existing_calibration = controller_calibrations_lock.get_mut(&raw_event.joystick_guid);
 
+                  let vendor_id = unsafe { sdl2_sys::SDL_JoystickGetDeviceVendor(raw_event.joystick_index as i32) };
+                  let product_id = unsafe { sdl2_sys::SDL_JoystickGetDeviceProduct(raw_event.joystick_index as i32) };
+
                   let mut controller_sdl_map: ControllerSdlMap = match &existing_sdl_map {
                     Some(sdl_map) => (*sdl_map).clone(),
                     None => ControllerSdlMap {
-                      sdl_id: Some(SDLGuid::new(&raw_event.joystick_guid)),
-                      sdl_name: raw_event.joystick_name.clone(),
+                      usb_id: format!("{:04x}:{:04x}", vendor_id, product_id),
                       name: "Unknown".to_string(),
                       data: vec![],
                     }
@@ -77,8 +79,7 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
                   let mut controller_calibration: ControllerCalibration = match &existing_calibration {
                     Some(calibration) => (*calibration).clone(),
                     None => ControllerCalibration {
-                      sdl_id: Some(SDLGuid::new(&raw_event.joystick_guid)),
-                      sdl_name: raw_event.joystick_name.clone(),
+                      usb_id: format!("{:04x}:{:04x}", vendor_id, product_id),
                       data: vec![],
                     }
                   };
