@@ -68,7 +68,7 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
                   let mut controller_sdl_map: ControllerSdlMap = match &existing_sdl_map {
                     Some(sdl_map) => (*sdl_map).clone(),
                     None => ControllerSdlMap {
-                      sdl_id: SDLGuid::new(&raw_event.joystick_guid),
+                      sdl_id: Some(SDLGuid::new(&raw_event.joystick_guid)),
                       sdl_name: raw_event.joystick_name.clone(),
                       name: "Unknown".to_string(),
                       data: vec![],
@@ -77,7 +77,7 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
                   let mut controller_calibration: ControllerCalibration = match &existing_calibration {
                     Some(calibration) => (*calibration).clone(),
                     None => ControllerCalibration {
-                      sdl_id: SDLGuid::new(&raw_event.joystick_guid),
+                      sdl_id: Some(SDLGuid::new(&raw_event.joystick_guid)),
                       sdl_name: raw_event.joystick_name.clone(),
                       data: vec![],
                     }

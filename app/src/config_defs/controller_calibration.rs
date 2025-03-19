@@ -20,7 +20,7 @@ pub struct ControllerCalibrationData {
  */
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ControllerCalibration {
-    pub sdl_id: SDLGuid,
+    pub sdl_id: Option<SDLGuid>,
     pub sdl_name: String,
     pub data: Vec<ControllerCalibrationData>,
 }

@@ -22,7 +22,7 @@ pub struct ControllerSdlMapControl {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ControllerSdlMap {
     pub name: String,
-    pub sdl_id: SDLGuid,
+    pub sdl_id: Option<SDLGuid>,
     pub sdl_name: String,
     pub data: Vec<ControllerSdlMapControl>,
 }

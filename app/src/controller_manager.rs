@@ -266,7 +266,7 @@ impl ControllerManagerController {
         let joystick_guid = joystick_arc.guid();
         let joystick_name = joystick_arc.name();
         let sdl_mapping = config.find_sdl_mapping(&joystick_guid, &joystick_name);
-        let calibration = config.find_controller_calibration(joystick_guid, &joystick_name);
+        let calibration = config.find_controller_calibration(&joystick_guid, &joystick_name);
         let all_controls_calibration_data = calibration.map(|x| x.data.clone()).unwrap_or(Vec::new());
 
         let mut gamepad_controls = HashMap::new();
