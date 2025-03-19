@@ -1,6 +1,6 @@
 {
   "name": "TCA Quadrant Boeing",
-  "id": "0300c4ce4f0400000a04000011010000",
+  "sdl_name": "TCA Quadrant Boeing 1&2",
   "data": [
     { "kind": "axis", "index": 3, "name": "Lever1" },
     { "kind": "axis", "index": 4, "name": "Lever2" },
