@@ -3,10 +3,7 @@ use std::{fs, path::Path};
 use log::{info, warn};
 use sdl2::joystick::Guid;
 
-use super::config_defs::{
-    controller_calibration::ControllerCalibration, controller_profile::ControllerProfile,
-    controller_sdl_map::ControllerSdlMap,
-};
+use super::config_defs::{controller_calibration::ControllerCalibration, controller_profile::ControllerProfile, controller_sdl_map::ControllerSdlMap};
 
 pub struct ConfigLoader {
     pub controller_sdl_mappings: Vec<ControllerSdlMap>,
@@ -129,7 +126,7 @@ impl ConfigLoader {
         }
 
         for calibration in self.controller_calibrations.iter() {
-            let file_path = calibration_path.join(format!("{}.json", calibration.id.string()));
+            let file_path = calibration_path.join(format!("{}.json", calibration.sdl_id.string()));
             let json = serde_json::to_string_pretty(calibration).unwrap();
             fs::write(file_path, json).unwrap();
         }
@@ -141,32 +138,30 @@ impl ConfigLoader {
         }
     }
 
-    pub fn find_sdl_mapping(&self, guid: &Guid) -> Option<&ControllerSdlMap> {
-        self.controller_sdl_mappings.iter().find(|m| &m.id == guid)
-    }
-
-    pub fn find_controller_calibration(&self, guid: Guid) -> Option<&ControllerCalibration> {
-        self.controller_calibrations.iter().find(|m| m.id == guid)
-    }
-
-    pub fn find_controller_profile<T: AsRef<str>>(
-        &self,
-        name: T,
-        controller_guid: Option<String>,
-    ) -> Option<&ControllerProfile> {
-        let fallback_profile = self
-            .controller_profiles
+    pub fn find_sdl_mapping(&self, guid: &Guid, name: &String) -> Option<&ControllerSdlMap> {
+        self.controller_sdl_mappings
             .iter()
-            .find(|m| m.name == name.as_ref() && m.controller_id.is_none());
+            .find(|m| &m.sdl_id == guid)
+            .or(self.controller_sdl_mappings.iter().find(|m| &m.sdl_name == name))
+    }
+
+    pub fn find_controller_calibration(&self, guid: Guid, name: &String) -> Option<&ControllerCalibration> {
+        self.controller_calibrations
+            .iter()
+            .find(|m| m.sdl_id == guid)
+            .or(self.controller_calibrations.iter().find(|m| m.sdl_id == guid))
+    }
+
+    pub fn find_controller_profile<T: AsRef<str>>(&self, name: T, controller_guid: Option<String>) -> Option<&ControllerProfile> {
+        let fallback_profile = self.controller_profiles.iter().find(|m| m.name == name.as_ref() && m.controller_id.is_none());
 
         match controller_guid {
             Some(guid) => {
                 let sdl_guid = Guid::from_string(&guid).unwrap();
-                let override_profile = self.controller_profiles.iter().find(|m| {
-                    m.name == name.as_ref()
-                        && m.controller_id.is_some()
-                        && m.controller_id.as_ref().unwrap() == &sdl_guid
-                });
+                let override_profile = self
+                    .controller_profiles
+                    .iter()
+                    .find(|m| m.name == name.as_ref() && m.controller_id.is_some() && m.controller_id.as_ref().unwrap() == &sdl_guid);
                 match override_profile {
                     Some(profile) => Some(profile),
                     None => fallback_profile,

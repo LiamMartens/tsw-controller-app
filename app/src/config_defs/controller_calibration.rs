@@ -16,10 +16,12 @@ pub struct ControllerCalibrationData {
 
 /**
  * This struct defines the controller calibration data that is stored in the config file.
+ * Will match by ID first name second
  */
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ControllerCalibration {
-    pub id: SDLGuid,
+    pub sdl_id: SDLGuid,
+    pub sdl_name: String,
     pub data: Vec<ControllerCalibrationData>,
 }
 

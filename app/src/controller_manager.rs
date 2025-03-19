@@ -24,6 +24,7 @@ pub struct ControllerManagerChangeEvent {
 #[derive(Clone, Debug)]
 pub struct ControllerManagerRawEvent {
     pub joystick_guid: String,
+    pub joystick_name: String,
     pub event: Event,
 }
 
@@ -47,10 +48,7 @@ pub struct ControllerManagerControllerControl {
     calibration: Option<ControllerCalibrationData>,
     state: ControllerManagerControllerControlState,
 
-    change_event_channel: (
-        Arc<Sender<ControllerManagerChangeEvent>>,
-        Arc<Mutex<Receiver<ControllerManagerChangeEvent>>>,
-    ),
+    change_event_channel: (Arc<Sender<ControllerManagerChangeEvent>>, Arc<Mutex<Receiver<ControllerManagerChangeEvent>>>),
 }
 
 pub struct ControllerManagerController {
@@ -58,10 +56,7 @@ pub struct ControllerManagerController {
     joystick: Arc<Joystick>,
     controls: HashMap<String, ControllerManagerControllerControl>,
 
-    change_event_channel: (
-        Arc<Sender<ControllerManagerChangeEvent>>,
-        Arc<Mutex<Receiver<ControllerManagerChangeEvent>>>,
-    ),
+    change_event_channel: (Arc<Sender<ControllerManagerChangeEvent>>, Arc<Mutex<Receiver<ControllerManagerChangeEvent>>>),
 }
 
 pub struct ControllerManager {
@@ -70,20 +65,13 @@ pub struct ControllerManager {
     joystick_subsystem: Arc<sdl2::JoystickSubsystem>,
     devices: HashMap<u32, ControllerManagerController>,
 
-    change_event_channel: (
-        Arc<Sender<ControllerManagerChangeEvent>>,
-        Arc<Mutex<Receiver<ControllerManagerChangeEvent>>>,
-    ),
-    raw_event_channel: (
-        Arc<Sender<ControllerManagerRawEvent>>,
-        Arc<Mutex<Receiver<ControllerManagerRawEvent>>>,
-    ),
+    change_event_channel: (Arc<Sender<ControllerManagerChangeEvent>>, Arc<Mutex<Receiver<ControllerManagerChangeEvent>>>),
+    raw_event_channel: (Arc<Sender<ControllerManagerRawEvent>>, Arc<Mutex<Receiver<ControllerManagerRawEvent>>>),
 }
 
 impl ControllerManagerChangeEvent {
     pub fn has_changed(&self) -> bool {
-        self.control_state.value != self.control_state.previous_value
-            && self.control_state.direction.0 != 0
+        self.control_state.value != self.control_state.previous_value && self.control_state.direction.0 != 0
     }
 }
 
@@ -108,10 +96,7 @@ impl ControllerManagerControllerControl {
         sdl_mapping: ControllerSdlMapControl,
         calibration: Option<&ControllerCalibrationData>,
 
-        change_event_channel: (
-            Arc<Sender<ControllerManagerChangeEvent>>,
-            Arc<Mutex<Receiver<ControllerManagerChangeEvent>>>,
-        ),
+        change_event_channel: (Arc<Sender<ControllerManagerChangeEvent>>, Arc<Mutex<Receiver<ControllerManagerChangeEvent>>>),
     ) -> ControllerManagerControllerControl {
         ControllerManagerControllerControl {
             joystick,
@@ -202,12 +187,10 @@ impl ControllerManagerControllerControl {
                     };
                     self.state.value = match is_reset {
                         true => value as f32,
-                        false => {
-                            match self.is_within_margin_of_error(self.state.value, value as f32) {
-                                true => self.state.value,
-                                false => value as f32,
-                            }
-                        }
+                        false => match self.is_within_margin_of_error(self.state.value, value as f32) {
+                            true => self.state.value,
+                            false => value as f32,
+                        },
                     };
                 }
             },
@@ -248,14 +231,11 @@ impl ControllerManagerControllerControl {
             }
         };
 
-        match self
-            .change_event_channel
-            .0
-            .send(ControllerManagerChangeEvent {
-                joystick_guid: self.joystick.guid().string(),
-                control_name: self.name.clone(),
-                control_state: self.state.clone(),
-            }) {
+        match self.change_event_channel.0.send(ControllerManagerChangeEvent {
+            joystick_guid: self.joystick.guid().string(),
+            control_name: self.name.clone(),
+            control_state: self.state.clone(),
+        }) {
             Ok(_) => {}
             Err(err) => {
                 debug!("Failed to send controller change event: {}", err);
@@ -280,34 +260,26 @@ impl ControllerManagerController {
     pub fn new(
         config: Arc<ConfigLoader>,
         joystick: Joystick,
-        change_event_channel: (
-            Arc<Sender<ControllerManagerChangeEvent>>,
-            Arc<Mutex<Receiver<ControllerManagerChangeEvent>>>,
-        ),
+        change_event_channel: (Arc<Sender<ControllerManagerChangeEvent>>, Arc<Mutex<Receiver<ControllerManagerChangeEvent>>>),
     ) -> ControllerManagerController {
         let joystick_arc = Arc::new(joystick);
         let joystick_guid = joystick_arc.guid();
-        let sdl_mapping = config.find_sdl_mapping(&joystick_guid);
-        let calibration = config.find_controller_calibration(joystick_guid);
-        let all_controls_calibration_data =
-            calibration.map(|x| x.data.clone()).unwrap_or(Vec::new());
+        let joystick_name = joystick_arc.name();
+        let sdl_mapping = config.find_sdl_mapping(&joystick_guid, &joystick_name);
+        let calibration = config.find_controller_calibration(joystick_guid, &joystick_name);
+        let all_controls_calibration_data = calibration.map(|x| x.data.clone()).unwrap_or(Vec::new());
 
         let mut gamepad_controls = HashMap::new();
         if let Some(mapping) = &sdl_mapping {
             mapping.data.iter().for_each(|control| {
-                let control_calibration = all_controls_calibration_data
-                    .iter()
-                    .find(|x| x.id == control.name);
+                let control_calibration = all_controls_calibration_data.iter().find(|x| x.id == control.name);
 
                 let mut control = ControllerManagerControllerControl::new(
                     Arc::clone(&joystick_arc),
                     control.name.clone(),
                     control.clone(),
                     control_calibration,
-                    (
-                        Arc::clone(&change_event_channel.0),
-                        Arc::clone(&change_event_channel.1),
-                    ),
+                    (Arc::clone(&change_event_channel.0), Arc::clone(&change_event_channel.1)),
                 );
                 control.reset();
                 gamepad_controls.insert(control.name.clone(), control);
@@ -323,38 +295,34 @@ impl ControllerManagerController {
     }
 
     pub fn process(&mut self, event: sdl2::event::Event) {
-        debug!(
-            "Processing event ({}): {:?}",
-            self.joystick.guid().string(),
-            event
-        );
+        debug!("Processing event ({}): {:?}", self.joystick.guid().string(), event);
 
         use sdl2::event::Event;
 
         match event {
             Event::JoyAxisMotion { axis_idx, .. } => {
-                let axis = self.controls.values_mut().find(|control| {
-                    control.sdl_mapping.kind == SDLControlKind::Axis
-                        && control.sdl_mapping.index == axis_idx
-                });
+                let axis = self
+                    .controls
+                    .values_mut()
+                    .find(|control| control.sdl_mapping.kind == SDLControlKind::Axis && control.sdl_mapping.index == axis_idx);
                 if let Some(axis) = axis {
                     axis.process(event);
                 }
             }
             Event::JoyButtonDown { button_idx, .. } | Event::JoyButtonUp { button_idx, .. } => {
-                let button = self.controls.values_mut().find(|control| {
-                    control.sdl_mapping.kind == SDLControlKind::Button
-                        && control.sdl_mapping.index == button_idx
-                });
+                let button = self
+                    .controls
+                    .values_mut()
+                    .find(|control| control.sdl_mapping.kind == SDLControlKind::Button && control.sdl_mapping.index == button_idx);
                 if let Some(button) = button {
                     button.process(event);
                 }
             }
             Event::JoyHatMotion { hat_idx, .. } => {
-                let hat = self.controls.values_mut().find(|control| {
-                    control.sdl_mapping.kind == SDLControlKind::Hat
-                        && control.sdl_mapping.index == hat_idx
-                });
+                let hat = self
+                    .controls
+                    .values_mut()
+                    .find(|control| control.sdl_mapping.kind == SDLControlKind::Hat && control.sdl_mapping.index == hat_idx);
                 if let Some(hat) = hat {
                     hat.process(event);
                 }
@@ -376,14 +344,8 @@ impl ControllerManager {
             sdl_context,
             joystick_subsystem,
             devices: HashMap::new(),
-            change_event_channel: (
-                Arc::new(channel_pair.0),
-                Arc::new(Mutex::new(channel_pair.1)),
-            ),
-            raw_event_channel: (
-                Arc::new(raw_channel_pair.0),
-                Arc::new(Mutex::new(raw_channel_pair.1)),
-            ),
+            change_event_channel: (Arc::new(channel_pair.0), Arc::new(Mutex::new(channel_pair.1))),
+            raw_event_channel: (Arc::new(raw_channel_pair.0), Arc::new(Mutex::new(raw_channel_pair.1))),
         }
     }
 
@@ -391,15 +353,8 @@ impl ControllerManager {
         match event {
             Event::JoyDeviceAdded { which, .. } => {
                 let joystick = self.joystick_subsystem.open(which).unwrap();
-                debug!("Joystick Opened: {:?}", joystick.guid().string());
-                let controller = ControllerManagerController::new(
-                    Arc::clone(&self.config),
-                    joystick,
-                    (
-                        Arc::clone(&self.change_event_channel.0),
-                        Arc::clone(&self.change_event_channel.1),
-                    ),
-                );
+                println!("Joystick Opened: {} - {}", joystick.guid().string(), joystick.name());
+                let controller = ControllerManagerController::new(Arc::clone(&self.config), joystick, (Arc::clone(&self.change_event_channel.0), Arc::clone(&self.change_event_channel.1)));
                 self.devices.insert(which, controller);
             }
             _ => panic!("Invalid event type"),
@@ -423,6 +378,7 @@ impl ControllerManager {
                         .0
                         .send(ControllerManagerRawEvent {
                             joystick_guid: controller.joystick.guid().string(),
+                            joystick_name: controller.joystick.name(),
                             event: event.clone(),
                         })
                         .unwrap();
@@ -441,6 +397,7 @@ impl ControllerManager {
                         .0
                         .send(ControllerManagerRawEvent {
                             joystick_guid: controller.joystick.guid().string(),
+                            joystick_name: controller.joystick.name(),
                             event: event.clone(),
                         })
                         .unwrap();
@@ -460,6 +417,7 @@ impl ControllerManager {
                         .0
                         .send(ControllerManagerRawEvent {
                             joystick_guid: controller.joystick.guid().string(),
+                            joystick_name: controller.joystick.name(),
                             event: event.clone(),
                         })
                         .unwrap();
@@ -524,11 +482,7 @@ impl ControllerManager {
         }
     }
 
-    pub fn subscribe(
-        &self,
-        forwarder: Sender<ControllerManagerChangeEvent>,
-        cancel_token: CancellationToken,
-    ) -> tokio::task::JoinHandle<()> {
+    pub fn subscribe(&self, forwarder: Sender<ControllerManagerChangeEvent>, cancel_token: CancellationToken) -> tokio::task::JoinHandle<()> {
         let mut receiver = self.change_event_channel.0.subscribe();
 
         tokio::task::spawn(async move {
@@ -543,10 +497,7 @@ impl ControllerManager {
         })
     }
 
-    pub fn subscribe_raw(
-        &self,
-        forwarder: Sender<ControllerManagerRawEvent>,
-    ) -> tokio::task::JoinHandle<()> {
+    pub fn subscribe_raw(&self, forwarder: Sender<ControllerManagerRawEvent>) -> tokio::task::JoinHandle<()> {
         let mut receiver = self.raw_event_channel.0.subscribe();
 
         tokio::spawn(async move {

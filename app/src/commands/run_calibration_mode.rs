@@ -18,15 +18,13 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
 
     let config = config_loader::ConfigLoader::new();
     let config_arc = Arc::new(config);
-    let mut controller_manager =
-        controller_manager::ControllerManager::new(Arc::clone(&config_arc));
+    let mut controller_manager = controller_manager::ControllerManager::new(Arc::clone(&config_arc));
 
     let cancel_token = CancellationToken::new();
     let receiver = controller_manager.raw_receiver();
 
     let controller_sdl_mappings = Arc::new(Mutex::new(HashMap::<String, ControllerSdlMap>::new()));
-    let controller_calibrations =
-        Arc::new(Mutex::new(HashMap::<String, ControllerCalibration>::new()));
+    let controller_calibrations = Arc::new(Mutex::new(HashMap::<String, ControllerCalibration>::new()));
 
     let cancel_token_clone = cancel_token.clone();
     let controller_sdl_mappings_task_arc = Arc::clone(&controller_sdl_mappings);
@@ -35,8 +33,7 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
         let stdin = io::stdin();
         let mut stdout = io::stdout();
         let mut stdin_reader = BufReader::new(stdin);
-        let (stdin_read_channel_tx, mut stdin_read_channel_rx) =
-            tokio::sync::mpsc::channel::<Result<String, String>>(10);
+        let (stdin_read_channel_tx, mut stdin_read_channel_rx) = tokio::sync::mpsc::channel::<Result<String, String>>(10);
 
         loop {
             let mut last_line_input = String::new();
@@ -71,7 +68,8 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
                   let mut controller_sdl_map: ControllerSdlMap = match &existing_sdl_map {
                     Some(sdl_map) => (*sdl_map).clone(),
                     None => ControllerSdlMap {
-                      id: SDLGuid::new(&raw_event.joystick_guid),
+                      sdl_id: SDLGuid::new(&raw_event.joystick_guid),
+                      sdl_name: raw_event.joystick_name.clone(),
                       name: "Unknown".to_string(),
                       data: vec![],
                     }
@@ -79,14 +77,15 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
                   let mut controller_calibration: ControllerCalibration = match &existing_calibration {
                     Some(calibration) => (*calibration).clone(),
                     None => ControllerCalibration {
-                      id: SDLGuid::new(&raw_event.joystick_guid),
+                      sdl_id: SDLGuid::new(&raw_event.joystick_guid),
+                      sdl_name: raw_event.joystick_name.clone(),
                       data: vec![],
                     }
                   };
 
                   match raw_event.event {
                     Event::JoyAxisMotion { axis_idx, value, .. } => {
-                      stdout.write_all(format!("[{}] Axis {} moved to {}\n",  raw_event.joystick_guid, axis_idx, value).as_bytes()).await.unwrap();
+                      stdout.write_all(format!("[{}][{}] Axis {} moved to {}\n", raw_event.joystick_guid, raw_event.joystick_name, axis_idx, value).as_bytes()).await.unwrap();
                       stdout.flush().await.unwrap();
 
                       let control_name = format!("Axis{}", axis_idx);
@@ -130,7 +129,7 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
                       }
                     },
                     Event::JoyButtonDown {button_idx, ..} | Event::JoyButtonUp {button_idx, ..} => {
-                      stdout.write_all(format!("[{}] Button {} triggered\n",  raw_event.joystick_guid, button_idx).as_bytes()).await.unwrap();
+                      stdout.write_all(format!("[{}][{}] Button {} triggered\n",  raw_event.joystick_guid, raw_event.joystick_name, button_idx).as_bytes()).await.unwrap();
                       stdout.flush().await.unwrap();
 
                       if !controller_sdl_map.data.iter().any(|c| c.kind == SDLControlKind::Button && c.index == button_idx) {
@@ -149,7 +148,7 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
                       }
                     },
                     Event::JoyHatMotion {hat_idx, ..}  => {
-                      stdout.write_all(format!("[{}] Hat {} triggered\n",  raw_event.joystick_guid, hat_idx).as_bytes()).await.unwrap();
+                      stdout.write_all(format!("[{}][{}] Hat {} triggered\n", raw_event.joystick_guid, raw_event.joystick_name, hat_idx).as_bytes()).await.unwrap();
                       stdout.flush().await.unwrap();
 
                       if !controller_sdl_map.data.iter().any(|c| c.kind == SDLControlKind::Hat && c.index == hat_idx) {
