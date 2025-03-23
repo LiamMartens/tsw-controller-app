@@ -202,6 +202,17 @@
       }
     },
     {
+      "name": "Button4",
+      "description": "Headlights Dial Left",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "shift+h"
+        }
+      }
+    },
+    {
       "name": "Button2",
       "description": "Cab Light",
       "assignment": {
