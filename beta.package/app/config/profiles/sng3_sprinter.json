@@ -1,0 +1,217 @@
+{
+  "name": "sng3_sprinter",
+  "controls": [
+    {
+      "name": "Lever1",
+      "description": "Parking Brake",
+      "assignment": {
+        "type": "linear",
+        "neutral": 0.5,
+        "thresholds": [
+          {
+            "value": -0.6,
+            "action_activate": {
+              "controls": "ParkingBrakeRelease",
+              "value": 1.0,
+              "hold": false
+            }
+          },
+          {
+            "value": 0.6,
+            "action_activate": {
+              "controls": "ParkingBrakeApply",
+              "value": 1.0,
+              "hold": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Lever3",
+      "description": "Master Controller",
+      "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "MasterController",
+          "input_value": {
+            "min": -0.9,
+            "max": 1.0
+          }
+        },
+        {
+          "type": "sync_control",
+          "identifier": "Throttle",
+          "input_value": {
+            "min": -0.9,
+            "max": 1.0
+          },
+          "action_increase": {
+            "keys": "'"
+          },
+          "action_decrease": {
+            "keys": ";"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Lever3Button1",
+      "description": "Decrease Master Controller",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "d"
+        }
+      }
+    },
+    {
+      "name": "Lever3Trigger1",
+      "description": "Increase Master Controller",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "a"
+        }
+      }
+    },
+
+    {
+      "name": "Dial1Button",
+      "description": "AWS/Safety Reset",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "Q+PageDown"
+        }
+      }
+    },
+    {
+      "name": "Dial1CW",
+      "description": "Reverser Increase",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "w",
+          "press_time": 0.3,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "Dial1CCW",
+      "description": "Reverser Decrease",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "s",
+          "press_time": 0.3,
+          "wait_time": 0.2
+        }
+      }
+    },
+
+    {
+      "name": "Lever2Trigger1",
+      "description": "Horn",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "space"
+        }
+      }
+    },
+    {
+      "name": "Lever2Button1",
+      "description": "Sand",
+      "assignment": {
+        "type": "toggle",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "x"
+        },
+        "action_deactivate": {
+          "keys": "shift+x"
+        }
+      }
+    },
+
+    {
+      "name": "Dial2State1",
+      "description": "Open Close Left Doors",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "y"
+        }
+      }
+    },
+    {
+      "name": "Dial2State3",
+      "description": "Open Close Right Doors",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "u"
+        }
+      }
+    },
+
+    {
+      "name": "Button3",
+      "description": "Wipers Dial",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "v"
+        }
+      }
+    },
+    {
+      "name": "Button2",
+      "description": "Cab Light Toggle",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "l"
+        }
+      }
+    },
+    {
+      "name": "Button1",
+      "description": "Lights Switch Toggle",
+      "assignment": {
+        "type": "toggle",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "h"
+        },
+        "action_deactivate": {
+          "keys": "shift+h"
+        }
+      }
+    },
+    {
+      "name": "Button4",
+      "description": "Headlights Intensity Dial",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "ctrl+h"
+        }
+      }
+    }
+  ]
+}
