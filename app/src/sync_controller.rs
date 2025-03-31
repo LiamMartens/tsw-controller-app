@@ -167,7 +167,7 @@ impl SyncController {
                   },
                   Ok(event) = controller_receiver.recv() => {
                     let profile_runner_lock = profile_runner.lock().await;
-                    let profile = profile_runner_lock.get_current_profile(Some(event.joystick_guid));
+                    let profile = profile_runner_lock.get_current_profile(Some(event.usb_id));
                     let preferred_control_mode = profile_runner_lock.get_preferred_control_mode();
                     match profile {
                       Some(profile) => {

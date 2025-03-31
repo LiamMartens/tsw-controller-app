@@ -2,8 +2,6 @@ use core::fmt;
 
 use serde::{Deserialize, Serialize};
 
-use super::serde_sdl_guid::SDLGuid;
-
 #[derive(PartialEq, Clone, Copy)]
 pub enum PreferredControlMode {
     DirectControl,
@@ -107,7 +105,8 @@ pub struct ControllerProfileControl {
 pub struct ControllerProfile {
     pub name: String,
     pub controls: Vec<ControllerProfileControl>,
-    pub controller_id: Option<SDLGuid>,
+    /* can be used to set a specific controller for this configuration */
+    pub usb_id: Option<String>,
 }
 
 impl fmt::Display for ControllerProfileControlAssignmentDirectControlAction {

@@ -1,7 +1,6 @@
 use std::{fs, path::Path};
 
 use log::{info, warn};
-use sdl2::joystick::Guid;
 
 use super::config_defs::{controller_calibration::ControllerCalibration, controller_profile::ControllerProfile, controller_sdl_map::ControllerSdlMap};
 
@@ -146,16 +145,15 @@ impl ConfigLoader {
         self.controller_calibrations.iter().find(|m| &m.usb_id == usb_id)
     }
 
-    pub fn find_controller_profile<T: AsRef<str>>(&self, name: T, controller_guid: Option<String>) -> Option<&ControllerProfile> {
-        let fallback_profile = self.controller_profiles.iter().find(|m| m.name == name.as_ref() && m.controller_id.is_none());
+    pub fn find_controller_profile<T: AsRef<str>>(&self, name: T, controller_usb_id: Option<String>) -> Option<&ControllerProfile> {
+        let fallback_profile = self.controller_profiles.iter().find(|m| m.name == name.as_ref() && m.usb_id.is_none());
 
-        match controller_guid {
-            Some(guid) => {
-                let sdl_guid = Guid::from_string(&guid).unwrap();
+        match controller_usb_id {
+            Some(usb_id) => {
                 let override_profile = self
                     .controller_profiles
                     .iter()
-                    .find(|m| m.name == name.as_ref() && m.controller_id.is_some() && m.controller_id.as_ref().unwrap() == &sdl_guid);
+                    .find(|m| m.name == name.as_ref() && m.usb_id.is_some() && m.usb_id.as_ref().unwrap() == &usb_id);
                 match override_profile {
                     Some(profile) => Some(profile),
                     None => fallback_profile,

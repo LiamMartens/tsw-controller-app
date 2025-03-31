@@ -7,7 +7,6 @@ use crate::{
     config_defs::{
         controller_calibration::{ControllerCalibration, ControllerCalibrationData},
         controller_sdl_map::{ControllerSdlMap, ControllerSdlMapControl, SDLControlKind},
-        serde_sdl_guid::SDLGuid,
     },
     config_loader,
     controller_manager::{self, ControllerManagerRawEvent},
@@ -62,8 +61,8 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
 
                   let mut sdl_mapping_lock = controller_sdl_mappings_task_arc.lock().await;
                   let mut controller_calibrations_lock = controller_calibrations_task_arc.lock().await;
-                  let existing_sdl_map = sdl_mapping_lock.get_mut(&raw_event.joystick_guid);
-                  let existing_calibration = controller_calibrations_lock.get_mut(&raw_event.joystick_guid);
+                  let existing_sdl_map = sdl_mapping_lock.get_mut(&raw_event.joystick_usb_id);
+                  let existing_calibration = controller_calibrations_lock.get_mut(&raw_event.joystick_usb_id);
 
                   let vendor_id = unsafe { sdl2_sys::SDL_JoystickGetDeviceVendor(raw_event.joystick_index as i32) };
                   let product_id = unsafe { sdl2_sys::SDL_JoystickGetDeviceProduct(raw_event.joystick_index as i32) };
@@ -86,7 +85,7 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
 
                   match raw_event.event {
                     Event::JoyAxisMotion { axis_idx, value, .. } => {
-                      stdout.write_all(format!("[{}][{}] Axis {} moved to {}\n", raw_event.joystick_guid, raw_event.joystick_name, axis_idx, value).as_bytes()).await.unwrap();
+                      stdout.write_all(format!("[{}][{}] Axis {} moved to {}\n", raw_event.joystick_usb_id, raw_event.joystick_name, axis_idx, value).as_bytes()).await.unwrap();
                       stdout.flush().await.unwrap();
 
                       let control_name = format!("Axis{}", axis_idx);
@@ -130,7 +129,7 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
                       }
                     },
                     Event::JoyButtonDown {button_idx, ..} | Event::JoyButtonUp {button_idx, ..} => {
-                      stdout.write_all(format!("[{}][{}] Button {} triggered\n",  raw_event.joystick_guid, raw_event.joystick_name, button_idx).as_bytes()).await.unwrap();
+                      stdout.write_all(format!("[{}][{}] Button {} triggered\n",  raw_event.joystick_usb_id, raw_event.joystick_name, button_idx).as_bytes()).await.unwrap();
                       stdout.flush().await.unwrap();
 
                       if !controller_sdl_map.data.iter().any(|c| c.kind == SDLControlKind::Button && c.index == button_idx) {
@@ -149,7 +148,7 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
                       }
                     },
                     Event::JoyHatMotion {hat_idx, ..}  => {
-                      stdout.write_all(format!("[{}][{}] Hat {} triggered\n", raw_event.joystick_guid, raw_event.joystick_name, hat_idx).as_bytes()).await.unwrap();
+                      stdout.write_all(format!("[{}][{}] Hat {} triggered\n", raw_event.joystick_usb_id, raw_event.joystick_name, hat_idx).as_bytes()).await.unwrap();
                       stdout.flush().await.unwrap();
 
                       if !controller_sdl_map.data.iter().any(|c| c.kind == SDLControlKind::Hat && c.index == hat_idx) {
@@ -170,8 +169,8 @@ pub async fn run_calibration_mode<T: AsRef<str>>(config_dir: T) {
                     _ => {},
                   };
 
-                  sdl_mapping_lock.insert(raw_event.joystick_guid.clone(), controller_sdl_map);
-                  controller_calibrations_lock.insert(raw_event.joystick_guid.clone(), controller_calibration);
+                  sdl_mapping_lock.insert(raw_event.joystick_usb_id.clone(), controller_sdl_map);
+                  controller_calibrations_lock.insert(raw_event.joystick_usb_id.clone(), controller_calibration);
                 } => {}
             }
         }

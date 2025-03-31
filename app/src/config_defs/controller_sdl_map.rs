@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use super::serde_sdl_guid::SDLGuid;
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "snake_case")]
 pub enum SDLControlKind {
@@ -25,27 +23,4 @@ pub struct ControllerSdlMap {
     /* {0xVENDOR_ID}:{0xPRODUCT_ID} */
     pub usb_id: String,
     pub data: Vec<ControllerSdlMapControl>,
-}
-
-impl ControllerSdlMap {
-    /**
-     * Finds the mapping information by an SDL index and kind
-     */
-    pub fn find_by_sdl_index(
-        &self,
-        kind: &SDLControlKind,
-        index: u8,
-    ) -> Option<ControllerSdlMapControl> {
-        self.data
-            .iter()
-            .find(|c| &c.kind == kind && c.index == index)
-            .cloned()
-    }
-
-    /**
-     * Finds the mapping information by it's friendly name
-     */
-    pub fn find_by_name<T: AsRef<str>>(&self, name: T) -> Option<ControllerSdlMapControl> {
-        self.data.iter().find(|c| c.name == name.as_ref()).cloned()
-    }
 }

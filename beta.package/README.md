@@ -66,3 +66,6 @@ The most advanced configurations are the `direct_control` and `sync_control` ass
 
 That should be all; you can just close and re-open the program (you don't need to restart the game) to load the new profile and you can test out whether it works as expected. Rinse and repeat until you have everything configured correctly.
 
+## Advanced: Adding controller specific config overrides
+If you want to override the config for your specific controller you can create a new profile with the same name, but adding a `"usb_id": ""` key in the config. This key specifies the controller this config is relevant for and will override the general profile.
+

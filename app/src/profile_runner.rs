@@ -87,9 +87,9 @@ impl ProfileRunner {
         self.preferred_control_mode = mode;
     }
 
-    pub fn get_current_profile(&self, controller_guid: Option<String>) -> Option<&ControllerProfile> {
+    pub fn get_current_profile(&self, controller_usb_id: Option<String>) -> Option<&ControllerProfile> {
         match self.profile_name {
-            Some(ref name) => self.config.find_controller_profile(name, controller_guid),
+            Some(ref name) => self.config.find_controller_profile(name, controller_usb_id),
             None => None,
         }
     }
@@ -149,7 +149,7 @@ impl ProfileRunner {
         }
 
         let config_loader = Arc::clone(&self.config);
-        let controller_config = config_loader.find_controller_profile(self.profile_name.as_ref().unwrap(), Some(event.joystick_guid));
+        let controller_config = config_loader.find_controller_profile(self.profile_name.as_ref().unwrap(), Some(event.usb_id));
 
         if controller_config.is_none() {
             return;

@@ -14,9 +14,15 @@ use crate::{
     config_loader::ConfigLoader,
 };
 
+#[derive(Clone)]
+pub struct SDLJoystick {
+    pub usb_id: String,
+    pub raw: Arc<Joystick>,
+}
+
 #[derive(Clone, Debug)]
 pub struct ControllerManagerChangeEvent {
-    pub joystick_guid: String,
+    pub usb_id: String,
     pub control_name: String,
     pub control_state: ControllerManagerControllerControlState,
 }
@@ -24,7 +30,7 @@ pub struct ControllerManagerChangeEvent {
 #[derive(Clone, Debug)]
 pub struct ControllerManagerRawEvent {
     pub joystick_index: u32,
-    pub joystick_guid: String,
+    pub joystick_usb_id: String,
     pub joystick_name: String,
     pub event: Event,
 }
@@ -43,7 +49,7 @@ pub struct ControllerManagerControllerControlState {
 }
 
 pub struct ControllerManagerControllerControl {
-    joystick: Arc<Joystick>,
+    joystick: SDLJoystick,
     name: String,
     sdl_mapping: ControllerSdlMapControl,
     calibration: Option<ControllerCalibrationData>,
@@ -54,7 +60,7 @@ pub struct ControllerManagerControllerControl {
 
 pub struct ControllerManagerController {
     config: Arc<ConfigLoader>,
-    joystick: Arc<Joystick>,
+    joystick: SDLJoystick,
     controls: HashMap<String, ControllerManagerControllerControl>,
 
     change_event_channel: (Arc<Sender<ControllerManagerChangeEvent>>, Arc<Mutex<Receiver<ControllerManagerChangeEvent>>>),
@@ -92,7 +98,7 @@ impl ControllerManagerControllerControlState {
 
 impl ControllerManagerControllerControl {
     pub fn new(
-        joystick: Arc<Joystick>,
+        joystick: SDLJoystick,
         name: String,
         sdl_mapping: ControllerSdlMapControl,
         calibration: Option<&ControllerCalibrationData>,
@@ -128,17 +134,17 @@ impl ControllerManagerControllerControl {
     pub fn reset(&mut self) {
         match self.sdl_mapping.kind {
             SDLControlKind::Axis => {
-                if let Ok(value) = self.joystick.axis(self.sdl_mapping.index as u32) {
+                if let Ok(value) = self.joystick.raw.axis(self.sdl_mapping.index as u32) {
                     self.update_value(value, true);
                 }
             }
             SDLControlKind::Button => {
-                if let Ok(value) = self.joystick.button(self.sdl_mapping.index as u32) {
+                if let Ok(value) = self.joystick.raw.button(self.sdl_mapping.index as u32) {
                     self.update_value(if value { 1 } else { 0 }, true);
                 }
             }
             SDLControlKind::Hat => {
-                if let Ok(value) = self.joystick.hat(self.sdl_mapping.index as u32) {
+                if let Ok(value) = self.joystick.raw.hat(self.sdl_mapping.index as u32) {
                     self.update_value(value as i16, true);
                 }
             }
@@ -233,7 +239,7 @@ impl ControllerManagerControllerControl {
         };
 
         match self.change_event_channel.0.send(ControllerManagerChangeEvent {
-            joystick_guid: self.joystick.guid().string(),
+            usb_id: self.joystick.usb_id.clone(),
             control_name: self.name.clone(),
             control_state: self.state.clone(),
         }) {
@@ -275,7 +281,10 @@ impl ControllerManagerController {
                 let control_calibration = all_controls_calibration_data.iter().find(|x| x.id == control.name);
 
                 let mut control = ControllerManagerControllerControl::new(
-                    Arc::clone(&joystick_arc),
+                    SDLJoystick {
+                        usb_id: usb_id.clone(),
+                        raw: Arc::clone(&joystick_arc),
+                    },
                     control.name.clone(),
                     control.clone(),
                     control_calibration,
@@ -288,14 +297,17 @@ impl ControllerManagerController {
 
         ControllerManagerController {
             config: Arc::clone(&config),
-            joystick: joystick_arc,
+            joystick: SDLJoystick {
+                usb_id: usb_id.clone(),
+                raw: joystick_arc,
+            },
             controls: gamepad_controls,
             change_event_channel,
         }
     }
 
     pub fn process(&mut self, event: sdl2::event::Event) {
-        debug!("Processing event ({}): {:?}", self.joystick.guid().string(), event);
+        debug!("Processing event ({}): {:?}", self.joystick.usb_id, event);
 
         use sdl2::event::Event;
 
@@ -386,8 +398,8 @@ impl ControllerManager {
                         .0
                         .send(ControllerManagerRawEvent {
                             joystick_index: which,
-                            joystick_guid: controller.joystick.guid().string(),
-                            joystick_name: controller.joystick.name(),
+                            joystick_usb_id: controller.joystick.usb_id.clone(),
+                            joystick_name: controller.joystick.raw.name(),
                             event: event.clone(),
                         })
                         .unwrap();
@@ -406,8 +418,8 @@ impl ControllerManager {
                         .0
                         .send(ControllerManagerRawEvent {
                             joystick_index: which,
-                            joystick_guid: controller.joystick.guid().string(),
-                            joystick_name: controller.joystick.name(),
+                            joystick_usb_id: controller.joystick.usb_id.clone(),
+                            joystick_name: controller.joystick.raw.name(),
                             event: event.clone(),
                         })
                         .unwrap();
@@ -427,8 +439,8 @@ impl ControllerManager {
                         .0
                         .send(ControllerManagerRawEvent {
                             joystick_index: which,
-                            joystick_guid: controller.joystick.guid().string(),
-                            joystick_name: controller.joystick.name(),
+                            joystick_usb_id: controller.joystick.usb_id.clone(),
+                            joystick_name: controller.joystick.raw.name(),
                             event: event.clone(),
                         })
                         .unwrap();

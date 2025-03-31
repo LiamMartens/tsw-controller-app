@@ -1,4 +1,3 @@
-use super::serde_sdl_guid::SDLGuid;
 use bezier_easing::bezier_easing;
 use serde::{Deserialize, Serialize};
 

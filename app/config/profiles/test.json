@@ -236,7 +236,7 @@
         "type": "momentary",
         "threshold": 0.9,
         "action_activate": {
-          "keys": "h"
+          "keys": "d"
         }
       }
     },
