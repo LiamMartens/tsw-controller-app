@@ -293,15 +293,24 @@ class TSWControllerMod : public RC::CppUserModBase
         /* skip if no controller or pawn */
         Unreal::UObject* controller = TSWControllerMod::get_player_controller_from(context);
         Unreal::UObject* pawn = TSWControllerMod::get_driver_pawn_from_controller(controller);
-        if (!controller || !pawn) return;
+        if (!controller || !pawn) {
+            Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Missing player controller or pawn\n"));
+            return;
+        }
 
         /* skip if drivable actor can't be found */
         Unreal::UFunction* get_drivable_actor_fn = pawn->GetFunctionByNameInChain(STR("GetDrivableActor"));
-        if (!get_drivable_actor_fn) return;
+        if (!get_drivable_actor_fn) {
+            Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Can't find GetDrivableActor function\n"));
+            return;
+        }
 
         DriverPawn_GetDrivableActorParams drivable_actor_result;
         pawn->ProcessEvent(get_drivable_actor_fn, &drivable_actor_result);
-        if (!drivable_actor_result.DrivableActor) return;
+        if (!drivable_actor_result.DrivableActor) {
+            Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Can't find drivable actor\n"));
+            return;
+        }
 
         Unreal::UFunction* find_virtual_hid_component_func = drivable_actor_result.DrivableActor->GetFunctionByNameInChain(STR("FindVirtualHIDComponent"));
         if (!find_virtual_hid_component_func) return;
