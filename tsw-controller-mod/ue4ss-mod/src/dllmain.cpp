@@ -308,7 +308,6 @@ class TSWControllerMod : public RC::CppUserModBase
         DriverController_GetDrivableActorParams drivable_actor_result;
         controller->ProcessEvent(get_drivable_actor_fn, &drivable_actor_result);
         if (!drivable_actor_result.DrivableActor) {
-            Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Can't find drivable actor\n"));
             return;
         }
 
