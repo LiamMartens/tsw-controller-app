@@ -64,7 +64,7 @@ struct DriverPawn_GetAttachedSeatComponentParams
 {
     Unreal::UObject* SeatComponent;
 };
-struct DriverPawn_GetDrivableActorParams
+struct DriverController_GetDrivableActorParams
 {
     Unreal::UObject* DrivableActor;
 };
@@ -299,14 +299,14 @@ class TSWControllerMod : public RC::CppUserModBase
         }
 
         /* skip if drivable actor can't be found */
-        Unreal::UFunction* get_drivable_actor_fn = pawn->GetFunctionByNameInChain(STR("GetDrivableActor"));
+        Unreal::UFunction* get_drivable_actor_fn = controller->GetFunctionByNameInChain(STR("GetDrivableActor"));
         if (!get_drivable_actor_fn) {
             Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Can't find GetDrivableActor function\n"));
             return;
         }
 
-        DriverPawn_GetDrivableActorParams drivable_actor_result;
-        pawn->ProcessEvent(get_drivable_actor_fn, &drivable_actor_result);
+        DriverController_GetDrivableActorParams drivable_actor_result;
+        controller->ProcessEvent(get_drivable_actor_fn, &drivable_actor_result);
         if (!drivable_actor_result.DrivableActor) {
             Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Can't find drivable actor\n"));
             return;
