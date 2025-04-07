@@ -26,6 +26,15 @@ That's all the required configuration for your controller.
 
 To get started you will need to install UE4SS into Train Sim World. The instructions to do so can be found on [their website](https://docs.ue4ss.com/dev/installation-guide.html).
 
+This mod will require the experimental latest version. As of the time of writing this version was released on December 29, 2024 ([https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest)).
+
+**Note** important note, UE4SS won't work with TSW unless you specify the engine major/minor versions. To do so you will need to open up the `UE4SS-Settings.ini` file and edit the `[EngineVersionOverride]` section as follows:
+```
+[EngineVersionOverride]
+MajorVersion = 4
+MinorVersion = 26
+```
+
 ### Install the mod
 
 Once you have the `ue4ss` directory in the right place you can simply copy the `ue4ss/Mods/TSWControllerMod` directory into the `ue4ss` Mods directory as directed by UE4SS's guides. That's all the required installation on UE4SS.
