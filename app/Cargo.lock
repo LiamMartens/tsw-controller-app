@@ -3618,7 +3618,7 @@ dependencies = [
 
 [[package]]
 name = "tsw5-gamepad"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "bezier_easing",
  "clap",

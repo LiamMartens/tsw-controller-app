@@ -1,6 +1,7 @@
 use std::{fs, path::Path};
 
 use log::{info, warn};
+use slug::slugify;
 
 use super::config_defs::{controller_calibration::ControllerCalibration, controller_profile::ControllerProfile, controller_sdl_map::ControllerSdlMap};
 
@@ -119,19 +120,19 @@ impl ConfigLoader {
         fs::create_dir_all(&profiles_path).unwrap();
 
         for mapping in self.controller_sdl_mappings.iter() {
-            let file_path = sdl_mappings_path.join(format!("{}.json", mapping.name));
+            let file_path = sdl_mappings_path.join(format!("{}.json", slugify(mapping.name.to_string())));
             let json = serde_json::to_string_pretty(mapping).unwrap();
             fs::write(file_path, json).unwrap();
         }
 
         for calibration in self.controller_calibrations.iter() {
-            let file_path = calibration_path.join(format!("{}.json", calibration.usb_id));
+            let file_path = calibration_path.join(format!("{}.json", slugify(calibration.usb_id.to_string())));
             let json = serde_json::to_string_pretty(calibration).unwrap();
             fs::write(file_path, json).unwrap();
         }
 
         for profile in self.controller_profiles.iter() {
-            let file_path = profiles_path.join(format!("{}.json", profile.name));
+            let file_path = profiles_path.join(format!("{}.json", slugify(profile.name.to_string())));
             let json = serde_json::to_string_pretty(profile).unwrap();
             fs::write(file_path, json).unwrap();
         }
