@@ -254,7 +254,8 @@ class TSWControllerMod : public RC::CppUserModBase
 
     static void on_process_event_pre_callback(Unreal::UObject* context, Unreal::UFunction* function, void* params)
     {
-        if (function->GetName() != STR("Tick"))
+        static auto NAME_Tick = Unreal::FName(STR("Tick"));
+        if (function->GetNamePrivate() != NAME_Tick)
         {
             /* only run on ticks to prevent clogging*/
             return;
@@ -392,7 +393,7 @@ class TSWControllerMod : public RC::CppUserModBase
             VirtualHIDComponent_GetCurrentlyChangingControllerParams get_currently_changing_controller_params{};
             context.Context->ProcessEvent(get_currently_changing_controller_func, &get_currently_changing_controller_params);
             /* don't do anything if it's a none identifier, there is no controller or it's not the player controller */
-            if (input_identifier->ToString() == STR("None") || !get_currently_changing_controller_params.Controller ||
+            if (*input_identifier == Unreal::NAME_None || !get_currently_changing_controller_params.Controller ||
                 !TSWControllerMod::is_player_controller(get_currently_changing_controller_params.Controller))
             {
                 return;
