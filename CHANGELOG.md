@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.8.3
+- Disabled UE4ss hot reload
+
 ## v1.8.2
 - Fix tags not always displaying
 
