@@ -1,0 +1,29 @@
+{
+  "folders": [
+    {
+      "path": "./go-app",
+    },
+    {
+      "path": "./RE-UE4SS",
+    },
+    {
+      "path": "./tsc-controller-mod",
+    },
+    {
+      "path": "./tsw-controller-mod",
+    },
+    {
+      "path": "./website",
+    },
+    {
+      "path": "./virtual-controller",
+    },
+    {
+      "path": "./shared-profiles",
+    },
+    {
+      "path": "./profile-builder-schema",
+    },
+  ],
+  "settings": {},
+}
