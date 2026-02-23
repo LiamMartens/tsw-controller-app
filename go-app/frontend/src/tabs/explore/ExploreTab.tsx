@@ -3,8 +3,13 @@ import { Suspense, useMemo } from "react";
 import { main } from "../../../wailsjs/go/models";
 import { BrowserOpenURL } from "../../../wailsjs/runtime/runtime";
 import { useControllers, useSharedProfiles } from "../../swr";
+import { useForm } from "react-hook-form";
 
 const ExploreTabContent = () => {
+  const { register, watch } = useForm<{ query: string }>({
+    defaultValues: { query: "" },
+  });
+
   const { data: controllers } = useControllers();
   const { data: sharedProfiles } = useSharedProfiles();
 
@@ -14,6 +19,7 @@ const ExploreTabContent = () => {
     );
   };
 
+  const searchQuery = watch("query");
   const [supportedSharedProfiles, unsupportedSharedProfiles] = useMemo(() => {
     const controllerDeviceIDs = new Set(
       controllers?.filter((c) => !c.IsVirtual).map((c) => c.DeviceID) ?? [],
@@ -21,13 +27,18 @@ const ExploreTabContent = () => {
     const supportedSharedProfiles: main.Interop_SharedProfile[] = [];
     const unsupportedSharedProfiles: main.Interop_SharedProfile[] = [];
     sharedProfiles.forEach((p) => {
+      const isSearchMatch =
+        searchQuery.trim().length === 0 ||
+        p.Name.toLowerCase().includes(searchQuery.toLowerCase());
+      if (!isSearchMatch) return;
+
       (controllerDeviceIDs.has(p.DeviceID)
         ? supportedSharedProfiles
         : unsupportedSharedProfiles
       ).push(p);
     });
     return [supportedSharedProfiles, unsupportedSharedProfiles] as const;
-  }, [controllers, sharedProfiles]);
+  }, [controllers, sharedProfiles, searchQuery]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -39,6 +50,13 @@ const ExploreTabContent = () => {
             Submit now
           </button>
         </span>
+      </div>
+      <div>
+        <input
+          className="input w-full"
+          placeholder="Search for profile(s)"
+          {...register("query")}
+        />
       </div>
       <div>
         <p className="text-md">Supported Controller Profiles</p>

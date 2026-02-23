@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.9.0
+- Add search for explore tab
+
 ## v1.8.3
 - Disabled UE4ss hot reload
 

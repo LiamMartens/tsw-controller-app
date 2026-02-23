@@ -51,7 +51,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./1972mk2tubestock.tswprofile",
-      "name": "1972mk2tubestock - TCA Quadrant Boeing",
+      "name": "1972 Mark 2 Tubestock  - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -60,7 +60,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./acela.tswprofile",
-      "name": "acela - TCA Quadrant Boeing",
+      "name": "Acela Express - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -69,7 +69,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./acs64_boston_sprinter.tswprofile",
-      "name": "acs64_boston_sprinter - TCA Quadrant Boeing",
+      "name": "ACS-64 - Boston Sprinter - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -78,7 +78,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./acs64.tswprofile",
-      "name": "acs64 - TCA Quadrant Boeing",
+      "name": "ACS-64 - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -87,7 +87,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./allegra.tswprofile",
-      "name": "allegra - TCA Quadrant Boeing",
+      "name": "ABe 8/12 Allegra - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -96,7 +96,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./alp45dp.tswprofile",
-      "name": "alp45dp - TCA Quadrant Boeing",
+      "name": "ALP-45DP - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -105,7 +105,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./alp46.tswprofile",
-      "name": "alp46 - TCA Quadrant Boeing",
+      "name": "ALP-46 - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -114,7 +114,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./amfleet_cabcar.tswprofile",
-      "name": "amfleet_cabcar - TCA Quadrant Boeing",
+      "name": "Amfleet Cab Car - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -123,7 +123,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./awc_class805.tswprofile",
-      "name": "awc_class805 - TCA Quadrant Boeing",
+      "name": "Avanti BR Class 805 - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -132,7 +132,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./bi_level_cabcar_ctx.tswprofile",
-      "name": "bi_level_cabcar_ctx - TCA Quadrant Boeing",
+      "name": "Bombardier Bi-Level Cab Car - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -141,7 +141,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./bilevel_rotem_car.tswprofile",
-      "name": "bilevel_rotem_car - TCA Quadrant Boeing",
+      "name": "Rotem Bi-Level Cab Car - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -150,7 +150,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./bnsf_es44c4.tswprofile",
-      "name": "bnsf_es44c4 - TCA Quadrant Boeing",
+      "name": "BNSF ES44C4 - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -159,7 +159,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./bnsf_sd40.tswprofile",
-      "name": "bnsf_sd40 - TCA Quadrant Boeing",
+      "name": "BNSF SD40 - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -168,7 +168,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./br110.tswprofile",
-      "name": "br110 - TCA Quadrant Boeing",
+      "name": "DB BR 110 - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -177,7 +177,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./br111.tswprofile",
-      "name": "br111 - TCA Quadrant Boeing",
+      "name": "DB BR 111 - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -186,7 +186,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./br112.tswprofile",
-      "name": "br112 - TCA Quadrant Boeing",
+      "name": "DB BR 112 - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -195,7 +195,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./br114.tswprofile",
-      "name": "br114 - TCA Quadrant Boeing",
+      "name": "DB BR 114 - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -204,7 +204,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./br143_nahverkehr_dresden.tswprofile",
-      "name": "br143_nahverkehr_dresden - TCA Quadrant Boeing",
+      "name": "DB BR 143 - Nahverkehr Dresden - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -213,7 +213,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./br143_dresden_leipzig.tswprofile",
-      "name": "br143_dresden_leipzig - TCA Quadrant Boeing",
+      "name": "DB BR 143 - Dresden Leipzig - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -222,7 +222,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./br146.tswprofile",
-      "name": "br146 - TCA Quadrant Boeing",
+      "name": "DB BR 146 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -230,7 +230,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./br155.tswprofile",
-      "name": "br155 - TCA Quadrant Boeing",
+      "name": "DB BR 155 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -238,7 +238,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./br182_185.tswprofile",
-      "name": "br182_185 - TCA Quadrant Boeing",
+      "name": "DB BR 182 / DB BR 185 - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -247,7 +247,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./br193.tswprofile",
-      "name": "br193 - TCA Quadrant Boeing",
+      "name": "DB BR 193 - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -256,7 +256,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./br363_365.tswprofile",
-      "name": "br363_365 - TCA Quadrant Boeing",
+      "name": "DB BR 363 / DB BR 365 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -264,7 +264,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./br401.tswprofile",
-      "name": "br401 - TCA Quadrant Boeing",
+      "name": "DB BR 401 ICE 1 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -272,7 +272,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./br411_403_406.tswprofile",
-      "name": "br411_403_406 - TCA Quadrant Boeing",
+      "name": "DB BR 403 ICE 3 / DB BR 406 ICE 3M / DB BR 411 ICE-T - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -280,7 +280,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./br423_425_430.tswprofile",
-      "name": "br423_425_430 - TCA Quadrant Boeing",
+      "name": "DB BR 423 / DB BR 425 / DB BR 430 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -288,7 +288,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./br442_1442.tswprofile",
-      "name": "br442_1442 - TCA Quadrant Boeing",
+      "name": "DB BR 442 / DB BR 1442 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -296,7 +296,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./br463_nwagen.tswprofile",
-      "name": "br463_nwagen - TCA Quadrant Boeing",
+      "name": "DB BR Diesel 463 n-Wagen - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -304,7 +304,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./br628.tswprofile",
-      "name": "br628 - TCA Quadrant Boeing",
+      "name": "DB BR 628 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -312,7 +312,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./br642.tswprofile",
-      "name": "br642 - TCA Quadrant Boeing",
+      "name": "DB BR 642 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -320,7 +320,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class08.tswprofile",
-      "name": "class08 - TCA Quadrant Boeing",
+      "name": "BR Class 08 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -328,7 +328,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class101.tswprofile",
-      "name": "class101 - TCA Quadrant Boeing",
+      "name": "BR Class 101 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -336,7 +336,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class142.tswprofile",
-      "name": "class142 - TCA Quadrant Boeing",
+      "name": "BR Class 142 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -344,7 +344,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class150.tswprofile",
-      "name": "class150 - TCA Quadrant Boeing",
+      "name": "BR Class 150 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -352,7 +352,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class150_gwr.tswprofile",
-      "name": "class150_gwr - TCA Quadrant Boeing",
+      "name": "BR Class 150 - Great Western Railway - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -361,7 +361,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class158.tswprofile",
-      "name": "class158 - TCA Quadrant Boeing",
+      "name": "BR Class 158 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -369,7 +369,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class166.tswprofile",
-      "name": "class166 - TCA Quadrant Boeing",
+      "name": "BR Class 166 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -377,7 +377,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class170.tswprofile",
-      "name": "class170 - TCA Quadrant Boeing",
+      "name": "BR Class 170 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -385,7 +385,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class20.tswprofile",
-      "name": "class20 - TCA Quadrant Boeing",
+      "name": "BR Class 20 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -393,7 +393,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class314.tswprofile",
-      "name": "class314 - TCA Quadrant Boeing",
+      "name": "BR Class 314 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -401,7 +401,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class31.tswprofile",
-      "name": "class31 - TCA Quadrant Boeing",
+      "name": "BR Class 31 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -409,7 +409,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class323.tswprofile",
-      "name": "class323 - TCA Quadrant Boeing",
+      "name": "BR Class 323 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -417,7 +417,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class350.tswprofile",
-      "name": "class350 - TCA Quadrant Boeing",
+      "name": "BR Class 350 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -425,7 +425,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class37_40_45_47.tswprofile",
-      "name": "class37_40_45_47 - TCA Quadrant Boeing",
+      "name": "BR Class 37 / BR Class 40 / BR Class 45 / BR Class 47 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -433,7 +433,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class375_377_387.tswprofile",
-      "name": "class375_377_387 - TCA Quadrant Boeing",
+      "name": "BR Class 375 / BR Class 377 / BR Class 387 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -441,7 +441,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class385.tswprofile",
-      "name": "class385 - TCA Quadrant Boeing",
+      "name": "BR Class 385 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -449,7 +449,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class390.tswprofile",
-      "name": "class390 - TCA Quadrant Boeing",
+      "name": "BR Class 390 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -457,7 +457,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class395.tswprofile",
-      "name": "class395 - TCA Quadrant Boeing",
+      "name": "BR Class 395 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -465,7 +465,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class43_gwr.tswprofile",
-      "name": "class43_gwr - TCA Quadrant Boeing",
+      "name": "BR Class 43 - Great Western Railway - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -473,7 +473,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class465.tswprofile",
-      "name": "class465 - TCA Quadrant Boeing",
+      "name": "BR Class 465 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -481,7 +481,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class66.tswprofile",
-      "name": "class66 - TCA Quadrant Boeing",
+      "name": "BR Class 66 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -489,7 +489,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class710.tswprofile",
-      "name": "class710 - TCA Quadrant Boeing",
+      "name": "BR Class 710 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -497,7 +497,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./class800_801.tswprofile",
-      "name": "class800_801 - TCA Quadrant Boeing",
+      "name": "BR Class 800 / BR Class 801 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -505,7 +505,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./ctc3_cabcar.tswprofile",
-      "name": "ctc3_cabcar - TCA Quadrant Boeing",
+      "name": "CTC-3 Cab Car - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -513,7 +513,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./db766.tswprofile",
-      "name": "db766 - TCA Quadrant Boeing",
+      "name": "DB BR 766 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -521,7 +521,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./emd_f125.tswprofile",
-      "name": "emd_f125 - TCA Quadrant Boeing",
+      "name": "EMD F125 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -529,7 +529,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./f40ph.tswprofile",
-      "name": "f40ph - TCA Quadrant Boeing",
+      "name": "EMD F40PH - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -537,7 +537,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./gallery_cabcar.tswprofile",
-      "name": "gallery_cabcar - TCA Quadrant Boeing",
+      "name": "Gallery Cab Car - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -545,7 +545,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./ge4_4.tswprofile",
-      "name": "ge4_4 - TCA Quadrant Boeing",
+      "name": "RhB Ge 4/4 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -553,7 +553,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./gp38.tswprofile",
-      "name": "gp38 - TCA Quadrant Boeing",
+      "name": "GP38 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -561,7 +561,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./hsp46.tswprofile",
-      "name": "hsp46 - TCA Quadrant Boeing",
+      "name": "HSP46 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -569,7 +569,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./icm3_koploper.tswprofile",
-      "name": "icm3_koploper - TCA Quadrant Boeing",
+      "name": "ICMm Koploper - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -577,7 +577,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./m3.tswprofile",
-      "name": "m3 - TCA Quadrant Boeing",
+      "name": "M3 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -585,7 +585,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./m7.tswprofile",
-      "name": "m7 - TCA Quadrant Boeing",
+      "name": "M7 - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -594,7 +594,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./m9.tswprofile",
-      "name": "m9 - TCA Quadrant Boeing",
+      "name": "M9 - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -603,7 +603,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./mp36.tswprofile",
-      "name": "mp36 - TCA Quadrant Boeing",
+      "name": "MP36 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -611,7 +611,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./multilevel_cabcar_njt.tswprofile",
-      "name": "multilevel_cabcar_njt - TCA Quadrant Boeing",
+      "name": "Multi-Level Commuter Cab Car - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -619,7 +619,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./njt-arrow3.tswprofile",
-      "name": "njt-arrow3 - TCA Quadrant Boeing",
+      "name": "Arrow III (3) - TCA Quadrant Boeing",
       "auto_select": true,
       "apps": [
         "Train Sim World"
@@ -628,7 +628,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./obb1116.tswprofile",
-      "name": "obb1116 - TCA Quadrant Boeing",
+      "name": "ÖBB 1116 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -636,7 +636,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./obb4024.tswprofile",
-      "name": "obb4024 - TCA Quadrant Boeing",
+      "name": "ÖBB 4024 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -644,7 +644,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./rabe523.tswprofile",
-      "name": "rabe523 - TCA Quadrant Boeing",
+      "name": "SBB RABe 523 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -652,7 +652,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./rotem_ctc5.tswprofile",
-      "name": "rotem_ctc5 - TCA Quadrant Boeing",
+      "name": "CTC-5 - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -660,7 +660,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./sng3_sprinter.tswprofile",
-      "name": "sng3_sprinter - TCA Quadrant Boeing",
+      "name": "SNG 3 Sprinter - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
@@ -668,7 +668,7 @@
     {
       "usb_id": "044F:040A",
       "file": "./tgv_duplex.tswprofile",
-      "name": "tgv_duplex - TCA Quadrant Boeing",
+      "name": "TGV Duplex - TCA Quadrant Boeing",
       "apps": [
         "Train Sim World"
       ]
