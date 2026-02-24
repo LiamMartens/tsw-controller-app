@@ -13,6 +13,7 @@
     "control_range": {
       "type": "object",
       "description": "The control range that will be remapped to 0,1 or 0,-1. This is useful when direct mapping partial ranges.",
+      "required": ["start", "end"],
       "properties": {
         "start": {
           "type": "number"
