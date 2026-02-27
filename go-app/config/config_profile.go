@@ -81,7 +81,7 @@ type Config_Controller_Profile_Control_Assignment_Momentary struct {
 	Config_Controller_Profile_Control_Assignment_Shared
 	Type      string  `json:"type" validate:"required,eq=momentary"`
 	Threshold float64 `json:"threshold"`
-	Match     *string `json:"match,omitempty" validate:"oneof=exceeds equals"`
+	Match     *string `json:"match,omitempty" validate:"omitempty,oneof=exceeds equals"`
 	/* which action to perform once the threshold is exceeded */
 	ActionActivate Config_Controller_Profile_Control_Assignment_Action `json:"action_activate" validate:"required"`
 	/* which action to perform once the threshold is not exceeded anymore; defaults to releasing the activate action if keys */
@@ -109,7 +109,7 @@ type Config_Controller_Profile_Control_Assignment_Toggle struct {
 	Config_Controller_Profile_Control_Assignment_Shared
 	Type      string  `json:"type" validate:"required,eq=toggle"`
 	Threshold float64 `json:"threshold"`
-	Match     *string `json:"match,omitempty" validate:"oneof=exceeds equals"`
+	Match     *string `json:"match,omitempty" validate:"omitempty,oneof=exceeds equals"`
 	/* which action to perform once the threshold is exceeded */
 	ActionActivate   Config_Controller_Profile_Control_Assignment_Action `json:"action_activate" validate:"required"`
 	ActionDeactivate Config_Controller_Profile_Control_Assignment_Action `json:"action_deactivate" validate:"required"`

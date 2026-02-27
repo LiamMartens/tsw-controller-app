@@ -10,6 +10,11 @@
       "type": "number",
       "description": "The threshold which the gamepad control needs to exceed before triggering the action. For most momentary implementations this can be any value since most buttons report a value of 0 or 1"
     },
+    "match": {
+      "enum": ["exceeds", "equals"],
+      "default": "exceeds",
+      "description": "Defines how to interpret the threshold. Defaults to exceeds where the action is executed when the value exceeds the threshold. Can also be set to equals for an exact comparison"
+    },
     "action_activate": {
       "$ref": "./profile.assignment_action.schema.json",
       "description": "The actual action to activate when the threshold is exceeded"
