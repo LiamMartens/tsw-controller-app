@@ -68,7 +68,7 @@ type Config_Controller_Profile_Control_Assignment_Action struct {
 type Config_Controller_Profile_Control_Assignment_Condition struct {
 	/* this is the other control name to depend on */
 	Control  string  `json:"control" validate:"required"`
-	Operator string  `json:"operator" validate:"required,oneof=gte lte gt lt"`
+	Operator string  `json:"operator" validate:"required,oneof=gte lte gt lt eq"`
 	Value    float64 `json:"value"`
 }
 
@@ -81,6 +81,7 @@ type Config_Controller_Profile_Control_Assignment_Momentary struct {
 	Config_Controller_Profile_Control_Assignment_Shared
 	Type      string  `json:"type" validate:"required,eq=momentary"`
 	Threshold float64 `json:"threshold"`
+	Match     *string `json:"match,omitempty" validate:"omitempty,oneof=exceeds equals"`
 	/* which action to perform once the threshold is exceeded */
 	ActionActivate Config_Controller_Profile_Control_Assignment_Action `json:"action_activate" validate:"required"`
 	/* which action to perform once the threshold is not exceeded anymore; defaults to releasing the activate action if keys */
@@ -108,6 +109,7 @@ type Config_Controller_Profile_Control_Assignment_Toggle struct {
 	Config_Controller_Profile_Control_Assignment_Shared
 	Type      string  `json:"type" validate:"required,eq=toggle"`
 	Threshold float64 `json:"threshold"`
+	Match     *string `json:"match,omitempty" validate:"omitempty,oneof=exceeds equals"`
 	/* which action to perform once the threshold is exceeded */
 	ActionActivate   Config_Controller_Profile_Control_Assignment_Action `json:"action_activate" validate:"required"`
 	ActionDeactivate Config_Controller_Profile_Control_Assignment_Action `json:"action_deactivate" validate:"required"`
@@ -453,6 +455,24 @@ func (c *Config_Controller_Profile_Control_Assignment_Action) ToString() string 
 		return c.DirectControl.ToString()
 	}
 	return ""
+}
+
+func (c *Config_Controller_Profile_Control_Assignment_Momentary) IsMatch(value float64) bool {
+	if c.Match != nil {
+		if *c.Match == "equals" {
+			return value == c.Threshold
+		}
+	}
+	return value >= c.Threshold
+}
+
+func (c *Config_Controller_Profile_Control_Assignment_Toggle) IsMatch(value float64) bool {
+	if c.Match != nil {
+		if *c.Match == "equals" {
+			return value == c.Threshold
+		}
+	}
+	return value >= c.Threshold
 }
 
 func (c *Config_Controller_Profile_Control_Assignment_Linear_Threshold) IsExceedingThreshold(value float64) bool {

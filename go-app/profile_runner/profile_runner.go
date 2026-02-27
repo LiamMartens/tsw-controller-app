@@ -567,6 +567,11 @@ collect_assignments_loop:
 						/* condition doesn't match -> skip */
 						continue collect_assignments_loop
 					}
+				case "eq":
+					if state.NormalizedValues.Value != condition.Value {
+						/* condition doesn't match -> skip */
+						continue collect_assignments_loop
+					}
 				}
 			}
 		}
@@ -684,14 +689,14 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 				}
 
 				if control_assignment_item.Momentary != nil {
-					if change_event.ControlState.NormalizedValues.Value >= control_assignment_item.Momentary.Threshold {
+					if control_assignment_item.Momentary.IsMatch(change_event.ControlState.NormalizedValues.Value) {
 						// call if there was no prior call or if the prior call was not this threshold
-						should_call_activation := previous_assignment_call == nil || previous_assignment_call.ControlState.NormalizedValues.Value < control_assignment_item.Momentary.Threshold
+						should_call_activation := previous_assignment_call == nil || !control_assignment_item.Momentary.IsMatch(previous_assignment_call.ControlState.NormalizedValues.Value)
 						if should_call_activation {
 							action_to_call := p.AssignmentActionToAssignmentCall(change_event.ControlState, control_assignment_item.Momentary.ActionActivate, false)
 							p.CallAssignmentActionForControl(control_name, assignment_index, change_event.Controller, change_event.ControlState, control_assignment_item, action_to_call)
 						}
-					} else if previous_assignment_call != nil && previous_assignment_call.ControlState.NormalizedValues.Value >= control_assignment_item.Momentary.Threshold {
+					} else if previous_assignment_call != nil && control_assignment_item.Momentary.IsMatch(previous_assignment_call.ControlState.NormalizedValues.Value) {
 						// when below the threshold only call action if the last call was above or equal to the threshold
 						if control_assignment_item.Momentary.ActionDeactivate != nil {
 							action_to_call := p.AssignmentActionToAssignmentCall(change_event.ControlState, *control_assignment_item.Momentary.ActionDeactivate, false)
@@ -749,7 +754,7 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 					}
 				}
 				if control_assignment_item.Toggle != nil {
-					if change_event.ControlState.NormalizedValues.Value >= control_assignment_item.Toggle.Threshold {
+					if control_assignment_item.Toggle.IsMatch(change_event.ControlState.NormalizedValues.Value) {
 						// call if there was no prior call or if the prior call was not this threshold
 						action_to_call := p.AssignmentActionToAssignmentCall(change_event.ControlState, control_assignment_item.Toggle.ActionActivate, false)
 						if previous_assignment_call != nil && action_to_call.IsSameAction(previous_assignment_call) {
@@ -757,7 +762,7 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 							action_to_call = p.AssignmentActionToAssignmentCall(change_event.ControlState, control_assignment_item.Toggle.ActionDeactivate, false)
 						}
 						p.CallAssignmentActionForControl(control_name, assignment_index, change_event.Controller, change_event.ControlState, control_assignment_item, action_to_call)
-					} else if previous_assignment_call != nil && previous_assignment_call.ControlState.NormalizedValues.Value >= control_assignment_item.Toggle.Threshold && previous_assignment_call.ActionSequencerAction != nil {
+					} else if previous_assignment_call != nil && control_assignment_item.Toggle.IsMatch(previous_assignment_call.ControlState.NormalizedValues.Value) && previous_assignment_call.ActionSequencerAction != nil {
 						// when below the threshold only call action if the last call was above or equal to the threshold
 						// this is only used for releasing key actions
 						p.CallAssignmentActionForControl(control_name, assignment_index, change_event.Controller, change_event.ControlState, control_assignment_item, &ProfileRunnerAssignmentCall{
