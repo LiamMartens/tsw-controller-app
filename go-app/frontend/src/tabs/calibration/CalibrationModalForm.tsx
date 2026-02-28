@@ -104,6 +104,12 @@ export const CalibrationModalForm = ({ controller, onClose }: Props) => {
     });
   }, [controller]);
 
+  useEffect(() => {
+    return () => {
+      UnsubscribeRaw();
+    }
+  }, []);
+
   return (
     <div>
       <h3 className="font-bold text-base">Configuring {controller?.Name}</h3>
