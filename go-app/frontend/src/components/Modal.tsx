@@ -5,12 +5,13 @@ import {
   useRef,
   useState,
   ReactNode,
+  SyntheticEvent,
 } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useDelayState } from "../hooks";
 
-const ErrorFallback = () => (
-  <p className="text-error text-center py-20">An error occured</p>
+const ErrorFallback = ({ error }: { error: unknown }) => (
+  <div className="alert alert-error">{`An error occured (${error})`}</div>
 );
 const SuspenseFallback = () => (
   <div className="flex justify-center py-6">
@@ -37,6 +38,11 @@ export function Modal<T>({ openState, onClose, Component }: ModalProps<T>) {
     ref.current = d;
   };
 
+  const handleClose = (e: SyntheticEvent<HTMLDialogElement>) => {
+    e.stopPropagation();
+    onClose();
+  };
+
   useEffect(() => {
     if (openState) {
       delayedOpenState.setValueInstant(openState);
@@ -45,12 +51,12 @@ export function Modal<T>({ openState, onClose, Component }: ModalProps<T>) {
       ref.current?.close();
       delayedOpenState.setValueDelayed(false, 500);
     }
-  }, [openState, onClose]);
+  }, [openState]);
 
   return (
-    <dialog ref={handleRef} className="modal modal-s">
+    <dialog ref={handleRef} className="modal modal-s" onClose={handleClose}>
       <div className="modal-box w-11/12 max-w-5xl">
-        <ErrorBoundary fallback={<ErrorFallback />}>
+        <ErrorBoundary fallbackRender={ErrorFallback}>
           <Suspense fallback={<SuspenseFallback />}>
             {delayedOpenState.value !== false && (
               <Component

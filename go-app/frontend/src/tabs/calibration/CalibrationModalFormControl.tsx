@@ -5,9 +5,10 @@ import {
   CalibrationStateControl,
   UseCalibrationFormType,
 } from "./useCalibrationForm";
-import { CSSProperties, useMemo, useRef } from "react";
+import { CSSProperties, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Controller } from "react-hook-form";
+import { Modal, ModalContentProps } from "../../components";
 
 type Props = {
   form: UseCalibrationFormType;
@@ -16,13 +17,66 @@ type Props = {
   isRunning: boolean;
 };
 
-export const CalibrationModalFormControl = ({
-  form,
-  index,
-  field,
-  isRunning,
-}: Props) => {
-  const curveDialogRef = useRef<HTMLDialogElement | null>(null);
+const CalibrationModalFormControlEditCurveModal = ({
+  openState: { index, field, form },
+}: ModalContentProps<Props>) => {
+  return (
+    <div>
+      <form method="dialog">
+        <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+          ✕
+        </button>
+      </form>
+      <div className="flex flex-col gap-4">
+        <h3 className="font-bold text-sm">Editing {field.name} curve</h3>
+        <div
+          style={
+            {
+              "--bce-colors-background": "var(--color-base-300)",
+              "--bce-colors-row": "var(--color-base-100)",
+              "--bce-colors-outerarea": "var(--color-base-100)",
+              "--bce-colors-handle-fixed": "var(--color-base-content)",
+              "--bce-colors-handle-start": "var(--color-secondary)",
+              "--bce-colors-handle-end": "var(--color-secondary)",
+              "--bce-colors-curve-line": "var(--color-primary)",
+              "--bce-colors-preview": "var(--color-base-content)",
+              "--bce-colors-preview-border": "var(--color-primary)",
+            } as CSSProperties
+          }
+          className="flex flex-col gap-2"
+        >
+          <Controller
+            control={form.control}
+            name={`controls.${index}.easingCurve`}
+            render={({ field }) => (
+              <div className="flex justify-center">
+                <BezierCurveEditor
+                  enablePreview
+                  size={255}
+                  outerAreaSize={0}
+                  value={field.value as ValueType}
+                  onChange={field.onChange}
+                />
+              </div>
+            )}
+          />
+          <p className="text-xs text-base-content/60">
+            The axis curve controls how your physical axis behaves. By default
+            the axis is linear, but this can be adjusted to make the behavior
+            faster or slower depending on the curve.
+          </p>
+        </div>
+        <form method="dialog">
+          <button className="btn btn-sm w-full">Close</button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export const CalibrationModalFormControl = (props: Props) => {
+  const { form, index, field, isRunning } = props;
+  const [editCurveDialogOpen, setEditCurveDialogOpen] = useState(false);
   const normalAxisValue = useMemo(() => {
     const ease = easings.cubicBezier(...field.easingCurve);
 
@@ -38,7 +92,7 @@ export const CalibrationModalFormControl = ({
   }, [field]);
 
   const handleEditAxisCurve = () => {
-    curveDialogRef.current?.showModal();
+    setEditCurveDialogOpen(true);
   };
 
   return (
@@ -169,56 +223,11 @@ export const CalibrationModalFormControl = ({
       </div>
 
       {createPortal(
-        <dialog ref={curveDialogRef} className="modal modal-s">
-          <div className="modal-box w-xs">
-            <form method="dialog">
-              <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
-                ✕
-              </button>
-            </form>
-            <div className="flex flex-col gap-4">
-              <h3 className="font-bold text-sm">Editing {field.name} curve</h3>
-              <div
-                style={
-                  {
-                    "--bce-colors-background": "var(--color-base-300)",
-                    "--bce-colors-row": "var(--color-base-100)",
-                    "--bce-colors-outerarea": "var(--color-base-100)",
-                    "--bce-colors-handle-fixed": "var(--color-base-content)",
-                    "--bce-colors-handle-start": "var(--color-secondary)",
-                    "--bce-colors-handle-end": "var(--color-secondary)",
-                    "--bce-colors-curve-line": "var(--color-primary)",
-                    "--bce-colors-preview": "var(--color-base-content)",
-                    "--bce-colors-preview-border": "var(--color-primary)",
-                  } as CSSProperties
-                }
-                className="flex flex-col gap-2"
-              >
-                <Controller
-                  control={form.control}
-                  name={`controls.${index}.easingCurve`}
-                  render={({ field }) => (
-                    <BezierCurveEditor
-                      enablePreview
-                      size={255}
-                      outerAreaSize={0}
-                      value={field.value as ValueType}
-                      onChange={field.onChange}
-                    />
-                  )}
-                />
-                <p className="text-xs text-base-content/60">
-                  The axis curve controls how your physical axis behaves. By
-                  default the axis is linear, but this can be adjusted to make
-                  the behavior faster or slower depending on the curve.
-                </p>
-              </div>
-              <form method="dialog">
-                <button className="btn btn-sm w-full">Close</button>
-              </form>
-            </div>
-          </div>
-        </dialog>,
+        <Modal
+          openState={editCurveDialogOpen ? props : false}
+          onClose={() => setEditCurveDialogOpen(false)}
+          Component={CalibrationModalFormControlEditCurveModal}
+        />,
         document.body,
       )}
     </div>

@@ -1,25 +1,21 @@
 import { MutableRefObject, useRef } from "react";
+import { Modal } from "../../components";
 
 type Props = {
-  dialogRef: MutableRefObject<HTMLDialogElement | null>;
+  open: boolean;
+  onClose: () => void;
 };
 
-export const EasyMapperModal = ({ dialogRef }: Props) => {
-  const ref = useRef<HTMLDialogElement | null>(null);
+const EasyMapperModalContent = () => {
+  return null;
+};
 
-  const handleRef = (d: HTMLDialogElement | null) => {
-    ref.current = d;
-    dialogRef.current = d;
-  };
-
-  const handleClose = () => {
-    ref.current?.close();
-  };
-
+export const EasyMapperModal = ({ open, onClose }: Props) => {
   return (
-    <dialog ref={handleRef} className="modal modal-s">
-      <div className="modal-box w-11/12 max-w-5xl">
-      </div>
-    </dialog>
+    <Modal
+      openState={open}
+      onClose={onClose}
+      Component={EasyMapperModalContent}
+    />
   );
 };

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LiamMartens/tsw-controller-app/refs/heads/main/profile-builder-schema/profile.schema.json",
+  "name": "Test",
+  "controls": [
+    {
+      "name": "Button1",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 1.0,
+          "action_activate": {
+            "keys": "q"
+          }
+        }
+      ]
+    }
+  ]
+}

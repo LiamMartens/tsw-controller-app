@@ -7,3 +7,4 @@ export * from "./useSharedProfiles";
 export * from "./useLastInstalledModVersion";
 export * from "./useProfiles";
 export * from "./useDeviceIP";
+export * from "./useControllerConfiguration";
