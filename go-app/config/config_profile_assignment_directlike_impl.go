@@ -3,6 +3,8 @@ package config
 import (
 	"math"
 	"tsw_controller_app/math_utils"
+
+	"github.com/yassinebenaid/godump"
 )
 
 type StepList_Item struct {
@@ -138,7 +140,8 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Get
 	defs := []ControlStepDefinition{}
 	for ix, step := range stepslist {
 		num_steps := len(stepslist)
-		default_controlvalue_step_tolerance := math_utils.RoundToMarginOfError((c.Max - c.Min) / (float64(num_steps) - 1.0) / 2.0)
+		default_threshold_step := math_utils.RoundToMarginOfError(1.0 / (float64(num_steps) - 1.0))
+		default_threshold_tolerance := math_utils.RoundToMarginOfError(default_threshold_step / 2.0)
 		step_threshold := ControlStepDefinition_Threshold{}
 		if len(step_thresholds) > ix {
 			step_threshold.ValueStart = step_thresholds[ix].Threshold
@@ -149,21 +152,21 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Get
 			if step_thresholds[ix].ThresholdTolerance != nil {
 				step_threshold.Tolerance = *step_thresholds[ix].ThresholdTolerance
 			} else if !step.IsFreeRange {
-				step_threshold.Tolerance = default_controlvalue_step_tolerance
+				step_threshold.Tolerance = default_threshold_tolerance
 			}
 		} else if !step.IsFreeRange {
 			step_threshold.ValueStart = *step.Value
 			step_threshold.ValueEnd = *step.Value
-			step_threshold.Tolerance = default_controlvalue_step_tolerance
+			step_threshold.Tolerance = default_threshold_tolerance
 		} else if step.IsFreeRange {
-			step_threshold.ValueStart = c.Min
-			step_threshold.ValueEnd = c.Max
+			step_threshold.ValueStart = 0.0
+			step_threshold.ValueEnd = 1.0
 			step_threshold.Tolerance = 0.0 /* free range zones get no tolerance by default */
-			if step.PreviousValue != nil {
-				step_threshold.ValueStart = *step.PreviousValue
+			if ix > 0 {
+				step_threshold.ValueStart = float64(ix-1) * default_threshold_step
 			}
-			if step.NextValue != nil {
-				step_threshold.ValueEnd = *step.NextValue
+			if ix < num_steps-1 {
+				step_threshold.ValueEnd = float64(ix+1) * default_threshold_step
 			}
 		}
 
@@ -213,17 +216,11 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Cal
 
 	minmax_delta := math.Abs(c.Max - c.Min)
 	absolute_input_value := math.Abs(input_value)
-	var input_value_factor float64 = 1
-	if input_value < 0.0 {
-		input_value_factor = -1
-	}
-
-	// normal := (input_value * total_distance) + c.Min
 
 	steps := c.GetSteps()
 	if len(steps) == 0 {
 		/* if no steps are defined - send value directly */
-		value := math_utils.Clamp((absolute_input_value*minmax_delta)*input_value_factor+c.Min, c.Min, c.Max)
+		value := math_utils.Clamp((absolute_input_value*minmax_delta)+c.Min, c.Min, c.Max)
 		return &value
 	}
 
@@ -235,10 +232,11 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Cal
 
 		threshold_start := step.Threshold.ValueStart - step.Threshold.Tolerance
 		threshold_end := step.Threshold.ValueEnd + step.Threshold.Tolerance
-		is_within_threshold := input_value >= threshold_start && input_value <= threshold_end
+		is_within_threshold := absolute_input_value >= threshold_start && absolute_input_value <= threshold_end
 		if is_within_threshold {
 			/* normal depends on the threshold */
-			incoming_value := step.ValueStart + step.Delta()*((input_value-step.Threshold.ValueStart)/step.Threshold.Delta())
+			godump.Dump(step)
+			incoming_value := step.Delta()*((absolute_input_value-step.Threshold.ValueStart)/step.Threshold.Delta()) + step.ValueStart
 			value := math_utils.Clamp(incoming_value, c.Min, c.Max)
 			return &value
 		}
@@ -251,7 +249,7 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Cal
 
 		threshold_start := step.Threshold.ValueStart - step.Threshold.Tolerance
 		threshold_end := step.Threshold.ValueEnd + step.Threshold.Tolerance
-		is_within_threshold := input_value >= threshold_start && input_value <= threshold_end
+		is_within_threshold := absolute_input_value >= threshold_start && absolute_input_value <= threshold_end
 		if is_within_threshold {
 			value := math_utils.Clamp(step.ValueStart, c.Min, c.Max)
 			return &value
