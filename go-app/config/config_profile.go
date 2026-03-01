@@ -20,21 +20,24 @@ const (
 	PreferredControlMode_ApiControl    PreferredControlMode = "api_control"
 )
 
+type StepList_Item struct {
+	IsFreeRange   bool
+	Value         *float64
+	PreviousValue *float64
+	NextValue     *float64
+}
+
 type ControlStepDefinition_Threshold struct {
-	Value     float64
-	ValueEnd  float64
-	Tolerance float64
+	ValueStart float64
+	ValueEnd   float64
+	Tolerance  float64
 }
 
 type ControlStepDefinition struct {
 	IsFreeRange bool
-	Value       float64
+	ValueStart  float64
+	ValueEnd    float64
 	Threshold   ControlStepDefinition_Threshold
-}
-
-type FreeRangeZone struct {
-	Start float64
-	End   float64
 }
 
 type Config_Controller_Profile_Control_Assignment_Action_Keys struct {
@@ -135,7 +138,7 @@ type Config_Controller_Profile_Control_Assignment_DirectLike_ControlRange struct
 type Config_Controller_Profile_Control_Assignment_DirectLike_InputValue_StepThreshold struct {
 	Threshold          float64  `json:"threshold,omitempty"`           /* The actual threshold of this corresponding step. Can be combined with threshold tolerance */
 	ThresholdEnd       *float64 `json:"threshold_end,omitempty"`       /* Defines the end value of the corresponding step */
-	ThresholdTolerance *float64 `json:"threshold_tolerance,omitempty"` /* Defines the tolerance of the threshold and threshold_end; defaults to 0 */
+	ThresholdTolerance *float64 `json:"threshold_tolerance,omitempty"` /* Defines the tolerance of the threshold and threshold_end; defaults to 0 for free range zones and the default tolerance for normal steps */
 }
 
 type Config_Controller_Profile_Control_Assignment_DirectLike_InputValue struct {
@@ -536,6 +539,14 @@ func (c *Config_Controller_Profile_Control_Assignment_Linear) CalculateNeutraliz
 	return value
 }
 
+func (t *ControlStepDefinition_Threshold) Delta() float64 {
+	return math.Abs(t.ValueEnd - t.ValueStart)
+}
+
+func (t *ControlStepDefinition) Delta() float64 {
+	return math.Abs(t.ValueEnd - t.ValueStart)
+}
+
 func (c *Config_Controller_Profile_Control_Assignment_DirectLike_ControlRange) Clamp(value float64) float64 {
 	// Positive side
 	if value >= 0.0 {
@@ -566,36 +577,71 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_ControlRange) C
 	return (end - value) / (end - start)
 }
 
+/*
+Gets the actual step list as derived from step/steps
+*/
+func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) GetStepsList() []StepList_Item {
+	if c.Steps == nil && c.Step == nil {
+		return []StepList_Item{}
+	}
+
+	/* gather raw numerical step values based on steps or step; identical sequential values */
+	stepvalues := []*float64{}
+	if c.Steps != nil {
+		for ix, step := range *c.Steps {
+			num_values := len(stepvalues)
+			if num_values == 0 || stepvalues[ix-1] != step {
+				stepvalues = append(stepvalues, step)
+			}
+		}
+	} else if c.Step != nil {
+		/* auto-generate steps based on the step param */
+		current_value := c.Min
+		for {
+			step_value := current_value
+			stepvalues = append(stepvalues, &step_value)
+			if current_value >= c.Max {
+				break
+			}
+			current_value = math.Min(math_utils.RoundToMarginOfError(current_value+*c.Step), c.Max)
+		}
+	}
+
+	num_values := len(stepvalues)
+	if num_values == 0 {
+		return []StepList_Item{}
+	}
+
+	steplist := []StepList_Item{}
+	for ix, step := range stepvalues {
+		var previous_value *float64 = nil
+		var next_value *float64 = nil
+		if ix > 0 && stepvalues[ix-1] != nil {
+			value := *stepvalues[ix-1]
+			previous_value = &value
+		}
+		if ix < num_values-1 && stepvalues[ix+1] != nil {
+			value := *stepvalues[ix+1]
+			next_value = &value
+		}
+		steplist = append(steplist, StepList_Item{
+			IsFreeRange:   step == nil,
+			Value:         step,
+			PreviousValue: previous_value,
+			NextValue:     next_value,
+		})
+	}
+	return steplist
+}
+
 /**
 * Returns a normalized steps definition list which contains both free range zones and normal steps
 * and additionally. handles the threshold definitions
  */
 func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) GetSteps() []ControlStepDefinition {
-	if c.Steps == nil && c.Step == nil {
+	stepslist := c.GetStepsList()
+	if len(stepslist) == 0 {
 		return []ControlStepDefinition{}
-	}
-
-	/* normalize into a single deduplicated steps list */
-	steps := []*float64{}
-	if c.Steps != nil {
-		for _, step := range *c.Steps {
-			num_steps := len(steps)
-			/* dedup */
-			if num_steps == 0 || steps[num_steps-1] != step {
-				steps = append(steps, step)
-			}
-		}
-	} else if c.Step != nil {
-		current_value := c.Min
-		for {
-			step_value := current_value
-			steps = append(steps, &step_value)
-			current_value = math.Min(math_utils.RoundToMarginOfError(current_value+*c.Step), c.Max)
-			if current_value >= c.Max {
-				steps = append(steps, &c.Max)
-				break
-			}
-		}
 	}
 
 	step_thresholds := []Config_Controller_Profile_Control_Assignment_DirectLike_InputValue_StepThreshold{}
@@ -604,46 +650,57 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Get
 	}
 
 	defs := []ControlStepDefinition{}
-	for ix, step := range steps {
-		num_steps := len(steps)
+	for ix, step := range stepslist {
+		num_steps := len(stepslist)
 		default_controlvalue_step_tolerance := math_utils.RoundToMarginOfError((c.Max - c.Min) / (float64(num_steps) - 1.0) / 2.0)
 		step_threshold := ControlStepDefinition_Threshold{}
 		if len(step_thresholds) > ix {
-			step_threshold.Value = step_thresholds[ix].Threshold
+			step_threshold.ValueStart = step_thresholds[ix].Threshold
 			step_threshold.ValueEnd = step_thresholds[ix].Threshold
 			if step_thresholds[ix].ThresholdEnd != nil {
 				step_threshold.ValueEnd = *step_thresholds[ix].ThresholdEnd
 			}
 			if step_thresholds[ix].ThresholdTolerance != nil {
 				step_threshold.Tolerance = *step_thresholds[ix].ThresholdTolerance
+			} else if !step.IsFreeRange {
+				step_threshold.Tolerance = default_controlvalue_step_tolerance
 			}
-		} else if step != nil {
-			step_threshold.Value = *step
-			step_threshold.ValueEnd = *step
+		} else if !step.IsFreeRange {
+			step_threshold.ValueStart = *step.Value
+			step_threshold.ValueEnd = *step.Value
 			step_threshold.Tolerance = default_controlvalue_step_tolerance
-		} else {
-			step_threshold.Value = c.Min
+		} else if step.IsFreeRange {
+			step_threshold.ValueStart = c.Min
 			step_threshold.ValueEnd = c.Max
 			step_threshold.Tolerance = 0.0 /* free range zones get no tolerance by default */
-			/* the previous and next values should always be non-nil because the deduplicated list can never contain 2 nil values in sequence */
-			if ix > 0 {
-				step_threshold.Value = *steps[ix-1]
+			if step.PreviousValue != nil {
+				step_threshold.ValueStart = *step.PreviousValue
 			}
-			if ix < num_steps-1 {
-				step_threshold.ValueEnd = *steps[ix+1]
+			if step.NextValue != nil {
+				step_threshold.ValueEnd = *step.NextValue
 			}
 		}
 
-		if step != nil {
+		if !step.IsFreeRange {
 			defs = append(defs, ControlStepDefinition{
 				IsFreeRange: false,
-				Value:       step_threshold.Value,
+				ValueStart:  *step.Value,
+				ValueEnd:    *step.Value,
 				Threshold:   step_threshold,
 			})
-		} else {
+		} else if step.IsFreeRange {
+			value_start := c.Min
+			value_end := c.Max
+			if step.PreviousValue != nil {
+				value_start = *step.PreviousValue
+			}
+			if step.NextValue != nil {
+				value_end = *step.NextValue
+			}
 			defs = append(defs, ControlStepDefinition{
 				IsFreeRange: true,
-				Value:       step_threshold.Value,
+				ValueStart:  value_start,
+				ValueEnd:    value_end,
 				Threshold:   step_threshold,
 			})
 		}
@@ -672,17 +729,25 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Cal
 	normal := (input_value * total_distance) + c.Min
 	steps := c.GetSteps()
 
+	if len(steps) == 0 {
+		/* if no steps are defined - send value directly */
+		value := math_utils.Clamp(normal, c.Min, c.Max)
+		return &value
+	}
+
 	/* free range zones will get prioritized */
 	for _, step := range steps {
 		if !step.IsFreeRange {
 			continue
 		}
 
-		threshold_start := step.Threshold.Value - step.Threshold.Tolerance
+		threshold_start := step.Threshold.ValueStart - step.Threshold.Tolerance
 		threshold_end := step.Threshold.ValueEnd + step.Threshold.Tolerance
 		is_within_threshold := normal >= threshold_start && normal <= threshold_end
 		if is_within_threshold {
-			value := math_utils.Clamp(normal, c.Min, c.Max)
+			/* normal depends on the threshold */
+			incoming_value := step.ValueStart + step.Delta()*((normal-step.Threshold.ValueStart)/step.Threshold.Delta())
+			value := math_utils.Clamp(incoming_value, c.Min, c.Max)
 			return &value
 		}
 	}
@@ -692,11 +757,11 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Cal
 			continue
 		}
 
-		threshold_start := step.Threshold.Value - step.Threshold.Tolerance
+		threshold_start := step.Threshold.ValueStart - step.Threshold.Tolerance
 		threshold_end := step.Threshold.ValueEnd + step.Threshold.Tolerance
 		is_within_threshold := normal >= threshold_start && normal <= threshold_end
 		if is_within_threshold {
-			value := math_utils.Clamp(step.Value, c.Min, c.Max)
+			value := math_utils.Clamp(step.ValueStart, c.Min, c.Max)
 			return &value
 		}
 	}

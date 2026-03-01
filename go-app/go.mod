@@ -13,6 +13,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/veandco/go-sdl2 v0.4.40
 	github.com/wailsapp/wails/v2 v2.10.2
+	github.com/yassinebenaid/godump v0.11.1
 	golang.org/x/exp v0.0.0-20250911091902-df9299821621
 )
 

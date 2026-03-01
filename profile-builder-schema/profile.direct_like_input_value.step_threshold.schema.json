@@ -4,13 +4,16 @@
   "description": "Defines the threshold of a step which can be used to remap a direct/api control like value",
   "properties": {
     "threshold": {
-      "type": "number"
+      "type": "number",
+      "description": "Defines the actual threshold value"
     },
     "threshold_end": {
-      "type": "number"
+      "type": "number",
+      "description": "Defines the threshold end value for ranges"
     },
     "threshold_tolerance": {
-      "type": "number"
+      "type": "number",
+      "description": "Defines the tolerance for the threshold"
     }
   },
   "required": ["threshold"]
