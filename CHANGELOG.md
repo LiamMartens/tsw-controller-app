@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.9.2
+- Added new `step_thresholds` option for direct/api/sync control assignments which can be used to manually map lever inputs onto direct control values more accurately
+
 ## v1.9.1
 - Add support for `eq` operator in conditions
 - Add `match` parameter to `momentary` and `toggle` assignments which can be a value of `exceeds` (default) or `equals`
