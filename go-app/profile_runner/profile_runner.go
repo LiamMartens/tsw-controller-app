@@ -798,17 +798,19 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 					if control_assignment_item.DirectControl.UseNormalized != nil && *control_assignment_item.DirectControl.UseNormalized {
 						flags = append(flags, "normalized")
 					}
-					p.CallAssignmentActionForControl(control_name, assignment_index, change_event.Controller, change_event.ControlState, control_assignment_item, &ProfileRunnerAssignmentCall{
-						ControlState:          change_event.ControlState,
-						ActionSequencerAction: nil,
-						ApiControlCommand:     nil,
-						DirectControlCommand: &DirectController_Command{
-							Controls:      control_assignment_item.DirectControl.Controls,
-							InputValue:    output_value,
-							MaxChangeRate: max_change_rate,
-							Flags:         flags,
-						},
-					})
+					if output_value != nil {
+						p.CallAssignmentActionForControl(control_name, assignment_index, change_event.Controller, change_event.ControlState, control_assignment_item, &ProfileRunnerAssignmentCall{
+							ControlState:          change_event.ControlState,
+							ActionSequencerAction: nil,
+							ApiControlCommand:     nil,
+							DirectControlCommand: &DirectController_Command{
+								Controls:      control_assignment_item.DirectControl.Controls,
+								InputValue:    *output_value,
+								MaxChangeRate: max_change_rate,
+								Flags:         flags,
+							},
+						})
+					}
 				}
 				if control_assignment_item.ApiControl != nil {
 					max_change_rate := DEFAULT_MAX_CHANGE_RATE
@@ -824,17 +826,19 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 						hold = *control_assignment_item.ApiControl.Hold
 					}
 					output_value := control_assignment_item.ApiControl.InputValue.CalculateOutputValue(control_value)
-					p.CallAssignmentActionForControl(control_name, assignment_index, change_event.Controller, change_event.ControlState, control_assignment_item, &ProfileRunnerAssignmentCall{
-						ControlState:          change_event.ControlState,
-						ActionSequencerAction: nil,
-						DirectControlCommand:  nil,
-						ApiControlCommand: &ApiController_Command{
-							Controls:      control_assignment_item.ApiControl.Controls,
-							InputValue:    output_value,
-							MaxChangeRate: max_change_rate,
-							Hold:          hold,
-						},
-					})
+					if output_value != nil {
+						p.CallAssignmentActionForControl(control_name, assignment_index, change_event.Controller, change_event.ControlState, control_assignment_item, &ProfileRunnerAssignmentCall{
+							ControlState:          change_event.ControlState,
+							ActionSequencerAction: nil,
+							DirectControlCommand:  nil,
+							ApiControlCommand: &ApiController_Command{
+								Controls:      control_assignment_item.ApiControl.Controls,
+								InputValue:    *output_value,
+								MaxChangeRate: max_change_rate,
+								Hold:          hold,
+							},
+						})
+					}
 				}
 				if control_assignment_item.SyncControl != nil {
 					control_value := change_event.Control.GetState().NormalizedValues.Value
@@ -842,7 +846,14 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 						control_value = control_assignment_item.SyncControl.ControlRange.Clamp(control_value)
 					}
 					output_value := control_assignment_item.SyncControl.InputValue.CalculateOutputValue(control_value)
-					p.SyncController.UpdateControlStateTargetValue(control_assignment_item.SyncControl.Identifier, output_value, control_assignment_item.SyncControl, &change_event)
+					if output_value != nil {
+						p.SyncController.UpdateControlStateTargetValue(
+							control_assignment_item.SyncControl.Identifier,
+							*output_value,
+							control_assignment_item.SyncControl,
+							&change_event,
+						)
+					}
 				}
 			}
 		}

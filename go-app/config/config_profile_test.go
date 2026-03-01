@@ -82,58 +82,62 @@ func TestConfigProfile_Linear_CalculateNeutralizedValue(t *testing.T) {
 	assert.Equal(t, 1.0, linear.CalculateNeutralizedValue(1))
 }
 
-func TestConfigProfile_DirectOrSyncControl_InputValue_GetFreeRangeZones(t *testing.T) {
-	steps_0_0 := 0.0
-	steps_0_5 := 0.5
-	steps_1_0 := 1.0
+func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_Simple(t *testing.T) {
 	input_value := Config_Controller_Profile_Control_Assignment_DirectLike_InputValue{
-		Min: 0.0,
-		Max: 1.0,
-		Steps: &[]*float64{
-			&steps_0_0, &steps_0_5, nil, &steps_1_0,
-		},
+		Min:  0.0,
+		Max:  1.0,
+		Step: floatPtr(0.2),
 	}
-	free_range_zones := input_value.GetFreeRangeZones()
-	assert.Len(t, free_range_zones, 1)
-	assert.Equal(t, FreeRangeZone{Start: 0.5, End: 1.0}, free_range_zones[0])
+	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.0))
+	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.1))
+	assert.Equal(t, 0.2, *input_value.CalculateOutputValue(0.15))
+	assert.Equal(t, 0.2, *input_value.CalculateOutputValue(0.2))
 }
 
-func TestConfigProfile_DirectOrSyncControl_InputValue_GetNormalSteps(t *testing.T) {
-	steps_0_0 := 0.0
-	steps_0_5 := 0.5
-	steps_1_0 := 1.0
+func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_SimpleFreeRange(t *testing.T) {
 	input_value := Config_Controller_Profile_Control_Assignment_DirectLike_InputValue{
 		Min: 0.0,
 		Max: 1.0,
 		Steps: &[]*float64{
-			&steps_0_0, &steps_0_5, nil, &steps_1_0,
+			floatPtr(0.0), floatPtr(0.5), nil, floatPtr(1.0),
 		},
 	}
-	normal_steps := input_value.GetNormalSteps()
-	assert.Len(t, *normal_steps, 3)
-	assert.ElementsMatch(t, *normal_steps, []float64{0.0, 0.5, 1.0})
+	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.0))
+	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.1))
+	assert.Nil(t, input_value.CalculateOutputValue(0.2))
+	assert.Nil(t, input_value.CalculateOutputValue(0.3))
+	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.4))
+	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.5))
+	assert.Equal(t, 0.6, *input_value.CalculateOutputValue(0.6))
+	assert.Equal(t, 0.7, *input_value.CalculateOutputValue(0.7))
+	assert.Equal(t, 0.8, *input_value.CalculateOutputValue(0.8))
+	assert.Equal(t, 0.9, *input_value.CalculateOutputValue(0.9))
+	assert.Equal(t, 1.0, *input_value.CalculateOutputValue(1.0))
 }
 
-func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue(t *testing.T) {
-	steps_0_0 := 0.0
-	steps_0_5 := 0.5
-	steps_1_0 := 1.0
+func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_SimpleFreeRange_CustomThresholds(t *testing.T) {
 	input_value := Config_Controller_Profile_Control_Assignment_DirectLike_InputValue{
 		Min: 0.0,
 		Max: 1.0,
 		Steps: &[]*float64{
-			&steps_0_0, &steps_0_5, nil, &steps_1_0,
+			floatPtr(0.0), floatPtr(0.5), nil, floatPtr(1.0),
+		},
+		StepThresholds: &[]Config_Controller_Profile_Control_Assignment_DirectLike_InputValue_StepThreshold{
+			{Threshold: 0.0, ThresholdTolerance: floatPtr(0.05)},
+			{Threshold: 0.5, ThresholdTolerance: floatPtr(0.05)},
+			{Threshold: 0.55, ThresholdEnd: floatPtr(0.95)},
+			{Threshold: 1.0, ThresholdTolerance: floatPtr(0.05)},
 		},
 	}
-	assert.Equal(t, 0.0, input_value.CalculateOutputValue(0.0))
-	assert.Equal(t, 0.0, input_value.CalculateOutputValue(0.1))
-	assert.Equal(t, 0.0, input_value.CalculateOutputValue(0.2))
-	assert.Equal(t, 0.5, input_value.CalculateOutputValue(0.3))
-	assert.Equal(t, 0.5, input_value.CalculateOutputValue(0.4))
-	assert.Equal(t, 0.5, input_value.CalculateOutputValue(0.5))
-	assert.Equal(t, 0.6, input_value.CalculateOutputValue(0.6))
-	assert.Equal(t, 0.7, input_value.CalculateOutputValue(0.7))
-	assert.Equal(t, 0.8, input_value.CalculateOutputValue(0.8))
-	assert.Equal(t, 0.9, input_value.CalculateOutputValue(0.9))
-	assert.Equal(t, 1.0, input_value.CalculateOutputValue(1.0))
+	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.0))
+	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.05))
+
+	assert.Nil(t, input_value.CalculateOutputValue(0.1))
+	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.5))
+
+	assert.Equal(t, 0.55, *input_value.CalculateOutputValue(0.55))
+	assert.Equal(t, 0.75, *input_value.CalculateOutputValue(0.75))
+	assert.Equal(t, 0.9, *input_value.CalculateOutputValue(0.9))
+
+	assert.Equal(t, 1.0, *input_value.CalculateOutputValue(1.0))
 }
