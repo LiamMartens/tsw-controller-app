@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "title": "Step Threshold Definition",
+  "description": "Defines the threshold of a step which can be used to remap a direct/api control like value",
+  "properties": {
+    "threshold": {
+      "type": "number"
+    },
+    "threshold_end": {
+      "type": "number"
+    },
+    "threshold_tolerance": {
+      "type": "number"
+    }
+  },
+  "required": ["threshold"]
+}
