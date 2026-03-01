@@ -211,13 +211,19 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Cal
 		}
 	}
 
-	total_distance := math.Abs(c.Max - c.Min)
-	normal := (input_value * total_distance) + c.Min
-	steps := c.GetSteps()
+	minmax_delta := math.Abs(c.Max - c.Min)
+	absolute_input_value := math.Abs(input_value)
+	var input_value_factor float64 = 1
+	if input_value < 0.0 {
+		input_value_factor = -1
+	}
 
+	// normal := (input_value * total_distance) + c.Min
+
+	steps := c.GetSteps()
 	if len(steps) == 0 {
 		/* if no steps are defined - send value directly */
-		value := math_utils.Clamp(normal, c.Min, c.Max)
+		value := math_utils.Clamp((absolute_input_value*minmax_delta)*input_value_factor+c.Min, c.Min, c.Max)
 		return &value
 	}
 
@@ -229,10 +235,10 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Cal
 
 		threshold_start := step.Threshold.ValueStart - step.Threshold.Tolerance
 		threshold_end := step.Threshold.ValueEnd + step.Threshold.Tolerance
-		is_within_threshold := normal >= threshold_start && normal <= threshold_end
+		is_within_threshold := input_value >= threshold_start && input_value <= threshold_end
 		if is_within_threshold {
 			/* normal depends on the threshold */
-			incoming_value := step.ValueStart + step.Delta()*((normal-step.Threshold.ValueStart)/step.Threshold.Delta())
+			incoming_value := step.ValueStart + step.Delta()*((input_value-step.Threshold.ValueStart)/step.Threshold.Delta())
 			value := math_utils.Clamp(incoming_value, c.Min, c.Max)
 			return &value
 		}
@@ -245,7 +251,7 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Cal
 
 		threshold_start := step.Threshold.ValueStart - step.Threshold.Tolerance
 		threshold_end := step.Threshold.ValueEnd + step.Threshold.Tolerance
-		is_within_threshold := normal >= threshold_start && normal <= threshold_end
+		is_within_threshold := input_value >= threshold_start && input_value <= threshold_end
 		if is_within_threshold {
 			value := math_utils.Clamp(step.ValueStart, c.Min, c.Max)
 			return &value
