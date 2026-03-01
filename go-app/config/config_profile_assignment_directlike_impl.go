@@ -3,8 +3,6 @@ package config
 import (
 	"math"
 	"tsw_controller_app/math_utils"
-
-	"github.com/yassinebenaid/godump"
 )
 
 type StepList_Item struct {
@@ -155,8 +153,8 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Get
 				step_threshold.Tolerance = default_threshold_tolerance
 			}
 		} else if !step.IsFreeRange {
-			step_threshold.ValueStart = *step.Value
-			step_threshold.ValueEnd = *step.Value
+			step_threshold.ValueStart = float64(ix) * default_threshold_step
+			step_threshold.ValueEnd = float64(ix) * default_threshold_step
 			step_threshold.Tolerance = default_threshold_tolerance
 		} else if step.IsFreeRange {
 			step_threshold.ValueStart = 0.0
@@ -218,6 +216,7 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Cal
 	absolute_input_value := math.Abs(input_value)
 
 	steps := c.GetSteps()
+
 	if len(steps) == 0 {
 		/* if no steps are defined - send value directly */
 		value := math_utils.Clamp((absolute_input_value*minmax_delta)+c.Min, c.Min, c.Max)
@@ -235,8 +234,7 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Cal
 		is_within_threshold := absolute_input_value >= threshold_start && absolute_input_value <= threshold_end
 		if is_within_threshold {
 			/* normal depends on the threshold */
-			godump.Dump(step)
-			incoming_value := step.Delta()*((absolute_input_value-step.Threshold.ValueStart)/step.Threshold.Delta()) + step.ValueStart
+			incoming_value := math_utils.RoundToMarginOfError(step.Delta()*((absolute_input_value-step.Threshold.ValueStart)/step.Threshold.Delta()) + step.ValueStart)
 			value := math_utils.Clamp(incoming_value, c.Min, c.Max)
 			return &value
 		}

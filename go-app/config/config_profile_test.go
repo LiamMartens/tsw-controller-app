@@ -104,14 +104,13 @@ func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_Simpl
 	}
 	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.0))
 	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.1))
-	assert.Nil(t, input_value.CalculateOutputValue(0.2))
-	assert.Nil(t, input_value.CalculateOutputValue(0.3))
-	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.4))
-	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.5))
-	assert.Equal(t, 0.6, *input_value.CalculateOutputValue(0.6))
-	assert.Equal(t, 0.7, *input_value.CalculateOutputValue(0.7))
-	assert.Equal(t, 0.8, *input_value.CalculateOutputValue(0.8))
-	assert.Equal(t, 0.9, *input_value.CalculateOutputValue(0.9))
+	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.2))
+	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.3))
+	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.3333))
+	assert.Equal(t, 0.7, *input_value.CalculateOutputValue(0.6))
+	assert.Equal(t, 0.7751, *input_value.CalculateOutputValue(0.7))
+	assert.Equal(t, 0.8501, *input_value.CalculateOutputValue(0.8))
+	assert.Equal(t, 0.9251, *input_value.CalculateOutputValue(0.9))
 	assert.Equal(t, 1.0, *input_value.CalculateOutputValue(1.0))
 }
 
@@ -152,10 +151,10 @@ func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_Simpl
 		},
 	}
 	assert.Equal(t, -1.0, *input_value.CalculateOutputValue(0.0))
-	// assert.Equal(t, -0.5, *input_value.CalculateOutputValue(0.25))
-	// assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.5))
-	// assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.75))
-	// assert.Equal(t, 1.0, *input_value.CalculateOutputValue(1.0))
+	assert.Equal(t, -0.5, *input_value.CalculateOutputValue(0.25))
+	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.5))
+	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.75))
+	assert.Equal(t, 1.0, *input_value.CalculateOutputValue(1.0))
 }
 
 func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_SimpleFreeRange_WithNegativeValues_CustomThresholdss(t *testing.T) {

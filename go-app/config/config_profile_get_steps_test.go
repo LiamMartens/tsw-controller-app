@@ -75,9 +75,9 @@ func TestConfigProfile_DirectLike_InputValue_GetSteps_PreDefinedStepsWithFreeRan
 
 	steps := input_value.GetSteps()
 	assert.Len(t, steps, 5)
-	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: -1.0, ValueEnd: -1.0, Threshold: ControlStepDefinition_Threshold{ValueStart: -1.0, ValueEnd: -1.0, Tolerance: 0.25}}, steps[0])
-	assert.Equal(t, ControlStepDefinition{IsFreeRange: true, ValueStart: -1.0, ValueEnd: 0.0, Threshold: ControlStepDefinition_Threshold{ValueStart: -1.0, ValueEnd: 0.0, Tolerance: 0}}, steps[1])
-	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 0.0, ValueEnd: 0.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.0, ValueEnd: 0.0, Tolerance: 0.25}}, steps[2])
-	assert.Equal(t, ControlStepDefinition{IsFreeRange: true, ValueStart: 0.0, ValueEnd: 1.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.0, ValueEnd: 1.0, Tolerance: 0}}, steps[3])
-	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 1.0, ValueEnd: 1.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 1.0, ValueEnd: 1.0, Tolerance: 0.25}}, steps[4])
+	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: -1.0, ValueEnd: -1.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.0, ValueEnd: 0.0, Tolerance: 0.125}}, steps[0])
+	assert.Equal(t, ControlStepDefinition{IsFreeRange: true, ValueStart: -1.0, ValueEnd: 0.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.0, ValueEnd: 0.5, Tolerance: 0}}, steps[1])
+	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 0.0, ValueEnd: 0.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.5, ValueEnd: 0.5, Tolerance: 0.125}}, steps[2])
+	assert.Equal(t, ControlStepDefinition{IsFreeRange: true, ValueStart: 0.0, ValueEnd: 1.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.5, ValueEnd: 1.0, Tolerance: 0}}, steps[3])
+	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 1.0, ValueEnd: 1.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 1.0, ValueEnd: 1.0, Tolerance: 0.125}}, steps[4])
 }
