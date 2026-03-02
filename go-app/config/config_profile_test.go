@@ -7,6 +7,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func floatPtr(f float64) *float64 {
+	return &f
+}
+
 func TestConfigProfile_SyncControlValidation(t *testing.T) {
 	value := Config_Controller_Profile_Control_Assignment_SyncControl{
 		Type:       "sync_control",

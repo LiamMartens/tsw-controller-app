@@ -6,8 +6,44 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func floatPtr(f float64) *float64 {
-	return &f
+func TestConfigProfile_DirectLike_InputValue_GetStepsList(t *testing.T) {
+	input_value := Config_Controller_Profile_Control_Assignment_DirectLike_InputValue{
+		Min:   0.0,
+		Max:   1.0,
+		Steps: &[]*float64{floatPtr(0.0), nil, nil, floatPtr(0.5), floatPtr(0.5), nil, nil, floatPtr(1.0)},
+	}
+	steps_list := input_value.GetStepsList()
+	assert.Len(t, steps_list, 5)
+	assert.Equal(t, steps_list[0], StepList_Item{
+		IsFreeRange:   false,
+		Value:         floatPtr(0.0),
+		PreviousValue: nil,
+		NextValue:     nil,
+	})
+	assert.Equal(t, steps_list[1], StepList_Item{
+		IsFreeRange:   true,
+		Value:         nil,
+		PreviousValue: floatPtr(0.0),
+		NextValue:     floatPtr(0.5),
+	})
+	assert.Equal(t, steps_list[2], StepList_Item{
+		IsFreeRange:   false,
+		Value:         floatPtr(0.5),
+		PreviousValue: nil,
+		NextValue:     nil,
+	})
+	assert.Equal(t, steps_list[3], StepList_Item{
+		IsFreeRange:   true,
+		Value:         nil,
+		PreviousValue: floatPtr(0.5),
+		NextValue:     floatPtr(1.0),
+	})
+	assert.Equal(t, steps_list[4], StepList_Item{
+		IsFreeRange:   false,
+		Value:         floatPtr(1.0),
+		PreviousValue: nil,
+		NextValue:     nil,
+	})
 }
 
 func TestConfigProfile_DirectLike_InputValue_GetSteps_AutomticFromStep(t *testing.T) {

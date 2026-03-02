@@ -2,6 +2,7 @@ package config
 
 import (
 	"math"
+	"tsw_controller_app/cmp_utils"
 	"tsw_controller_app/math_utils"
 )
 
@@ -74,9 +75,9 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Get
 	/* gather raw numerical step values based on steps or step; identical sequential values */
 	stepvalues := []*float64{}
 	if c.Steps != nil {
-		for ix, step := range *c.Steps {
+		for _, step := range *c.Steps {
 			num_values := len(stepvalues)
-			if num_values == 0 || stepvalues[ix-1] != step {
+			if num_values == 0 || !cmp_utils.IsSameFloatValue(stepvalues[num_values-1], step) {
 				stepvalues = append(stepvalues, step)
 			}
 		}
