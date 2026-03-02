@@ -656,492 +656,74 @@
             { "class_name": "RVM_LIRR_M3-A_C" },
             { "class_name": "RVM_LIRR_M3-B_C" }
           ],
-          "conditions": [
-            { "control": "MasterController", "operator": "lte", "value": 0.01 }
-          ],
           "input_value": {
-            "min": 0.0,
-            "max": 0.0,
-            "max_change_rate": 0.1
+            "min": 0.65,
+            "max": 1.0,
+            "max_change_rate": 0.1,
+            "steps": [0, 0.27, null, 0.65, 0.72, 0.85, 0.9, 0.95, 1.0],
+            "step_thresholds": [
+              { "threshold": 0, "threshold_tolerance": 0.01 },
+              { "threshold": 0.06, "threshold_tolerance": 0.05 },
+              { "threshold": 0.12, "threshold_end": 0.57, "threshold_tolerance": 0 },
+              { "threshold": 0.6, "threshold_tolerance": 0.05 },
+              { "threshold": 0.7, "threshold_tolerance": 0.05 },
+              { "threshold": 0.76, "threshold_tolerance": 0.05 },
+              { "threshold": 0.86, "threshold_tolerance": 0.05 },
+              { "threshold": 0.94, "threshold_tolerance": 0.05 },
+              { "threshold": 0.99, "threshold_tolerance": 0.01 }
+            ]
           }
         },
         {
-          "type": "direct_control",
+          "type": "api_control",
           "controls": "MasterController",
           "rail_class_information": [
             { "class_name": "RVM_NYH_MNR_M3a-A_C" },
             { "class_name": "RVM_NYH_MNR_M3a-B_C" },
             { "class_name": "RVM_LIRR_M3-A_C" },
             { "class_name": "RVM_LIRR_M3-B_C" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gte", "value": 0.02 },
-            { "control": "MasterController", "operator": "lte", "value": 0.12 }
-          ],
-          "input_value": {
-            "min": 0.27,
-            "max": 0.27,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "direct_control",
-          "controls": "MasterController",
-          "rail_class_information": [
-            { "class_name": "RVM_NYH_MNR_M3a-A_C" },
-            { "class_name": "RVM_NYH_MNR_M3a-B_C" },
-            { "class_name": "RVM_LIRR_M3-A_C" },
-            { "class_name": "RVM_LIRR_M3-B_C" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.12 },
-            { "control": "MasterController", "operator": "lte", "value": 0.57 }
-          ],
-          "control_range": {
-            "start": 0.12,
-            "end": 0.57
-          },
-          "input_value": {
-            "min": 0.25,
-            "max": 0.65,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "direct_control",
-          "controls": "MasterController",
-          "rail_class_information": [
-            { "class_name": "RVM_NYH_MNR_M3a-A_C" },
-            { "class_name": "RVM_NYH_MNR_M3a-B_C" },
-            { "class_name": "RVM_LIRR_M3-A_C" },
-            { "class_name": "RVM_LIRR_M3-B_C" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.57 },
-            { "control": "MasterController", "operator": "lte", "value": 0.62 }
           ],
           "input_value": {
             "min": 0.65,
-            "max": 0.65,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "direct_control",
-          "controls": "MasterController",
-          "rail_class_information": [
-            { "class_name": "RVM_NYH_MNR_M3a-A_C" },
-            { "class_name": "RVM_NYH_MNR_M3a-B_C" },
-            { "class_name": "RVM_LIRR_M3-A_C" },
-            { "class_name": "RVM_LIRR_M3-B_C" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.63 },
-            { "control": "MasterController", "operator": "lte", "value": 0.73 }
-          ],
-          "input_value": {
-            "min": 0.72,
-            "max": 0.72,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "direct_control",
-          "controls": "MasterController",
-          "rail_class_information": [
-            { "class_name": "RVM_NYH_MNR_M3a-A_C" },
-            { "class_name": "RVM_NYH_MNR_M3a-B_C" },
-            { "class_name": "RVM_LIRR_M3-A_C" },
-            { "class_name": "RVM_LIRR_M3-B_C" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.74 },
-            { "control": "MasterController", "operator": "lte", "value": 0.81 }
-          ],
-          "input_value": {
-            "min": 0.85,
-            "max": 0.85,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "direct_control",
-          "controls": "MasterController",
-          "rail_class_information": [
-            { "class_name": "RVM_NYH_MNR_M3a-A_C" },
-            { "class_name": "RVM_NYH_MNR_M3a-B_C" },
-            { "class_name": "RVM_LIRR_M3-A_C" },
-            { "class_name": "RVM_LIRR_M3-B_C" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.82 },
-            { "control": "MasterController", "operator": "lte", "value": 0.9 }
-          ],
-          "input_value": {
-            "min": 0.9,
-            "max": 0.9,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "direct_control",
-          "controls": "MasterController",
-          "rail_class_information": [
-            { "class_name": "RVM_NYH_MNR_M3a-A_C" },
-            { "class_name": "RVM_NYH_MNR_M3a-B_C" },
-            { "class_name": "RVM_LIRR_M3-A_C" },
-            { "class_name": "RVM_LIRR_M3-B_C" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.91 },
-            { "control": "MasterController", "operator": "lte", "value": 0.99 }
-          ],
-          "input_value": {
-            "min": 0.95,
-            "max": 0.95,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "direct_control",
-          "controls": "MasterController",
-          "rail_class_information": [
-            { "class_name": "RVM_NYH_MNR_M3a-A_C" },
-            { "class_name": "RVM_NYH_MNR_M3a-B_C" },
-            { "class_name": "RVM_LIRR_M3-A_C" },
-            { "class_name": "RVM_LIRR_M3-B_C" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.99 }
-          ],
-          "input_value": {
-            "min": 1.0,
             "max": 1.0,
-            "max_change_rate": 0.1
+            "max_change_rate": 0.1,
+            "steps": [0, 0.27, null, 0.65, 0.72, 0.85, 0.9, 0.95, 1.0],
+            "step_thresholds": [
+              { "threshold": 0, "threshold_tolerance": 0.01 },
+              { "threshold": 0.06, "threshold_tolerance": 0.05 },
+              { "threshold": 0.12, "threshold_end": 0.57, "threshold_tolerance": 0 },
+              { "threshold": 0.6, "threshold_tolerance": 0.05 },
+              { "threshold": 0.7, "threshold_tolerance": 0.05 },
+              { "threshold": 0.76, "threshold_tolerance": 0.05 },
+              { "threshold": 0.86, "threshold_tolerance": 0.05 },
+              { "threshold": 0.94, "threshold_tolerance": 0.05 },
+              { "threshold": 0.99, "threshold_tolerance": 0.01 }
+            ]
           }
         },
         {
-          "type": "api_control",
+          "type": "direct_control",
           "controls": "MasterController",
           "rail_class_information": [
-            { "class_name": "RVM_NYH_MNR_M3a-A_C" },
-            { "class_name": "RVM_NYH_MNR_M3a-B_C" },
-            { "class_name": "RVM_LIRR_M3-A_C" },
-            { "class_name": "RVM_LIRR_M3-B_C" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "lte", "value": 0.01 }
-          ],
-          "input_value": {
-            "min": 0.0,
-            "max": 0.0,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "api_control",
-          "controls": "MasterController",
-          "rail_class_information": [
-            { "class_name": "RVM_NYH_MNR_M3a-A_C" },
-            { "class_name": "RVM_NYH_MNR_M3a-B_C" },
-            { "class_name": "RVM_LIRR_M3-A_C" },
-            { "class_name": "RVM_LIRR_M3-B_C" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gte", "value": 0.02 },
-            { "control": "MasterController", "operator": "lte", "value": 0.12 }
-          ],
-          "input_value": {
-            "min": 0.27,
-            "max": 0.27,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "api_control",
-          "controls": "MasterController",
-          "rail_class_information": [
-            { "class_name": "RVM_NYH_MNR_M3a-A_C" },
-            { "class_name": "RVM_NYH_MNR_M3a-B_C" },
-            { "class_name": "RVM_LIRR_M3-A_C" },
-            { "class_name": "RVM_LIRR_M3-B_C" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.12 },
-            { "control": "MasterController", "operator": "lte", "value": 0.57 }
-          ],
-          "control_range": {
-            "start": 0.12,
-            "end": 0.57
-          },
-          "input_value": {
-            "min": 0.25,
-            "max": 0.65,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "api_control",
-          "controls": "MasterController",
-          "rail_class_information": [
-            { "class_name": "RVM_NYH_MNR_M3a-A_C" },
-            { "class_name": "RVM_NYH_MNR_M3a-B_C" },
-            { "class_name": "RVM_LIRR_M3-A_C" },
-            { "class_name": "RVM_LIRR_M3-B_C" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.57 },
-            { "control": "MasterController", "operator": "lte", "value": 0.62 }
+            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 A" },
+            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 B" }
           ],
           "input_value": {
             "min": 0.65,
-            "max": 0.65,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "api_control",
-          "controls": "MasterController",
-          "rail_class_information": [
-            { "class_name": "RVM_NYH_MNR_M3a-A_C" },
-            { "class_name": "RVM_NYH_MNR_M3a-B_C" },
-            { "class_name": "RVM_LIRR_M3-A_C" },
-            { "class_name": "RVM_LIRR_M3-B_C" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.63 },
-            { "control": "MasterController", "operator": "lte", "value": 0.73 }
-          ],
-          "input_value": {
-            "min": 0.72,
-            "max": 0.72,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "api_control",
-          "controls": "MasterController",
-          "rail_class_information": [
-            { "class_name": "RVM_NYH_MNR_M3a-A_C" },
-            { "class_name": "RVM_NYH_MNR_M3a-B_C" },
-            { "class_name": "RVM_LIRR_M3-A_C" },
-            { "class_name": "RVM_LIRR_M3-B_C" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.75 },
-            { "control": "MasterController", "operator": "lte", "value": 0.81 }
-          ],
-          "input_value": {
-            "min": 0.85,
-            "max": 0.85,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "api_control",
-          "controls": "MasterController",
-          "rail_class_information": [
-            { "class_name": "RVM_NYH_MNR_M3a-A_C" },
-            { "class_name": "RVM_NYH_MNR_M3a-B_C" },
-            { "class_name": "RVM_LIRR_M3-A_C" },
-            { "class_name": "RVM_LIRR_M3-B_C" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.82 },
-            { "control": "MasterController", "operator": "lte", "value": 0.9 }
-          ],
-          "input_value": {
-            "min": 0.9,
-            "max": 0.9,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "api_control",
-          "controls": "MasterController",
-          "rail_class_information": [
-            { "class_name": "RVM_NYH_MNR_M3a-A_C" },
-            { "class_name": "RVM_NYH_MNR_M3a-B_C" },
-            { "class_name": "RVM_LIRR_M3-A_C" },
-            { "class_name": "RVM_LIRR_M3-B_C" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.92 },
-            { "control": "MasterController", "operator": "lte", "value": 0.99 }
-          ],
-          "input_value": {
-            "min": 0.95,
-            "max": 0.95,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "api_control",
-          "controls": "MasterController",
-          "rail_class_information": [
-            { "class_name": "RVM_NYH_MNR_M3a-A_C" },
-            { "class_name": "RVM_NYH_MNR_M3a-B_C" },
-            { "class_name": "RVM_LIRR_M3-A_C" },
-            { "class_name": "RVM_LIRR_M3-B_C" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.99 }
-          ],
-          "input_value": {
-            "min": 1.0,
             "max": 1.0,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "direct_control",
-          "controls": "ThrottleAndBrake",
-          "rail_class_information": [
-            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 A" },
-            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 B" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "lte", "value": 0.01 }
-          ],
-          "input_value": {
-            "min": -1,
-            "max": -1
-          }
-        },
-        {
-          "type": "direct_control",
-          "controls": "ThrottleAndBrake",
-          "rail_class_information": [
-            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 A" },
-            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 B" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gte", "value": 0.02 },
-            { "control": "MasterController", "operator": "lte", "value": 0.12 }
-          ],
-          "input_value": {
-            "min": -0.9,
-            "max": -0.9,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "direct_control",
-          "controls": "ThrottleAndBrake",
-          "rail_class_information": [
-            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 A" },
-            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 B" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.12 },
-            { "control": "MasterController", "operator": "lte", "value": 0.57 }
-          ],
-          "control_range": {
-            "start": 0.12,
-            "end": 0.57
-          },
-          "input_value": {
-            "min": -0.9,
-            "max": -0.2
-          }
-        },
-        {
-          "type": "direct_control",
-          "controls": "ThrottleAndBrake",
-          "rail_class_information": [
-            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 A" },
-            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 B" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.57 },
-            { "control": "MasterController", "operator": "lte", "value": 0.62 }
-          ],
-          "input_value": {
-            "min": -0.2,
-            "max": -0.2
-          }
-        },
-        {
-          "type": "direct_control",
-          "controls": "ThrottleAndBrake",
-          "rail_class_information": [
-            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 A" },
-            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 B" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.63 },
-            { "control": "MasterController", "operator": "lte", "value": 0.73 }
-          ],
-          "input_value": {
-            "min": 0,
-            "max": 0,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "direct_control",
-          "controls": "ThrottleAndBrake",
-          "rail_class_information": [
-            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 A" },
-            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 B" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.74 },
-            { "control": "MasterController", "operator": "lte", "value": 0.81 }
-          ],
-          "input_value": {
-            "min": 0.25,
-            "max": 0.25,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "direct_control",
-          "controls": "ThrottleAndBrake",
-          "rail_class_information": [
-            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 A" },
-            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 B" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.82 },
-            { "control": "MasterController", "operator": "lte", "value": 0.9 }
-          ],
-          "input_value": {
-            "min": 0.5,
-            "max": 0.5,
-            "max_change_rate": 0.1
-          }
-        },
-        {
-          "type": "direct_control",
-          "controls": "ThrottleAndBrake",
-          "rail_class_information": [
-            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 A" },
-            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 B" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.91 },
-            { "control": "MasterController", "operator": "lte", "value": 0.99 }
-          ],
-          "input_value": {
-            "min": 0.75,
-            "max": 0.75
-          }
-        },
-        {
-          "type": "direct_control",
-          "controls": "ThrottleAndBrake",
-          "rail_class_information": [
-            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 A" },
-            { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 B" }
-          ],
-          "conditions": [
-            { "control": "MasterController", "operator": "gt", "value": 0.99 }
-          ],
-          "input_value": {
-            "min": 1.0,
-            "max": 1.0,
-            "max_change_rate": 0.1
+            "max_change_rate": 0.1,
+            "steps": [-1, -0.9, null, -0.2, 0, 0.25, 0.5, 0.75, 1.0],
+            "step_thresholds": [
+              { "threshold": 0, "threshold_tolerance": 0.01 },
+              { "threshold": 0.06, "threshold_tolerance": 0.05 },
+              { "threshold": 0.12, "threshold_end": 0.57, "threshold_tolerance": 0 },
+              { "threshold": 0.6, "threshold_tolerance": 0.05 },
+              { "threshold": 0.7, "threshold_tolerance": 0.05 },
+              { "threshold": 0.76, "threshold_tolerance": 0.05 },
+              { "threshold": 0.86, "threshold_tolerance": 0.05 },
+              { "threshold": 0.94, "threshold_tolerance": 0.05 },
+              { "threshold": 0.99, "threshold_tolerance": 0.01 }
+            ]
           }
         }
       ]

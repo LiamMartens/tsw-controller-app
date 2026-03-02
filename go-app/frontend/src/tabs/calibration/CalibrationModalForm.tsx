@@ -14,6 +14,8 @@ import {
 } from "./useCalibrationForm";
 import { CalibrationModalFormControl } from "./CalibrationModalFormControl";
 import { alert } from "../../utils/alert";
+import { useControllerConfiguration } from "../../swr";
+import { s } from "framer-motion/client";
 
 type Props = {
   controller: main.Interop_GenericController;
@@ -22,32 +24,53 @@ type Props = {
 
 export const CalibrationModalForm = ({ controller, onClose }: Props) => {
   const [isRunning, setIsRunning] = useState(false);
-  const form = useCalibrationForm();
+  const { data: controllerConfiguration } =
+    useControllerConfiguration(controller);
+  const form = useCalibrationForm({
+    name: controllerConfiguration.Calibration.Name,
+    controls: controllerConfiguration.Calibration.Controls.map(
+      (control): CalibrationStateControl => ({
+        kind: control.Kind as Kind,
+        index: control.Index,
+        name: control.Name,
+        min: control.Min,
+        max: control.Max,
+        idle: control.Idle,
+        deadzone: control.Deadzone,
+        invert: control.Invert,
+        value: control.Idle,
+        easingCurve: control.EasingCurve,
+        override: true,
+      }),
+    ).toSorted((a, b) =>
+      `${a.kind}_${a.index}`.localeCompare(`${b.kind}_${b.index}`),
+    ),
+  });
   const controls = form.watch("controls");
 
-  const handleStart = () => {
-    if (controller) {
-      SubscribeRaw(controller.UniqueID).then(() => {
-        setIsRunning(true);
-      });
+  const handleStart = async () => {
+    try {
+      await SubscribeRaw(controller.UniqueID);
+      setIsRunning(true);
+    } catch (err) {
+      alert(`Could not start calibration (${err})`, "error");
     }
   };
 
-  const handleCancel = () => {
-    UnsubscribeRaw().then(() => {
-      setIsRunning(false);
-      form.reset();
+  const handleCancel = async () => {
+    try {
+      await UnsubscribeRaw();
+    } catch (err) {
+      alert(`Could not cancel calibration (${err})`, "error");
+    } finally {
       onClose();
-    });
+    }
   };
 
-  const handleStopAndSave = () => {
-    if (!controller) {
-      throw new Error("No controller");
-    }
-
-    UnsubscribeRaw().then(() => {
-      form.handleSubmit((values) => {
+  const handleStopAndSave = async () => {
+    try {
+      await UnsubscribeRaw();
+      await form.handleSubmit(async (values) => {
         const data = new main.Interop_ControllerCalibration();
         data.Name = values.name;
         data.DeviceID = controller.DeviceID;
@@ -62,47 +85,22 @@ export const CalibrationModalForm = ({ controller, onClose }: Props) => {
           Invert: control.invert,
           EasingCurve: control.easingCurve,
         }));
-        SaveCalibration(data)
-          .then(() => {
-            form.reset(values);
-            LoadConfiguration();
-          })
-          .catch((err) => {
-            alert(String(err), "error");
-          })
-          .finally(() => {
-            setIsRunning(false);
-            form.reset();
-            onClose();
-          });
+        await SaveCalibration(data);
+        await LoadConfiguration();
       })();
-    });
+    } catch (err) {
+      alert(`Could not save calibration (${err})`, "error");
+    } finally {
+      onClose();
+    }
   };
 
   useEffect(() => {
-    GetControllerConfiguration(controller.UniqueID).then((configuration) => {
-      form.reset({
-        name: configuration.Calibration.Name,
-        controls: configuration.Calibration.Controls.map(
-          (control): CalibrationStateControl => ({
-            kind: control.Kind as Kind,
-            index: control.Index,
-            name: control.Name,
-            min: control.Min,
-            max: control.Max,
-            idle: control.Idle,
-            deadzone: control.Deadzone,
-            invert: control.Invert,
-            value: control.Idle,
-            easingCurve: control.EasingCurve,
-            override: true,
-          }),
-        ).toSorted((a, b) =>
-          `${a.kind}_${a.index}`.localeCompare(`${b.kind}_${b.index}`),
-        ),
-      });
-    });
-  }, [controller]);
+    return () => {
+      /* force unsubscribe */
+      UnsubscribeRaw();
+    };
+  }, []);
 
   return (
     <div>

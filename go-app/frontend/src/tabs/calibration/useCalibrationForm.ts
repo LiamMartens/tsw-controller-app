@@ -51,12 +51,9 @@ const applyDefaultDeadzoneToRawValue = (value: number) => {
   return roundToFactor(value * 0.99);
 };
 
-export const useCalibrationForm = () => {
+export const useCalibrationForm = (defaultValues: CalibrationState) => {
   const form = useForm<CalibrationState>({
-    defaultValues: {
-      name: "",
-      controls: [],
-    },
+    defaultValues,
   });
 
   useEffect(() => {
@@ -69,10 +66,10 @@ export const useCalibrationForm = () => {
       const controlState: CalibrationStateControl =
         existingIndex === -1
           ? {
-              ...EMPTY_CONTROL_STATE,
-              kind: data.Kind as Kind,
-              index: data.Index,
-            }
+            ...EMPTY_CONTROL_STATE,
+            kind: data.Kind as Kind,
+            index: data.Index,
+          }
           : { ...controls[existingIndex] };
 
       if (!controlState.override) {

@@ -4,9 +4,11 @@ import { GetDeviceIP } from "../../../../wailsjs/go/main/App";
 import { BrowserOpenURL } from "../../../../wailsjs/runtime/runtime";
 import { useDeviceIP } from "../../../swr";
 import { ErrorBoundary } from "react-error-boundary";
+import { Modal } from "../../../components";
 
 type Props = {
-  dialogRef: MutableRefObject<HTMLDialogElement | null>;
+  open: boolean;
+  onClose: () => void;
 };
 
 const ConnectRemoteControllerModalContent = () => {
@@ -25,7 +27,7 @@ const ConnectRemoteControllerModalContent = () => {
   };
 
   return (
-    <div className="modal-box w-11/12 max-w-5xl">
+    <div>
       <form method="dialog">
         <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
           ✕
@@ -74,25 +76,12 @@ const ConnectRemoteControllerModalContent = () => {
   );
 };
 
-export const ConnectRemoteControllerModal = ({ dialogRef }: Props) => {
-  const ref = useRef<HTMLDialogElement | null>(null);
-
-  const handleRef = (d: HTMLDialogElement | null) => {
-    ref.current = d;
-    dialogRef.current = d;
-  };
-
+export const ConnectRemoteControllerModal = ({ open, onClose }: Props) => {
   return (
-    <dialog ref={handleRef} className="modal modal-s">
-      <ErrorBoundary
-        fallbackRender={({ error }) => (
-          <div className="alert alert-error">{String(error)}</div>
-        )}
-      >
-        <Suspense>
-          <ConnectRemoteControllerModalContent />
-        </Suspense>
-      </ErrorBoundary>
-    </dialog>
+    <Modal
+      openState={open}
+      onClose={onClose}
+      Component={ConnectRemoteControllerModalContent}
+    />
   );
 };

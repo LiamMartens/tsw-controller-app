@@ -16,7 +16,7 @@ import {
   SaveProfileForSharingWithControllerInformation,
   ImportProfile,
 } from "../../../wailsjs/go/main/App";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BrowserOpenURL, EventsOn } from "../../../wailsjs/runtime/runtime";
 import { events } from "../../events";
 import { useForm } from "react-hook-form";
@@ -46,10 +46,7 @@ export const MainTab = () => {
   } = useLastInstalledModVersion();
   const { data: profiles, mutate: refetchProfiles } = useProfiles();
   const { data: controllers, mutate: refetchControllers } = useControllers();
-
-  const connectRemoteControllerDialogRef = useRef<HTMLDialogElement | null>(
-    null,
-  );
+  const [connectRemoteControllerOpen, setConnectRemoteControllerOpen] = useState(false);
 
   const form = useForm<FormValues>({
     defaultValues: { profiles: {} },
@@ -128,7 +125,7 @@ export const MainTab = () => {
   };
 
   const handleConnectRemoteController = () => {
-    connectRemoteControllerDialogRef.current?.showModal();
+    setConnectRemoteControllerOpen(true);
   };
 
   const handleInstallTrainSimWorldMod = () => {
@@ -335,7 +332,8 @@ export const MainTab = () => {
       </div>
 
       <ConnectRemoteControllerModal
-        dialogRef={connectRemoteControllerDialogRef}
+        open={connectRemoteControllerOpen}
+        onClose={() => setConnectRemoteControllerOpen(false)}
       />
     </div>
   );
