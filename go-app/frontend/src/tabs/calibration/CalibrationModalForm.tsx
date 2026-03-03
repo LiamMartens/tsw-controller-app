@@ -24,11 +24,11 @@ type Props = {
 
 export const CalibrationModalForm = ({ controller, onClose }: Props) => {
   const [isRunning, setIsRunning] = useState(false);
-  const { data: controllerConfiguration } =
+  const { data: controllerConfiguration, mutate: updateControllerConfiguration } =
     useControllerConfiguration(controller);
   const form = useCalibrationForm({
-    name: controllerConfiguration.Calibration.Name,
-    controls: controllerConfiguration.Calibration.Controls.map(
+    name: controllerConfiguration?.Calibration.Name ?? "",
+    controls: (controllerConfiguration?.Calibration.Controls ?? []).map(
       (control): CalibrationStateControl => ({
         kind: control.Kind as Kind,
         index: control.Index,
@@ -87,6 +87,7 @@ export const CalibrationModalForm = ({ controller, onClose }: Props) => {
         }));
         await SaveCalibration(data);
         await LoadConfiguration();
+        await updateControllerConfiguration();
       })();
     } catch (err) {
       alert(`Could not save calibration (${err})`, "error");

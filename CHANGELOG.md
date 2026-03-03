@@ -1,6 +1,10 @@
 
 # CHANGELOG
 
+## v1.9.3
+- Fix calibration modal bug
+- Update negative value handling
+
 ## v1.9.2
 - Added new `step_thresholds` option for direct/api/sync control assignments which can be used to manually map lever inputs onto direct control values more accurately
 

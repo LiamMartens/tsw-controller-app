@@ -1,6 +1,7 @@
 import { main } from "../../../wailsjs/go/models";
 import { CalibrationModalForm } from "./CalibrationModalForm";
 import { Modal, ModalContentProps } from "../../components";
+import { useEffect } from "react";
 
 type Props = {
   controller: main.Interop_GenericController | null;
@@ -13,7 +14,6 @@ const CalibrationModalContent = ({
 }: ModalContentProps<main.Interop_GenericController>) => {
   return (
     <CalibrationModalForm
-      key={controller.UniqueID}
       controller={controller}
       onClose={onClose}
     />
