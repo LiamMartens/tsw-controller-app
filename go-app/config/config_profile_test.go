@@ -86,6 +86,32 @@ func TestConfigProfile_Linear_CalculateNeutralizedValue(t *testing.T) {
 	assert.Equal(t, 1.0, linear.CalculateNeutralizedValue(1))
 }
 
+func TestConfigProfile_ControlStepDefinition_Threshold(t *testing.T) {
+	threshold_positive := ControlStepDefinition_Threshold{
+		ValueStart: 0.0,
+		ValueEnd:   0.5,
+		Tolerance:  0.1,
+	}
+	assert.False(t, threshold_positive.IsWithinThreshold(-0.1))
+	assert.True(t, threshold_positive.IsWithinThreshold(0.0))
+	assert.True(t, threshold_positive.IsWithinThreshold(0.1))
+	assert.True(t, threshold_positive.IsWithinThreshold(0.5))
+	assert.True(t, threshold_positive.IsWithinThreshold(0.6))
+	assert.False(t, threshold_positive.IsWithinThreshold(0.61))
+
+	threshold_negative := ControlStepDefinition_Threshold{
+		ValueStart: 0.0,
+		ValueEnd:   -0.5,
+		Tolerance:  0.1,
+	}
+	assert.False(t, threshold_negative.IsWithinThreshold(0.1))
+	assert.True(t, threshold_negative.IsWithinThreshold(0.0))
+	assert.True(t, threshold_negative.IsWithinThreshold(-0.1))
+	assert.True(t, threshold_negative.IsWithinThreshold(-0.5))
+	assert.True(t, threshold_negative.IsWithinThreshold(-0.6))
+	assert.False(t, threshold_negative.IsWithinThreshold(-0.61))
+}
+
 func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_Simple(t *testing.T) {
 	input_value := Config_Controller_Profile_Control_Assignment_DirectLike_InputValue{
 		Min:  0.0,
@@ -176,9 +202,9 @@ func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_Simpl
 			{Threshold: 1.0},
 		},
 	}
-	assert.Equal(t, 1.0, *input_value.CalculateOutputValue(-1.0))
-	// assert.Equal(t, -1.0, *input_value.CalculateOutputValue(0.0))
-	// assert.Equal(t, -0.5, *input_value.CalculateOutputValue(0.25))
-	// assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.5))
-	// assert.Equal(t, 1.0, *input_value.CalculateOutputValue(1.0))
+	assert.Nil(t, input_value.CalculateOutputValue(-1.0))
+	assert.Equal(t, -1.0, *input_value.CalculateOutputValue(0.0))
+	assert.Equal(t, -0.5, *input_value.CalculateOutputValue(0.25))
+	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.5))
+	assert.Equal(t, 1.0, *input_value.CalculateOutputValue(1.0))
 }

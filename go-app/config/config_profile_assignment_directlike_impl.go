@@ -4,6 +4,8 @@ import (
 	"math"
 	"tsw_controller_app/cmp_utils"
 	"tsw_controller_app/math_utils"
+
+	"github.com/yassinebenaid/godump"
 )
 
 type StepList_Item struct {
@@ -28,6 +30,17 @@ type ControlStepDefinition struct {
 
 func (t *ControlStepDefinition_Threshold) Delta() float64 {
 	return math.Abs(t.ValueEnd - t.ValueStart)
+}
+
+func (t *ControlStepDefinition_Threshold) IsWithinThreshold(input float64) bool {
+	absolute_input := math.Abs(input)
+	abs_threshold_start := math.Abs(t.ValueStart) - t.Tolerance
+	abs_threshold_end := math.Abs(t.ValueEnd) + t.Tolerance
+	is_within_threshold := absolute_input >= abs_threshold_start && absolute_input <= abs_threshold_end
+	if t.ValueStart < 0.0 || t.ValueEnd < 0.0 {
+		return is_within_threshold && input <= 0.0
+	}
+	return is_within_threshold && input >= 0.0
 }
 
 func (t *ControlStepDefinition) Delta() float64 {
@@ -139,7 +152,7 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Get
 	defs := []ControlStepDefinition{}
 	for ix, step := range stepslist {
 		num_steps := len(stepslist)
-		default_threshold_step := math_utils.RoundToMarginOfError(1.0 / (float64(num_steps) - 1.0))
+		default_threshold_step := math_utils.RoundToMarginOfError(1.0 / math.Max(1.0, float64(num_steps)-1.0))
 		default_threshold_tolerance := math_utils.RoundToMarginOfError(default_threshold_step / 2.0)
 		step_threshold := ControlStepDefinition_Threshold{}
 		if len(step_thresholds) > ix {
@@ -229,13 +242,11 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Cal
 		if !step.IsFreeRange {
 			continue
 		}
-
-		threshold_start := step.Threshold.ValueStart - step.Threshold.Tolerance
-		threshold_end := step.Threshold.ValueEnd + step.Threshold.Tolerance
-		is_within_threshold := absolute_input_value >= threshold_start && absolute_input_value <= threshold_end
-		if is_within_threshold {
+		if step.Threshold.IsWithinThreshold(input_value) {
+			godump.Dump(step.Delta())
 			/* normal depends on the threshold */
-			incoming_value := math_utils.RoundToMarginOfError(step.Delta()*((absolute_input_value-step.Threshold.ValueStart)/step.Threshold.Delta()) + step.ValueStart)
+			actual_progress := (absolute_input_value - math.Abs(step.Threshold.ValueStart)) / step.Threshold.Delta()
+			incoming_value := math_utils.RoundToMarginOfError(step.Delta()*actual_progress + step.ValueStart)
 			value := math_utils.Clamp(incoming_value, c.Min, c.Max)
 			return &value
 		}
@@ -246,10 +257,7 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Cal
 			continue
 		}
 
-		threshold_start := step.Threshold.ValueStart - step.Threshold.Tolerance
-		threshold_end := step.Threshold.ValueEnd + step.Threshold.Tolerance
-		is_within_threshold := absolute_input_value >= threshold_start && absolute_input_value <= threshold_end
-		if is_within_threshold {
+		if step.Threshold.IsWithinThreshold(input_value) {
 			value := math_utils.Clamp(step.ValueStart, c.Min, c.Max)
 			return &value
 		}
