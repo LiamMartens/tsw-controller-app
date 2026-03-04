@@ -9,16 +9,18 @@ import { SettingsTab } from "./tabs/settings";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
+type TabsFormValues = {
+  tab:
+    | "main"
+    | "explore"
+    | "calibration"
+    | "cab_debugger"
+    | "logs"
+    | "settings";
+};
+
 const App = () => {
-  const tabsForm = useForm<{
-    tab:
-      | "main"
-      | "explore"
-      | "calibration"
-      | "cab_debugger"
-      | "logs"
-      | "settings";
-  }>({
+  const tabsForm = useForm<TabsFormValues>({
     defaultValues: { tab: "main" },
   });
   const tab = tabsForm.watch("tab");

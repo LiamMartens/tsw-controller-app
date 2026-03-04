@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@json-editor/json-editor": "^2.15.2",
     "animejs": "^4.2.2",
     "clsx": "^2.1.1",
@@ -27,6 +28,7 @@
     "react-qr-code": "^2.0.18",
     "semver": "^7.7.2",
     "swr": "^2.3.6",
+    "zod": "^4.3.6",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
