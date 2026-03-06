@@ -26,7 +26,7 @@ Now we are ready to create a new profile
 To start a new profile you can either use the profile builder or if you are comfortable with JSON you can use a code editor to create the profile. If you choose to use a code editor you can start with the following empty template:  
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/LiamMartens/tsw-controller-app/refs/heads/main/profile-builder-schema/profile.schema.json",
+  "$schema": "https://tsw-controller-app.vercel.app/profile-builder/schema.json",
   "name": "",
   "controls": []
 }
