@@ -224,6 +224,56 @@ Used by `DirectControl`, `SyncControl`, and `ApiControl` to map axis input to co
 - `step`: Optional increment size.
 - `steps`: Optional list of discrete valid values. Can be used with `null` values to create zones of free motion between detents.
 - `invert`: Whether to reverse the axis.
+- `step_thresholds`: Optional array of threshold definitions for remapping values to match notched or stepped controls.
+
+### 📏 Step Thresholds
+
+The `step_thresholds` option allows you to define custom threshold values for each step in a direct control mapping. This is particularly useful when you want to remap a continuous analog input to match a notched control (e.g., a throttle with detents) or when you need to create custom value ranges.
+
+```json
+{
+  "type": "direct_control",
+  "controls": "Throttle1",
+  "input_value": {
+    "min": -1.0,
+    "max": 1.0,
+    "steps": [0.1, null, 1.0],
+    "step_thresholds": [
+      { "threshold": 0.2, "threshold_tolerance": 0.05 },
+      { "threshold": 0.5, "threshold_end": 0.6, "threshold_tolerance": 0.03 },
+      { "threshold": 0.8 }
+    ]
+  }
+}
+```
+
+#### Threshold Properties
+
+| Property | Description | Required |
+|----------|-------------|----------|
+| `threshold` | The actual threshold value where the step begins | ✅ Yes |
+| `threshold_end` | The end value for range-based thresholds (optional) | No |
+| `threshold_tolerance` | The tolerance around the threshold (optional) | No |
+
+#### How It Works
+
+1. **Single Threshold**: When only `threshold` is specified, it defines a single point value. The control will snap to this value when the input matches the threshold (+- the tolerance).
+
+2. **Range Threshold**: When both `threshold` and `threshold_end` are specified, it defines a range. The control will accept any input value within this range and map it proportionally. This is mostly useful for free range steps.
+
+3. **Tolerance**: The `threshold_tolerance` defines how much deviation from the threshold is acceptable. For example, if `threshold` is 0.5 and `threshold_tolerance` is 0.05, the control will accept input values between 0.45 and 0.55.
+
+4. **Default Tolerance**: If no tolerance is specified, a default tolerance is calculated based on the number of steps (approximately half the step size).
+
+5. **Free Range Zones**: When a step is marked as a free range zone (using `null` in the `steps` array), it gets special handling with no tolerance by default. The threshold defines the boundaries of the free range.
+
+**Note** it is important to note that the number of `step_thresholds` should match the number of `steps` as each step threshold definition corresponds to each step.
+
+#### Use Cases
+
+- **Notched Controls**: Match a physical control with detents (like a notched throttle) by defining thresholds at each detent position.
+- **Custom Value Ranges**: Create custom value ranges where certain input values map to specific output values.
+- **Hysteresis**: Define different thresholds for activation and deactivation to prevent rapid toggling.
 
 ---
 
