@@ -2,6 +2,7 @@ import { Nav } from "@/_components/Nav";
 import { Metadata } from "next";
 import Markdown from "react-markdown";
 import { pages } from "@/_constants/docs.pages";
+import remarkGfm from "remark-gfm";
 
 type Params = {
   slug: keyof typeof pages;
@@ -24,13 +25,13 @@ export default async function DocsPage({
   params: Promise<Params>;
 }) {
   const slug = (await params).slug;
-  const definition = pages[slug]
+  const definition = pages[slug];
 
   return (
     <>
       <Nav />
       <div className="prose max-w-4xl mx-auto px-8 my-8">
-        <Markdown>{definition.contents()}</Markdown>
+        <Markdown remarkPlugins={[remarkGfm]}>{definition.contents()}</Markdown>
       </div>
     </>
   );
