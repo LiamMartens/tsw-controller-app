@@ -13,7 +13,9 @@
     "next": "16.0.7",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "react-markdown": "^10.1.0"
+    "react-error-boundary": "^6.1.1",
+    "react-markdown": "^10.1.0",
+    "swr": "^2.4.1"
   },
   "devDependencies": {
     "@apidevtools/json-schema-ref-parser": "^15.1.2",

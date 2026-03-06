@@ -1,7 +1,16 @@
 "use client";
 
+import useSWR from "swr";
 import jsonSchema from "../_profile-builder-json-schema/profile.complete.schema.json";
-import { ChangeEventHandler, useCallback, useEffect, useRef } from "react";
+import {
+  ChangeEventHandler,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { ErrorBoundary } from "react-error-boundary";
 
 declare class JSONEditor {
   constructor(element: HTMLElement, options: Record<string, unknown>);
@@ -11,8 +20,42 @@ declare class JSONEditor {
   showValidationErrors(): void;
 }
 
-export const ProfileEditor = () => {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+const useIsClientReady = () => {
+  const [isClientReady, setIsClientRaedy] = useState(false);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsClientRaedy(true);
+    }
+  }, []);
+  return isClientReady;
+};
+
+const useJsonEditorLibrary = () => {
+  return useSWR(
+    [
+      "lib",
+      "https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js",
+    ],
+    async () => {
+      return new Promise<HTMLScriptElement>((resolve, reject) => {
+        const script =
+          document.querySelector<HTMLScriptElement>("script#jsoneditor") ??
+          document.createElement("script");
+        script.id = "jsoneditor";
+        script.onload = () => resolve(script);
+        script.onerror = () => reject(new Error("Could not load JSON editor"));
+        script.src =
+          "https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js";
+        document.body.appendChild(script);
+      });
+    },
+    { suspense: true },
+  );
+};
+
+const ProfileEditorContent = () => {
+  useJsonEditorLibrary();
+
   const editorRef = useRef<JSONEditor | null>(null);
 
   const handleSave = () => {
@@ -50,21 +93,17 @@ export const ProfileEditor = () => {
     reader.readAsText(file);
   };
 
-  const handleInitializeEditor = useCallback(() => {
-    if (
-      !containerRef.current ||
-      typeof JSONEditor === "undefined" ||
-      editorRef.current
-    )
-      return;
+  const handleContainerRef = useCallback((ref: HTMLElement | null) => {
+    if (!ref || typeof JSONEditor === "undefined" || editorRef.current) return;
+
     const profile_data_raw = new URL(window.location.href).searchParams.get(
-      "profile"
+      "profile",
     );
     const profile_data = profile_data_raw
       ? JSON.parse(atob(profile_data_raw))
       : {};
 
-    editorRef.current = new JSONEditor(containerRef.current, {
+    editorRef.current = new JSONEditor(ref, {
       schema: jsonSchema,
       display_required_only: true,
       keep_oneof_values: false,
@@ -73,28 +112,9 @@ export const ProfileEditor = () => {
     });
   }, []);
 
-  const handleContainerRef = useCallback(
-    (ref: HTMLDivElement | null) => {
-      containerRef.current = ref;
-      handleInitializeEditor();
-    },
-    [handleInitializeEditor]
-  );
-
-  useEffect(() => {
-    const script =
-      document.querySelector<HTMLScriptElement>("script#jsoneditor") ??
-      document.createElement("script");
-    script.id = "jsoneditor";
-    script.onload = () => setTimeout(handleInitializeEditor, 0);
-    script.src =
-      "https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js";
-    document.body.appendChild(script);
-  }, [handleInitializeEditor]);
-
   return (
     <>
-      <div id="editor" ref={handleContainerRef}></div>
+      <div id="editor" ref={handleContainerRef} />
       <div className="px-6 mx-auto max-w-4xl sticky bottom-4">
         <div className="bg-base-100 border-base-content/5 border rounded-lg shadow-xl">
           <div className="m-4 flex items-center gap-2">
@@ -116,5 +136,31 @@ export const ProfileEditor = () => {
         </div>
       </div>
     </>
+  );
+};
+
+export const ProfileEditor = () => {
+  const isClientReady = useIsClientReady();
+
+  return (
+    <div className="px-6 mx-auto max-w-4xl">
+      <ErrorBoundary
+        fallback={
+          <div role="alert" className="alert alert-error alert-soft">
+            <span>Something went wrong. Please try again later.</span>
+          </div>
+        }
+      >
+        <Suspense
+          fallback={
+            <div className="py-32 flex justify-center items-center">
+              <span className="loading loading-dots loading-sm"></span>
+            </div>
+          }
+        >
+          {!!isClientReady && <ProfileEditorContent />}
+        </Suspense>
+      </ErrorBoundary>
+    </div>
   );
 };

@@ -2,10 +2,6 @@
 @plugin "@tailwindcss/typography";
 @plugin "daisyui";
 
-#editor {
-  @apply px-6 mx-auto max-w-4xl;
-}
-
 #editor .je-indented-panel {
   @apply border-l-base-content/20;
 }
