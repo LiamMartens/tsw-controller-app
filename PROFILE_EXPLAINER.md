@@ -10,12 +10,15 @@ Each control on a game controller can be assigned an **action**. Assignments des
 
 All assignments conform to a top-level enum `ControllerProfileControlAssignment`, which contains the following variants:
 
-- `Momentary`
-- `Toggle`
-- `Linear`
-- `DirectControl`
-- `SyncControl`
-- `ApiControl`
+| Type | Description |
+|------|-------------|
+| `Momentary` | Single-press controls that trigger on threshold crossing |
+| `Toggle` | On/off state controls that alternate between actions |
+| `Linear` | Multi-threshold controls for fine-grained behavior |
+| `DirectControl` | Direct value mapping to the game |
+| `SyncControl` | Synchronized control via keypresses |
+| `ApiControl` | HTTP API-based value mapping |
+| `VirtualAction` | Virtual controls actions |
 
 Each assignment type has a specific use case and behavior, described below.
 
@@ -91,7 +94,7 @@ Maps an analog controller input to a continuous value in-game.
 }
 ```
 
-- **Directly updates** a UE4SS control based on axis input.
+- **Directly updates** a game control based on physical control input.
 - Used for **continuous analog mappings**.
 - Supports `step` or `steps` to quantize values.
 - Can be used with the `{SIDE}` placeholder to automatically select the correct side of the cab. This is specifically for controls named `Throttle_F` or `Throttle_B` where the `F` and `B` mark the side of the cab.
@@ -105,7 +108,7 @@ Maps an analog controller input to a continuous value in-game.
 
 ### 🧭 SyncControl
 
-A safer alternative to `DirectControl` for unstable locos.
+An alternative to `DirectControl` for locomotives that don't work with direct control.
 
 ```json
 {
@@ -122,7 +125,7 @@ A safer alternative to `DirectControl` for unstable locos.
 ```
 
 - **Reads current in-game state** and uses **keypresses** to reach desired state.
-- Ideal for **syncing with controls that don’t respond well to direct manipulation**.
+- Ideal for **syncing with controls that don't respond well to direct manipulation**.
 
 ### 🎚️ ApiControl
 
@@ -140,7 +143,7 @@ Maps an analog controller input to a continuous value in-game using the HTTP API
 }
 ```
 
-- **Directly updates** a game control based on axis input using the HTTP API. May result in slight overheada compared to the full direct control mode, but does not require additional a the mod to be installed.
+- **Directly updates** a game control based on axis input using the HTTP API. May result in slight overhead compared to the full direct control mode, but does not require additional mod to be installed.
 - Used for **continuous analog mappings**.
 - Supports `step` or `steps` to quantize values.
 
@@ -189,11 +192,23 @@ Each assignment triggers an action when activated (and optionally when deactivat
 
 - Sends a value directly to a control using the HTTP API.
 
+### 🎛️ Virtual Action
+
+```json
+{
+  "type": "virtual",
+  "control": "virtual:MyVirtualControl",
+  "value": 0.1
+}
+```
+
+- Sets the value of a virtual control which in turn can activate other assignments.
+
 ---
 
 ## 🔧 Input Value Mapping
 
-Used by `DirectControl`, `SyncControl` and `ApiControl` to map axis input to control values.
+Used by `DirectControl`, `SyncControl`, and `ApiControl` to map axis input to control values.
 
 ```json
 {
@@ -212,12 +227,13 @@ Used by `DirectControl`, `SyncControl` and `ApiControl` to map axis input to con
 
 ---
 
-## 🔁 Conditional assignments
+## 🔁 Conditional Assignments
 
-It is also possible to only execute assignments depending on one or more conditions. This can be used to create multi-key assignments. (eg: the action of a button changes depending on the position of a lever).
+It is also possible to only execute assignments depending on one or more conditions. This can be used to create multi-key assignments (e.g., the action of a button changes depending on the position of a lever).
+
 This can be added to any assignment using the `conditions` key:
 
-```
+```json
 {
   "type": "momentary",
   "conditions": [
@@ -230,35 +246,90 @@ This can be added to any assignment using the `conditions` key:
 }
 ```
 
-In the above example, the assignment will only execute if `mylever` exceeds 0.5. At this time the supported operators are `gte`, `lte`, `gt` and `lt`.
+In the above example, the assignment will only execute if `mylever` exceeds 0.5. At this time the supported operators are `eq`,`gte`, `lte`, `gt`, and `lt`.
+
+---
+
+## 🏗️ Profile Structure
+
+A controller profile is defined in a JSON file with the following structure:
+
+```json
+{
+  "name": "MyProfile",
+  "extends": "BaseProfile",
+  "auto_select": true,
+  "controls": [
+    {
+      "name": "Button1",
+      "type": "momentary",
+      "threshold": 0.5,
+      "action_activate": { "keys": "H" },
+      "action_deactivate": { "keys": "Shift+H" }
+    }
+  ],
+  "controller": {
+    "usb_id": "0x1234",
+    "mapping": "Standard",
+    "calibration": { ... }
+  },
+  "rail_class_information": [
+    "Class 40",
+    "Class 42",
+    "Class 43"
+  ]
+}
+```
+
+### Root Properties
+
+| Property | Description | Required |
+|----------|-------------|----------|
+| `name` | Profile name | ✅ Yes |
+| `extends` | Profile to extend from | No |
+| `auto_select` | Auto-detection support | No |
+| `controls` | Array of control definitions | No |
+| `controller` | Controller-specific info | No |
+| `rail_class_information` | Supported rail classes | No |
+
+### Controller Section
+
+The `controller` section contains controller-specific information. It is optional and is mostly available for profile sharing.
+
+```json
+"controller": {
+  "usb_id": "...",
+  "mapping": { ... },
+  "calibration": { ... }
+}
+```
+
+- `usb_id`: The USB device ID of the controller
+- `mapping`: The mapping profile used for the controller
+- `calibration`: Calibration data for the controller
+
+### Rail Class Information
+
+The `rail_class_information` section is an array of supported rail class names:
+
+```json
+"rail_class_information": [{ "class_name": "..." }]
+```
+
+- Contains a list of rail class names (e.g., "Class 40", "Class 42", etc.)
+- Used to specify which train classes the profile is compatible with
 
 ---
 
 ## ✅ Best Practices
 
 - Use `DirectControl` for stable, high-resolution mappings, especially lever controls.
-- Use `ApiControl` if you are unable to or do not want to use `DirectControl` (`ApiControl` is less flexible and is less performant, but still provides a near direct control option)
-- Use `SyncControl` if you want a direct control like experience but want to use keybindings. (this may be helpful since using keybinds trigger the in-game value notifications)
+- Use `ApiControl` if you are unable to or do not want to use `DirectControl` (`ApiControl` is less flexible and is less performant, but still provides a near direct control option).
+- Use `SyncControl` if you want a direct control-like experience but want to use keybindings.
 - Use `Linear` for fine-grained, manually configured lever behavior.
 - Use `Momentary` for temporary actions like horn or bell.
 - Use `Toggle` for switches with two states.
-
----
-
-## 📝 Example Full Assignment
-
-```json
-{
-  "type": "momentary",
-  "threshold": 0.5,
-  "action_activate": {
-    "keys": "H"
-  },
-  "action_deactivate": {
-    "keys": "Shift+H"
-  }
-}
-```
+- Use `VirtualAction` for controlling virtual controls.
 
 ---
 
