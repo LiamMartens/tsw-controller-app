@@ -11,10 +11,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@json-editor/json-editor": "^2.15.2",
-    "animejs": "^4.2.2",
+    "@json-editor/json-editor": "^2.16.0",
+    "animejs": "^4.3.6",
     "clsx": "^2.1.1",
-    "framer-motion": "^12.23.24",
+    "framer-motion": "^12.35.1",
     "install": "^0.13.0",
     "just-debounce": "^1.1.0",
     "just-throttle": "^4.2.0",
@@ -22,24 +22,24 @@
     "react": "^18.3.1",
     "react-bezier-curve-editor": "^2.1.0",
     "react-dom": "^18.3.1",
-    "react-error-boundary": "^6.1.0",
-    "react-hook-form": "^7.63.0",
+    "react-error-boundary": "^6.1.1",
+    "react-hook-form": "^7.71.2",
     "react-qr-code": "^2.0.18",
-    "semver": "^7.7.2",
-    "swr": "^2.3.6",
-    "zustand": "^5.0.8"
+    "semver": "^7.7.4",
+    "swr": "^2.4.1",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.1.13",
-    "@types/react": "^18.0.17",
-    "@types/react-dom": "^18.0.6",
+    "@tailwindcss/vite": "^4.2.1",
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18.3.7",
     "@types/semver": "^7.7.1",
-    "@vitejs/plugin-react": "^5.0.3",
-    "daisyui": "^5.1.13",
-    "prettier": "^3.6.2",
-    "tailwindcss": "^4.1.13",
-    "typescript": "^5.9.2",
-    "vite": "^7.1.6"
+    "@vitejs/plugin-react": "^5.1.4",
+    "daisyui": "^5.5.19",
+    "prettier": "^3.8.1",
+    "tailwindcss": "^4.2.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
   },
-  "packageManager": "npm@10.0.0"
+  "packageManager": "npm@10.9.5"
 }
