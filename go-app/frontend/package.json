@@ -11,14 +11,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@json-editor/json-editor": "^2.16.0",
     "animejs": "^4.3.6",
     "clsx": "^2.1.1",
     "framer-motion": "^12.35.1",
-    "install": "^0.13.0",
-    "just-debounce": "^1.1.0",
-    "just-throttle": "^4.2.0",
-    "npm": "^11.6.3",
     "react": "^18.3.1",
     "react-bezier-curve-editor": "^2.1.0",
     "react-dom": "^18.3.1",
@@ -26,8 +21,7 @@
     "react-hook-form": "^7.71.2",
     "react-qr-code": "^2.0.18",
     "semver": "^7.7.4",
-    "swr": "^2.4.1",
-    "zustand": "^5.0.11"
+    "swr": "^2.4.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.1",
