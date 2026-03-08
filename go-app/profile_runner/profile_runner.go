@@ -396,44 +396,68 @@ func (p *ProfileRunner) AssignmentActionToAssignmentCall(
 	preferred_control_mode := p.Settings.GetPreferredControlMode()
 	scored_assignment_calls := []ProfileRunner_ScoredAssignmentCallEntry{}
 
-	if action.DirectControl != nil && p.DirectController.Connector.IsActive() {
+	if action.DirectControl != nil {
 		max_change_rate := DEFAULT_MAX_CHANGE_RATE
-		flags := []string{}
-		if action.DirectControl.MaxChangeRate != nil {
-			max_change_rate = *action.DirectControl.MaxChangeRate
-		}
-		if action.DirectControl.Relative != nil && *action.DirectControl.Relative {
-			flags = append(flags, "relative")
-		}
-		if action.DirectControl.Hold != nil && *action.DirectControl.Hold {
-			flags = append(flags, "hold")
-		}
-		if action.DirectControl.UseNormalized != nil && *action.DirectControl.UseNormalized {
-			flags = append(flags, "normalized")
-		}
-		if action.DirectControl.Notify == nil || *action.DirectControl.Notify {
-			flags = append(flags, "notify")
-		}
+		enable_api_fallback := action.DirectControl.EnableAPIFallback != nil && *action.DirectControl.EnableAPIFallback
+		should_hold := action.DirectControl.Hold != nil && *action.DirectControl.Hold
 
-		scored_assignment_call := ProfileRunner_ScoredAssignmentCallEntry{
-			Score: 0,
-			AssignmentCall: ProfileRunnerAssignmentCall{
-				ControlState:          control_state,
-				ActionSequencerAction: nil,
-				VirtualAction:         nil,
-				ApiControlCommand:     nil,
-				DirectControlCommand: &DirectController_Command{
-					Controls:      action.DirectControl.Controls,
-					InputValue:    action.DirectControl.Value,
-					MaxChangeRate: max_change_rate,
-					Flags:         flags,
+		if p.DirectController.Connector.IsActive() {
+			flags := []string{}
+			if should_hold {
+				flags = append(flags, "hold")
+			}
+			if action.DirectControl.MaxChangeRate != nil {
+				max_change_rate = *action.DirectControl.MaxChangeRate
+			}
+			if action.DirectControl.Relative != nil && *action.DirectControl.Relative {
+				flags = append(flags, "relative")
+			}
+			if action.DirectControl.UseNormalized != nil && *action.DirectControl.UseNormalized {
+				flags = append(flags, "normalized")
+			}
+			if action.DirectControl.Notify == nil || *action.DirectControl.Notify {
+				flags = append(flags, "notify")
+			}
+
+			scored_assignment_call := ProfileRunner_ScoredAssignmentCallEntry{
+				Score: 0,
+				AssignmentCall: ProfileRunnerAssignmentCall{
+					ControlState:          control_state,
+					ActionSequencerAction: nil,
+					VirtualAction:         nil,
+					ApiControlCommand:     nil,
+					DirectControlCommand: &DirectController_Command{
+						Controls:      action.DirectControl.Controls,
+						InputValue:    action.DirectControl.Value,
+						MaxChangeRate: max_change_rate,
+						Flags:         flags,
+					},
 				},
-			},
+			}
+			if preferred_control_mode == config.PreferredControlMode_DirectControl {
+				scored_assignment_call.Score += 10
+			}
+			scored_assignment_calls = append(scored_assignment_calls, scored_assignment_call)
+		} else if enable_api_fallback && p.ApiController.API.Enabled() {
+			scored_assignment_call := ProfileRunner_ScoredAssignmentCallEntry{
+				Score: 0,
+				AssignmentCall: ProfileRunnerAssignmentCall{
+					ControlState:          control_state,
+					ActionSequencerAction: nil,
+					VirtualAction:         nil,
+					ApiControlCommand: &ApiController_Command{
+						Controls:      action.DirectControl.Controls,
+						InputValue:    action.DirectControl.Value,
+						Hold:          should_hold,
+						MaxChangeRate: max_change_rate,
+					},
+				},
+			}
+			if preferred_control_mode == config.PreferredControlMode_ApiControl {
+				scored_assignment_call.Score += 10
+			}
+			scored_assignment_calls = append(scored_assignment_calls, scored_assignment_call)
 		}
-		if preferred_control_mode == config.PreferredControlMode_DirectControl {
-			scored_assignment_call.Score += 10
-		}
-		scored_assignment_calls = append(scored_assignment_calls, scored_assignment_call)
 	}
 
 	if action.ApiControl != nil && p.ApiController.API.CanConnect() {
@@ -571,7 +595,12 @@ collect_assignments_loop:
 		}
 
 		if assignment.DirectControl != nil {
+			enable_api_fallback := assignment.DirectControl.EnableAPIFallback != nil && *assignment.DirectControl.EnableAPIFallback
 			scored_control_assignments[config.PreferredControlMode_DirectControl].Assignments = append(scored_control_assignments[config.PreferredControlMode_DirectControl].Assignments, assignment)
+			/* if enabaled as API fallback; also add this assignment to the scored list of API controls */
+			if enable_api_fallback {
+				scored_control_assignments[config.PreferredControlMode_ApiControl].Assignments = append(scored_control_assignments[config.PreferredControlMode_ApiControl].Assignments, assignment)
+			}
 		} else if assignment.SyncControl != nil {
 			scored_control_assignments[config.PreferredControlMode_SyncControl].Assignments = append(scored_control_assignments[config.PreferredControlMode_SyncControl].Assignments, assignment)
 		} else if assignment.ApiControl != nil {
@@ -597,6 +626,7 @@ collect_assignments_loop:
 		}
 	}
 	if can_use_api_control_mode {
+		/* this will also mark direct control assignments which have API fallback enabled with scores */
 		scored_control_assignments[config.PreferredControlMode_ApiControl].Score += 2
 		if preferred_control_mode == config.PreferredControlMode_ApiControl {
 			scored_control_assignments[config.PreferredControlMode_ApiControl].Score += 5
@@ -780,12 +810,14 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 					}
 					output_value := control_assignment_item.DirectControl.InputValue.CalculateOutputValue(control_value)
 					max_change_rate := DEFAULT_MAX_CHANGE_RATE
+					should_hold := control_assignment_item.DirectControl.Hold != nil && *control_assignment_item.DirectControl.Hold
+
 					flags := []string{}
+					if should_hold {
+						flags = append(flags, "hold")
+					}
 					if control_assignment_item.DirectControl.InputValue.MaxChangeRate != nil {
 						max_change_rate = *control_assignment_item.DirectControl.InputValue.MaxChangeRate
-					}
-					if control_assignment_item.DirectControl.Hold != nil && *control_assignment_item.DirectControl.Hold {
-						flags = append(flags, "hold")
 					}
 					if control_assignment_item.DirectControl.Notify == nil || *control_assignment_item.DirectControl.Notify {
 						flags = append(flags, "notify")
