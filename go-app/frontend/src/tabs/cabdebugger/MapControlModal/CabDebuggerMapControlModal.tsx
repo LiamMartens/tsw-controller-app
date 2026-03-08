@@ -63,49 +63,18 @@ const CabDebuggerMapControlModalContent = ({
         name: values.binding,
         assignments: [
           {
-            type: "direct_control",
-            hold: true,
-            controls: controlName,
-            conditions: [
-              { control: values.binding, operator: "gte", value: 0.9 },
-            ],
-            input_value: {
-              min: 1,
-              max: 1,
+            type: "momentary",
+            threshold: 0.9,
+            action_activate: {
+              controls: controlName,
+              enable_api_fallback: true,
+              value: 1.0,
+              hold: true,
             },
-          },
-          {
-            type: "direct_control",
-            controls: controlName,
-            conditions: [
-              { control: values.binding, operator: "lt", value: 0.9 },
-            ],
-            input_value: {
-              min: 0,
-              max: 0,
-            },
-          },
-          {
-            type: "api_control",
-            hold: true,
-            controls: controlName,
-            conditions: [
-              { control: values.binding, operator: "gte", value: 0.9 },
-            ],
-            input_value: {
-              min: 1,
-              max: 1,
-            },
-          },
-          {
-            type: "api_control",
-            controls: controlName,
-            conditions: [
-              { control: values.binding, operator: "lt", value: 0.9 },
-            ],
-            input_value: {
-              min: 0,
-              max: 0,
+            action_deactivate: {
+              controls: controlName,
+              enable_api_fallback: true,
+              value: 0.0,
             },
           },
         ],
@@ -151,11 +120,7 @@ const CabDebuggerMapControlModalContent = ({
             type: "direct_control",
             controls: controlName,
             input_value: inputValue,
-          },
-          {
-            type: "api_control",
-            controls: controlName,
-            input_value: inputValue,
+            enable_api_fallback: true,
           },
         ],
       };
