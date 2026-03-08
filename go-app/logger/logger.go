@@ -9,17 +9,22 @@ import (
 
 const LOGGER_BUFFER_SIZE = 128
 
+type GlobalLogger_Event struct {
+	LogLevel string
+	Message  string
+}
+
 type GlobalLogger struct {
 	mutex     sync.RWMutex
 	slogger   *slog.Logger
-	listeners []chan string
+	listeners []chan GlobalLogger_Event
 }
 
-func (g *GlobalLogger) Listen() (chan string, func()) {
+func (g *GlobalLogger) Listen() (chan GlobalLogger_Event, func()) {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
 
-	channel := make(chan string, LOGGER_BUFFER_SIZE)
+	channel := make(chan GlobalLogger_Event, LOGGER_BUFFER_SIZE)
 	g.listeners = append(g.listeners, channel)
 	unsubscribe := func() {
 		g.mutex.Lock()
@@ -56,7 +61,7 @@ func (g *GlobalLogger) Debug(msg string, args ...any) {
 	if len(g.listeners) > 0 {
 		properties := g.PropertiesFromArgs(args...)
 		for _, c := range g.listeners {
-			c <- fmt.Sprintf("%s | %v", msg, properties)
+			c <- GlobalLogger_Event{LogLevel: "debug", Message: fmt.Sprintf("%s | %v", msg, properties)}
 		}
 	}
 }
@@ -70,7 +75,7 @@ func (g *GlobalLogger) Info(msg string, args ...any) {
 	if len(g.listeners) > 0 {
 		properties := g.PropertiesFromArgs(args...)
 		for _, c := range g.listeners {
-			c <- fmt.Sprintf("%s | %v", msg, properties)
+			c <- GlobalLogger_Event{LogLevel: "info", Message: fmt.Sprintf("%s | %v", msg, properties)}
 		}
 	}
 }
@@ -84,7 +89,7 @@ func (g *GlobalLogger) Error(msg string, args ...any) {
 	if len(g.listeners) > 0 {
 		properties := g.PropertiesFromArgs(args...)
 		for _, c := range g.listeners {
-			c <- fmt.Sprintf("%s | %v", msg, properties)
+			c <- GlobalLogger_Event{LogLevel: "error", Message: fmt.Sprintf("%s | %v", msg, properties)}
 		}
 	}
 }
@@ -93,5 +98,5 @@ var Logger = GlobalLogger{
 	slogger: slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slog.LevelDebug,
 	})),
-	listeners: []chan string{},
+	listeners: []chan GlobalLogger_Event{},
 }

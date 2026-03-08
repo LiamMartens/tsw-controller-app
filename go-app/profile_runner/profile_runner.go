@@ -683,6 +683,8 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 			if !has_selected_profile {
 				logger.Logger.Debug("[ProfileRunner::Run] skipping event, no profile selected", "event", change_event)
 				return
+			} else {
+				logger.Logger.Debug("[ProfileRunner::Run] using profile", selected_profile.Profile.Name)
 			}
 
 			control_name := change_event.ControlName

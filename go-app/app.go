@@ -48,7 +48,9 @@ const (
 	AppEventType_ProfilesUpdated   AppEventType = "profiles_updated"
 	AppEventType_RawEvent          AppEventType = "rawevent"
 	AppEventType_ChangeEvent       AppEventType = "changeevent"
-	AppEventType_Log               AppEventType = "log"
+	AppEventType_Log_Debug         AppEventType = "log/debug"
+	AppEventType_Log_Info          AppEventType = "log/info"
+	AppEventType_Log_Error         AppEventType = "log/error"
 )
 
 type AppConfig_Mode = string
@@ -243,7 +245,14 @@ func (a *App) startupRun() {
 			case <-a.ctx.Done():
 				return
 			case msg := <-channel:
-				runtime.EventsEmit(a.ctx, AppEventType_Log, msg)
+				switch msg.LogLevel {
+				case "debug":
+					runtime.EventsEmit(a.ctx, AppEventType_Log_Debug, msg.Message)
+				case "info":
+					runtime.EventsEmit(a.ctx, AppEventType_Log_Info, msg.Message)
+				case "error":
+					runtime.EventsEmit(a.ctx, AppEventType_Log_Error, msg.Message)
+				}
 			}
 		}
 	}()

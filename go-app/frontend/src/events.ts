@@ -3,5 +3,9 @@ export const events = {
   profiles_updated: "profiles_updated",
   rawevent: "rawevent",
   changeevent: "changeevent",
-  log: "log",
+  log: {
+    debug: "log/debug",
+    info: "log/info",
+    error: "log/error"
+  },
 };
