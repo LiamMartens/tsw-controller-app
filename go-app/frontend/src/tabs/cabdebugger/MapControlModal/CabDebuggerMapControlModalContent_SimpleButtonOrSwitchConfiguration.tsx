@@ -52,6 +52,7 @@ export const CabDebuggerMapControlModalContent_SimpleButtonOrSwitchConfiguration
           {!!binding && <p className="text-sm text-base-content">{binding}</p>}
         </div>
         <button
+          type="button"
           className={clsx("btn btn-sm", { "btn-active btn-info": listening })}
           onClick={handleBindToggle}
         >

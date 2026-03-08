@@ -137,12 +137,14 @@ export const CabDebuggerMapControlModalContent_MultiSwitchOrLeverConfiguration_V
           </div>
           <div className="join ml-auto">
             <button
+              type="button"
               className="join-item btn btn-sm btn-ghost btn-error"
               onClick={handleDeleteValue}
             >
               Delete
             </button>
             <button
+              type="button"
               className={clsx("join-item btn btn-sm", {
                 "btn-active btn-info": listening,
               })}

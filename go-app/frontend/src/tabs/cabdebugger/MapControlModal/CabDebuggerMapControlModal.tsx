@@ -147,6 +147,7 @@ const CabDebuggerMapControlModalContent = ({
           </span>
         </div>
         <form
+          id={FORM_ID}
           className="flex flex-col gap-2"
           onSubmit={form.handleSubmit(handleFormValid)}
         >

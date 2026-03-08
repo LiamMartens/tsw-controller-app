@@ -79,6 +79,7 @@ export const CabDebuggerMapControlModalContent_MultiSwitchOrLeverConfiguration =
           </div>
           <div className="join">
             <button
+              type="button"
               className={clsx("join-item btn btn-sm", {
                 "btn-active btn-info": listening,
               })}
@@ -86,7 +87,11 @@ export const CabDebuggerMapControlModalContent_MultiSwitchOrLeverConfiguration =
             >
               Bind
             </button>
-            <button className="join-item btn btn-sm" onClick={handleAddValue}>
+            <button
+              type="button"
+              className="join-item btn btn-sm"
+              onClick={handleAddValue}
+            >
               Add value
             </button>
           </div>

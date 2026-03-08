@@ -705,6 +705,7 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 			}
 
 			assignments := p.GetAssignments(control_profile, &change_event)
+
 			previous_control_assignments_call_list, has_previous_control_assignments_call_list := p.PreviousControlAssignmentCallList.Get(control_name)
 			for assignment_index, control_assignment_item := range assignments {
 				logger.Logger.Debug("[ProfileRunner::Run] executing assignment", "assignment", control_assignment_item)
@@ -809,8 +810,10 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 						control_value = control_assignment_item.DirectControl.ControlRange.Clamp(control_value)
 					}
 					output_value := control_assignment_item.DirectControl.InputValue.CalculateOutputValue(control_value)
+
 					max_change_rate := DEFAULT_MAX_CHANGE_RATE
 					should_hold := control_assignment_item.DirectControl.Hold != nil && *control_assignment_item.DirectControl.Hold
+					enable_api_fallback := control_assignment_item.DirectControl.EnableAPIFallback != nil && *control_assignment_item.DirectControl.EnableAPIFallback
 
 					flags := []string{}
 					if should_hold {
@@ -826,7 +829,7 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 						flags = append(flags, "normalized")
 					}
 					if output_value != nil {
-						p.CallAssignmentActionForControl(control_name, assignment_index, change_event.Controller, change_event.ControlState, control_assignment_item, &ProfileRunnerAssignmentCall{
+						assignment_call := &ProfileRunnerAssignmentCall{
 							ControlState:          change_event.ControlState,
 							ActionSequencerAction: nil,
 							ApiControlCommand:     nil,
@@ -836,7 +839,17 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 								MaxChangeRate: max_change_rate,
 								Flags:         flags,
 							},
-						})
+						}
+						if enable_api_fallback && !p.DirectController.Connector.IsActive() {
+							assignment_call.DirectControlCommand = nil
+							assignment_call.ApiControlCommand = &ApiController_Command{
+								Controls:      control_assignment_item.DirectControl.Controls,
+								InputValue:    *output_value,
+								MaxChangeRate: max_change_rate,
+								Hold:          should_hold,
+							}
+						}
+						p.CallAssignmentActionForControl(control_name, assignment_index, change_event.Controller, change_event.ControlState, control_assignment_item, assignment_call)
 					}
 				}
 				if control_assignment_item.ApiControl != nil {
