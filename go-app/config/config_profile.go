@@ -41,6 +41,8 @@ type Config_Controller_Profile_Control_Assignment_Action_DirectControl struct {
 	UseNormalized *bool `json:"use_normalized,omitempty"`
 	/* whether to notify the game for value changes (defaults to true) */
 	Notify *bool `json:"notify,omitempty"`
+	/* whether to enable fallback to the TSW API if available */
+	EnableAPIFallback *bool `json:"enable_api_fallback,omitempty"`
 }
 
 type Config_Controller_Profile_Control_Assignment_Action_ApiControl struct {
@@ -141,7 +143,10 @@ type Config_Controller_Profile_Control_Assignment_DirectControl struct {
 	Hold *bool `json:"hold,omitempty"`
 	/* whether to apply raw or normalized values */
 	UseNormalized *bool `json:"use_normalized,omitempty"`
-	Notify        *bool `json:"notify,omitempty"`
+	/* whether to enable fallback to the TSW API if available */
+	EnableAPIFallback *bool `json:"enable_api_fallback,omitempty"`
+	/* whether to send the notify flag */
+	Notify *bool `json:"notify,omitempty"`
 }
 
 type Config_Controller_Profile_Control_Assignment_ApiControl struct {

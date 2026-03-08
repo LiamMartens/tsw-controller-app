@@ -30,6 +30,10 @@
     "notify": {
       "type": "boolean",
       "description": "Enables showing the in-game notification when changing values"
+    },
+    "enable_api_fallback": {
+      "type": "boolean",
+      "description": "Determines whether to enable fallback to the TSW API if available"
     }
   },
   "required": ["controls", "value"]

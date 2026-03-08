@@ -128,6 +128,10 @@ export interface DirectControlAction {
    * Enables showing the in-game notification when changing values
    */
   notify?: boolean;
+  /**
+   * Determines whether to enable fallback to the TSW API if available
+   */
+  enable_api_fallback?: boolean;
   [k: string]: unknown;
 }
 export interface APIControlAction {
@@ -258,6 +262,10 @@ export interface DirectControl {
    * Whether to use the normalized value instead of the non-normalized value
    */
   use_normalized?: boolean;
+  /**
+   * Determines whether to enable fallback to the TSW API if available
+   */
+  enable_api_fallback?: boolean;
   /**
    * Enables showing the in-game notification when changing values
    */
