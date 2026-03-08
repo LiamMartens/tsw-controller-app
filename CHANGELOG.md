@@ -1,6 +1,10 @@
 
 # CHANGELOG
 
+## v1.10.0
+### Features
+- Adds an easier way of mapping controls through the UI
+
 ## v1.9.3
 - Fix calibration modal bug
 - Update negative value handling

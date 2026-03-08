@@ -1,10 +1,10 @@
-import { useRef, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 
 export const useDelayState = <T>(defaultValue: T) => {
   const delayValueTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [value, setValue] = useState(defaultValue);
 
-  return {
+  return useMemo(() => ({
     value,
     setValueDelayed: (value: T, delay: number) => {
       if (delayValueTimeoutRef.current) {
@@ -19,5 +19,5 @@ export const useDelayState = <T>(defaultValue: T) => {
       }
       setValue(value);
     }
-  }
+  }), [value])
 }

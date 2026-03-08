@@ -4,7 +4,6 @@ import {
   SaveCalibration,
   UnsubscribeRaw,
   SubscribeRaw,
-  GetControllerConfiguration,
   LoadConfiguration,
 } from "../../../wailsjs/go/main/App";
 import {

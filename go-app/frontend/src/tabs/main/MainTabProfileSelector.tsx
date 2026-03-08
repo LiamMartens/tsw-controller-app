@@ -1,6 +1,6 @@
-import { Controller, UseFormReturn, useWatch } from "react-hook-form";
+import { UseFormReturn, useWatch } from "react-hook-form";
 import { main } from "../../../wailsjs/go/models";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { ProfileSelectionListItem } from "./_components/ProfileSelectionListItem";
 import { unfocus } from "../../utils/unfocus";
 import {

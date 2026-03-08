@@ -58,6 +58,8 @@ export function ResetCabControlState():Promise<void>;
 
 export function SaveCalibration(arg1:main.Interop_ControllerCalibration):Promise<void>;
 
+export function SaveControlMapping(arg1:main.Interop_SaveControlMapping):Promise<void>;
+
 export function SaveLogs(arg1:Array<string>):Promise<void>;
 
 export function SaveProfileForSharing(arg1:string):Promise<void>;
@@ -78,11 +80,17 @@ export function SetTSWAPIKeyLocation(arg1:string):Promise<void>;
 
 export function SetTheme(arg1:string):Promise<void>;
 
+export function SubscribeChangeEvent():Promise<void>;
+
 export function SubscribeRaw(arg1:string):Promise<void>;
+
+export function TypestubGetChangeEvent():Promise<main.Interop_ChangeEvent>;
 
 export function TypestubGetRawEvent():Promise<main.Interop_RawEvent>;
 
 export function TypestubGetSelectedProfile():Promise<main.Interop_SelectedProfileInfo>;
+
+export function UnsubscribeChangeEvent():Promise<void>;
 
 export function UnsubscribeRaw():Promise<void>;
 

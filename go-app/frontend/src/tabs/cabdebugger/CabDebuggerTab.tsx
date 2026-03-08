@@ -1,6 +1,9 @@
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useCabControlState } from "../../swr";
+import { CabDebuggerTabControl } from "./CabDebuggerTabControl";
+import { main } from "../../../wailsjs/go/models";
+import { CabDebuggerMapControlModal } from "./CabDebuggerMapControlModal";
 
 export const CabDebuggerTab = () => {
   const { register, watch } = useForm<{ query: string }>({
@@ -8,6 +11,8 @@ export const CabDebuggerTab = () => {
   });
   const { data: cabControlState, mutate: refetchCabControlState } =
     useCabControlState();
+  const [mapControlModalOpenState, setMapControlModalOpenState] =
+    useState<main.Interop_Cab_ControlState_Control | null>(null);
 
   const query = watch("query");
   const sortedControls = useMemo(
@@ -23,6 +28,17 @@ export const CabDebuggerTab = () => {
       ),
     [cabControlState?.Controls, query],
   );
+
+  const handleOpenMapControlModal = useCallback(
+    (controlState: main.Interop_Cab_ControlState_Control) => {
+      setMapControlModalOpenState(controlState);
+    },
+    [],
+  );
+
+  const handleCloseMapControlModal = useCallback(() => {
+    setMapControlModalOpenState(null);
+  }, []);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
@@ -59,32 +75,18 @@ export const CabDebuggerTab = () => {
       )}
       <ul className="list bg-base-100 rounded-box shadow-md">
         {sortedControls?.map((controlState) => (
-          <li key={controlState.PropertyName} className="list-row">
-            <div className="flex flex-col gap-2">
-              <div className="grid grid-cols-2">
-                <div>
-                  <p className="text-slate-400">Sync Control Name</p>
-                  <p>{decodeURIComponent(controlState.Identifier)}</p>
-                </div>
-                <div>
-                  <p className="text-slate-400">Direct Control Name</p>
-                  <p>{decodeURIComponent(controlState.PropertyName)}</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2">
-                <div>
-                  <p className="text-slate-400">Current Value</p>
-                  <p>{controlState.CurrentValue.toFixed(4)}</p>
-                </div>
-                <div>
-                  <p className="text-slate-400">Current Normalized Value</p>
-                  <p>{controlState.CurrentNormalizedValue.toFixed(4)}</p>
-                </div>
-              </div>
-            </div>
-          </li>
+          <CabDebuggerTabControl
+            key={controlState.PropertyName}
+            controlState={controlState}
+            onMapControl={handleOpenMapControlModal}
+          />
         ))}
       </ul>
+
+      <CabDebuggerMapControlModal
+        controlState={mapControlModalOpenState?.PropertyName ?? null}
+        onClose={handleCloseMapControlModal}
+      />
     </div>
   );
 };

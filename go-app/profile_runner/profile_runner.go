@@ -480,13 +480,7 @@ func (p *ProfileRunner) GetAssignments(
 	control *config.Config_Controller_Profile_Control,
 	source_event *controller_mgr.ControllerManager_Control_ChangeEvent,
 ) []config.Config_Controller_Profile_Control_Assignment {
-	var assignments []config.Config_Controller_Profile_Control_Assignment
-	if control.Assignment != nil {
-		assignments = append(assignments, *control.Assignment)
-	} else if control.Assignments != nil {
-		/* copy by value clone */
-		assignments = append(assignments, *control.Assignments...)
-	}
+	assignments := control.GetAssignments()
 
 	/* filter out conditional assignments */
 	current_rail_class := p.CabDebugger.State.DrivableActorName
@@ -662,6 +656,7 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 			}
 
 			control_name := change_event.ControlName
+			device_id := change_event.Device.DeviceID
 			if selected_profile.Profile.Controller != nil && selected_profile.Profile.Controller.Mapping != nil {
 				if joy_control, is_joy_control := change_event.Control.(*controller_mgr.SDL_ControllerManager_Controller_JoyControl); is_joy_control {
 					root_mapping := joy_control.SDLMapping()
@@ -673,7 +668,7 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 				}
 			}
 
-			control_profile := selected_profile.Profile.FindControlByName(control_name)
+			control_profile := selected_profile.Profile.FindControlByName(device_id, control_name)
 			if control_profile == nil {
 				logger.Logger.Debug("[ProfileRunner::Run] skipping event, control not found in profile", "event", change_event)
 				return

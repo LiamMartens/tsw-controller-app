@@ -220,9 +220,14 @@ func (c *Config_Controller_Profile) Id() string {
 	return fmt.Sprintf("%x", hash)
 }
 
-func (c *Config_Controller_Profile) FindControlByName(name string) *Config_Controller_Profile_Control {
+/*
+Finds a control in the profile by it's name or by it's device ID and name
+eg: "{name}" or "{device_id}:{name}"
+*/
+func (c *Config_Controller_Profile) FindControlByName(device_id string, name string) *Config_Controller_Profile_Control {
+	with_device_id := fmt.Sprintf("%s:%s", device_id, name)
 	for _, control := range c.Controls {
-		if control.Name == name {
+		if control.Name == with_device_id || control.Name == name {
 			return &control
 		}
 	}

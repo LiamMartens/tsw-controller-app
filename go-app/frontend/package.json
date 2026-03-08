@@ -4,13 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "generate:profile_json_schema": "node ./profile_json_schema/dereference.mjs",
+    "generate:schema-types": "json2ts --cwd=../../profile-builder-schema --input ../../profile-builder-schema/profile.schema.json --output ./src/profile-schema/schema.ts",
     "format": "prettier --write .",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "animejs": "^4.3.6",
     "clsx": "^2.1.1",
     "framer-motion": "^12.35.1",
@@ -19,9 +20,11 @@
     "react-dom": "^18.3.1",
     "react-error-boundary": "^6.1.1",
     "react-hook-form": "^7.71.2",
+    "react-icons": "^5.6.0",
     "react-qr-code": "^2.0.18",
     "semver": "^7.7.4",
-    "swr": "^2.4.1"
+    "swr": "^2.4.1",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.1",
@@ -30,6 +33,7 @@
     "@types/semver": "^7.7.1",
     "@vitejs/plugin-react": "^5.1.4",
     "daisyui": "^5.5.19",
+    "json-schema-to-typescript": "^15.0.4",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",

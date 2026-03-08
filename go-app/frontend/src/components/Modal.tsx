@@ -1,14 +1,8 @@
-import {
-  PropsWithChildren,
-  Suspense,
-  useEffect,
-  useRef,
-  useState,
-  ReactNode,
-  SyntheticEvent,
-} from "react";
+import { Suspense, useEffect, useRef, ReactNode, SyntheticEvent } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useDelayState } from "../hooks";
+import clsx from "clsx";
+import { createPortal } from "react-dom";
 
 const ErrorFallback = ({ error }: { error: unknown }) => (
   <div className="alert alert-error">{`An error occured (${error})`}</div>
@@ -19,18 +13,26 @@ const SuspenseFallback = () => (
   </div>
 );
 
+export interface ModalCloseReason {}
+
 export type ModalContentProps<T> = {
   openState: Exclude<T, false>;
-  onClose: () => void;
+  onClose: (reason?: ModalCloseReason) => void;
 };
 
 export type ModalProps<T> = {
   openState: T | false;
-  onClose: () => void;
+  className?: string;
+  onClose: (reason?: ModalCloseReason) => void;
   Component: (props: ModalContentProps<T>) => ReactNode;
 };
 
-export function Modal<T>({ openState, onClose, Component }: ModalProps<T>) {
+export function Modal<T>({
+  className,
+  openState,
+  onClose,
+  Component,
+}: ModalProps<T>) {
   const ref = useRef<HTMLDialogElement | null>(null);
   const delayedOpenState = useDelayState(openState);
 
@@ -53,8 +55,12 @@ export function Modal<T>({ openState, onClose, Component }: ModalProps<T>) {
     }
   }, [openState]);
 
-  return (
-    <dialog ref={handleRef} className="modal modal-s" onClose={handleClose}>
+  return createPortal(
+    <dialog
+      ref={handleRef}
+      className={clsx("modal modal-s", className)}
+      onClose={handleClose}
+    >
       <div className="modal-box w-11/12 max-w-5xl">
         <ErrorBoundary fallbackRender={ErrorFallback}>
           <Suspense fallback={<SuspenseFallback />}>
@@ -67,6 +73,7 @@ export function Modal<T>({ openState, onClose, Component }: ModalProps<T>) {
           </Suspense>
         </ErrorBoundary>
       </div>
-    </dialog>
+    </dialog>,
+    document.body,
   );
 }

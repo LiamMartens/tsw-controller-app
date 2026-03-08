@@ -47,6 +47,7 @@ const (
 	AppEventType_JoyDevicesUpdated AppEventType = "joydevices_updated"
 	AppEventType_ProfilesUpdated   AppEventType = "profiles_updated"
 	AppEventType_RawEvent          AppEventType = "rawevent"
+	AppEventType_ChangeEvent       AppEventType = "changeevent"
 	AppEventType_Log               AppEventType = "log"
 )
 
@@ -97,6 +98,11 @@ type AppRawSubscriber struct {
 	Cancel  func()
 }
 
+type AppChangeEventSubscriber struct {
+	Channel chan controller_mgr.ControllerManager_Control_ChangeEvent
+	Cancel  func()
+}
+
 type AppConfig_ProxySettings struct {
 	Addr string
 }
@@ -125,7 +131,8 @@ type App struct {
 	api_controller             *profile_runner.ApiController
 	profile_runner             *profile_runner.ProfileRunner
 
-	raw_subscriber *AppRawSubscriber
+	raw_subscriber          *AppRawSubscriber
+	change_event_subscriber *AppChangeEventSubscriber
 }
 
 /* these are just wails type stubs */
@@ -134,6 +141,10 @@ func (a *App) TypestubGetSelectedProfile() *Interop_SelectedProfileInfo {
 }
 
 func (a *App) TypestubGetRawEvent() *Interop_RawEvent {
+	return nil
+}
+
+func (a *App) TypestubGetChangeEvent() *Interop_ChangeEvent {
 	return nil
 }
 
@@ -688,38 +699,98 @@ func (a *App) SubscribeRaw(unique_id controller_mgr.DeviceUniqueID) error {
 		return fmt.Errorf("joystick not found")
 	}
 
-	channel, cancel := a.sdl_controller_manager.SubscribeRaw()
+	childctx, cancel := context.WithCancel(a.ctx)
+	sdl_channel, sdl_cancel := a.sdl_controller_manager.SubscribeRaw()
 	raw_subscriber := AppRawSubscriber{
-		Channel: channel,
+		Channel: sdl_channel,
 		Cancel:  cancel,
 	}
 	go func() {
-		for e := range channel {
-			if e.Device().UniqueID == joystick.UniqueID() {
-				raw_event := Interop_RawEvent{
-					UniqueID:  joystick.UniqueID(),
-					DeviceID:  joystick.DeviceID(),
-					Timestamp: e.Timestamp(),
+		defer sdl_cancel()
+		for {
+			select {
+			case <-childctx.Done():
+				return
+			case e := <-sdl_channel:
+				if e.Device().UniqueID == joystick.UniqueID() {
+					raw_event := Interop_RawEvent{
+						UniqueID:  joystick.UniqueID(),
+						DeviceID:  joystick.DeviceID(),
+						Timestamp: e.Timestamp(),
+					}
+					switch event := e.(type) {
+					case *controller_mgr.ControllerManager_RawEvent_Axis:
+						raw_event.Kind = sdl_mgr.SDLMgr_Control_Kind_Axis
+						raw_event.Index = event.Axis()
+						raw_event.Value = event.Value()
+					case *controller_mgr.ControllerManager_RawEvent_Button:
+						raw_event.Kind = sdl_mgr.SDLMgr_Control_Kind_Button
+						raw_event.Index = event.Button()
+						raw_event.Value = event.Value()
+					case *controller_mgr.ControllerManager_RawEvent_Hat:
+						raw_event.Kind = sdl_mgr.SDLMgr_Control_Kind_Hat
+						raw_event.Index = event.Hat()
+						raw_event.Value = event.Value()
+					}
+					go runtime.EventsEmit(a.ctx, AppEventType_RawEvent, raw_event)
 				}
-				switch event := e.(type) {
-				case *controller_mgr.ControllerManager_RawEvent_Axis:
-					raw_event.Kind = sdl_mgr.SDLMgr_Control_Kind_Axis
-					raw_event.Index = event.Axis()
-					raw_event.Value = event.Value()
-				case *controller_mgr.ControllerManager_RawEvent_Button:
-					raw_event.Kind = sdl_mgr.SDLMgr_Control_Kind_Button
-					raw_event.Index = event.Button()
-					raw_event.Value = event.Value()
-				case *controller_mgr.ControllerManager_RawEvent_Hat:
-					raw_event.Kind = sdl_mgr.SDLMgr_Control_Kind_Hat
-					raw_event.Index = event.Hat()
-					raw_event.Value = event.Value()
-				}
-				go runtime.EventsEmit(a.ctx, AppEventType_RawEvent, raw_event)
 			}
 		}
 	}()
 	a.raw_subscriber = &raw_subscriber
+
+	return nil
+}
+
+func (a *App) UnsubscribeChangeEvent() {
+	if a.change_event_subscriber != nil {
+		a.change_event_subscriber.Cancel()
+		a.change_event_subscriber = nil
+	}
+}
+
+func (a *App) SubscribeChangeEvent() error {
+	if a.change_event_subscriber != nil {
+		logger.Logger.Error("already subscribed")
+		return fmt.Errorf("already subscribed")
+	}
+
+	childctx, cancel := context.WithCancel(a.ctx)
+	sdl_channel, sdl_cancel := a.sdl_controller_manager.SubscribeChangeEvent()
+	virt_channel, virt_cancel := a.virtual_controller_manager.SubscribeChangeEvent()
+
+	change_event_subscriber := AppChangeEventSubscriber{
+		Channel: make(chan controller_mgr.ControllerManager_Control_ChangeEvent),
+		Cancel:  cancel,
+	}
+	a.change_event_subscriber = &change_event_subscriber
+
+	go func() {
+		defer sdl_cancel()
+		defer virt_cancel()
+		for {
+			select {
+			case <-childctx.Done():
+				return
+			case event := <-sdl_channel:
+				change_event := Interop_ChangeEvent{
+					UniqueID:    event.Device.UniqueID,
+					DeviceID:    event.Device.DeviceID,
+					ControlName: event.ControlName,
+					Value:       event.ControlState.NormalizedValues.Value,
+				}
+				go runtime.EventsEmit(a.ctx, AppEventType_ChangeEvent, change_event)
+			case event := <-virt_channel:
+				change_event := Interop_ChangeEvent{
+					UniqueID:    event.Device.UniqueID,
+					DeviceID:    event.Device.DeviceID,
+					ControlName: event.ControlName,
+					Value:       event.ControlState.NormalizedValues.Value,
+				}
+				go runtime.EventsEmit(a.ctx, AppEventType_ChangeEvent, change_event)
+			}
+		}
+	}()
 
 	return nil
 }
@@ -1253,6 +1324,69 @@ func (a *App) ImportSharedProfile(profile Interop_SharedProfile) error {
 		UpdatedAt: time.Now(),
 	}); err != nil {
 		return fmt.Errorf("could not import profile from repository: %w", err)
+	}
+
+	return nil
+}
+
+/*
+Saves a profile control mapping;
+- if the profile already exists by name it will be merged
+- if the profile does not exist it will be newly created and saved
+*/
+func (a *App) SaveControlMapping(
+	mapping Interop_SaveControlMapping,
+) error {
+	profile, err := config.ControllerProfileFromJSON(mapping.ProfileJSON, config.Config_Controller_Profile_Metadata{
+		Path: mapping.ExistingPath,
+	})
+	if err != nil {
+		return fmt.Errorf("could not save profile: %w", err)
+	}
+
+	/* find profile merge */
+	merged_profile := config.Config_Controller_Profile{}
+	a.profile_runner.Profiles.ForEach(func(p config.Config_Controller_Profile, key string) bool {
+		if p.Metadata.Path == profile.Metadata.Path {
+			merged_profile = p
+			return false
+		}
+		return true
+	})
+
+	did_merge_with_existing_control := false
+	for _, control := range profile.Controls {
+		for index, existing_control := range merged_profile.Controls {
+			if control.Name == existing_control.Name {
+				assignments := existing_control.GetAssignments()
+				assignments = append(assignments, control.GetAssignments()...)
+				existing_control.Assignment = nil
+				existing_control.Assignments = &assignments
+				merged_profile.Controls[index] = existing_control
+				did_merge_with_existing_control = true
+			}
+		}
+		if !did_merge_with_existing_control {
+			merged_profile.Controls = append(merged_profile.Controls, control)
+		}
+	}
+
+	/* check if path is set; if not generate filename for saving */
+	target_file_path := profile.Metadata.Path
+	if target_file_path == "" {
+		target_file_path = filepath.Join(a.config.GlobalConfigDir, "profiles", fmt.Sprintf("%s_%d.json", string_utils.Sluggify(profile.Name), time.Now().Unix()))
+	}
+
+	json_bytes, err := json.Marshal(merged_profile)
+	if err != nil {
+		return fmt.Errorf("could not save profile: %w", err)
+	}
+
+	if _, err = a.importProfileJSON(json_bytes, config.Config_Controller_Profile_Metadata{
+		Path:      target_file_path,
+		UpdatedAt: time.Now(),
+	}); err != nil {
+		return fmt.Errorf("could not save profile: %w", err)
 	}
 
 	return nil
