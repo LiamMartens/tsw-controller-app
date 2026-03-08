@@ -1221,7 +1221,7 @@ func (a *App) tryWriteStructAsJSON(path string, data any) error {
 		return err
 	}
 
-	target_file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0644)
+	target_file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		return err
 	}
@@ -1345,7 +1345,9 @@ func (a *App) SaveControlMapping(
 	}
 
 	/* find profile merge */
-	merged_profile := config.Config_Controller_Profile{}
+	merged_profile := config.Config_Controller_Profile{
+		Name: profile.Name,
+	}
 	a.profile_runner.Profiles.ForEach(func(p config.Config_Controller_Profile, key string) bool {
 		if p.Metadata.Path == profile.Metadata.Path {
 			merged_profile = p
@@ -1377,7 +1379,7 @@ func (a *App) SaveControlMapping(
 		target_file_path = filepath.Join(a.config.GlobalConfigDir, "profiles", fmt.Sprintf("%s_%d.json", string_utils.Sluggify(profile.Name), time.Now().Unix()))
 	}
 
-	json_bytes, err := json.Marshal(merged_profile)
+	json_bytes, err := json.MarshalIndent(merged_profile, "", "  ")
 	if err != nil {
 		return fmt.Errorf("could not save profile: %w", err)
 	}
