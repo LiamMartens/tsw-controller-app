@@ -4,6 +4,8 @@
 ## v1.10.0
 ### Features
 - Adds an easier way of mapping controls through the UI
+- Adds option to include the USB ID in the control name specifier to create a multi-controller setup
+- Adds the `enable_api_fallback` option to direct control to simplify configuration
 
 ## v1.9.3
 - Fix calibration modal bug
