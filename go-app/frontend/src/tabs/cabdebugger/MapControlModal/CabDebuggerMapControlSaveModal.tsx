@@ -1,16 +1,21 @@
-import { useEffect, useMemo } from "react";
-import { Modal, ModalCloseReason, ModalContentProps } from "../../components";
-import { ProfileSchema } from "../../profile-schema/schema";
-import { useProfiles } from "../../swr";
+import { BaseSyntheticEvent, useEffect, useMemo } from "react";
+import {
+  Modal,
+  ModalCloseReason,
+  ModalContentProps,
+} from "../../../components";
+import { ProfileSchema } from "../../../profile-schema/schema";
+import { useProfiles } from "../../../swr";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { alert } from "../../utils/alert";
+import { alert } from "../../../utils/alert";
 import {
   LoadConfiguration,
   SaveControlMapping,
-} from "../../../wailsjs/go/main/App";
-import { config } from "../../../wailsjs/go/models";
+} from "../../../../wailsjs/go/main/App";
+
+const FORM_ID = "CabDebuggerMapControlSaveModal";
 
 type Props = {
   openState: ProfileSchema["controls"][number] | null;
@@ -52,23 +57,25 @@ const CabDebuggerMapControlSaveModalContent = ({
     [profiles],
   );
 
-  const handleSave = async () => {
-    await form.handleSubmit(async (values) => {
-      try {
-        const jsonStr = JSON.stringify({
-          name: values.name,
-          controls: [controlMapping],
-        });
-        await SaveControlMapping({
-          ProfileJSON: jsonStr,
-          ExistingPath: selectedProfile?.Metadata.Path ?? "",
-        });
-        await LoadConfiguration();
-        onClose(new ProfileSavedModalCloseReason());
-      } catch (err) {
-        alert(`Could not save profile (${err})`, "error");
-      }
-    })();
+  const handleFormValid = async (
+    values: FormValues,
+    event?: BaseSyntheticEvent,
+  ) => {
+    event?.stopPropagation();
+    try {
+      const jsonStr = JSON.stringify({
+        name: values.name,
+        controls: [controlMapping],
+      });
+      await SaveControlMapping({
+        ProfileJSON: jsonStr,
+        ExistingPath: selectedProfile?.Metadata.Path ?? "",
+      });
+      await LoadConfiguration();
+      onClose(new ProfileSavedModalCloseReason());
+    } catch (err) {
+      alert(`Could not save profile (${err})`, "error");
+    }
   };
 
   useEffect(() => {
@@ -84,7 +91,7 @@ const CabDebuggerMapControlSaveModalContent = ({
   return (
     <div className="flex flex-col gap-2">
       <h3 className="font-bold text-base">Save Mapping</h3>
-      <div>
+      <form id={FORM_ID} onSubmit={form.handleSubmit(handleFormValid)}>
         <fieldset className="fieldset">
           <legend className="fieldset-legend">Select Profile</legend>
           <select className="select w-full" {...form.register("profile")}>
@@ -113,15 +120,16 @@ const CabDebuggerMapControlSaveModalContent = ({
             </span>
           )}
         </fieldset>
-      </div>
+      </form>
       <div className="flex gap-2 justify-end">
         <form method="dialog">
           <button className="btn btn-sm">Cancel</button>
         </form>
         <button
+          type="submit"
+          form={FORM_ID}
           className="btn btn-sm"
           disabled={!form.formState.isValid}
-          onClick={handleSave}
         >
           Save
         </button>

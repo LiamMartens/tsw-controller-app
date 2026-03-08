@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useCabControlState } from "../../swr";
 import { CabDebuggerTabControl } from "./CabDebuggerTabControl";
 import { main } from "../../../wailsjs/go/models";
-import { CabDebuggerMapControlModal } from "./CabDebuggerMapControlModal";
+import { CabDebuggerMapControlModal } from "./MapControlModal/CabDebuggerMapControlModal";
 
 export const CabDebuggerTab = () => {
   const { register, watch } = useForm<{ query: string }>({
