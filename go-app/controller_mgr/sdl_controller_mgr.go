@@ -500,7 +500,7 @@ func (mgr *SDLControllerManager) Handler_JoyDeviceAdded(event *sdl.JoyDeviceAdde
 func (mgr *SDLControllerManager) Handler_JoyDeviceRemoved(event *sdl.JoyDeviceRemovedEvent) error {
 	mgr.ConfiguredControllers.Mutate(func(configured_controller SDL_ControllerManager_ConfiguredController, unique_id DeviceUniqueID) map_utils.LockMapMutateAction[DeviceUniqueID, SDL_ControllerManager_ConfiguredController] {
 		if configured_controller.Joystick.InstanceID == event.Which {
-			logger.Logger.Info("[ControllerManager:Handler_JoyDeviceRemoved] Removing joy device", "name", configured_controller.Joystick.Name)
+			logger.Logger.Debug("[ControllerManager:Handler_JoyDeviceRemoved] Removing joy device", "name", configured_controller.Joystick.Name)
 			defer func() {
 				mgr.joyDevicesUpdatedChannels.EmitTimeout(time.Second, ControllerManager_Control_DevicesUpdated{})
 			}()
@@ -516,7 +516,7 @@ func (mgr *SDLControllerManager) Handler_JoyDeviceRemoved(event *sdl.JoyDeviceRe
 
 	mgr.UnconfiguredControllers.Mutate(func(unconfigured_controller SDL_ControllerManager_UnconfiguredController, unique_id DeviceUniqueID) map_utils.LockMapMutateAction[DeviceUniqueID, SDL_ControllerManager_UnconfiguredController] {
 		if unconfigured_controller.Joystick.InstanceID == event.Which {
-			logger.Logger.Info("[ControllerManager:Handler_JoyDeviceRemoved] Removing joy device", "name", unconfigured_controller.Joystick.Name)
+			logger.Logger.Debug("[ControllerManager:Handler_JoyDeviceRemoved] Removing joy device", "name", unconfigured_controller.Joystick.Name)
 			defer func() {
 				mgr.joyDevicesUpdatedChannels.EmitTimeout(time.Second, ControllerManager_Control_DevicesUpdated{})
 			}()
@@ -584,7 +584,7 @@ func (mgr *SDLControllerManager) Handler_JoyButtonEvent(event *sdl.JoyButtonEven
 		logger.Logger.Debug("[ControllerManager::Handler_JoyButtonEvent] processing button event", "event", event)
 		configured.ProcessEvent(event)
 	} else {
-		logger.Logger.Info("[ControllerManager::Handler_JoyButtonEvent] skipping processing because of unconfigured controller", "event", event)
+		logger.Logger.Debug("[ControllerManager::Handler_JoyButtonEvent] skipping processing because of unconfigured controller", "event", event)
 	}
 
 	return nil

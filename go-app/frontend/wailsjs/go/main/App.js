@@ -114,6 +114,10 @@ export function SaveCalibration(arg1) {
   return window['go']['main']['App']['SaveCalibration'](arg1);
 }
 
+export function SaveControlMapping(arg1) {
+  return window['go']['main']['App']['SaveControlMapping'](arg1);
+}
+
 export function SaveLogs(arg1) {
   return window['go']['main']['App']['SaveLogs'](arg1);
 }
@@ -154,8 +158,16 @@ export function SetTheme(arg1) {
   return window['go']['main']['App']['SetTheme'](arg1);
 }
 
+export function SubscribeChangeEvent() {
+  return window['go']['main']['App']['SubscribeChangeEvent']();
+}
+
 export function SubscribeRaw(arg1) {
   return window['go']['main']['App']['SubscribeRaw'](arg1);
+}
+
+export function TypestubGetChangeEvent() {
+  return window['go']['main']['App']['TypestubGetChangeEvent']();
 }
 
 export function TypestubGetRawEvent() {
@@ -164,6 +176,10 @@ export function TypestubGetRawEvent() {
 
 export function TypestubGetSelectedProfile() {
   return window['go']['main']['App']['TypestubGetSelectedProfile']();
+}
+
+export function UnsubscribeChangeEvent() {
+  return window['go']['main']['App']['UnsubscribeChangeEvent']();
 }
 
 export function UnsubscribeRaw() {

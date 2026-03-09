@@ -41,6 +41,8 @@ type Config_Controller_Profile_Control_Assignment_Action_DirectControl struct {
 	UseNormalized *bool `json:"use_normalized,omitempty"`
 	/* whether to notify the game for value changes (defaults to true) */
 	Notify *bool `json:"notify,omitempty"`
+	/* whether to enable fallback to the TSW API if available */
+	EnableAPIFallback *bool `json:"enable_api_fallback,omitempty"`
 }
 
 type Config_Controller_Profile_Control_Assignment_Action_ApiControl struct {
@@ -113,7 +115,7 @@ type Config_Controller_Profile_Control_Assignment_DirectLike_ControlRange struct
 }
 
 type Config_Controller_Profile_Control_Assignment_DirectLike_InputValue_StepThreshold struct {
-	Threshold          float64  `json:"threshold,omitempty"`           /* The actual threshold of this corresponding step. Can be combined with threshold tolerance */
+	Threshold          float64  `json:"threshold"`                     /* The actual threshold of this corresponding step. Can be combined with threshold tolerance */
 	ThresholdEnd       *float64 `json:"threshold_end,omitempty"`       /* Defines the end value of the corresponding step */
 	ThresholdTolerance *float64 `json:"threshold_tolerance,omitempty"` /* Defines the tolerance of the threshold and threshold_end; defaults to 0 for free range zones and the default tolerance for normal steps */
 }
@@ -141,7 +143,10 @@ type Config_Controller_Profile_Control_Assignment_DirectControl struct {
 	Hold *bool `json:"hold,omitempty"`
 	/* whether to apply raw or normalized values */
 	UseNormalized *bool `json:"use_normalized,omitempty"`
-	Notify        *bool `json:"notify,omitempty"`
+	/* whether to enable fallback to the TSW API if available */
+	EnableAPIFallback *bool `json:"enable_api_fallback,omitempty"`
+	/* whether to send the notify flag */
+	Notify *bool `json:"notify,omitempty"`
 }
 
 type Config_Controller_Profile_Control_Assignment_ApiControl struct {
@@ -220,9 +225,14 @@ func (c *Config_Controller_Profile) Id() string {
 	return fmt.Sprintf("%x", hash)
 }
 
-func (c *Config_Controller_Profile) FindControlByName(name string) *Config_Controller_Profile_Control {
+/*
+Finds a control in the profile by it's name or by it's device ID and name
+eg: "{name}" or "{device_id}:{name}"
+*/
+func (c *Config_Controller_Profile) FindControlByName(device_id string, name string) *Config_Controller_Profile_Control {
+	with_device_id := fmt.Sprintf("%s:%s", device_id, name)
 	for _, control := range c.Controls {
-		if control.Name == name {
+		if control.Name == with_device_id || control.Name == name {
 			return &control
 		}
 	}

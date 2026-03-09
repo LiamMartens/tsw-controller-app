@@ -65,17 +65,17 @@ func (c *SocketConnection) WebsocketHandler(w http.ResponseWriter, r *http.Reque
 		}
 
 		if msg_type == websocket.CloseMessage {
-			logger.Logger.Info("[ProfileRunner::WebsocketHandler] received close message from client")
+			logger.Logger.Debug("[ProfileRunner::WebsocketHandler] received close message from client")
 			break
 		}
 
 		if msg_type == websocket.TextMessage {
 			socket_message := TSWConnector_Message_FromString(string(msg))
-			logger.Logger.Info("[ProfileRunner::WebsocketHandler] received message from client", "message", socket_message)
+			logger.Logger.Debug("[ProfileRunner::WebsocketHandler] received message from client", "message", socket_message)
 			c.Subscribers.EmitTimeout(time.Second, socket_message)
 			go c.Forward(conn_id, socket_message)
 		} else {
-			logger.Logger.Info("[ProfileRunner::WebsocketHandler] received unsupported message %d", "message_type", msg_type)
+			logger.Logger.Debug("[ProfileRunner::WebsocketHandler] received unsupported message %d", "message_type", msg_type)
 		}
 	}
 

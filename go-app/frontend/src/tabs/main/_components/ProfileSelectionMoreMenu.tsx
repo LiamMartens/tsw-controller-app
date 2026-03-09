@@ -64,12 +64,12 @@ export const ProfileSelectionMoreMenu = ({
 
   return (
     <div className="dropdown dropdown-end">
-      <button tabIndex={0} role="button" className="btn">
+      <button tabIndex={0} role="button" className="btn" title="Configure Control">
         More
       </button>
       <ul
         tabIndex={-1}
-        className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
+        className="dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm"
       >
         <li>
           <button onClick={handleReloadConfiguration}>

@@ -41,7 +41,7 @@ export const confirm = (input: ConfirmInput) => {
                   key={action}
                   name="action"
                   value={action}
-                  className="btn"
+                  className="btn btn-sm"
                 >
                   {action}
                 </button>

@@ -106,6 +106,24 @@ export namespace main {
 		}
 	}
 	
+	export class Interop_ChangeEvent {
+	    UniqueID: string;
+	    DeviceID: string;
+	    ControlName: string;
+	    Value: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Interop_ChangeEvent(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.UniqueID = source["UniqueID"];
+	        this.DeviceID = source["DeviceID"];
+	        this.ControlName = source["ControlName"];
+	        this.Value = source["Value"];
+	    }
+	}
 	export class Interop_ControllerCalibration_Control {
 	    Kind: string;
 	    Index: number;
@@ -300,6 +318,20 @@ export namespace main {
 	        this.Index = source["Index"];
 	        this.Value = source["Value"];
 	        this.Timestamp = source["Timestamp"];
+	    }
+	}
+	export class Interop_SaveControlMapping {
+	    ProfileJSON: string;
+	    ExistingPath: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Interop_SaveControlMapping(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ProfileJSON = source["ProfileJSON"];
+	        this.ExistingPath = source["ExistingPath"];
 	    }
 	}
 	export class Interop_SelectedProfileInfo {

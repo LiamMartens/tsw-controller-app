@@ -288,7 +288,7 @@ func (p *ProfileRunner) CallAssignmentActionForControl(
 	action *ProfileRunnerAssignmentCall,
 ) error {
 	if action != nil {
-		logger.Logger.Info("[ProfileRunner::CallAssignmentActionForControl] executing assignment action", "sequencer_action", action.ActionSequencerAction, "direct_control_action", action.DirectControlCommand, "api_control_action", action.ApiControlCommand)
+		logger.Logger.Debug("[ProfileRunner::CallAssignmentActionForControl] executing assignment action", "sequencer_action", action.ActionSequencerAction, "direct_control_action", action.DirectControlCommand, "api_control_action", action.ApiControlCommand)
 	}
 	previous_control_assignments_call_list, has_previous_control_call := p.PreviousControlAssignmentCallList.Get(control_name)
 	if !has_previous_control_call {
@@ -396,44 +396,68 @@ func (p *ProfileRunner) AssignmentActionToAssignmentCall(
 	preferred_control_mode := p.Settings.GetPreferredControlMode()
 	scored_assignment_calls := []ProfileRunner_ScoredAssignmentCallEntry{}
 
-	if action.DirectControl != nil && p.DirectController.Connector.IsActive() {
+	if action.DirectControl != nil {
 		max_change_rate := DEFAULT_MAX_CHANGE_RATE
-		flags := []string{}
-		if action.DirectControl.MaxChangeRate != nil {
-			max_change_rate = *action.DirectControl.MaxChangeRate
-		}
-		if action.DirectControl.Relative != nil && *action.DirectControl.Relative {
-			flags = append(flags, "relative")
-		}
-		if action.DirectControl.Hold != nil && *action.DirectControl.Hold {
-			flags = append(flags, "hold")
-		}
-		if action.DirectControl.UseNormalized != nil && *action.DirectControl.UseNormalized {
-			flags = append(flags, "normalized")
-		}
-		if action.DirectControl.Notify == nil || *action.DirectControl.Notify {
-			flags = append(flags, "notify")
-		}
+		enable_api_fallback := action.DirectControl.EnableAPIFallback != nil && *action.DirectControl.EnableAPIFallback
+		should_hold := action.DirectControl.Hold != nil && *action.DirectControl.Hold
 
-		scored_assignment_call := ProfileRunner_ScoredAssignmentCallEntry{
-			Score: 0,
-			AssignmentCall: ProfileRunnerAssignmentCall{
-				ControlState:          control_state,
-				ActionSequencerAction: nil,
-				VirtualAction:         nil,
-				ApiControlCommand:     nil,
-				DirectControlCommand: &DirectController_Command{
-					Controls:      action.DirectControl.Controls,
-					InputValue:    action.DirectControl.Value,
-					MaxChangeRate: max_change_rate,
-					Flags:         flags,
+		if p.DirectController.Connector.IsActive() {
+			flags := []string{}
+			if should_hold {
+				flags = append(flags, "hold")
+			}
+			if action.DirectControl.MaxChangeRate != nil {
+				max_change_rate = *action.DirectControl.MaxChangeRate
+			}
+			if action.DirectControl.Relative != nil && *action.DirectControl.Relative {
+				flags = append(flags, "relative")
+			}
+			if action.DirectControl.UseNormalized != nil && *action.DirectControl.UseNormalized {
+				flags = append(flags, "normalized")
+			}
+			if action.DirectControl.Notify == nil || *action.DirectControl.Notify {
+				flags = append(flags, "notify")
+			}
+
+			scored_assignment_call := ProfileRunner_ScoredAssignmentCallEntry{
+				Score: 0,
+				AssignmentCall: ProfileRunnerAssignmentCall{
+					ControlState:          control_state,
+					ActionSequencerAction: nil,
+					VirtualAction:         nil,
+					ApiControlCommand:     nil,
+					DirectControlCommand: &DirectController_Command{
+						Controls:      action.DirectControl.Controls,
+						InputValue:    action.DirectControl.Value,
+						MaxChangeRate: max_change_rate,
+						Flags:         flags,
+					},
 				},
-			},
+			}
+			if preferred_control_mode == config.PreferredControlMode_DirectControl {
+				scored_assignment_call.Score += 10
+			}
+			scored_assignment_calls = append(scored_assignment_calls, scored_assignment_call)
+		} else if enable_api_fallback && p.ApiController.API.Enabled() {
+			scored_assignment_call := ProfileRunner_ScoredAssignmentCallEntry{
+				Score: 0,
+				AssignmentCall: ProfileRunnerAssignmentCall{
+					ControlState:          control_state,
+					ActionSequencerAction: nil,
+					VirtualAction:         nil,
+					ApiControlCommand: &ApiController_Command{
+						Controls:      action.DirectControl.Controls,
+						InputValue:    action.DirectControl.Value,
+						Hold:          should_hold,
+						MaxChangeRate: max_change_rate,
+					},
+				},
+			}
+			if preferred_control_mode == config.PreferredControlMode_ApiControl {
+				scored_assignment_call.Score += 10
+			}
+			scored_assignment_calls = append(scored_assignment_calls, scored_assignment_call)
 		}
-		if preferred_control_mode == config.PreferredControlMode_DirectControl {
-			scored_assignment_call.Score += 10
-		}
-		scored_assignment_calls = append(scored_assignment_calls, scored_assignment_call)
 	}
 
 	if action.ApiControl != nil && p.ApiController.API.CanConnect() {
@@ -480,13 +504,7 @@ func (p *ProfileRunner) GetAssignments(
 	control *config.Config_Controller_Profile_Control,
 	source_event *controller_mgr.ControllerManager_Control_ChangeEvent,
 ) []config.Config_Controller_Profile_Control_Assignment {
-	var assignments []config.Config_Controller_Profile_Control_Assignment
-	if control.Assignment != nil {
-		assignments = append(assignments, *control.Assignment)
-	} else if control.Assignments != nil {
-		/* copy by value clone */
-		assignments = append(assignments, *control.Assignments...)
-	}
+	assignments := control.GetAssignments()
 
 	/* filter out conditional assignments */
 	current_rail_class := p.CabDebugger.State.DrivableActorName
@@ -577,7 +595,12 @@ collect_assignments_loop:
 		}
 
 		if assignment.DirectControl != nil {
+			enable_api_fallback := assignment.DirectControl.EnableAPIFallback != nil && *assignment.DirectControl.EnableAPIFallback
 			scored_control_assignments[config.PreferredControlMode_DirectControl].Assignments = append(scored_control_assignments[config.PreferredControlMode_DirectControl].Assignments, assignment)
+			/* if enabaled as API fallback; also add this assignment to the scored list of API controls */
+			if enable_api_fallback {
+				scored_control_assignments[config.PreferredControlMode_ApiControl].Assignments = append(scored_control_assignments[config.PreferredControlMode_ApiControl].Assignments, assignment)
+			}
 		} else if assignment.SyncControl != nil {
 			scored_control_assignments[config.PreferredControlMode_SyncControl].Assignments = append(scored_control_assignments[config.PreferredControlMode_SyncControl].Assignments, assignment)
 		} else if assignment.ApiControl != nil {
@@ -603,6 +626,7 @@ collect_assignments_loop:
 		}
 	}
 	if can_use_api_control_mode {
+		/* this will also mark direct control assignments which have API fallback enabled with scores */
 		scored_control_assignments[config.PreferredControlMode_ApiControl].Score += 2
 		if preferred_control_mode == config.PreferredControlMode_ApiControl {
 			scored_control_assignments[config.PreferredControlMode_ApiControl].Score += 5
@@ -630,7 +654,7 @@ collect_assignments_loop:
 			return append(scored_control_assignments_values_list[0].Assignments, non_control_asssignments...)
 		}
 	} else {
-		logger.Logger.Info("no socket or API connection is available - skipping direct/sync and API control")
+		logger.Logger.Debug("no socket or API connection is available - skipping direct/sync and API control")
 	}
 
 	return non_control_asssignments
@@ -659,9 +683,12 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 			if !has_selected_profile {
 				logger.Logger.Debug("[ProfileRunner::Run] skipping event, no profile selected", "event", change_event)
 				return
+			} else {
+				logger.Logger.Debug("[ProfileRunner::Run] executing profile", "name", selected_profile.Profile.Name)
 			}
 
 			control_name := change_event.ControlName
+			device_id := change_event.Device.DeviceID
 			if selected_profile.Profile.Controller != nil && selected_profile.Profile.Controller.Mapping != nil {
 				if joy_control, is_joy_control := change_event.Control.(*controller_mgr.SDL_ControllerManager_Controller_JoyControl); is_joy_control {
 					root_mapping := joy_control.SDLMapping()
@@ -673,13 +700,14 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 				}
 			}
 
-			control_profile := selected_profile.Profile.FindControlByName(control_name)
+			control_profile := selected_profile.Profile.FindControlByName(device_id, control_name)
 			if control_profile == nil {
 				logger.Logger.Debug("[ProfileRunner::Run] skipping event, control not found in profile", "event", change_event)
 				return
 			}
 
 			assignments := p.GetAssignments(control_profile, &change_event)
+
 			previous_control_assignments_call_list, has_previous_control_assignments_call_list := p.PreviousControlAssignmentCallList.Get(control_name)
 			for assignment_index, control_assignment_item := range assignments {
 				logger.Logger.Debug("[ProfileRunner::Run] executing assignment", "assignment", control_assignment_item)
@@ -784,13 +812,17 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 						control_value = control_assignment_item.DirectControl.ControlRange.Clamp(control_value)
 					}
 					output_value := control_assignment_item.DirectControl.InputValue.CalculateOutputValue(control_value)
+
 					max_change_rate := DEFAULT_MAX_CHANGE_RATE
+					should_hold := control_assignment_item.DirectControl.Hold != nil && *control_assignment_item.DirectControl.Hold
+					enable_api_fallback := control_assignment_item.DirectControl.EnableAPIFallback != nil && *control_assignment_item.DirectControl.EnableAPIFallback
+
 					flags := []string{}
+					if should_hold {
+						flags = append(flags, "hold")
+					}
 					if control_assignment_item.DirectControl.InputValue.MaxChangeRate != nil {
 						max_change_rate = *control_assignment_item.DirectControl.InputValue.MaxChangeRate
-					}
-					if control_assignment_item.DirectControl.Hold != nil && *control_assignment_item.DirectControl.Hold {
-						flags = append(flags, "hold")
 					}
 					if control_assignment_item.DirectControl.Notify == nil || *control_assignment_item.DirectControl.Notify {
 						flags = append(flags, "notify")
@@ -799,7 +831,7 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 						flags = append(flags, "normalized")
 					}
 					if output_value != nil {
-						p.CallAssignmentActionForControl(control_name, assignment_index, change_event.Controller, change_event.ControlState, control_assignment_item, &ProfileRunnerAssignmentCall{
+						assignment_call := &ProfileRunnerAssignmentCall{
 							ControlState:          change_event.ControlState,
 							ActionSequencerAction: nil,
 							ApiControlCommand:     nil,
@@ -809,7 +841,17 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 								MaxChangeRate: max_change_rate,
 								Flags:         flags,
 							},
-						})
+						}
+						if enable_api_fallback && !p.DirectController.Connector.IsActive() {
+							assignment_call.DirectControlCommand = nil
+							assignment_call.ApiControlCommand = &ApiController_Command{
+								Controls:      control_assignment_item.DirectControl.Controls,
+								InputValue:    *output_value,
+								MaxChangeRate: max_change_rate,
+								Hold:          should_hold,
+							}
+						}
+						p.CallAssignmentActionForControl(control_name, assignment_index, change_event.Controller, change_event.ControlState, control_assignment_item, assignment_call)
 					}
 				}
 				if control_assignment_item.ApiControl != nil {

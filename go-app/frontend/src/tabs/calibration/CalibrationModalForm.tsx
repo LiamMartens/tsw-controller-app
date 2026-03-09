@@ -4,7 +4,6 @@ import {
   SaveCalibration,
   UnsubscribeRaw,
   SubscribeRaw,
-  GetControllerConfiguration,
   LoadConfiguration,
 } from "../../../wailsjs/go/main/App";
 import {
@@ -15,7 +14,6 @@ import {
 import { CalibrationModalFormControl } from "./CalibrationModalFormControl";
 import { alert } from "../../utils/alert";
 import { useControllerConfiguration } from "../../swr";
-import { s } from "framer-motion/client";
 
 type Props = {
   controller: main.Interop_GenericController;

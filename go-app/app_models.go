@@ -38,6 +38,13 @@ type Interop_RawEvent struct {
 	Timestamp int
 }
 
+type Interop_ChangeEvent struct {
+	UniqueID    string
+	DeviceID    string
+	ControlName string
+	Value       float64
+}
+
 type Interop_ControllerCalibration_Control struct {
 	Kind        sdl_mgr.SDLMgr_Control_Kind
 	Index       int
@@ -91,4 +98,9 @@ type Interop_SharedProfile struct {
 type Interop_SelectedProfileInfo struct {
 	Id   string
 	Name string
+}
+
+type Interop_SaveControlMapping struct {
+	ProfileJSON  string
+	ExistingPath string
 }
