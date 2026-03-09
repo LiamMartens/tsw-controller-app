@@ -86,7 +86,6 @@ func (controller *ApiController) StartInteractingIfNotAlready(ctx context.Contex
 				controller.interacting.mutex.Lock()
 				delete(controller.interacting.controls, control)
 				controller.interacting.mutex.Unlock()
-				logger.Logger.Debug("\n\n\nstopped interacting with\n\n\n", "control", control)
 			}
 		}
 	}()

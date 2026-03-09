@@ -60,7 +60,7 @@ func (c *TSWAPI) executeTswApiRequest(req *http.Request) (map[string]any, error)
 
 		/* an error here generally always means some kind of connection error which we could retry */
 		if err != nil {
-			logger.Logger.Debug("[TSWAPI::executeTswApiRequest] API request failed", "error", err)
+			logger.Logger.Error("[TSWAPI::executeTswApiRequest] API request failed", "error", err)
 
 			var op_err *net.OpError
 			if errors.As(err, &op_err) && op_err.Err != nil {
@@ -79,7 +79,7 @@ func (c *TSWAPI) executeTswApiRequest(req *http.Request) (map[string]any, error)
 		}
 
 		if resp.StatusCode >= 300 {
-			logger.Logger.Debug("[TSWAPI::executeTswApiRequest] API request failed", "status", resp.StatusCode)
+			logger.Logger.Error("[TSWAPI::executeTswApiRequest] API request failed", "status", resp.StatusCode)
 			return nil, ErrNonSuccessStatusCode
 		}
 

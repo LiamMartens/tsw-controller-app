@@ -288,7 +288,7 @@ func (p *ProfileRunner) CallAssignmentActionForControl(
 	action *ProfileRunnerAssignmentCall,
 ) error {
 	if action != nil {
-		logger.Logger.Info("[ProfileRunner::CallAssignmentActionForControl] executing assignment action", "sequencer_action", action.ActionSequencerAction, "direct_control_action", action.DirectControlCommand, "api_control_action", action.ApiControlCommand)
+		logger.Logger.Debug("[ProfileRunner::CallAssignmentActionForControl] executing assignment action", "sequencer_action", action.ActionSequencerAction, "direct_control_action", action.DirectControlCommand, "api_control_action", action.ApiControlCommand)
 	}
 	previous_control_assignments_call_list, has_previous_control_call := p.PreviousControlAssignmentCallList.Get(control_name)
 	if !has_previous_control_call {
@@ -654,7 +654,7 @@ collect_assignments_loop:
 			return append(scored_control_assignments_values_list[0].Assignments, non_control_asssignments...)
 		}
 	} else {
-		logger.Logger.Info("no socket or API connection is available - skipping direct/sync and API control")
+		logger.Logger.Debug("no socket or API connection is available - skipping direct/sync and API control")
 	}
 
 	return non_control_asssignments
@@ -684,7 +684,7 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 				logger.Logger.Debug("[ProfileRunner::Run] skipping event, no profile selected", "event", change_event)
 				return
 			} else {
-				logger.Logger.Debug("[ProfileRunner::Run] using profile", selected_profile.Profile.Name)
+				logger.Logger.Debug("[ProfileRunner::Run] executing profile", "name", selected_profile.Profile.Name)
 			}
 
 			control_name := change_event.ControlName

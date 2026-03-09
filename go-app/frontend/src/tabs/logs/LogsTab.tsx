@@ -1,10 +1,11 @@
 import { useEffect, useRef } from "react";
-import { EventsOn } from "../../../wailsjs/runtime/runtime";
+import { EventsOn, LogFatal } from "../../../wailsjs/runtime/runtime";
 import { events } from "../../events";
 import { LogLevel, logs } from "../../logs";
 import { SaveLogs } from "../../../wailsjs/go/main/App";
 import { alert } from "../../utils/alert";
 import { useForm } from "react-hook-form";
+import throttle from "just-throttle";
 import clsx from "clsx";
 
 type FormValues = {
@@ -29,16 +30,15 @@ export const LogsTab = () => {
 
   useEffect(() => {
     /* add initial logs once */
-    console.log(logs);
     if (logsRef.current) {
       logsRef.current.replaceChildren();
     }
     if (logsRef.current && logs.length) {
-      const LOGS_LIMIT = 1000;
+      const LOGS_LIMIT = 500;
       const logsSlice = logs.slice(-LOGS_LIMIT);
       logsRef.current.appendChild(
         document.createTextNode(
-          "\n...only showing the last 1000 logs, for all logs please save them as a file...\n\n",
+          "\n\t...only showing the last 500 logs, for all logs please save them as a file...\n\n",
         ),
       );
       for (const [loglevel, msg] of logsSlice) {
@@ -51,24 +51,32 @@ export const LogsTab = () => {
   }, []);
 
   useEffect(() => {
-    const handleLogMessageReceived = (level: LogLevel, msg: string) => {
-      /* add new logs as they come in */
+    const pendingSet: [LogLevel, string][] = [];
+    const handleProcessPendingSet = throttle(() => {
       requestAnimationFrame(() => {
-        if (logsRef.current) {
-          const isNearBottom =
-            document.documentElement.scrollTop + window.innerHeight >=
-            document.documentElement.scrollHeight - window.innerHeight * 0.1;
+        if (!logsRef.current) return;
+        const wasNearBottom =
+          document.documentElement.scrollTop + window.innerHeight >=
+          document.documentElement.scrollHeight - window.innerHeight * 0.1;
+        const messages = pendingSet.splice(0, pendingSet.length);
+        const spans = messages.map(([level, msg]) => {
           const span = document.createElement("span");
           span.dataset.loglevel = level;
           span.appendChild(document.createTextNode(msg + "\n"));
-          logsRef.current.appendChild(span);
-          if (isNearBottom) {
-            /* scroll bottom if near bottom */
-            document.documentElement.scrollTop =
-              document.documentElement.scrollHeight;
-          }
+          return span;
+        });
+        logsRef.current.append(...spans);
+        if (wasNearBottom) {
+          /* scroll bottom if near bottom */
+          document.documentElement.scrollTop =
+            document.documentElement.scrollHeight;
         }
       });
+    }, 1000 / 5);
+
+    const handleLogMessageReceived = (level: LogLevel, msg: string) => {
+      pendingSet.push([level, msg]);
+      handleProcessPendingSet();
     };
 
     const unsubscribe_debug = EventsOn(events.log.debug, (msg: string) =>
