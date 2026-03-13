@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"tsw_controller_app/action_sequencer"
 	"tsw_controller_app/cabdebugger"
 	"tsw_controller_app/config"
+	"tsw_controller_app/config_loader"
 	"tsw_controller_app/controller_mgr"
 	"tsw_controller_app/logger"
 	"tsw_controller_app/profile_runner"
@@ -180,8 +182,11 @@ func (a *App) startupRun() {
 		}
 		defer watcher.Close()
 
-		watcher.Add(a.config.GlobalConfigDir)
-		watcher.Add(a.config.LocalConfigDir)
+		subdirectories := []string{config_loader.DIR_PROFILES_NAME, config_loader.DIR_CALIBRATION_NAME, config_loader.DIR_SDL_MAPPINGS_NAME}
+		for _, dir := range subdirectories {
+			watcher.Add(filepath.Join(a.config.GlobalConfigDir, dir))
+			watcher.Add(filepath.Join(a.config.LocalConfigDir, dir))
+		}
 
 		for {
 			select {
@@ -191,6 +196,7 @@ func (a *App) startupRun() {
 				if !ok {
 					return
 				}
+				logger.Logger.Info("reloading configuration")
 				a.LoadConfiguration()
 			case err, ok := <-watcher.Errors:
 				logger.Logger.Error("error received while watching config directories", "error", err)
