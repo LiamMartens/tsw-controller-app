@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.10.1
+- Add auto-reloading of configuration when file(s) change
+
 ## v1.10.0
 ### Features
 - Adds an easier way of mapping controls through the UI
