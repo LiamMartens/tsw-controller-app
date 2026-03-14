@@ -6,6 +6,7 @@
 #include <tuple>
 #include <shared_mutex>
 #include <unordered_map>
+#include <regex>
 
 #include <Unreal/Core/HAL/Platform.hpp>
 #include <Unreal/FFrame.hpp>
@@ -185,14 +186,40 @@ class TSWControllerMod : public RC::CppUserModBase
             }
         }
 
-        RC::StringType train_side_placeholder = STR("{SIDE}");
-        std::size_t side_placeholder_pos = control_name.find(train_side_placeholder);
-        /* if no {SIDE} -> just return raw*/
-        if (side_placeholder_pos != RC::StringType::npos)
+        /* regex pattern to match {SIDE} with optional front/back placeholders */
+        /* captures: front placeholder (optional), back placeholder (optional) */
+        std::regex side_placeholder_regex(R"(\{SIDE(:[^:]+)?(:[^:]+)?\})");
+        std::smatch match;
+        std::wregex_match(control_name.begin(), control_name.end(), match, side_placeholder_regex);
+
+        if (match.size() >= 1)
         {
-            RC::StringType train_side_str = train_side == 0 ? STR("F") : STR("B");
-            control_name.replace(side_placeholder_pos, train_side_placeholder.length(), train_side_str);
+            std::size_t placeholder_start = match[0].position();
+            std::size_t placeholder_end = match[0].position() + match[0].length();
+
+            /* determine which value to use based on train side */
+            RC::StringType front_value = STR("F");
+            RC::StringType back_value = STR("B");
+
+            /* extract front placeholder if specified (between first and second colon) */
+            if (match.size() >= 2)
+            {
+                front_value = STR(match[1].str().substr(1));
+            }
+
+            /* extract back placeholder if specified (after second colon) */
+            if (match.size() >= 3)
+            {
+                back_value = STR(match[2].str().substr(1));
+            }
+
+            /* select appropriate value based on train side */
+            RC::StringType train_side_str = train_side == 0 ? front_value : back_value;
+
+            /* replace the placeholder with the selected value */
+            control_name.replace(placeholder_start, placeholder_end - placeholder_start, train_side_str);
         }
+        /* if no {SIDE} -> just return raw*/
         return control_name;
     }
 
