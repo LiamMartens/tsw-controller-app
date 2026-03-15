@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.10.2
+- TSW Mod performance optimizations
+
 ## v1.10.1
 - Add auto-reloading of configuration when file(s) change
 - Updated {SIDE} placeholder to support customizing the placeholders with a new {SIDE:F:B} syntax. This is to support the new Czech locomotives where F = 1 and B = 2 on some controls. With this new placeholder implementation it is possible to use `ControlName_{SIDE:1:2}`

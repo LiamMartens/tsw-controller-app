@@ -127,6 +127,8 @@ struct DirectControlControlTargetState
 class TSWControllerMod : public RC::CppUserModBase
 {
   private:
+    static inline std::wregex RX_SIDE_PLACEHOLDER = std::wregex(STR(R"(\{SIDE(:[^:]+)?(:[^:]+)?\})"));
+
     static inline std::shared_mutex CURRENT_DRIVABLE_ACTOR_CLASS_NAME_MUTEX;
     static inline float TIME_SINCE_CURRENT_DRIVABLE_ACTOR_REPORTED = 0;
     static inline RC::StringType CURRENT_DRIVABLE_ACTOR_CLASS_NAME = STR("");
@@ -188,9 +190,8 @@ class TSWControllerMod : public RC::CppUserModBase
 
         /* regex pattern to match {SIDE} with optional front/back placeholders */
         /* captures: front placeholder (optional), back placeholder (optional) */
-        std::wregex side_placeholder_regex(STR(R"(\{SIDE(:[^:]+)?(:[^:]+)?\})"));
         std::wsmatch side_placeholder_matches;
-        if (std::regex_search(control_name, side_placeholder_matches, side_placeholder_regex))
+        if (std::regex_search(control_name, side_placeholder_matches, TSWControllerMod::RX_SIDE_PLACEHOLDER))
         {
             RC::StringType::const_iterator placeholder_start = side_placeholder_matches[0].first;
             RC::StringType::const_iterator placeholder_end = side_placeholder_matches[0].second;
