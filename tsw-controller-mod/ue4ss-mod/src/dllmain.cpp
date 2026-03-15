@@ -129,9 +129,6 @@ class TSWControllerMod : public RC::CppUserModBase
   private:
     static inline std::wregex RX_SIDE_PLACEHOLDER = std::wregex(STR(R"(\{SIDE(:[^:]+)?(:[^:]+)?\})"));
 
-    static inline std::shared_mutex UFUNC_CACHE_MUTEX;
-    static inline std::unordered_map<RC::StringType, Unreal::TWeakObjectPtr<Unreal::UFunction>> UFUNC_CACHE;
-
     static inline std::shared_mutex CURRENT_DRIVABLE_ACTOR_CLASS_NAME_MUTEX;
     static inline float TIME_SINCE_CURRENT_DRIVABLE_ACTOR_REPORTED = 0;
     static inline RC::StringType CURRENT_DRIVABLE_ACTOR_CLASS_NAME = STR("");
@@ -148,25 +145,11 @@ class TSWControllerMod : public RC::CppUserModBase
         return abs(target - current) < 0.05f;
     }
 
-    static Unreal::UFunction* get_function_by_name_in_chain(Unreal::UObject* obj, const TCHAR* func_name)
-    {
-        std::unique_lock<std::shared_mutex> ufunc_cache_lock(TSWControllerMod::UFUNC_CACHE_MUTEX);
-        if (
-            TSWControllerMod::UFUNC_CACHE.find(func_name) != TSWControllerMod::UFUNC_CACHE.end()
-            && !TSWControllerMod::UFUNC_CACHE[func_name].Get()
-        )
-        {
-            Unreal::UFunction* func = obj->GetFunctionByNameInChain(func_name);
-            TSWControllerMod::UFUNC_CACHE[func_name] = Unreal::TWeakObjectPtr<Unreal::UFunction>(func);
-        }
-        return TSWControllerMod::UFUNC_CACHE[func_name].Get();
-    }
-
     static bool is_player_controller(Unreal::UObject* controller)
     {
         if (!controller) return false;
         PlayerController_IsPlayerControllerParams is_player_controller_result;
-        Unreal::UFunction* is_player_function = TSWControllerMod::get_function_by_name_in_chain(controller, STR("IsPlayerController"));
+        Unreal::UFunction* is_player_function = controller->GetFunctionByNameInChain(STR("IsPlayerController"));
         if (is_player_function)
         {
             controller->ProcessEvent(is_player_function, &is_player_controller_result);
@@ -179,7 +162,7 @@ class TSWControllerMod : public RC::CppUserModBase
     {
         if (!controller) return nullptr;
 
-        Unreal::UFunction* get_driver_pawn_func = TSWControllerMod::get_function_by_name_in_chain(controller, STR("GetDriverPawn"));
+        Unreal::UFunction* get_driver_pawn_func = controller->GetFunctionByNameInChain(STR("GetDriverPawn"));
         if (!get_driver_pawn_func) return nullptr;
 
         PlayerController_GetDriverPawnParams get_driver_pawn_result;
@@ -194,7 +177,7 @@ class TSWControllerMod : public RC::CppUserModBase
 
         /* get seat side to determine train side */
         DriverPawn_GetAttachedSeatComponentParams get_attached_seat_component_result;
-        pawn->ProcessEvent(TSWControllerMod::get_function_by_name_in_chain(pawn, STR("GetAttachedSeatComponent")), &get_attached_seat_component_result);
+        pawn->ProcessEvent(pawn->GetFunctionByNameInChain(STR("GetAttachedSeatComponent")), &get_attached_seat_component_result);
         if (get_attached_seat_component_result.SeatComponent)
         {
             Unreal::FProperty* seat_side_prop = get_attached_seat_component_result.SeatComponent->GetPropertyByNameInChain(STR("SeatSide"));
@@ -268,7 +251,7 @@ class TSWControllerMod : public RC::CppUserModBase
     {
         if (!vhid_component) return false;
 
-        Unreal::UFunction* is_changing_func = TSWControllerMod::get_function_by_name_in_chain(vhid_component, STR("IsChanging"));
+        Unreal::UFunction* is_changing_func = vhid_component->GetFunctionByNameInChain(STR("IsChanging"));
         if (!is_changing_func) return false;
 
         VirtualHIDComponent_IsChangingParams params;
@@ -280,7 +263,7 @@ class TSWControllerMod : public RC::CppUserModBase
     {
         if (!vhid_component) return 0.0f;
 
-        Unreal::UFunction* get_current_input_value_func = TSWControllerMod::get_function_by_name_in_chain(vhid_component, STR("GetCurrentInputValue"));
+        Unreal::UFunction* get_current_input_value_func = vhid_component->GetFunctionByNameInChain(STR("GetCurrentInputValue"));
         if (!get_current_input_value_func) return false;
 
         VirtualHIDComponent_GetCurrentInputValueParams params;
@@ -292,7 +275,7 @@ class TSWControllerMod : public RC::CppUserModBase
     {
         if (!vhid_component) return 0.0f;
 
-        Unreal::UFunction* get_normalised_input_value_func = TSWControllerMod::get_function_by_name_in_chain(vhid_component, STR("GetNormalisedInputValue"));
+        Unreal::UFunction* get_normalised_input_value_func = vhid_component->GetFunctionByNameInChain(STR("GetNormalisedInputValue"));
         if (!get_normalised_input_value_func) return false;
 
         VirtualVHIDComponent_GetNormalisedInputValueParams params;
@@ -323,7 +306,7 @@ class TSWControllerMod : public RC::CppUserModBase
 
         // get pawn
         Unreal::UObject* pawn = TSWControllerMod::get_driver_pawn_from_controller(controller);
-        Unreal::UFunction* get_drivable_actor_fn = TSWControllerMod::get_function_by_name_in_chain(controller, STR("GetDrivableActor"));
+        Unreal::UFunction* get_drivable_actor_fn = controller->GetFunctionByNameInChain(STR("GetDrivableActor"));
         if (!pawn || !get_drivable_actor_fn) {
             Output::send<LogLevel::Error>(STR("[TSWControllerMod] Missing driver pawn or GetDrivableActor function\n"));
             return;
@@ -333,15 +316,15 @@ class TSWControllerMod : public RC::CppUserModBase
         if (!drivable_actor_result.DrivableActor) {
             return;
         }
-        Unreal::UFunction* find_virtual_hid_component_func = TSWControllerMod::get_function_by_name_in_chain(drivable_actor_result.DrivableActor, STR("FindVirtualHIDComponent"));
-        Unreal::UFunction* notify_begin_interaction_func = TSWControllerMod::get_function_by_name_in_chain(controller, STR("NotifyBeginInteraction"));
-        Unreal::UFunction* begin_changing_vhid_component_func = TSWControllerMod::get_function_by_name_in_chain(controller, STR("BeginChangingVHIDComponent"));
+        Unreal::UFunction* find_virtual_hid_component_func = drivable_actor_result.DrivableActor->GetFunctionByNameInChain(STR("FindVirtualHIDComponent"));
+        Unreal::UFunction* notify_begin_interaction_func = controller->GetFunctionByNameInChain(STR("NotifyBeginInteraction"));
+        Unreal::UFunction* begin_changing_vhid_component_func = controller->GetFunctionByNameInChain(STR("BeginChangingVHIDComponent"));
 
         /*
           used on the M3 MTA variant - if this is not called after updating controls; the constraints won't register properly
           this is not a problem on all trains
         */
-        Unreal::UFunction* call_update_functions_func = TSWControllerMod::get_function_by_name_in_chain(drivable_actor_result.DrivableActor, STR("CallUpdateFunctions"));
+        Unreal::UFunction* call_update_functions_func = drivable_actor_result.DrivableActor->GetFunctionByNameInChain(STR("CallUpdateFunctions"));
 
         if (!find_virtual_hid_component_func || !notify_begin_interaction_func || !begin_changing_vhid_component_func) return;
 
@@ -366,8 +349,8 @@ class TSWControllerMod : public RC::CppUserModBase
 
         if (!TSWControllerMod::VHID_COMPONENTS_CHANGING.empty())
         {
-            Unreal::UFunction* notify_end_interaction_func = TSWControllerMod::get_function_by_name_in_chain(controller, STR("NotifyEndInteraction"));
-            Unreal::UFunction* end_using_vhid_component_func = TSWControllerMod::get_function_by_name_in_chain(controller, STR("EndUsingVHIDComponent"));
+            Unreal::UFunction* notify_end_interaction_func = controller->GetFunctionByNameInChain(STR("NotifyEndInteraction"));
+            Unreal::UFunction* end_using_vhid_component_func = controller->GetFunctionByNameInChain(STR("EndUsingVHIDComponent"));
             if (!notify_end_interaction_func || !end_using_vhid_component_func) return;
 
             for (auto it = TSWControllerMod::VHID_COMPONENTS_CHANGING.begin(); it != TSWControllerMod::VHID_COMPONENTS_CHANGING.end();)
@@ -381,7 +364,7 @@ class TSWControllerMod : public RC::CppUserModBase
                         PlayerController_EndUsingVHIDComponentParams params{vhid_component};
                         controller->ProcessEvent(end_using_vhid_component_func, &params);
                         controller->ProcessEvent(notify_end_interaction_func, &params);
-                        Unreal::UFunction* end_changing_func = TSWControllerMod::get_function_by_name_in_chain(vhid_component, STR("EndChanging"));
+                        Unreal::UFunction* end_changing_func = vhid_component->GetFunctionByNameInChain(STR("EndChanging"));
                         if (end_changing_func)
                         {
                             VirtualVHIDComponent_EndChangingParams params{controller};
@@ -408,11 +391,11 @@ class TSWControllerMod : public RC::CppUserModBase
                 continue;
             }
 
-            Unreal::UFunction* set_pushed_state_func = TSWControllerMod::get_function_by_name_in_chain(find_virtualhid_component_params.VirtualHIDComponent, STR("SetPushedState"));
+            Unreal::UFunction* set_pushed_state_func = find_virtualhid_component_params.VirtualHIDComponent->GetFunctionByNameInChain(STR("SetPushedState"));
             Unreal::UFunction* set_current_input_value_fn =
-                    TSWControllerMod::get_function_by_name_in_chain(find_virtualhid_component_params.VirtualHIDComponent, STR("SetCurrentInputValue"));
+                    find_virtualhid_component_params.VirtualHIDComponent->GetFunctionByNameInChain(STR("SetCurrentInputValue"));
             Unreal::UFunction* set_normlised_input_value_fn =
-                    TSWControllerMod::get_function_by_name_in_chain(find_virtualhid_component_params.VirtualHIDComponent, STR("SetNormalisedInputValue"));
+                    find_virtualhid_component_params.VirtualHIDComponent->GetFunctionByNameInChain(STR("SetNormalisedInputValue"));
 
             auto target_value = control_pair.second.TargetValue;
             auto max_change_rate = control_pair.second.MaxChangeRate;
@@ -528,7 +511,7 @@ class TSWControllerMod : public RC::CppUserModBase
     static void on_ts2_virtualhidcomponent_inputvaluechanged(Unreal::UnrealScriptFunctionCallableContext context, void* custom_data)
     {
         Unreal::FName* input_identifier = TSWControllerMod::get_vhid_component_input_identifier(context.Context);
-        Unreal::UFunction* get_currently_changing_controller_func = TSWControllerMod::get_function_by_name_in_chain(context.Context, STR("GetCurrentlyChangingController"));
+        Unreal::UFunction* get_currently_changing_controller_func = context.Context->GetFunctionByNameInChain(STR("GetCurrentlyChangingController"));
         if (input_identifier && get_currently_changing_controller_func)
         {
             VirtualHIDComponent_GetCurrentlyChangingControllerParams get_currently_changing_controller_params{};
@@ -540,7 +523,7 @@ class TSWControllerMod : public RC::CppUserModBase
             }
 
             /* find drivable actor*/
-            Unreal::UFunction* get_drivable_actor_fn = TSWControllerMod::get_function_by_name_in_chain(get_currently_changing_controller_params.Controller, STR("GetDrivableActor"));
+            Unreal::UFunction* get_drivable_actor_fn = get_currently_changing_controller_params.Controller->GetFunctionByNameInChain(STR("GetDrivableActor"));
             if (!get_drivable_actor_fn) {
                 Output::send<LogLevel::Error>(STR("[TSWControllerMod] Can't find GetDrivableActor function\n"));
                 return;
