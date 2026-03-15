@@ -192,8 +192,8 @@ class TSWControllerMod : public RC::CppUserModBase
         std::wsmatch side_placeholder_matches;
         if (std::regex_match(control_name, side_placeholder_matches, side_placeholder_regex))
         {
-            std::size_t placeholder_start = side_placeholder_matches[0].first;
-            std::size_t placeholder_end = side_placeholder_matches[0].second;
+            RC::StringType::const_iterator placeholder_start = side_placeholder_matches[0].first;
+            RC::StringType::const_iterator placeholder_end = side_placeholder_matches[0].second;
 
             RC::StringType front_value = STR("F");
             RC::StringType back_value = STR("B");
@@ -210,7 +210,7 @@ class TSWControllerMod : public RC::CppUserModBase
 
             /* determine which value to use based on train side */
             RC::StringType train_side_str = train_side == 0 ? front_value : back_value;
-            control_name.replace(placeholder_start, placeholder_end - placeholder_start, train_side_str);
+            control_name.replace(placeholder_start, placeholder_end, train_side_str);
         }
 
         /* if no {SIDE} -> just return raw*/
