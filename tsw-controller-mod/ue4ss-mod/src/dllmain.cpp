@@ -190,7 +190,7 @@ class TSWControllerMod : public RC::CppUserModBase
         /* captures: front placeholder (optional), back placeholder (optional) */
         std::wregex side_placeholder_regex(STR(R"(\{SIDE(:[^:]+)?(:[^:]+)?\})"));
         std::wsmatch side_placeholder_matches;
-        if (std::regex_match(control_name, side_placeholder_matches, side_placeholder_regex))
+        if (std::regex_search(control_name, side_placeholder_matches, side_placeholder_regex))
         {
             RC::StringType::const_iterator placeholder_start = side_placeholder_matches[0].first;
             RC::StringType::const_iterator placeholder_end = side_placeholder_matches[0].second;
