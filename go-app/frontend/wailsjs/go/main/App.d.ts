@@ -34,8 +34,6 @@ export function GetTheme():Promise<string>;
 
 export function GetVersion():Promise<string>;
 
-export function HasNewerVersion():Promise<boolean>;
-
 export function ImportProfile():Promise<void>;
 
 export function ImportSharedProfile(arg1:main.Interop_SharedProfile):Promise<void>;
@@ -93,5 +91,3 @@ export function TypestubGetSelectedProfile():Promise<main.Interop_SelectedProfil
 export function UnsubscribeChangeEvent():Promise<void>;
 
 export function UnsubscribeRaw():Promise<void>;
-
-export function UpdateApp():Promise<boolean>;

@@ -66,10 +66,6 @@ export function GetVersion() {
   return window['go']['main']['App']['GetVersion']();
 }
 
-export function HasNewerVersion() {
-  return window['go']['main']['App']['HasNewerVersion']();
-}
-
 export function ImportProfile() {
   return window['go']['main']['App']['ImportProfile']();
 }
@@ -184,8 +180,4 @@ export function UnsubscribeChangeEvent() {
 
 export function UnsubscribeRaw() {
   return window['go']['main']['App']['UnsubscribeRaw']();
-}
-
-export function UpdateApp() {
-  return window['go']['main']['App']['UpdateApp']();
 }

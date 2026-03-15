@@ -6,6 +6,7 @@ toolchain go1.24.5
 
 require (
 	github.com/creasty/go-easing v0.0.0-20161107103139-0cfd96d3a544
+	github.com/fsnotify/fsnotify v1.9.0
 	github.com/go-playground/validator/v10 v10.27.0
 	github.com/go-vgo/robotgo v0.110.8
 	github.com/google/uuid v1.6.0

@@ -6,6 +6,7 @@
 #include <tuple>
 #include <shared_mutex>
 #include <unordered_map>
+#include <regex>
 
 #include <Unreal/Core/HAL/Platform.hpp>
 #include <Unreal/FFrame.hpp>
@@ -185,14 +186,34 @@ class TSWControllerMod : public RC::CppUserModBase
             }
         }
 
-        RC::StringType train_side_placeholder = STR("{SIDE}");
-        std::size_t side_placeholder_pos = control_name.find(train_side_placeholder);
-        /* if no {SIDE} -> just return raw*/
-        if (side_placeholder_pos != RC::StringType::npos)
+        /* regex pattern to match {SIDE} with optional front/back placeholders */
+        /* captures: front placeholder (optional), back placeholder (optional) */
+        std::wregex side_placeholder_regex(STR(R"(\{SIDE(:[^:]+)?(:[^:]+)?\})"));
+        std::wsmatch side_placeholder_matches;
+        if (std::regex_search(control_name, side_placeholder_matches, side_placeholder_regex))
         {
-            RC::StringType train_side_str = train_side == 0 ? STR("F") : STR("B");
-            control_name.replace(side_placeholder_pos, train_side_placeholder.length(), train_side_str);
+            RC::StringType::const_iterator placeholder_start = side_placeholder_matches[0].first;
+            RC::StringType::const_iterator placeholder_end = side_placeholder_matches[0].second;
+
+            RC::StringType front_value = STR("F");
+            RC::StringType back_value = STR("B");
+
+            if (side_placeholder_matches.length() >= 2)
+            {
+                front_value = side_placeholder_matches[1].str().substr(1);
+            }
+
+            if (side_placeholder_matches.length() >= 3)
+            {
+                back_value = side_placeholder_matches[2].str().substr(1);
+            }
+
+            /* determine which value to use based on train side */
+            RC::StringType train_side_str = train_side == 0 ? front_value : back_value;
+            control_name.replace(placeholder_start, placeholder_end, train_side_str);
         }
+
+        /* if no {SIDE} -> just return raw*/
         return control_name;
     }
 
@@ -286,7 +307,7 @@ class TSWControllerMod : public RC::CppUserModBase
         Unreal::UObject* pawn = TSWControllerMod::get_driver_pawn_from_controller(controller);
         Unreal::UFunction* get_drivable_actor_fn = controller->GetFunctionByNameInChain(STR("GetDrivableActor"));
         if (!pawn || !get_drivable_actor_fn) {
-            Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Missing driver pawn or GetDrivableActor function\n"));
+            Output::send<LogLevel::Error>(STR("[TSWControllerMod] Missing driver pawn or GetDrivableActor function\n"));
             return;
         }
         DriverController_GetDrivableActorParams drivable_actor_result;
@@ -317,7 +338,7 @@ class TSWControllerMod : public RC::CppUserModBase
             TSWControllerMod::CURRENT_DRIVABLE_ACTOR_CLASS_NAME = drivable_actor_name;
             auto message = STR("current_drivable_actor,name=") + drivable_actor_name;
             auto message_str = std::string(message.begin(), message.end());
-            Output::send<LogLevel::Default>(STR("[TSWControllerMod] sending current drivable actor information {}\n"), message);
+            Output::send<LogLevel::Normal>(STR("[TSWControllerMod] sending current drivable actor information {}\n"), message);
             tsw_controller_mod_send_message((char*)message_str.c_str());
         }
         current_drivable_actor_lock.unlock();
@@ -348,7 +369,7 @@ class TSWControllerMod : public RC::CppUserModBase
                             VirtualVHIDComponent_EndChangingParams params{controller};
                             vhid_component->ProcessEvent(end_changing_func, &params);
                         }
-                        Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] stopped using VHID component: {}\n"), it->first);
+                        Output::send<LogLevel::Normal>(STR("[TSWControllerMod] stopped using VHID component {}\n"), it->first);
                     }
                     it = TSWControllerMod::VHID_COMPONENTS_CHANGING.erase(it);
                 }
@@ -401,7 +422,7 @@ class TSWControllerMod : public RC::CppUserModBase
                 PlayerController_BeginChangingVHIDComponentParams begin_changing_params{find_virtualhid_component_params.VirtualHIDComponent};
                 controller->ProcessEvent(begin_changing_vhid_component_func, &begin_changing_params);
                 TSWControllerMod::VHID_COMPONENTS_CHANGING[control_name] = Unreal::TWeakObjectPtr<Unreal::UObject>(find_virtualhid_component_params.VirtualHIDComponent);
-                Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] started changing VHID component: {}\n"), control_name);
+                Output::send<LogLevel::Normal>(STR("[TSWControllerMod] started changing VHID component {}\n"), control_name);
 
                 if (should_notify)
                 {
@@ -435,7 +456,7 @@ class TSWControllerMod : public RC::CppUserModBase
                 auto current_input_value = get_current_value_func(find_virtualhid_component_params.VirtualHIDComponent);
                 if (!should_hold && TSWControllerMod::is_within_margin_of_error(target_value, current_input_value))
                 {
-                    Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] clearing target value for control {}\n"), control_pair.first);
+                    Output::send<LogLevel::Normal>(STR("[TSWControllerMod] clearing target value for control {}\n"), control_pair.first);
                     /* remove value from target states */
                     TSWControllerMod::DIRECT_CONTROL_TARGET_STATE.erase(control_pair.first);
                 }
@@ -444,7 +465,6 @@ class TSWControllerMod : public RC::CppUserModBase
             // /* run post update functions */
             // if (call_update_functions_func)
             // {
-            //     Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Calling M3 MTA specific CallUpdateFunctions\n"));
             //     EmptyVoidFunctionParams params{};
             //     drivable_actor_result.DrivableActor->ProcessEvent(call_update_functions_func, &params);
             // }
@@ -479,7 +499,7 @@ class TSWControllerMod : public RC::CppUserModBase
         if (properties.find(STR("value")) == properties.end()) return;
         if (properties.find(STR("flags")) == properties.end()) return;
 
-        Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Processing Direct Control message: {}\n"), message);
+        Output::send<LogLevel::Normal>(STR("[TSWControllerMod] Processing Direct Control Message: {}\n"), message);
         float target_value = std::stof(properties[STR("value")]);
         float max_change_rate = (properties.find(STR("max_change_rate")) == properties.end()) ? 1000.0 : std::stof(properties[STR("max_change_rate")]);
         std::vector<RC::StringType> flags = TSWControllerMod::wstring_split(properties[STR("flags")], STR("|"));
@@ -504,7 +524,7 @@ class TSWControllerMod : public RC::CppUserModBase
             /* find drivable actor*/
             Unreal::UFunction* get_drivable_actor_fn = get_currently_changing_controller_params.Controller->GetFunctionByNameInChain(STR("GetDrivableActor"));
             if (!get_drivable_actor_fn) {
-                Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Can't find GetDrivableActor function\n"));
+                Output::send<LogLevel::Error>(STR("[TSWControllerMod] Can't find GetDrivableActor function\n"));
                 return;
             }
             DriverController_GetDrivableActorParams drivable_actor_result;
@@ -530,7 +550,7 @@ class TSWControllerMod : public RC::CppUserModBase
             /* message format = sync_control,name={name},property={control_property_name},value={value},normal_value={normal_value} */
             auto message = STR("sync_control_value,name=") + input_identifier->ToString() + STR(",property=") + control_property_name + STR(",value=") + std::to_wstring(input_value_changed_params.NewValue) + STR(",normalized_value=") + std::to_wstring(normalized_value);
             auto message_str = std::string(message.begin(), message.end());
-            Output::send<LogLevel::Default>(STR("[TSWControllerMod] sending updated control value {}\n"), message);
+            Output::send<LogLevel::Normal>(STR("[TSWControllerMod] sending updated control value: {}\n"), message);
             tsw_controller_mod_send_message((char*)message_str.c_str());
         }
     }
@@ -539,22 +559,21 @@ class TSWControllerMod : public RC::CppUserModBase
     TSWControllerMod() : CppUserModBase()
     {
         ModName = STR("TSWControllerMod");
-        ModVersion = STR("1.0.0");
+        ModVersion = STR("1.10.1");
         ModDescription = STR("TSW Controller Utility Helper");
-        ModAuthors = STR("Liam");
+        ModAuthors = STR("Liah Martens");
 
-        Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Starting..."));
+        Output::send<LogLevel::Normal>(STR("[TSWControllerMod] Starting...\n"));
     }
 
     auto on_unreal_init() -> void override
     {
-        Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Unreal Initialized"));
+        Output::send<LogLevel::Normal>(STR("[TSWControllerMod] Unreal Initialized\n"));
 
         Unreal::UFunction* input_value_changed_func =
                 Unreal::UObjectGlobals::StaticFindObject<Unreal::UFunction*>(nullptr, nullptr, STR("/Script/TS2Prototype.VirtualHIDComponent:InputValueChanged"));
         if (!input_value_changed_func) return;
 
-        Output::send<LogLevel::Verbose>(STR("[TSWControllerMod] Registering hooks and callbacks"));
         input_value_changed_func->RegisterPostHook(TSWControllerMod::on_ts2_virtualhidcomponent_inputvaluechanged);
         Unreal::Hook::RegisterAActorTickPreCallback(TSWControllerMod::on_tick);
         tsw_controller_mod_set_receive_message_callback(TSWControllerMod::on_direct_control_message_received);
