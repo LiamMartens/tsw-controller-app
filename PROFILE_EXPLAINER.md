@@ -98,6 +98,7 @@ Maps an analog controller input to a continuous value in-game.
 - Used for **continuous analog mappings**.
 - Supports `step` or `steps` to quantize values.
 - Can be used with the `{SIDE}` placeholder to automatically select the correct side of the cab. This is specifically for controls named `Throttle_F` or `Throttle_B` where the `F` and `B` mark the side of the cab.
+**Note: some locomotives don't use the F and R placeholders. The Czech route locomotives for example use 1 and 2. To support this you can use the expanded placeholder which defines which characters to use for front and back: {SIDE:F:B} [example with 1/2: {SIDE:1:2}]**
 
 #### Options
 
