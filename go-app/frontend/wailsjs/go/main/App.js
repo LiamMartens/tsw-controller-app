@@ -82,6 +82,10 @@ export function InstallTrainSimWorldMod() {
   return window['go']['main']['App']['InstallTrainSimWorldMod']();
 }
 
+export function InstallWondersOfSodorMod() {
+  return window['go']['main']['App']['InstallWondersOfSodorMod']();
+}
+
 export function LoadConfiguration() {
   return window['go']['main']['App']['LoadConfiguration']();
 }

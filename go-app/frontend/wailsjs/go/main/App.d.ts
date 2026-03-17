@@ -42,6 +42,8 @@ export function InstallTrainSimClassicMod():Promise<void>;
 
 export function InstallTrainSimWorldMod():Promise<void>;
 
+export function InstallWondersOfSodorMod():Promise<void>;
+
 export function LoadConfiguration():Promise<void>;
 
 export function OpenConfigDirectory():Promise<void>;

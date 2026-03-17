@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.11.0
+- Add mod installation path for Wonders of Sodor
+
 ## v1.10.2
 - TSW Mod performance optimizations
 
