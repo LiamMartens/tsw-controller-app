@@ -37,14 +37,60 @@ type ApiController_ControlTargets struct {
 	mutex sync.RWMutex
 }
 
+type ApiController_ActiveCab struct {
+	updatedAt *time.Time
+	Front     bool
+	Back      bool
+}
+
 type ApiController struct {
 	API            *tswapi.TSWAPI
 	ControlChannel chan ApiController_Command
+	ActiveCab      ApiController_ActiveCab
 	interacting    ApiController_Interacting
 }
 
 func (c *ApiController_Command) ToString() string {
 	return fmt.Sprintf("api_control_command:%s:%f", c.Controls, c.InputValue)
+}
+
+func (s *ApiController_ActiveCab) Update(api *tswapi.TSWAPI) error {
+	/* update at most once every 2 seconds */
+	now := time.Now()
+	should_update := s.updatedAt == nil || now.Sub(*s.updatedAt).Seconds() > 2.0
+	if should_update {
+		cab, err := api.GetActiveCab()
+		s.Front = cab.Front
+		s.Back = cab.Back
+		s.updatedAt = &now
+		return err
+	}
+	return nil
+}
+
+func (controller *ApiController) formatControlName(control string) string {
+	re := regexp.MustCompile(`\{SIDE\}|\{SIDE:[^:\}]+:[^:\}]+\}`)
+
+	formatted_control := re.ReplaceAllStringFunc(control, func(match string) string {
+		err := controller.ActiveCab.Update(controller.API)
+		if err != nil {
+			logger.Logger.Error("[App::ApiController] Could not update active cab: %e", err)
+		}
+
+		match_parts := strings.Split(match[1:len(match)-1], ":") /* split and remove leading and trailing {} */
+		front_value := "F"
+		back_value := "B"
+		if len(match_parts) == 3 {
+			front_value = match_parts[1]
+			back_value = match_parts[2]
+		}
+		if controller.ActiveCab.Back {
+			return back_value
+		}
+		return front_value
+	})
+
+	return formatted_control
 }
 
 func (controller *ApiController) StartInteractingIfNotAlready(ctx context.Context, control string) error {
@@ -95,33 +141,7 @@ func (controller *ApiController) StartInteractingIfNotAlready(ctx context.Contex
 }
 
 func (controller *ApiController) UpdateControlValue(ctx context.Context, control string, value float64) error {
-	var cab_side *tswapi.TSWAPIActiveCab = nil
-	var getActiveCabSide = func() tswapi.TSWAPIActiveCab {
-		if cab_side == nil {
-			active_cab_side, _ := controller.API.GetActiveCab()
-			cab_side = &active_cab_side
-		}
-		return *cab_side
-	}
-
-	re := regexp.MustCompile(`\{SIDE\}|\{SIDE:[^:\}]+:[^:\}]+\}`)
-
-	formatted_control := re.ReplaceAllStringFunc(control, func(match string) string {
-		match_parts := strings.Split(match[1:len(match)-1], ":") /* split and remove leading and trailing {} */
-		front_value := "F"
-		back_value := "B"
-		if len(match_parts) == 3 {
-			front_value = match_parts[1]
-			back_value = match_parts[2]
-		}
-		active_cab_side := getActiveCabSide()
-		if active_cab_side.Back {
-			return back_value
-		}
-		return front_value
-	})
-
-	if err := controller.API.SetInputValue(formatted_control, value); err != nil {
+	if err := controller.API.SetInputValue(control, value); err != nil {
 		logger.Logger.Error("could not update value", "error", err)
 		return err
 	}
@@ -162,7 +182,8 @@ func (controller *ApiController) ProcessPendingControlCommand(ctx context.Contex
 	defer controller.clearControlTargetCommand(command)
 
 	/* we're just silently ignoring this error here and starting from a default of 0.0f on failure which is acceptable in most cases */
-	current_value, _ := controller.API.GetInputValue(command.Controls)
+	current_value := 0.0
+	current_value, _ = controller.API.GetInputValue(command.Controls)
 	target_value_diff := math.Abs(current_value - command.InputValue)
 	/* no-op if the value is already the same */
 	if math_utils.IsWithinMarginOfError(current_value, command.InputValue) {
@@ -217,15 +238,17 @@ func (controller *ApiController) ProcessPendingControlStates(ctx context.Context
 * - Assigns incoming command as the target command
  */
 func (controller *ApiController) ProcessControlCommand(ctx context.Context, command ApiController_Command) error {
-	if err := controller.StartInteractingIfNotAlready(ctx, command.Controls); err != nil {
+	control := controller.formatControlName(command.Controls)
+
+	if err := controller.StartInteractingIfNotAlready(ctx, control); err != nil {
 		return err
 	}
 
 	controller.interacting.mutex.Lock()
 	defer controller.interacting.mutex.Unlock()
-	controlstate := controller.interacting.controls[command.Controls]
+	controlstate := controller.interacting.controls[control]
 	controlstate.TargetCommand = &command
-	controller.interacting.controls[command.Controls] = controlstate
+	controller.interacting.controls[control] = controlstate
 	return nil
 }
 
@@ -254,6 +277,11 @@ func NewAPIController(twapi *tswapi.TSWAPI) *ApiController {
 	controller := ApiController{
 		API:            twapi,
 		ControlChannel: make(chan ApiController_Command, API_CONTROLLER_QUEUE_BUFFER_SIZE),
+		ActiveCab: ApiController_ActiveCab{
+			updatedAt: nil,
+			Front:     false,
+			Back:      false,
+		},
 		interacting: ApiController_Interacting{
 			mutex:    sync.RWMutex{},
 			controls: map[string]ApiController_Interacting_Control{},
