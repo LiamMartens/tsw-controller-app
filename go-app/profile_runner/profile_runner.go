@@ -751,14 +751,15 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 					control_state_value := control_assignment_item.Linear.CalculateNeutralizedValue(change_event.ControlState.NormalizedValues.Value)
 					var thresholds_currently_exceeding []config.Config_Controller_Profile_Control_Assignment_Linear_Threshold
 					var thresholds_previously_passed []config.Config_Controller_Profile_Control_Assignment_Linear_Threshold
-					for _, threshold := range control_assignment_item.Linear.GenerateThresholds() {
-						if threshold.IsExceedingThreshold(control_state_value) {
+					for _, threshold := range control_assignment_item.Linear.GenerateThresholds(defined_thresholds) {
+						if threshold.IsExceedingThreshold(control_state_value, defined_thresholds) {
 							thresholds_currently_exceeding = append(thresholds_currently_exceeding, threshold)
 						}
 						/* threshold was previously passed if the last assignment call was exceeding the threshold OR if there was no last call if the initial value exceeded it*/
 						if previous_assignment_call != nil && threshold.IsExceedingThreshold(
 							control_assignment_item.Linear.CalculateNeutralizedValue(previous_assignment_call.ControlState.NormalizedValues.Value),
-						) || previous_assignment_call == nil && threshold.IsExceedingThreshold(initial_state_value) {
+							defined_thresholds,
+						) || previous_assignment_call == nil && threshold.IsExceedingThreshold(initial_state_value, defined_thresholds) {
 							thresholds_previously_passed = append(thresholds_previously_passed, threshold)
 						}
 					}

@@ -2,23 +2,45 @@ package config
 
 import "tsw_controller_app/math_utils"
 
-func (c *Config_Controller_Profile_Control_Assignment_Linear_Threshold) IsExceedingThreshold(value float64) bool {
-	if c.Value < 0.0 {
-		return value < c.Value
-	}
-	return value >= c.Value
+type Config_Controller_Profile_Control_Assignment_Linear_Threshold_Resolved struct {
+	Value    float64
+	ValueEnd *float64
 }
 
-func (c *Config_Controller_Profile_Control_Assignment_Linear) GenerateThresholds() []Config_Controller_Profile_Control_Assignment_Linear_Threshold {
+func (c *Config_Controller_Profile_Control_Assignment_Linear_Threshold) Resolve(thresholds map[string]float64) Config_Controller_Profile_Control_Assignment_Linear_Threshold_Resolved {
+	var value_end *float64 = nil
+	if c.ValueEnd != nil {
+		value := c.ValueEnd.GetValue(thresholds)
+		value_end = &value
+	}
+
+	return Config_Controller_Profile_Control_Assignment_Linear_Threshold_Resolved{
+		Value:    c.Value.GetValue(thresholds),
+		ValueEnd: value_end,
+	}
+}
+
+func (c *Config_Controller_Profile_Control_Assignment_Linear_Threshold) IsExceedingThreshold(value float64, thresholds map[string]float64) bool {
+	resolved := c.Resolve(thresholds)
+
+	if resolved.Value < 0.0 {
+		return value < resolved.Value
+	}
+	return value >= resolved.Value
+}
+
+func (c *Config_Controller_Profile_Control_Assignment_Linear) GenerateThresholds(namedthresholds map[string]float64) []Config_Controller_Profile_Control_Assignment_Linear_Threshold {
 	var thresholds []Config_Controller_Profile_Control_Assignment_Linear_Threshold
 	for _, threshold := range c.Thresholds {
-		if threshold.ValueEnd == nil || threshold.ValueStep == nil {
+		resolved := threshold.Resolve(namedthresholds)
+
+		if resolved.ValueEnd == nil || threshold.ValueStep == nil {
 			thresholds = append(thresholds, threshold)
 		} else {
-			current_value := threshold.Value
-			for current_value <= *threshold.ValueEnd {
+			current_value := resolved.Value
+			for current_value <= *resolved.ValueEnd {
 				thresholds = append(thresholds, Config_Controller_Profile_Control_Assignment_Linear_Threshold{
-					Value: current_value,
+					Value: Config_Threshold_Value{Value: current_value},
 					/* generated thresholds don't need these anymore */
 					ValueEnd:         nil,
 					ValueStep:        nil,
