@@ -6,11 +6,12 @@ import (
 )
 
 type Interop_GenericController struct {
-	UniqueID     string
-	DeviceID     string /* this is the USB ID for SDL controllers */
-	Name         string
-	IsConfigured bool
-	IsVirtual    bool
+	UniqueID      string
+	DeviceID      string /* this is the USB ID for SDL controllers */
+	Name          string
+	IsConfigured  bool
+	IsVirtual     bool
+	HasThresholds bool
 }
 
 type Interop_Profile_Metadata struct {

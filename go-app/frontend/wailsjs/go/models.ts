@@ -225,6 +225,7 @@ export namespace main {
 	    Name: string;
 	    IsConfigured: boolean;
 	    IsVirtual: boolean;
+	    HasThresholds: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Interop_GenericController(source);
@@ -237,6 +238,7 @@ export namespace main {
 	        this.Name = source["Name"];
 	        this.IsConfigured = source["IsConfigured"];
 	        this.IsVirtual = source["IsVirtual"];
+	        this.HasThresholds = source["HasThresholds"];
 	    }
 	}
 	export class Interop_Profile_Metadata {

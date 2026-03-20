@@ -8,12 +8,23 @@ import (
 func (a *App) GetControllers() []Interop_GenericController {
 	var controllers []Interop_GenericController = []Interop_GenericController{}
 	a.sdl_controller_manager.ConfiguredControllers.ForEach(func(c controller_mgr.SDL_ControllerManager_ConfiguredController, _ controller_mgr.DeviceUniqueID) bool {
+		has_thresholds := false
+		c.Controls().ForEach(func(value controller_mgr.IControllerManager_Controller_Control, key string) bool {
+			sdl_control := value.(*controller_mgr.SDL_ControllerManager_Controller_JoyControl)
+			if len(sdl_control.Calibration().Thresholds) > 0 {
+				has_thresholds = true
+				return false
+			}
+			return true
+		})
+
 		controllers = append(controllers, Interop_GenericController{
-			UniqueID:     c.Device().UniqueID(),
-			DeviceID:     c.Device().DeviceID(),
-			Name:         c.Name,
-			IsConfigured: true,
-			IsVirtual:    false,
+			UniqueID:      c.Device().UniqueID(),
+			DeviceID:      c.Device().DeviceID(),
+			Name:          c.Name,
+			IsConfigured:  true,
+			IsVirtual:     false,
+			HasThresholds: has_thresholds,
 		})
 		return true
 	})
