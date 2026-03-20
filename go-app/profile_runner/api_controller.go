@@ -249,6 +249,7 @@ func (controller *ApiController) ProcessPendingControlStates(ctx context.Context
  */
 func (controller *ApiController) ProcessControlCommand(ctx context.Context, command ApiController_Command) error {
 	control, err := controller.formatControlName(command.Controls)
+
 	if err != nil {
 		return err
 	}
@@ -260,7 +261,12 @@ func (controller *ApiController) ProcessControlCommand(ctx context.Context, comm
 	controller.interacting.mutex.Lock()
 	defer controller.interacting.mutex.Unlock()
 	controlstate := controller.interacting.controls[control]
-	controlstate.TargetCommand = &command
+	controlstate.TargetCommand = &ApiController_Command{
+		Controls:      control,
+		InputValue:    command.InputValue,
+		Hold:          command.Hold,
+		MaxChangeRate: command.MaxChangeRate,
+	}
 	controller.interacting.controls[control] = controlstate
 	return nil
 }
