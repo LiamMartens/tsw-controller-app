@@ -17,6 +17,13 @@ func (api *mockApi) GetActiveCab() (tswapi.TSWAPIActiveCab, error) {
 }
 
 func TestApiController_FormatControlName(t *testing.T) {
+	t.Run("no placeholder", func(t *testing.T) {
+		api := &mockApi{}
+		controller := NewAPIController(api)
+		formatted, err := controller.formatControlName("Control_F")
+		assert.Nil(t, err, "Expected no error when one cab is active")
+		assert.Equal(t, formatted, "Control_F")
+	})
 
 	t.Run("no active cab", func(t *testing.T) {
 		api := &mockApi{}
