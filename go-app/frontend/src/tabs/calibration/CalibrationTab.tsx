@@ -4,18 +4,25 @@ import { CalibrationModal } from "./CalibrationModal";
 import { EventsOn } from "../../../wailsjs/runtime/runtime";
 import { events } from "../../events";
 import { useControllers } from "../../swr";
+import { RemapNotchesModal } from "./RemapNotchesModal";
 
 type ControllerRowProps = {
   controller: main.Interop_GenericController;
   onConfigure: (controller: main.Interop_GenericController) => void;
+  onRemapNotches: (controller: main.Interop_GenericController) => void;
 };
 
 const CalibrationTabControllerRow = ({
   controller,
   onConfigure,
+  onRemapNotches,
 }: ControllerRowProps) => {
   const handleConfigure = () => {
     onConfigure(controller);
+  };
+
+  const handleRemapNotches = () => {
+    onRemapNotches(controller);
   };
 
   return (
@@ -23,7 +30,20 @@ const CalibrationTabControllerRow = ({
       <div className="list-col-grow">
         <div>{controller.Name}</div>
       </div>
-      <div>
+      <div className="flex items-center gap-2">
+        {controller.IsConfigured && controller.HasThresholds && (
+          <div
+            className="tooltip tooltip-bottom"
+            data-tip="Remap controller notches"
+          >
+            <button
+              className="btn btn-success btn-soft btn-xs"
+              onClick={handleRemapNotches}
+            >
+              Remap Notches
+            </button>
+          </div>
+        )}
         {controller.IsConfigured && (
           <div className="tooltip tooltip-bottom" data-tip="Re-configure">
             <button
@@ -50,9 +70,14 @@ const CalibrationTabControllerRow = ({
 };
 
 export const CalibrationTab = () => {
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const calibrationDialogRef = useRef<HTMLDialogElement | null>(null);
+  const remapNotchesDialogRef = useRef<HTMLDialogElement | null>(null);
   const [currentlyCalibratingController, setCurrentlyCalibratingController] =
     useState<main.Interop_GenericController | null>(null);
+  const [
+    currrentlyRemappingNotchesController,
+    setCurrrentlyRemappingNotchesController,
+  ] = useState<main.Interop_GenericController | null>(null);
 
   const { data: controllers, mutate: refetchControllers } = useControllers();
   const configurableControllers = useMemo(
@@ -62,7 +87,12 @@ export const CalibrationTab = () => {
 
   const handleConfigure = (c: main.Interop_GenericController) => {
     setCurrentlyCalibratingController(c);
-    dialogRef.current?.showModal();
+    calibrationDialogRef.current?.showModal();
+  };
+
+  const handleRemapNotches = (c: main.Interop_GenericController) => {
+    setCurrrentlyRemappingNotchesController(c);
+    remapNotchesDialogRef.current?.showModal();
   };
 
   useEffect(() => {
@@ -79,12 +109,17 @@ export const CalibrationTab = () => {
             key={c.UniqueID}
             controller={c}
             onConfigure={handleConfigure}
+            onRemapNotches={handleRemapNotches}
           />
         ))}
       </ul>
       <CalibrationModal
         controller={currentlyCalibratingController}
         onClose={() => setCurrentlyCalibratingController(null)}
+      />
+      <RemapNotchesModal
+        controller={currrentlyRemappingNotchesController}
+        onClose={() => setCurrrentlyRemappingNotchesController(null)}
       />
     </div>
   );

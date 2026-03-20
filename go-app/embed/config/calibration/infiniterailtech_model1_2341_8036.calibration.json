@@ -28,6 +28,14 @@
           "value": 0.1
         },
         {
+          "name": "BrakeRangeStart",
+          "value": 0.12
+        },
+        {
+          "name": "BrakeRangeEnd",
+          "value": 0.57
+        },
+        {
           "name": "MinBrake",
           "value": 0.58
         },

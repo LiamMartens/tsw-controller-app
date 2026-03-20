@@ -93,6 +93,8 @@ func (controller *ApiController) StartInteractingIfNotAlready(ctx context.Contex
 }
 
 func (controller *ApiController) UpdateControlValue(ctx context.Context, control string, value float64) error {
+	// activecab, _ := controller.API.GetActiveCab()
+
 	if err := controller.API.SetInputValue(control, value); err != nil {
 		logger.Logger.Error("could not update value", "error", err)
 		return err

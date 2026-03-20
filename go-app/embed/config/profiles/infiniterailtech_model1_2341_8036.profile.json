@@ -671,8 +671,8 @@
                 "threshold_tolerance": 0.04
               },
               {
-                "threshold": { "value": 0.12, "reference": "MaxBrake" },
-                "threshold_end": { "value": 0.57, "reference": "MinBrake" },
+                "threshold": { "value": 0.12, "reference": "BrakeRangeStart" },
+                "threshold_end": { "value": 0.57, "reference": "BrakeRangeEnd" },
                 "threshold_tolerance": 0
               },
               {
@@ -726,8 +726,8 @@
                 "threshold_tolerance": 0.04
               },
               {
-                "threshold": { "value": 0.12, "reference": "MaxBrake" },
-                "threshold_end": { "value": 0.57, "reference": "MinBrake" },
+                "threshold": { "value": 0.12, "reference": "BrakeRangeStart" },
+                "threshold_end": { "value": 0.57, "reference": "BrakeRangeEnd" },
                 "threshold_tolerance": 0
               },
               {
@@ -779,8 +779,8 @@
                 "threshold_tolerance": 0.04
               },
               {
-                "threshold": { "value": 0.12, "reference": "MaxBrake" },
-                "threshold_end": { "value": 0.57, "reference": "MinBrake" },
+                "threshold": { "value": 0.12, "reference": "BrakeRangeStart" },
+                "threshold_end": { "value": 0.57, "reference": "BrakeRangeEnd" },
                 "threshold_tolerance": 0
               },
               {

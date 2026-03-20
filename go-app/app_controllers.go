@@ -2,6 +2,7 @@ package main
 
 import (
 	"sort"
+	"tsw_controller_app/config"
 	"tsw_controller_app/controller_mgr"
 )
 
@@ -68,6 +69,11 @@ func (a *App) GetControllerConfiguration(unique_id controller_mgr.DeviceUniqueID
 			if control, ok := c.(*controller_mgr.SDL_ControllerManager_Controller_JoyControl); ok {
 				sdl_mapping := control.SDLMapping()
 				calibration_data := control.Calibration()
+				thresholds := []config.Config_Controller_Calibration_Threshold{}
+				if len(control.Calibration().Thresholds) > 0 {
+					thresholds = append(thresholds, control.Calibration().Thresholds...)
+				}
+
 				calibration := Interop_ControllerCalibration_Control{
 					Kind:        sdl_mapping.Kind,
 					Index:       sdl_mapping.Index,
@@ -78,7 +84,7 @@ func (a *App) GetControllerConfiguration(unique_id controller_mgr.DeviceUniqueID
 					Deadzone:    0,
 					Invert:      false,
 					EasingCurve: []float64{0.0, 0.0, 1.0, 1.0},
-					Thresholds:  control.Calibration().Thresholds,
+					Thresholds:  thresholds,
 				}
 				if calibration_data.Idle != nil {
 					calibration.Idle = *calibration_data.Idle

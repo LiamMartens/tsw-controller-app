@@ -261,6 +261,7 @@ func (a *App) SaveCalibration(data Interop_ControllerCalibration) error {
 					Deadzone:    &control.Deadzone,
 					Invert:      &control.Invert,
 					EasingCurve: &control.EasingCurve,
+					Thresholds:  control.Thresholds,
 				})
 			}
 		}
