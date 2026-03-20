@@ -56,6 +56,7 @@ type Interop_ControllerCalibration_Control struct {
 	Deadzone    float64
 	EasingCurve []float64
 	Invert      bool
+	Thresholds  []config.Config_Controller_Calibration_Threshold
 }
 
 type Interop_ControllerCalibration struct {

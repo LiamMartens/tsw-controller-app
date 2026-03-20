@@ -10,10 +10,11 @@ func (a *App) GetControllers() []Interop_GenericController {
 	a.sdl_controller_manager.ConfiguredControllers.ForEach(func(c controller_mgr.SDL_ControllerManager_ConfiguredController, _ controller_mgr.DeviceUniqueID) bool {
 		has_thresholds := false
 		c.Controls().ForEach(func(value controller_mgr.IControllerManager_Controller_Control, key string) bool {
-			sdl_control := value.(*controller_mgr.SDL_ControllerManager_Controller_JoyControl)
-			if len(sdl_control.Calibration().Thresholds) > 0 {
-				has_thresholds = true
-				return false
+			if sdl_control, ok := value.(*controller_mgr.SDL_ControllerManager_Controller_JoyControl); ok {
+				if len(sdl_control.Calibration().Thresholds) > 0 {
+					has_thresholds = true
+					return false
+				}
 			}
 			return true
 		})
@@ -77,6 +78,7 @@ func (a *App) GetControllerConfiguration(unique_id controller_mgr.DeviceUniqueID
 					Deadzone:    0,
 					Invert:      false,
 					EasingCurve: []float64{0.0, 0.0, 1.0, 1.0},
+					Thresholds:  control.Calibration().Thresholds,
 				}
 				if calibration_data.Idle != nil {
 					calibration.Idle = *calibration_data.Idle
