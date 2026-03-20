@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"regexp"
+	"strings"
 	"sync"
 	"time"
 	"tsw_controller_app/logger"
@@ -93,9 +95,33 @@ func (controller *ApiController) StartInteractingIfNotAlready(ctx context.Contex
 }
 
 func (controller *ApiController) UpdateControlValue(ctx context.Context, control string, value float64) error {
-	// activecab, _ := controller.API.GetActiveCab()
+	var cab_side *tswapi.TSWAPIActiveCab = nil
+	var getActiveCabSide = func() tswapi.TSWAPIActiveCab {
+		if cab_side == nil {
+			active_cab_side, _ := controller.API.GetActiveCab()
+			cab_side = &active_cab_side
+		}
+		return *cab_side
+	}
 
-	if err := controller.API.SetInputValue(control, value); err != nil {
+	re := regexp.MustCompile(`\{SIDE\}|\{SIDE:[^:\}]+:[^:\}]+\}`)
+
+	formatted_control := re.ReplaceAllStringFunc(control, func(match string) string {
+		match_parts := strings.Split(match[1:len(match)-1], ":") /* split and remove leading and trailing {} */
+		front_value := "F"
+		back_value := "B"
+		if len(match_parts) == 3 {
+			front_value = match_parts[1]
+			back_value = match_parts[2]
+		}
+		active_cab_side := getActiveCabSide()
+		if active_cab_side.Back {
+			return back_value
+		}
+		return front_value
+	})
+
+	if err := controller.API.SetInputValue(formatted_control, value); err != nil {
 		logger.Logger.Error("could not update value", "error", err)
 		return err
 	}
