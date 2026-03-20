@@ -19,6 +19,22 @@ type TSWAPIConfig struct {
 	CommAPIKey string
 }
 
+type ITSWAPI interface {
+	ListCurrentDrivableActor() (TSWAPI_ListResponse, error)
+	GetCurrentDrivableActorObjectClass() (string, error)
+	DeleteSubscription(id int) error
+	GetSubscription(id int) (map[string]any, error)
+	SetInteracting(control string, value float64) error
+	SetInputValue(control string, value float64) error
+	GetInputValue(control string) (float64, error)
+	GetActiveCab() (TSWAPIActiveCab, error)
+	CreateCurrentDrivableActorSubscription(id int) error
+	GetCurrentDrivableActorSubscription(id int) (TSWAPI_GetCurrentDrivableActorSubscriptionResponse, error)
+	LoadAPIKey(path string) error
+	CanConnect() bool
+	Enabled() bool
+}
+
 type TSWAPI struct {
 	transport  *http.Transport
 	client     *http.Client
@@ -30,6 +46,8 @@ type TSWAPIActiveCab struct {
 	Front bool
 	Back  bool
 }
+
+var _ ITSWAPI = &TSWAPI{}
 
 var ErrMissingCommAPIKey = errors.New("missing CommAPIKey")
 var ErrNonSuccessStatusCode = errors.New("non-successfull status code returned from API")

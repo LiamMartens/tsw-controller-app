@@ -44,7 +44,7 @@ type ApiController_ActiveCab struct {
 }
 
 type ApiController struct {
-	API            *tswapi.TSWAPI
+	API            tswapi.ITSWAPI
 	ControlChannel chan ApiController_Command
 	ActiveCab      ApiController_ActiveCab
 	interacting    ApiController_Interacting
@@ -54,7 +54,7 @@ func (c *ApiController_Command) ToString() string {
 	return fmt.Sprintf("api_control_command:%s:%f", c.Controls, c.InputValue)
 }
 
-func (s *ApiController_ActiveCab) Update(api *tswapi.TSWAPI) error {
+func (s *ApiController_ActiveCab) Update(api tswapi.ITSWAPI) error {
 	/* update at most once every 2 seconds */
 	now := time.Now()
 	should_update := s.updatedAt == nil || now.Sub(*s.updatedAt).Seconds() > 2.0
@@ -68,9 +68,10 @@ func (s *ApiController_ActiveCab) Update(api *tswapi.TSWAPI) error {
 	return nil
 }
 
-func (controller *ApiController) formatControlName(control string) string {
+func (controller *ApiController) formatControlName(control string) (string, error) {
 	re := regexp.MustCompile(`\{SIDE\}|\{SIDE:[^:\}]+:[^:\}]+\}`)
 
+	side_replacement_failed := false
 	formatted_control := re.ReplaceAllStringFunc(control, func(match string) string {
 		err := controller.ActiveCab.Update(controller.API)
 		if err != nil {
@@ -87,10 +88,19 @@ func (controller *ApiController) formatControlName(control string) string {
 		if controller.ActiveCab.Back {
 			return back_value
 		}
-		return front_value
+		if controller.ActiveCab.Front {
+			return front_value
+		}
+
+		side_replacement_failed = true
+		return match
 	})
 
-	return formatted_control
+	if side_replacement_failed {
+		return formatted_control, fmt.Errorf("Could not replace side placeholder due to missing active cab")
+	}
+
+	return formatted_control, nil
 }
 
 func (controller *ApiController) StartInteractingIfNotAlready(ctx context.Context, control string) error {
@@ -238,7 +248,10 @@ func (controller *ApiController) ProcessPendingControlStates(ctx context.Context
 * - Assigns incoming command as the target command
  */
 func (controller *ApiController) ProcessControlCommand(ctx context.Context, command ApiController_Command) error {
-	control := controller.formatControlName(command.Controls)
+	control, err := controller.formatControlName(command.Controls)
+	if err != nil {
+		return err
+	}
 
 	if err := controller.StartInteractingIfNotAlready(ctx, control); err != nil {
 		return err
@@ -273,7 +286,7 @@ func (controller *ApiController) Run(ctx context.Context) func() {
 	return cancel
 }
 
-func NewAPIController(twapi *tswapi.TSWAPI) *ApiController {
+func NewAPIController(twapi tswapi.ITSWAPI) *ApiController {
 	controller := ApiController{
 		API:            twapi,
 		ControlChannel: make(chan ApiController_Command, API_CONTROLLER_QUEUE_BUFFER_SIZE),
