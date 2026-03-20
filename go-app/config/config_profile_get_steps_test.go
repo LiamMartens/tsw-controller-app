@@ -85,11 +85,11 @@ func TestConfigProfile_DirectLike_InputValue_GetSteps_PreDefinedStepsWithFreeRan
 		Max:   1.0,
 		Steps: &[]*float64{floatPtr(0.0), nil, floatPtr(0.5), floatPtr(0.75), nil},
 		StepThresholds: &[]Config_Controller_Profile_Control_Assignment_DirectLike_InputValue_StepThreshold{
-			{Threshold: 0.0},
-			{Threshold: 0.1, ThresholdEnd: floatPtr(0.4)},
-			{Threshold: 0.5, ThresholdTolerance: floatPtr(0.05)},
-			{Threshold: 0.75, ThresholdTolerance: floatPtr(0.05)},
-			{Threshold: 0.8, ThresholdEnd: floatPtr(1.0), ThresholdTolerance: floatPtr(0.05)},
+			{Threshold: Config_Threshold_Value{Value: 0.0}},
+			{Threshold: Config_Threshold_Value{Value: 0.1}, ThresholdEnd: &Config_Threshold_Value{Value: 0.4}},
+			{Threshold: Config_Threshold_Value{Value: 0.5}, ThresholdTolerance: floatPtr(0.05)},
+			{Threshold: Config_Threshold_Value{Value: 0.75}, ThresholdTolerance: floatPtr(0.05)},
+			{Threshold: Config_Threshold_Value{Value: 0.8}, ThresholdEnd: &Config_Threshold_Value{Value: 1.0}, ThresholdTolerance: floatPtr(0.05)},
 		},
 	}
 

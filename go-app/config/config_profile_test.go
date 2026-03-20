@@ -152,10 +152,10 @@ func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_Simpl
 			floatPtr(0.0), floatPtr(0.5), nil, floatPtr(1.0),
 		},
 		StepThresholds: &[]Config_Controller_Profile_Control_Assignment_DirectLike_InputValue_StepThreshold{
-			{Threshold: 0.0, ThresholdTolerance: floatPtr(0.05)},
-			{Threshold: 0.5, ThresholdTolerance: floatPtr(0.05)},
-			{Threshold: 0.55, ThresholdEnd: floatPtr(0.95)},
-			{Threshold: 1.0, ThresholdTolerance: floatPtr(0.05)},
+			{Threshold: Config_Threshold_Value{Value: 0.0}, ThresholdTolerance: floatPtr(0.05)},
+			{Threshold: Config_Threshold_Value{Value: 0.5}, ThresholdTolerance: floatPtr(0.05)},
+			{Threshold: Config_Threshold_Value{Value: 0.55}, ThresholdEnd: &Config_Threshold_Value{Value: 0.95}},
+			{Threshold: Config_Threshold_Value{Value: 1.0}, ThresholdTolerance: floatPtr(0.05)},
 		},
 	}
 	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.0))
@@ -195,11 +195,11 @@ func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_Simpl
 			floatPtr(-1.0), nil, floatPtr(0), nil, floatPtr(1.0),
 		},
 		StepThresholds: &[]Config_Controller_Profile_Control_Assignment_DirectLike_InputValue_StepThreshold{
-			{Threshold: 0.0},
-			{Threshold: 0.0, ThresholdEnd: floatPtr(0.5)},
-			{Threshold: 0.5},
-			{Threshold: 0.5, ThresholdEnd: floatPtr(1.0)},
-			{Threshold: 1.0},
+			{Threshold: Config_Threshold_Value{Value: 0.0}},
+			{Threshold: Config_Threshold_Value{Value: 0.0}, ThresholdEnd: &Config_Threshold_Value{Value: 0.5}},
+			{Threshold: Config_Threshold_Value{Value: 0.5}},
+			{Threshold: Config_Threshold_Value{Value: 0.5}, ThresholdEnd: &Config_Threshold_Value{Value: 1.0}},
+			{Threshold: Config_Threshold_Value{Value: 1.0}},
 		},
 	}
 	assert.Nil(t, input_value.CalculateOutputValue(-1.0))

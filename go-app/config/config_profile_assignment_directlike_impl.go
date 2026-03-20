@@ -154,10 +154,10 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Get
 		default_threshold_tolerance := math_utils.RoundToMarginOfError(default_threshold_step / 2.0)
 		step_threshold := ControlStepDefinition_Threshold{}
 		if len(step_thresholds) > ix {
-			step_threshold.ValueStart = step_thresholds[ix].Threshold
-			step_threshold.ValueEnd = step_thresholds[ix].Threshold
+			step_threshold.ValueStart = step_thresholds[ix].Threshold.Value
+			step_threshold.ValueEnd = step_thresholds[ix].Threshold.Value
 			if step_thresholds[ix].ThresholdEnd != nil {
-				step_threshold.ValueEnd = *step_thresholds[ix].ThresholdEnd
+				step_threshold.ValueEnd = step_thresholds[ix].ThresholdEnd.Value
 			}
 			if step_thresholds[ix].ThresholdTolerance != nil {
 				step_threshold.Tolerance = *step_thresholds[ix].ThresholdTolerance
