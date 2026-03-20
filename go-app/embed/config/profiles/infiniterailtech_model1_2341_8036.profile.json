@@ -662,19 +662,43 @@
             "max_change_rate": 0.1,
             "steps": [0, 0.27, null, 0.65, 0.72, 0.85, 0.9, 0.95, 1.0],
             "step_thresholds": [
-              { "threshold": 0, "threshold_tolerance": 0.01 },
-              { "threshold": 0.1, "threshold_tolerance": 0.04 },
               {
-                "threshold": 0.12,
-                "threshold_end": 0.57,
+                "threshold": { "value": 0.0, "reference": "EmergencyBrake" },
+                "threshold_tolerance": 0.01
+              },
+              {
+                "threshold": { "value": 0.1, "reference": "MaxBrake" },
+                "threshold_tolerance": 0.04
+              },
+              {
+                "threshold": { "value": 0.12, "reference": "MaxBrake" },
+                "threshold_end": { "value": 0.57, "reference": "MinBrake" },
                 "threshold_tolerance": 0
               },
-              { "threshold": 0.58, "threshold_tolerance": 0.05 },
-              { "threshold": 0.66, "threshold_tolerance": 0.05 },
-              { "threshold": 0.75, "threshold_tolerance": 0.05 },
-              { "threshold": 0.84, "threshold_tolerance": 0.05 },
-              { "threshold": 0.91, "threshold_tolerance": 0.05 },
-              { "threshold": 0.99, "threshold_tolerance": 0.01 }
+              {
+                "threshold": { "value": 0.57, "reference": "MinBrake" },
+                "threshold_tolerance": 0.05
+              },
+              {
+                "threshold": { "value": 0.66, "reference": "Coast" },
+                "threshold_tolerance": 0.05
+              },
+              {
+                "threshold": { "value": 0.75, "reference": "P1" },
+                "threshold_tolerance": 0.05
+              },
+              {
+                "threshold": { "value": 0.84, "reference": "P2" },
+                "threshold_tolerance": 0.05
+              },
+              {
+                "threshold": { "value": 0.91, "reference": "P3" },
+                "threshold_tolerance": 0.05
+              },
+              {
+                "threshold": { "value": 0.99, "reference": "P4" },
+                "threshold_tolerance": 0.01
+              }
             ]
           }
         },
@@ -693,19 +717,43 @@
             "max_change_rate": 0.1,
             "steps": [0, 0.27, null, 0.65, 0.72, 0.85, 0.9, 0.95, 1.0],
             "step_thresholds": [
-              { "threshold": 0, "threshold_tolerance": 0.01 },
-              { "threshold": 0.1, "threshold_tolerance": 0.04 },
               {
-                "threshold": 0.12,
-                "threshold_end": 0.57,
+                "threshold": { "value": 0.0, "reference": "EmergencyBrake" },
+                "threshold_tolerance": 0.01
+              },
+              {
+                "threshold": { "value": 0.1, "reference": "MaxBrake" },
+                "threshold_tolerance": 0.04
+              },
+              {
+                "threshold": { "value": 0.12, "reference": "MaxBrake" },
+                "threshold_end": { "value": 0.57, "reference": "MinBrake" },
                 "threshold_tolerance": 0
               },
-              { "threshold": 0.58, "threshold_tolerance": 0.05 },
-              { "threshold": 0.66, "threshold_tolerance": 0.05 },
-              { "threshold": 0.75, "threshold_tolerance": 0.05 },
-              { "threshold": 0.84, "threshold_tolerance": 0.05 },
-              { "threshold": 0.91, "threshold_tolerance": 0.05 },
-              { "threshold": 0.99, "threshold_tolerance": 0.01 }
+              {
+                "threshold": { "value": 0.57, "reference": "MinBrake" },
+                "threshold_tolerance": 0.05
+              },
+              {
+                "threshold": { "value": 0.66, "reference": "Coast" },
+                "threshold_tolerance": 0.05
+              },
+              {
+                "threshold": { "value": 0.75, "reference": "P1" },
+                "threshold_tolerance": 0.05
+              },
+              {
+                "threshold": { "value": 0.84, "reference": "P2" },
+                "threshold_tolerance": 0.05
+              },
+              {
+                "threshold": { "value": 0.91, "reference": "P3" },
+                "threshold_tolerance": 0.05
+              },
+              {
+                "threshold": { "value": 0.99, "reference": "P4" },
+                "threshold_tolerance": 0.01
+              }
             ]
           }
         },
@@ -722,19 +770,43 @@
             "max_change_rate": 0.1,
             "steps": [-1, -0.9, null, -0.2, 0, 0.25, 0.5, 0.75, 1.0],
             "step_thresholds": [
-              { "threshold": 0, "threshold_tolerance": 0.01 },
-              { "threshold": 0.1, "threshold_tolerance": 0.04 },
               {
-                "threshold": 0.12,
-                "threshold_end": 0.57,
+                "threshold": { "value": 0.0, "reference": "EmergencyBrake" },
+                "threshold_tolerance": 0.01
+              },
+              {
+                "threshold": { "value": 0.1, "reference": "MaxBrake" },
+                "threshold_tolerance": 0.04
+              },
+              {
+                "threshold": { "value": 0.12, "reference": "MaxBrake" },
+                "threshold_end": { "value": 0.57, "reference": "MinBrake" },
                 "threshold_tolerance": 0
               },
-              { "threshold": 0.58, "threshold_tolerance": 0.05 },
-              { "threshold": 0.66, "threshold_tolerance": 0.05 },
-              { "threshold": 0.75, "threshold_tolerance": 0.05 },
-              { "threshold": 0.84, "threshold_tolerance": 0.05 },
-              { "threshold": 0.91, "threshold_tolerance": 0.05 },
-              { "threshold": 0.99, "threshold_tolerance": 0.01 }
+              {
+                "threshold": { "value": 0.57, "reference": "MinBrake" },
+                "threshold_tolerance": 0.05
+              },
+              {
+                "threshold": { "value": 0.66, "reference": "Coast" },
+                "threshold_tolerance": 0.05
+              },
+              {
+                "threshold": { "value": 0.75, "reference": "P1" },
+                "threshold_tolerance": 0.05
+              },
+              {
+                "threshold": { "value": 0.84, "reference": "P2" },
+                "threshold_tolerance": 0.05
+              },
+              {
+                "threshold": { "value": 0.91, "reference": "P3" },
+                "threshold_tolerance": 0.05
+              },
+              {
+                "threshold": { "value": 0.99, "reference": "P4" },
+                "threshold_tolerance": 0.01
+              }
             ]
           }
         }
