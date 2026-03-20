@@ -9,27 +9,27 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@json-editor/json-editor": "^2.15.2",
-    "next": "16.0.7",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
+    "@json-editor/json-editor": "^2.16.0",
+    "next": "16.2.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
     "react-error-boundary": "^6.1.1",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "swr": "^2.4.1"
   },
   "devDependencies": {
-    "@apidevtools/json-schema-ref-parser": "^15.1.2",
-    "@tailwindcss/postcss": "^4.1.17",
+    "@apidevtools/json-schema-ref-parser": "^15.3.1",
+    "@tailwindcss/postcss": "^4.2.2",
     "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "daisyui": "^5.5.4",
+    "daisyui": "^5.5.19",
     "eslint": "^9",
-    "eslint-config-next": "16.0.3",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.14",
+    "eslint-config-next": "16.2.0",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.2",
     "typescript": "^5"
   }
 }

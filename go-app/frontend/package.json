@@ -14,7 +14,7 @@
     "@hookform/resolvers": "^5.2.2",
     "animejs": "^4.3.6",
     "clsx": "^2.1.1",
-    "framer-motion": "^12.35.1",
+    "framer-motion": "^12.38.0",
     "just-throttle": "^4.2.0",
     "react": "^18.3.1",
     "react-bezier-curve-editor": "^2.1.0",
@@ -28,7 +28,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.2.1",
+    "@tailwindcss/vite": "^4.2.2",
     "@types/react": "^18.3.28",
     "@types/react-dom": "^18.3.7",
     "@types/semver": "^7.7.1",
@@ -36,7 +36,7 @@
     "daisyui": "^5.5.19",
     "json-schema-to-typescript": "^15.0.4",
     "prettier": "^3.8.1",
-    "tailwindcss": "^4.2.1",
+    "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
   },
