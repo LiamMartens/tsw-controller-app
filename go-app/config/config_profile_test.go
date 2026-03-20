@@ -11,6 +11,10 @@ func floatPtr(f float64) *float64 {
 	return &f
 }
 
+func stringPtr(v string) *string {
+	return &v
+}
+
 func TestConfigProfile_SyncControlValidation(t *testing.T) {
 	value := Config_Controller_Profile_Control_Assignment_SyncControl{
 		Type:       "sync_control",
@@ -118,10 +122,10 @@ func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_Simpl
 		Max:  1.0,
 		Step: floatPtr(0.2),
 	}
-	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.0))
-	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.1))
-	assert.Equal(t, 0.2, *input_value.CalculateOutputValue(0.15))
-	assert.Equal(t, 0.2, *input_value.CalculateOutputValue(0.2))
+	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.0, nil))
+	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.1, nil))
+	assert.Equal(t, 0.2, *input_value.CalculateOutputValue(0.15, nil))
+	assert.Equal(t, 0.2, *input_value.CalculateOutputValue(0.2, nil))
 }
 
 func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_SimpleFreeRange(t *testing.T) {
@@ -132,16 +136,16 @@ func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_Simpl
 			floatPtr(0.0), floatPtr(0.5), nil, floatPtr(1.0),
 		},
 	}
-	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.0))
-	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.1))
-	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.2))
-	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.3))
-	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.3333))
-	assert.Equal(t, 0.7, *input_value.CalculateOutputValue(0.6))
-	assert.Equal(t, 0.7751, *input_value.CalculateOutputValue(0.7))
-	assert.Equal(t, 0.8501, *input_value.CalculateOutputValue(0.8))
-	assert.Equal(t, 0.9251, *input_value.CalculateOutputValue(0.9))
-	assert.Equal(t, 1.0, *input_value.CalculateOutputValue(1.0))
+	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.0, nil))
+	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.1, nil))
+	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.2, nil))
+	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.3, nil))
+	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.3333, nil))
+	assert.Equal(t, 0.7, *input_value.CalculateOutputValue(0.6, nil))
+	assert.Equal(t, 0.7751, *input_value.CalculateOutputValue(0.7, nil))
+	assert.Equal(t, 0.8501, *input_value.CalculateOutputValue(0.8, nil))
+	assert.Equal(t, 0.9251, *input_value.CalculateOutputValue(0.9, nil))
+	assert.Equal(t, 1.0, *input_value.CalculateOutputValue(1.0, nil))
 }
 
 func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_SimpleFreeRange_CustomThresholds(t *testing.T) {
@@ -158,18 +162,18 @@ func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_Simpl
 			{Threshold: Config_Threshold_Value{Value: 1.0}, ThresholdTolerance: floatPtr(0.05)},
 		},
 	}
-	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.0))
-	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.05))
+	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.0, nil))
+	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.05, nil))
 
-	assert.Nil(t, input_value.CalculateOutputValue(0.1))
-	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.5))
+	assert.Nil(t, input_value.CalculateOutputValue(0.1, nil))
+	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.5, nil))
 
-	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.55))
-	assert.Equal(t, 0.75, *input_value.CalculateOutputValue(0.75))
-	assert.Equal(t, 0.9375, *input_value.CalculateOutputValue(0.9))
-	assert.Equal(t, 1.0, *input_value.CalculateOutputValue(0.95))
+	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.55, nil))
+	assert.Equal(t, 0.75, *input_value.CalculateOutputValue(0.75, nil))
+	assert.Equal(t, 0.9375, *input_value.CalculateOutputValue(0.9, nil))
+	assert.Equal(t, 1.0, *input_value.CalculateOutputValue(0.95, nil))
 
-	assert.Equal(t, 1.0, *input_value.CalculateOutputValue(1.0))
+	assert.Equal(t, 1.0, *input_value.CalculateOutputValue(1.0, nil))
 }
 
 func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_SimpleFreeRange_WithNegativeValues(t *testing.T) {
@@ -180,11 +184,11 @@ func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_Simpl
 			floatPtr(-1.0), nil, floatPtr(0), nil, floatPtr(1.0),
 		},
 	}
-	assert.Equal(t, -1.0, *input_value.CalculateOutputValue(0.0))
-	assert.Equal(t, -0.5, *input_value.CalculateOutputValue(0.25))
-	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.5))
-	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.75))
-	assert.Equal(t, 1.0, *input_value.CalculateOutputValue(1.0))
+	assert.Equal(t, -1.0, *input_value.CalculateOutputValue(0.0, nil))
+	assert.Equal(t, -0.5, *input_value.CalculateOutputValue(0.25, nil))
+	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.5, nil))
+	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.75, nil))
+	assert.Equal(t, 1.0, *input_value.CalculateOutputValue(1.0, nil))
 }
 
 func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_SimpleFreeRange_WithNegativeValues_CustomThresholdss(t *testing.T) {
@@ -202,9 +206,9 @@ func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_Simpl
 			{Threshold: Config_Threshold_Value{Value: 1.0}},
 		},
 	}
-	assert.Nil(t, input_value.CalculateOutputValue(-1.0))
-	assert.Equal(t, -1.0, *input_value.CalculateOutputValue(0.0))
-	assert.Equal(t, -0.5, *input_value.CalculateOutputValue(0.25))
-	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.5))
-	assert.Equal(t, 1.0, *input_value.CalculateOutputValue(1.0))
+	assert.Nil(t, input_value.CalculateOutputValue(-1.0, nil))
+	assert.Equal(t, -1.0, *input_value.CalculateOutputValue(0.0, nil))
+	assert.Equal(t, -0.5, *input_value.CalculateOutputValue(0.25, nil))
+	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.5, nil))
+	assert.Equal(t, 1.0, *input_value.CalculateOutputValue(1.0, nil))
 }

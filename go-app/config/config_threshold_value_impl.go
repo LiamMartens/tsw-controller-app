@@ -10,6 +10,15 @@ type thresholdValueAsObject struct {
 	Reference *string  `json:"reference"`
 }
 
+func (v *Config_Threshold_Value) GetValue(thresholds map[string]float64) float64 {
+	if v.Reference != nil {
+		if value, has_ref := thresholds[*v.Reference]; has_ref {
+			return value
+		}
+	}
+	return v.Value
+}
+
 func (v *Config_Threshold_Value) UnmarshalJSON(data []byte) error {
 	var obj thresholdValueAsObject
 	if err := json.Unmarshal(data, &obj); err == nil {
