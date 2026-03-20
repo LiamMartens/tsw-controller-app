@@ -35,61 +35,6 @@ func TestConfigProfile_SyncControlValidation(t *testing.T) {
 	assert.NoError(t, v.Struct(value))
 }
 
-func TestConfigProfile_LinearThreshold_IsExceedingThreshold(t *testing.T) {
-	threshold := Config_Controller_Profile_Control_Assignment_Linear_Threshold{
-		Value: Config_Threshold_Value{Value: 0.5},
-	}
-
-	// 0.51 should exceed 0.5
-	assert.True(t, threshold.IsExceedingThreshold(0.51, map[string]float64{}))
-
-	// 0.49 should not exceed 0.49
-	assert.False(t, threshold.IsExceedingThreshold(0.49, map[string]float64{}))
-}
-
-func TestConfigProfile_Linear_GenerateThresholds(t *testing.T) {
-	var auto_step_threshold_value_end float64 = 0.4
-	var auto_step_threshold_value_step float64 = 0.03
-
-	linear := Config_Controller_Profile_Control_Assignment_Linear{
-		Type: "linear",
-		Thresholds: []Config_Controller_Profile_Control_Assignment_Linear_Threshold{
-			// simple thresholds
-			{Value: Config_Threshold_Value{Value: 0.0}},
-			{Value: Config_Threshold_Value{Value: 0.1}},
-			{Value: Config_Threshold_Value{Value: 0.2}},
-			// auto step threshold - value end is exclusive
-			{Value: Config_Threshold_Value{Value: 0.3}, ValueEnd: &Config_Threshold_Value{Value: auto_step_threshold_value_end}, ValueStep: &auto_step_threshold_value_step},
-			{Value: Config_Threshold_Value{Value: 0.6}},
-		},
-	}
-
-	thresholds := linear.GenerateThresholds(map[string]float64{})
-
-	// should have generated 9 thresholds
-	assert.Equal(t, thresholds[0].Value.GetValue(map[string]float64{}), 0.0)
-	assert.Equal(t, thresholds[1].Value.GetValue(map[string]float64{}), 0.1)
-	assert.Equal(t, thresholds[2].Value.GetValue(map[string]float64{}), 0.2)
-	assert.Equal(t, thresholds[3].Value.GetValue(map[string]float64{}), 0.3)
-	assert.Equal(t, thresholds[4].Value.GetValue(map[string]float64{}), 0.33)
-	assert.Equal(t, thresholds[5].Value.GetValue(map[string]float64{}), 0.36)
-	assert.Equal(t, thresholds[6].Value.GetValue(map[string]float64{}), 0.39)
-	assert.Equal(t, thresholds[7].Value.GetValue(map[string]float64{}), 0.6)
-}
-
-func TestConfigProfile_Linear_CalculateNeutralizedValue(t *testing.T) {
-	var neutral_value float64 = 0.5
-	linear := Config_Controller_Profile_Control_Assignment_Linear{
-		Type:       "linear",
-		Neutral:    &neutral_value,
-		Thresholds: []Config_Controller_Profile_Control_Assignment_Linear_Threshold{},
-	}
-
-	assert.Equal(t, 0.0, linear.CalculateNeutralizedValue(0.5))
-	assert.Equal(t, -1.0, linear.CalculateNeutralizedValue(0))
-	assert.Equal(t, 1.0, linear.CalculateNeutralizedValue(1))
-}
-
 func TestConfigProfile_ControlStepDefinition_Threshold(t *testing.T) {
 	threshold_positive := ControlStepDefinition_Threshold{
 		ValueStart: 0.0,

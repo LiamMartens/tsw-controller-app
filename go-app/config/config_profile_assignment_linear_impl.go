@@ -1,6 +1,8 @@
 package config
 
-import "tsw_controller_app/math_utils"
+import (
+	"tsw_controller_app/math_utils"
+)
 
 type Config_Controller_Profile_Control_Assignment_Linear_Threshold_Resolved struct {
 	Value    float64
@@ -33,14 +35,19 @@ func (c *Config_Controller_Profile_Control_Assignment_Linear) GenerateThresholds
 	var thresholds []Config_Controller_Profile_Control_Assignment_Linear_Threshold
 	for _, threshold := range c.Thresholds {
 		resolved := threshold.Resolve(namedthresholds)
-
 		if resolved.ValueEnd == nil || threshold.ValueStep == nil {
-			thresholds = append(thresholds, threshold)
+			thresholds = append(thresholds, Config_Controller_Profile_Control_Assignment_Linear_Threshold{
+				Value:            Config_Threshold_Value{Value: resolved.Value},
+				ActionActivate:   threshold.ActionActivate,
+				ActionDeactivate: threshold.ActionDeactivate,
+			})
 		} else {
 			current_value := resolved.Value
 			for current_value <= *resolved.ValueEnd {
 				thresholds = append(thresholds, Config_Controller_Profile_Control_Assignment_Linear_Threshold{
-					Value: Config_Threshold_Value{Value: current_value},
+					Value: Config_Threshold_Value{
+						Value: current_value,
+					},
 					/* generated thresholds don't need these anymore */
 					ValueEnd:         nil,
 					ValueStep:        nil,
