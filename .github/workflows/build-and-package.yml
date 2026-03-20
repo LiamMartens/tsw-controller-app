@@ -29,7 +29,7 @@ jobs:
         run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.10
 
       - working-directory: ./go-app
-        run: go test -coverprofile=coverage.out ./...
+        run: wails build; go test -coverprofile=coverage.out ./...
 
       - uses: actions/upload-artifact@v4
         with:
