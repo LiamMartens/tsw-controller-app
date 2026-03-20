@@ -135,8 +135,9 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Get
 /**
 * Returns a normalized steps definition list which contains both free range zones and normal steps
 * and additionally. handles the threshold definitions
+* Can be passed a map of named thresholds for resolving step thresholds
  */
-func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) GetSteps() []ControlStepDefinition {
+func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) GetSteps(thresholds map[string]float64) []ControlStepDefinition {
 	stepslist := c.GetStepsList()
 	if len(stepslist) == 0 {
 		return []ControlStepDefinition{}
@@ -154,10 +155,10 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Get
 		default_threshold_tolerance := math_utils.RoundToMarginOfError(default_threshold_step / 2.0)
 		step_threshold := ControlStepDefinition_Threshold{}
 		if len(step_thresholds) > ix {
-			step_threshold.ValueStart = step_thresholds[ix].Threshold
-			step_threshold.ValueEnd = step_thresholds[ix].Threshold
+			step_threshold.ValueStart = step_thresholds[ix].Threshold.GetValue(thresholds)
+			step_threshold.ValueEnd = step_thresholds[ix].Threshold.GetValue(thresholds)
 			if step_thresholds[ix].ThresholdEnd != nil {
-				step_threshold.ValueEnd = *step_thresholds[ix].ThresholdEnd
+				step_threshold.ValueEnd = step_thresholds[ix].ThresholdEnd.GetValue(thresholds)
 			}
 			if step_thresholds[ix].ThresholdTolerance != nil {
 				step_threshold.Tolerance = *step_thresholds[ix].ThresholdTolerance
@@ -211,9 +212,10 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Get
 /*
 *
 The incoming value here can only be [-1, 1]
-This calculates the actual value which would be sent to the game
+This calculates the actual value which would be sent to the game;
+Can be passed a map of defined thresholds for resolving step threshold references
 */
-func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) CalculateOutputValue(value float64) *float64 {
+func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) CalculateOutputValue(value float64, thresholds map[string]float64) *float64 {
 	input_value := value
 
 	if c.Invert != nil && *c.Invert {
@@ -227,7 +229,7 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Cal
 	minmax_delta := math.Abs(c.Max - c.Min)
 	absolute_input_value := math.Abs(input_value)
 
-	steps := c.GetSteps()
+	steps := c.GetSteps(thresholds)
 
 	if len(steps) == 0 {
 		/* if no steps are defined - send value directly */

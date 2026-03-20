@@ -6,11 +6,12 @@ import (
 )
 
 type Interop_GenericController struct {
-	UniqueID     string
-	DeviceID     string /* this is the USB ID for SDL controllers */
-	Name         string
-	IsConfigured bool
-	IsVirtual    bool
+	UniqueID      string
+	DeviceID      string /* this is the USB ID for SDL controllers */
+	Name          string
+	IsConfigured  bool
+	IsVirtual     bool
+	HasThresholds bool
 }
 
 type Interop_Profile_Metadata struct {
@@ -55,6 +56,7 @@ type Interop_ControllerCalibration_Control struct {
 	Deadzone    float64
 	EasingCurve []float64
 	Invert      bool
+	Thresholds  []config.Config_Controller_Calibration_Threshold
 }
 
 type Interop_ControllerCalibration struct {

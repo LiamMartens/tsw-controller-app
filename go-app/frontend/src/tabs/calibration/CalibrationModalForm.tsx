@@ -22,27 +22,31 @@ type Props = {
 
 export const CalibrationModalForm = ({ controller, onClose }: Props) => {
   const [isRunning, setIsRunning] = useState(false);
-  const { data: controllerConfiguration, mutate: updateControllerConfiguration } =
-    useControllerConfiguration(controller);
+  const {
+    data: controllerConfiguration,
+    mutate: updateControllerConfiguration,
+  } = useControllerConfiguration(controller);
   const form = useCalibrationForm({
     name: controllerConfiguration?.Calibration.Name ?? "",
-    controls: (controllerConfiguration?.Calibration.Controls ?? []).map(
-      (control): CalibrationStateControl => ({
-        kind: control.Kind as Kind,
-        index: control.Index,
-        name: control.Name,
-        min: control.Min,
-        max: control.Max,
-        idle: control.Idle,
-        deadzone: control.Deadzone,
-        invert: control.Invert,
-        value: control.Idle,
-        easingCurve: control.EasingCurve,
-        override: true,
-      }),
-    ).toSorted((a, b) =>
-      `${a.kind}_${a.index}`.localeCompare(`${b.kind}_${b.index}`),
-    ),
+    controls: (controllerConfiguration?.Calibration.Controls ?? [])
+      .map(
+        (control): CalibrationStateControl => ({
+          kind: control.Kind as Kind,
+          index: control.Index,
+          name: control.Name,
+          min: control.Min,
+          max: control.Max,
+          idle: control.Idle,
+          deadzone: control.Deadzone,
+          invert: control.Invert,
+          value: control.Idle,
+          easingCurve: control.EasingCurve,
+          override: true,
+        }),
+      )
+      .toSorted((a, b) =>
+        `${a.kind}_${a.index}`.localeCompare(`${b.kind}_${b.index}`),
+      ),
   });
   const controls = form.watch("controls");
 
@@ -72,17 +76,24 @@ export const CalibrationModalForm = ({ controller, onClose }: Props) => {
         const data = new main.Interop_ControllerCalibration();
         data.Name = values.name;
         data.DeviceID = controller.DeviceID;
-        data.Controls = values.controls.map((control) => ({
-          Kind: control.kind,
-          Index: control.index,
-          Name: control.name,
-          Min: control.min,
-          Max: control.max,
-          Idle: control.idle,
-          Deadzone: control.deadzone,
-          Invert: control.invert,
-          EasingCurve: control.easingCurve,
-        }));
+        data.Controls = values.controls.map((control) => {
+          const controlCalibration =
+            controllerConfiguration?.Calibration.Controls.find(
+              (c) => c.Name === control.name,
+            );
+          return main.Interop_ControllerCalibration_Control.createFrom({
+            Kind: control.kind,
+            Index: control.index,
+            Name: control.name,
+            Min: control.min,
+            Max: control.max,
+            Idle: control.idle,
+            Deadzone: control.deadzone,
+            Invert: control.invert,
+            EasingCurve: control.easingCurve,
+            Thresholds: (controlCalibration?.Thresholds ?? []),
+          });
+        });
         await SaveCalibration(data);
         await LoadConfiguration();
         await updateControllerConfiguration();

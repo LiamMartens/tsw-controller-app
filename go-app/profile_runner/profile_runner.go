@@ -689,13 +689,20 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 
 			control_name := change_event.ControlName
 			device_id := change_event.Device.DeviceID
+			defined_thresholds := map[string]float64{}
+
 			if selected_profile.Profile.Controller != nil && selected_profile.Profile.Controller.Mapping != nil {
 				if joy_control, is_joy_control := change_event.Control.(*controller_mgr.SDL_ControllerManager_Controller_JoyControl); is_joy_control {
 					root_mapping := joy_control.SDLMapping()
+					calibration := joy_control.Calibration()
 					override_mapping := selected_profile.Profile.Controller.Mapping
 					override_control, find_override_control_err := override_mapping.FindByKindAndIndex(root_mapping.Kind, root_mapping.Index)
 					if find_override_control_err == nil {
 						control_name = override_control.Name
+					}
+					/* collect the named thresholds and their values */
+					for _, threshold := range calibration.Thresholds {
+						defined_thresholds[threshold.Name] = threshold.Value
 					}
 				}
 			}
@@ -744,14 +751,15 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 					control_state_value := control_assignment_item.Linear.CalculateNeutralizedValue(change_event.ControlState.NormalizedValues.Value)
 					var thresholds_currently_exceeding []config.Config_Controller_Profile_Control_Assignment_Linear_Threshold
 					var thresholds_previously_passed []config.Config_Controller_Profile_Control_Assignment_Linear_Threshold
-					for _, threshold := range control_assignment_item.Linear.GenerateThresholds() {
-						if threshold.IsExceedingThreshold(control_state_value) {
+					for _, threshold := range control_assignment_item.Linear.GenerateThresholds(defined_thresholds) {
+						if threshold.IsExceedingThreshold(control_state_value, defined_thresholds) {
 							thresholds_currently_exceeding = append(thresholds_currently_exceeding, threshold)
 						}
 						/* threshold was previously passed if the last assignment call was exceeding the threshold OR if there was no last call if the initial value exceeded it*/
 						if previous_assignment_call != nil && threshold.IsExceedingThreshold(
 							control_assignment_item.Linear.CalculateNeutralizedValue(previous_assignment_call.ControlState.NormalizedValues.Value),
-						) || previous_assignment_call == nil && threshold.IsExceedingThreshold(initial_state_value) {
+							defined_thresholds,
+						) || previous_assignment_call == nil && threshold.IsExceedingThreshold(initial_state_value, defined_thresholds) {
 							thresholds_previously_passed = append(thresholds_previously_passed, threshold)
 						}
 					}
@@ -811,7 +819,7 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 					if control_assignment_item.DirectControl.ControlRange != nil {
 						control_value = control_assignment_item.DirectControl.ControlRange.Clamp(control_value)
 					}
-					output_value := control_assignment_item.DirectControl.InputValue.CalculateOutputValue(control_value)
+					output_value := control_assignment_item.DirectControl.InputValue.CalculateOutputValue(control_value, defined_thresholds)
 
 					max_change_rate := DEFAULT_MAX_CHANGE_RATE
 					should_hold := control_assignment_item.DirectControl.Hold != nil && *control_assignment_item.DirectControl.Hold
@@ -867,7 +875,8 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 					if control_assignment_item.ApiControl.Hold != nil {
 						hold = *control_assignment_item.ApiControl.Hold
 					}
-					output_value := control_assignment_item.ApiControl.InputValue.CalculateOutputValue(control_value)
+
+					output_value := control_assignment_item.ApiControl.InputValue.CalculateOutputValue(control_value, defined_thresholds)
 					if output_value != nil {
 						p.CallAssignmentActionForControl(control_name, assignment_index, change_event.Controller, change_event.ControlState, control_assignment_item, &ProfileRunnerAssignmentCall{
 							ControlState:          change_event.ControlState,
@@ -887,7 +896,7 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 					if control_assignment_item.SyncControl.ControlRange != nil {
 						control_value = control_assignment_item.SyncControl.ControlRange.Clamp(control_value)
 					}
-					output_value := control_assignment_item.SyncControl.InputValue.CalculateOutputValue(control_value)
+					output_value := control_assignment_item.SyncControl.InputValue.CalculateOutputValue(control_value, defined_thresholds)
 					if output_value != nil {
 						p.SyncController.UpdateControlStateTargetValue(
 							control_assignment_item.SyncControl.Identifier,

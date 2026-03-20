@@ -19,12 +19,35 @@ type TSWAPIConfig struct {
 	CommAPIKey string
 }
 
+type ITSWAPI interface {
+	ListCurrentDrivableActor() (TSWAPI_ListResponse, error)
+	GetCurrentDrivableActorObjectClass() (string, error)
+	DeleteSubscription(id int) error
+	GetSubscription(id int) (map[string]any, error)
+	SetInteracting(control string, value float64) error
+	SetInputValue(control string, value float64) error
+	GetInputValue(control string) (float64, error)
+	GetActiveCab() (TSWAPIActiveCab, error)
+	CreateCurrentDrivableActorSubscription(id int) error
+	GetCurrentDrivableActorSubscription(id int) (TSWAPI_GetCurrentDrivableActorSubscriptionResponse, error)
+	LoadAPIKey(path string) error
+	CanConnect() bool
+	Enabled() bool
+}
+
 type TSWAPI struct {
 	transport  *http.Transport
 	client     *http.Client
 	canConnect bool
 	Config     TSWAPIConfig
 }
+
+type TSWAPIActiveCab struct {
+	Front bool
+	Back  bool
+}
+
+var _ ITSWAPI = &TSWAPI{}
 
 var ErrMissingCommAPIKey = errors.New("missing CommAPIKey")
 var ErrNonSuccessStatusCode = errors.New("non-successfull status code returned from API")
@@ -174,6 +197,32 @@ func (c *TSWAPI) GetInputValue(control string) (float64, error) {
 	}
 	values := data["Values"].(map[string]any)
 	return values["InputValue"].(float64), nil
+}
+
+func (c *TSWAPI) GetActiveCab() (TSWAPIActiveCab, error) {
+	req_url := fmt.Sprintf("%s/get/CurrentDrivableActor.Function.IS_GetActiveCab", c.Config.BaseURL)
+	set_req, _ := http.NewRequest("GET", req_url, nil)
+	data, err := c.executeTswApiRequest(set_req)
+	if err != nil {
+		return TSWAPIActiveCab{}, err
+	}
+
+	active_cab := TSWAPIActiveCab{}
+	values := data["Values"].(map[string]any)
+
+	if bFront, hasValue := values["bFront"]; hasValue {
+		if boolVal, ok := bFront.(bool); ok {
+			active_cab.Front = boolVal
+		}
+	}
+
+	if bBack, hasValue := values["bBack"]; hasValue {
+		if boolVal, ok := bBack.(bool); ok {
+			active_cab.Back = boolVal
+		}
+	}
+
+	return active_cab, nil
 }
 
 func (c *TSWAPI) CreateCurrentDrivableActorSubscription(id int) error {

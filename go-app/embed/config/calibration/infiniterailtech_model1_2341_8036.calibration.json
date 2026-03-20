@@ -1,5 +1,5 @@
 {
-  "usb_id": "2341:8036",
+  "usb_id": "1209:5389",
   "data": [
     {
       "id": "Wiper",
@@ -14,10 +14,52 @@
       "id": "MasterController",
       "deadzone": 237,
       "invert": true,
-      "min": -24567,
-      "max": -857,
-      "idle": -24567,
-      "easing_curve": [0, 0, 1, 1]
+      "min": -26500,
+      "max": -1200,
+      "idle": -26500,
+      "easing_curve": [0, 0, 1, 1],
+      "thresholds": [
+        {
+          "name": "EmergencyBrake",
+          "value": 0.0
+        },
+        {
+          "name": "MaxBrake",
+          "value": 0.1
+        },
+        {
+          "name": "BrakeRangeStart",
+          "value": 0.12
+        },
+        {
+          "name": "BrakeRangeEnd",
+          "value": 0.57
+        },
+        {
+          "name": "MinBrake",
+          "value": 0.58
+        },
+        {
+          "name": "Coast",
+          "value": 0.66
+        },
+        {
+          "name": "P1",
+          "value": 0.75
+        },
+        {
+          "name": "P2",
+          "value": 0.84
+        },
+        {
+          "name": "P3",
+          "value": 0.91
+        },
+        {
+          "name": "P4",
+          "value": 0.99
+        }
+      ]
     }
   ]
 }

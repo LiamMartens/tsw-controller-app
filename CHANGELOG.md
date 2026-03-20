@@ -1,6 +1,12 @@
 
 # CHANGELOG
 
+## v1.11.0
+- Add mod installation path for Wonders of Sodor
+- Add side dection support in API control
+- Add named thresholds for step thresholds
+- Fixes a bug with the {SIDE} placeholder in direct control
+
 ## v1.10.2
 - TSW Mod performance optimizations
 

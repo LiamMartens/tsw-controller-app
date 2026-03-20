@@ -1,5 +1,19 @@
 export namespace config {
 	
+	export class Config_Controller_Calibration_Threshold {
+	    name: string;
+	    value: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Config_Controller_Calibration_Threshold(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.value = source["value"];
+	    }
+	}
 	export class Config_Controller_SDLMap_Control {
 	    kind: string;
 	    index: number;
@@ -134,6 +148,7 @@ export namespace main {
 	    Deadzone: number;
 	    EasingCurve: number[];
 	    Invert: boolean;
+	    Thresholds: config.Config_Controller_Calibration_Threshold[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Interop_ControllerCalibration_Control(source);
@@ -150,7 +165,26 @@ export namespace main {
 	        this.Deadzone = source["Deadzone"];
 	        this.EasingCurve = source["EasingCurve"];
 	        this.Invert = source["Invert"];
+	        this.Thresholds = this.convertValues(source["Thresholds"], config.Config_Controller_Calibration_Threshold);
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class Interop_ControllerCalibration {
 	    Name: string;
@@ -225,6 +259,7 @@ export namespace main {
 	    Name: string;
 	    IsConfigured: boolean;
 	    IsVirtual: boolean;
+	    HasThresholds: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Interop_GenericController(source);
@@ -237,6 +272,7 @@ export namespace main {
 	        this.Name = source["Name"];
 	        this.IsConfigured = source["IsConfigured"];
 	        this.IsVirtual = source["IsVirtual"];
+	        this.HasThresholds = source["HasThresholds"];
 	    }
 	}
 	export class Interop_Profile_Metadata {

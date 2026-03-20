@@ -17,6 +17,11 @@ const (
 	PreferredControlMode_ApiControl    PreferredControlMode = "api_control"
 )
 
+type Config_Threshold_Value struct {
+	Value     float64
+	Reference *string
+}
+
 type Config_Controller_Profile_Control_Assignment_Action_Keys struct {
 	Keys      string   `json:"keys" validate:"required" example:"ctrl+a"`
 	PressTime *float64 `json:"press_time,omitempty"`
@@ -83,10 +88,10 @@ type Config_Controller_Profile_Control_Assignment_Momentary struct {
 }
 
 type Config_Controller_Profile_Control_Assignment_Linear_Threshold struct {
-	Value float64 `json:"value"`
+	Value Config_Threshold_Value `json:"value"`
 	/* ValueEnd and ValueStep can be used to automatically generate a set of thresholds while keeping the same action (ie: throttle) */
-	ValueEnd  *float64 `json:"value_end,omitempty"`
-	ValueStep *float64 `json:"value_step,omitempty"`
+	ValueEnd  *Config_Threshold_Value `json:"value_end,omitempty"`
+	ValueStep *float64                `json:"value_step,omitempty"`
 	/* which action to perform once the linear threshold is exceeded */
 	ActionActivate   Config_Controller_Profile_Control_Assignment_Action  `json:"action_activate" validate:"required"`
 	ActionDeactivate *Config_Controller_Profile_Control_Assignment_Action `json:"action_deactivate,omitempty"`
@@ -115,9 +120,9 @@ type Config_Controller_Profile_Control_Assignment_DirectLike_ControlRange struct
 }
 
 type Config_Controller_Profile_Control_Assignment_DirectLike_InputValue_StepThreshold struct {
-	Threshold          float64  `json:"threshold"`                     /* The actual threshold of this corresponding step. Can be combined with threshold tolerance */
-	ThresholdEnd       *float64 `json:"threshold_end,omitempty"`       /* Defines the end value of the corresponding step */
-	ThresholdTolerance *float64 `json:"threshold_tolerance,omitempty"` /* Defines the tolerance of the threshold and threshold_end; defaults to 0 for free range zones and the default tolerance for normal steps */
+	Threshold          Config_Threshold_Value  `json:"threshold"`                     /* The actual threshold of this corresponding step. Can be combined with threshold tolerance */
+	ThresholdEnd       *Config_Threshold_Value `json:"threshold_end,omitempty"`       /* Defines the end value of the corresponding step */
+	ThresholdTolerance *float64                `json:"threshold_tolerance,omitempty"` /* Defines the tolerance of the threshold and threshold_end; defaults to 0 for free range zones and the default tolerance for normal steps */
 }
 
 type Config_Controller_Profile_Control_Assignment_DirectLike_InputValue struct {

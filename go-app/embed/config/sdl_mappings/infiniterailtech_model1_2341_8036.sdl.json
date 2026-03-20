@@ -1,7 +1,27 @@
 {
   "name": "Infinite Railtech: Model #01",
-  "usb_id": "2341:8036",
+  "usb_id": "1209:5389",
   "data": [
+    {
+      "kind": "axis",
+      "index": 0,
+      "name": "MasterController"
+    },
+    {
+      "kind": "axis",
+      "index": 1,
+      "name": "Wiper"
+    },
+    {
+      "kind": "button",
+      "index": 0,
+      "name": "Acknowledge"
+    },
+    {
+      "kind": "button",
+      "index": 1,
+      "name": "Horn"
+    },
     {
       "kind": "button",
       "index": 2,
@@ -14,53 +34,23 @@
     },
     {
       "kind": "button",
-      "index": 1,
-      "name": "Horn"
-    },
-    {
-      "kind": "button",
-      "index": 0,
-      "name": "Acknowledge"
-    },
-    {
-      "kind": "button",
-      "index": 9,
-      "name": "KeyOut"
-    },
-    {
-      "kind": "button",
-      "index": 10,
-      "name": "KeyIn"
-    },
-    {
-      "kind": "button",
-      "index": 12,
+      "index": 4,
       "name": "HeadlightsDim"
     },
     {
       "kind": "button",
-      "index": 11,
-      "name": "HeadlightsBright"
-    },
-    {
-      "kind": "axis",
-      "index": 1,
-      "name": "Wiper"
-    },
-    {
-      "kind": "button",
       "index": 5,
-      "name": "ReverserKeyOut"
+      "name": "HeadlightsBright"
     },
     {
       "kind": "button",
       "index": 6,
-      "name": "ReverserForward"
+      "name": "KeyOut"
     },
     {
       "kind": "button",
       "index": 7,
-      "name": "ReverserNeutral"
+      "name": "KeyIn"
     },
     {
       "kind": "button",
@@ -68,9 +58,19 @@
       "name": "ReverserReverse"
     },
     {
-      "kind": "axis",
-      "index": 0,
-      "name": "MasterController"
+      "kind": "button",
+      "index": 9,
+      "name": "ReverserNeutral"
+    },
+    {
+      "kind": "button",
+      "index": 10,
+      "name": "ReverserForward"
+    },
+    {
+      "kind": "button",
+      "index": 11,
+      "name": "ReverserKeyOut"
     }
   ]
 }

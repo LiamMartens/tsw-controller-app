@@ -17,6 +17,8 @@ type PropertyName = string
 const CURRENT_DRIVABLE_ACTOR_CONNECTOR_EVENT_NAME = "current_drivable_actor"
 const SYNC_CONTROL_VALUE_CONNECTOR_EVENT_NAME = "sync_control_value"
 
+// http://localhost:31270/get/CurrentDrivableActor.Function.IS_GetActiveCab
+
 type CabDebugger_ControlState_Control struct {
 	Identifier             string
 	PropertyName           PropertyName

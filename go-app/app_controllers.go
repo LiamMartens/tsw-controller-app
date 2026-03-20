@@ -2,18 +2,31 @@ package main
 
 import (
 	"sort"
+	"tsw_controller_app/config"
 	"tsw_controller_app/controller_mgr"
 )
 
 func (a *App) GetControllers() []Interop_GenericController {
 	var controllers []Interop_GenericController = []Interop_GenericController{}
 	a.sdl_controller_manager.ConfiguredControllers.ForEach(func(c controller_mgr.SDL_ControllerManager_ConfiguredController, _ controller_mgr.DeviceUniqueID) bool {
+		has_thresholds := false
+		c.Controls().ForEach(func(value controller_mgr.IControllerManager_Controller_Control, key string) bool {
+			if sdl_control, ok := value.(*controller_mgr.SDL_ControllerManager_Controller_JoyControl); ok {
+				if len(sdl_control.Calibration().Thresholds) > 0 {
+					has_thresholds = true
+					return false
+				}
+			}
+			return true
+		})
+
 		controllers = append(controllers, Interop_GenericController{
-			UniqueID:     c.Device().UniqueID(),
-			DeviceID:     c.Device().DeviceID(),
-			Name:         c.Name,
-			IsConfigured: true,
-			IsVirtual:    false,
+			UniqueID:      c.Device().UniqueID(),
+			DeviceID:      c.Device().DeviceID(),
+			Name:          c.Name,
+			IsConfigured:  true,
+			IsVirtual:     false,
+			HasThresholds: has_thresholds,
 		})
 		return true
 	})
@@ -56,6 +69,11 @@ func (a *App) GetControllerConfiguration(unique_id controller_mgr.DeviceUniqueID
 			if control, ok := c.(*controller_mgr.SDL_ControllerManager_Controller_JoyControl); ok {
 				sdl_mapping := control.SDLMapping()
 				calibration_data := control.Calibration()
+				thresholds := []config.Config_Controller_Calibration_Threshold{}
+				if len(control.Calibration().Thresholds) > 0 {
+					thresholds = append(thresholds, control.Calibration().Thresholds...)
+				}
+
 				calibration := Interop_ControllerCalibration_Control{
 					Kind:        sdl_mapping.Kind,
 					Index:       sdl_mapping.Index,
@@ -66,6 +84,7 @@ func (a *App) GetControllerConfiguration(unique_id controller_mgr.DeviceUniqueID
 					Deadzone:    0,
 					Invert:      false,
 					EasingCurve: []float64{0.0, 0.0, 1.0, 1.0},
+					Thresholds:  thresholds,
 				}
 				if calibration_data.Idle != nil {
 					calibration.Idle = *calibration_data.Idle

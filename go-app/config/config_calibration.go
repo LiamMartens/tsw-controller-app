@@ -9,6 +9,11 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+type Config_Controller_Calibration_Threshold struct {
+	Name  string  `json:"name"`
+	Value float64 `json:"value"`
+}
+
 type Config_Controller_CalibrationData struct {
 	/** the ID of the controller button or trigger as named in the controller mapping config (see other file - eg: "throttle1", "throttle2", "button1") */
 	Id           string     `json:"id" validate:"required"`
@@ -19,6 +24,8 @@ type Config_Controller_CalibrationData struct {
 	Max          float64    `json:"max" validate:"required"`
 	Idle         *float64   `json:"idle,omitempty"`
 	EasingCurve  *[]float64 `json:"easing_curve,omitempty"`
+	/* these are named thresholds which can be used in step thresholds and easily remapped */
+	Thresholds []Config_Controller_Calibration_Threshold `json:"thresholds,omitempty"`
 }
 
 type Config_Controller_Calibration struct {

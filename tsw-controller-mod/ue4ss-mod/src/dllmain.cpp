@@ -199,12 +199,12 @@ class TSWControllerMod : public RC::CppUserModBase
             RC::StringType front_value = STR("F");
             RC::StringType back_value = STR("B");
 
-            if (side_placeholder_matches.length() >= 2)
+            if (side_placeholder_matches.length() >= 2 && side_placeholder_matches[1].str().size())
             {
                 front_value = side_placeholder_matches[1].str().substr(1);
             }
 
-            if (side_placeholder_matches.length() >= 3)
+            if (side_placeholder_matches.length() >= 3 && side_placeholder_matches[2].str().size())
             {
                 back_value = side_placeholder_matches[2].str().substr(1);
             }

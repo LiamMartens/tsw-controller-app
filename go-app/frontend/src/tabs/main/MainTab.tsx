@@ -12,6 +12,7 @@ import {
   OpenNewProfileBuilder,
   OpenNewProfileBuilderForDeviceID,
   InstallTrainSimClassicMod,
+  InstallWondersOfSodorMod,
   SaveProfileForSharing,
   SaveProfileForSharingWithControllerInformation,
   ImportProfile,
@@ -140,6 +141,12 @@ export const MainTab = () => {
       .catch((err) => alert(String(err), "error"));
   };
 
+  const handleInstallWondorsOfSodorMod = () => {
+    InstallWondersOfSodorMod()
+      .then(() => refetchLastInstalledModVersion(version))
+      .catch((err) => alert(String(err), "error"));
+  };
+
   const handleImportProfile = () => {
     ImportProfile()
       .then(() => LoadConfiguration())
@@ -246,6 +253,11 @@ export const MainTab = () => {
             <li>
               <button onClick={handleInstallTrainSimClassicMod}>
                 Install TS Classic mod
+              </button>
+            </li>
+            <li>
+              <button onClick={handleInstallWondorsOfSodorMod}>
+                Install Wonders of Sodor
               </button>
             </li>
           </ul>
