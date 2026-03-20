@@ -3,6 +3,8 @@
 
 ## v1.11.0
 - Add mod installation path for Wonders of Sodor
+- Add side dection support in API control
+- Add named thresholds for step thresholds
 
 ## v1.10.2
 - TSW Mod performance optimizations
