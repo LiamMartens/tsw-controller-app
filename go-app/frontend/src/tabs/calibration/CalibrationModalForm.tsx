@@ -76,28 +76,30 @@ export const CalibrationModalForm = ({ controller, onClose }: Props) => {
         const data = new main.Interop_ControllerCalibration();
         data.Name = values.name;
         data.DeviceID = controller.DeviceID;
-        data.Controls = values.controls.map((control) => {
-          const controlCalibration =
-            controllerConfiguration?.Calibration.Controls.find(
-              (c) => c.Name === control.name,
-            );
-          return main.Interop_ControllerCalibration_Control.createFrom({
-            Kind: control.kind,
-            Index: control.index,
-            Name: control.name,
-            Min: control.min,
-            Max: control.max,
-            Idle: control.idle,
-            Deadzone: control.deadzone,
-            Invert: control.invert,
-            EasingCurve: control.easingCurve,
-            Thresholds: (controlCalibration?.Thresholds ?? []),
+        data.Controls = values.controls
+          .filter((c) => !!c.name)
+          .map((control) => {
+            const controlCalibration =
+              controllerConfiguration?.Calibration.Controls.find(
+                (c) => c.Name === control.name,
+              );
+            return main.Interop_ControllerCalibration_Control.createFrom({
+              Kind: control.kind,
+              Index: control.index,
+              Name: control.name,
+              Min: control.min,
+              Max: control.max,
+              Idle: control.idle,
+              Deadzone: control.deadzone,
+              Invert: control.invert,
+              EasingCurve: control.easingCurve,
+              Thresholds: controlCalibration?.Thresholds ?? [],
+            });
           });
-        });
         await SaveCalibration(data);
         await LoadConfiguration();
         await updateControllerConfiguration();
-      })();
+      }, console.log)();
     } catch (err) {
       alert(`Could not save calibration (${err})`, "error");
     } finally {
