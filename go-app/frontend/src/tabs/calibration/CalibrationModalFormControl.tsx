@@ -127,9 +127,7 @@ export const CalibrationModalFormControl = (props: Props) => {
                   type="text"
                   className="grow"
                   disabled={!isRunning}
-                  {...form.register(`controls.${index}.name`, {
-                    required: true,
-                  })}
+                  {...form.register(`controls.${index}.name`)}
                 />
               </label>
             </div>

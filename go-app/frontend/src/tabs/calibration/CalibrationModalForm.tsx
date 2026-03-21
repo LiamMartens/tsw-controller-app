@@ -125,7 +125,7 @@ export const CalibrationModalForm = ({ controller, onClose }: Props) => {
               type="text"
               className="grow"
               disabled={!isRunning}
-              {...form.register(`name`)}
+              {...form.register(`name`, { required: true })}
             />
           </label>
         </div>
