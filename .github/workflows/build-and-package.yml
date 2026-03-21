@@ -20,10 +20,10 @@ jobs:
         run: |
           sudo apt-get install -y libx11-dev xorg-dev libxtst-dev xsel xclip libpng++-dev xcb libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev libxkbcommon-x11-dev libxkbcommon-dev libgtk-3-dev libwebkit2gtk-4.1-dev
 
-      - name: Setup Go 1.24.5
+      - name: Setup Go 1.25.8
         uses: actions/setup-go@v5
         with:
-          go-version: 1.24.5
+          go-version: 1.25.8
 
       - name: Install wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.11
@@ -242,10 +242,10 @@ jobs:
           ..\vcpkg\vcpkg install
         shell: pwsh
 
-      - name: Setup Go 1.24.5
+      - name: Setup Go 1.25.8
         uses: actions/setup-go@v5
         with:
-          go-version: 1.24.5
+          go-version: 1.25.8
 
       - name: Install wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.11
@@ -311,10 +311,10 @@ jobs:
         run: |
           sudo apt-get install -y libx11-dev xorg-dev libxtst-dev xsel xclip libpng++-dev xcb libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev libxkbcommon-x11-dev libxkbcommon-dev libgtk-3-dev libwebkit2gtk-4.1-dev
 
-      - name: Setup Go 1.24.5
+      - name: Setup Go 1.25.8
         uses: actions/setup-go@v5
         with:
-          go-version: 1.24.5
+          go-version: 1.25.8
 
       - name: Install wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.11
@@ -378,10 +378,10 @@ jobs:
           brew update
           brew install sdl2
 
-      - name: Setup Go 1.24.5
+      - name: Setup Go 1.25.8
         uses: actions/setup-go@v5
         with:
-          go-version: 1.24.5
+          go-version: 1.25.8
 
       - name: Install wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.11
