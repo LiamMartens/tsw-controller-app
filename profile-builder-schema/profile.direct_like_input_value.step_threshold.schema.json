@@ -4,12 +4,36 @@
   "description": "Defines the threshold of a step which can be used to remap a direct/api control like value",
   "properties": {
     "threshold": {
-      "type": "number",
-      "description": "Defines the actual threshold value"
+      "oneOf": [
+        {
+          "type": "number",
+          "description": "Defines the actual threshold value"
+        },
+        {
+          "type": "object",
+          "required": ["reference", "value"],
+          "properties": {
+            "reference": { "type": "string" },
+            "value": { "type": "number" }
+          }
+        }
+      ]
     },
     "threshold_end": {
-      "type": "number",
-      "description": "Defines the threshold end value for ranges"
+      "oneOf": [
+        {
+          "type": "number",
+          "description": "Defines the threshold end value for ranges"
+        },
+                {
+          "type": "object",
+          "required": ["reference", "value"],
+          "properties": {
+            "reference": { "type": "string" },
+            "value": { "type": "number" }
+          }
+        }
+      ]
     },
     "threshold_tolerance": {
       "type": "number",
