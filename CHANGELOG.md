@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.11.2
+- Updated embedded profile
+
 ## v1.11.1
 - Filter out empty control names when saving
 
