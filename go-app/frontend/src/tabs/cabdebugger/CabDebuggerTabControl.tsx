@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { main } from "../../../wailsjs/go/models";
 import { TiCog } from "react-icons/ti";
 
