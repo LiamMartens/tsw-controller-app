@@ -5,17 +5,21 @@ import { EventsOn } from "../../../wailsjs/runtime/runtime";
 import { events } from "../../events";
 import { useControllers } from "../../swr";
 import { RemapNotchesModal } from "./RemapNotchesModal";
+import {  } from "react-icons/ti";
+import { InspectControllerModal } from "./InspectControllerModal";
 
 type ControllerRowProps = {
   controller: main.Interop_GenericController;
   onConfigure: (controller: main.Interop_GenericController) => void;
   onRemapNotches: (controller: main.Interop_GenericController) => void;
+  onInspect: (controller: main.Interop_GenericController) => void;
 };
 
 const CalibrationTabControllerRow = ({
   controller,
   onConfigure,
   onRemapNotches,
+  onInspect
 }: ControllerRowProps) => {
   const handleConfigure = () => {
     onConfigure(controller);
@@ -23,6 +27,10 @@ const CalibrationTabControllerRow = ({
 
   const handleRemapNotches = () => {
     onRemapNotches(controller);
+  };
+
+  const handleInspect = () => {
+    onInspect(controller);
   };
 
   return (
@@ -45,14 +53,22 @@ const CalibrationTabControllerRow = ({
           </div>
         )}
         {controller.IsConfigured && (
-          <div className="tooltip tooltip-bottom" data-tip="Re-configure">
+          <>
+            <div className="tooltip tooltip-bottom" data-tip="Re-configure">
+              <button
+                className="btn btn-success btn-soft btn-xs"
+                onClick={handleConfigure}
+              >
+                Configured
+              </button>
+            </div>
             <button
-              className="btn btn-success btn-soft btn-xs"
-              onClick={handleConfigure}
+              className="btn btn-soft btn-xs"
+              onClick={handleInspect}
             >
-              Configured
+              Inspect
             </button>
-          </div>
+          </>
         )}
         {!controller.IsConfigured && (
           <div className="tooltip tooltip-bottom" data-tip="Configure now">
@@ -72,12 +88,15 @@ const CalibrationTabControllerRow = ({
 export const CalibrationTab = () => {
   const calibrationDialogRef = useRef<HTMLDialogElement | null>(null);
   const remapNotchesDialogRef = useRef<HTMLDialogElement | null>(null);
+  const inspectDialogRef = useRef<HTMLDialogElement | null>(null);
   const [currentlyCalibratingController, setCurrentlyCalibratingController] =
     useState<main.Interop_GenericController | null>(null);
   const [
     currrentlyRemappingNotchesController,
     setCurrrentlyRemappingNotchesController,
   ] = useState<main.Interop_GenericController | null>(null);
+  const [currentInpsectingController, setCurrentInpsectingController] =
+    useState<main.Interop_GenericController | null>(null);
 
   const { data: controllers, mutate: refetchControllers } = useControllers();
   const configurableControllers = useMemo(
@@ -88,6 +107,11 @@ export const CalibrationTab = () => {
   const handleConfigure = (c: main.Interop_GenericController) => {
     setCurrentlyCalibratingController(c);
     calibrationDialogRef.current?.showModal();
+  };
+
+  const handleInspect = (c: main.Interop_GenericController) => {
+    setCurrentInpsectingController(c);
+    inspectDialogRef.current?.showModal();
   };
 
   const handleRemapNotches = (c: main.Interop_GenericController) => {
@@ -110,6 +134,7 @@ export const CalibrationTab = () => {
             controller={c}
             onConfigure={handleConfigure}
             onRemapNotches={handleRemapNotches}
+            onInspect={handleInspect}
           />
         ))}
       </ul>
@@ -120,6 +145,10 @@ export const CalibrationTab = () => {
       <RemapNotchesModal
         controller={currrentlyRemappingNotchesController}
         onClose={() => setCurrrentlyRemappingNotchesController(null)}
+      />
+      <InspectControllerModal
+        controller={currentInpsectingController}
+        onClose={() => setCurrentInpsectingController(null)}
       />
     </div>
   );

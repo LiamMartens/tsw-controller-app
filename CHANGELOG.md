@@ -1,6 +1,10 @@
 
 # CHANGELOG
 
+## v1.12.0
+- Added inspect dialog for debugging controller values
+- Disabled status bar overlay for android
+
 ## v1.11.2
 - Updated embedded profile
 

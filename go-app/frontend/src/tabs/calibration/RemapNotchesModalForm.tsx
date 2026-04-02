@@ -2,18 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { config, main } from "../../../wailsjs/go/models";
 import {
   SaveCalibration,
-  UnsubscribeRaw,
-  SubscribeRaw,
   LoadConfiguration,
   UnsubscribeChangeEvent,
   SubscribeChangeEvent,
 } from "../../../wailsjs/go/main/App";
-import {
-  CalibrationStateControl,
-  Kind,
-  useCalibrationForm,
-} from "./useCalibrationForm";
-import { CalibrationModalFormControl } from "./CalibrationModalFormControl";
 import { alert } from "../../utils/alert";
 import { useControllerConfiguration } from "../../swr";
 import { useForm } from "react-hook-form";
@@ -112,6 +104,7 @@ export const RemapNotchesModalForm = ({ controller, onClose }: Props) => {
       const unsubscribe = EventsOn(
         events.changeevent,
         (event: main.Interop_ChangeEvent) => {
+          if (event.UniqueID !== controller.UniqueID) return;
           if (event.ControlName === bindingNamedThreshold.control) {
             const thresholds = form.getValues("thresholds");
             thresholds[bindingNamedThreshold.control] =
@@ -136,7 +129,7 @@ export const RemapNotchesModalForm = ({ controller, onClose }: Props) => {
       /* force unsubscribe */
       UnsubscribeChangeEvent();
     };
-  }, [bindingNamedThreshold]);
+  }, [bindingNamedThreshold, controller]);
 
   const thresholds = form.watch("thresholds");
 
