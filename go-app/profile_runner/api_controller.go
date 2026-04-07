@@ -107,7 +107,6 @@ func (controller *ApiController) CancelStopInteractingTimer(ctx context.Context,
 	controller.interacting.mutex.Lock()
 	defer controller.interacting.mutex.Unlock()
 	if interacting, is_interacting := controller.interacting.controls[control]; is_interacting {
-		/* already interacting; reset timer */
 		interacting.Cancel()
 	}
 }
