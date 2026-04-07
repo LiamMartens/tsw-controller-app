@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/LiamMartens/tsw-controller-app/refs/heads/main/profile-builder-schema/profile.schema.json",
+  "$schema": "https://tsw-controller-app.vercel.app/profile-builder/schema.json",
   "auto_select": true,
   "rail_class_information": [
     { "class_name": "RVM_NYH_MNR_M3a-A_C" },
@@ -307,7 +307,6 @@
             { "class_name": "RVM_LIRR_M3-B_C" }
           ],
           "controls": "BrakeCharging",
-          "hold": true,
           "input_value": {
             "min": 0,
             "max": 1,
@@ -374,7 +373,6 @@
             { "class_name": "RVM_LIRR_M3-B_C" }
           ],
           "controls": "Buzzer",
-          "hold": true,
           "input_value": {
             "min": 0,
             "max": 1,
@@ -565,12 +563,10 @@
         {
           "type": "api_control",
           "controls": "Horn",
-          "hold": true,
           "input_value": {
             "min": 0,
             "max": 1,
-            "step": 1,
-            "max_change_rate": 0.3
+            "step": 1
           }
         }
       ]
@@ -622,11 +618,10 @@
             { "class_name": "RVM_LIRR_M3-B_C" }
           ],
           "controls": "Acknowledge",
-          "hold": true,
           "input_value": {
             "min": 0,
             "max": 1,
-            "step": 1
+            "step": 1.0
           }
         },
         {

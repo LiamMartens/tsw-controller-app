@@ -103,6 +103,15 @@ func (controller *ApiController) formatControlName(control string) (string, erro
 	return formatted_control, nil
 }
 
+func (controller *ApiController) CancelStopInteractingTimer(ctx context.Context, control string) {
+	controller.interacting.mutex.Lock()
+	defer controller.interacting.mutex.Unlock()
+	if interacting, is_interacting := controller.interacting.controls[control]; is_interacting {
+		/* already interacting; reset timer */
+		interacting.Cancel()
+	}
+}
+
 func (controller *ApiController) StartInteractingIfNotAlready(ctx context.Context, control string) error {
 	controller.interacting.mutex.Lock()
 	defer controller.interacting.mutex.Unlock()
@@ -136,11 +145,13 @@ func (controller *ApiController) StartInteractingIfNotAlready(ctx context.Contex
 			return
 		case <-stop_interacting_timer.C:
 			if controller.interacting.controls[control].TargetCommand != nil {
+				logger.Logger.Debug("skipping stop interaction", "control", control)
 				stop_interacting_timer.Reset(time.Second * 1)
 			} else if err := controller.API.SetInteracting(control, 0.0); err != nil {
 				logger.Logger.Debug("could not stop interacting with", "control", control)
 				stop_interacting_timer.Reset(time.Second * 1)
 			} else {
+				logger.Logger.Debug("stopped interacting with", "control", control)
 				controller.interacting.mutex.Lock()
 				delete(controller.interacting.controls, control)
 				controller.interacting.mutex.Unlock()
@@ -175,8 +186,11 @@ func (controller *ApiController) clearControlTargetCommand(command ApiController
 	defer controller.interacting.mutex.Unlock()
 
 	controlstate, has_controlstate := controller.interacting.controls[command.Controls]
-	/* clear target command if the same */
-	if has_controlstate && controlstate.TargetCommand != nil && controlstate.TargetCommand.ToString() == command.ToString() {
+	/* clear target command if the same and not hold */
+	if has_controlstate &&
+		controlstate.TargetCommand != nil &&
+		!controlstate.TargetCommand.Hold &&
+		controlstate.TargetCommand.ToString() == command.ToString() {
 		controlstate.TargetCommand = nil
 		controller.interacting.controls[command.Controls] = controlstate
 	}
@@ -193,18 +207,28 @@ func (controller *ApiController) ProcessPendingControlCommand(ctx context.Contex
 
 	/* we're just silently ignoring this error here and starting from a default of 0.0f on failure which is acceptable in most cases */
 	current_value := 0.0
+	is_button, _ := controller.API.GetIsButton(command.Controls)
 	current_value, _ = controller.API.GetInputValue(command.Controls)
 	target_value_diff := math.Abs(current_value - command.InputValue)
-	/* no-op if the value is already the same */
-	if math_utils.IsWithinMarginOfError(current_value, command.InputValue) {
+
+	/* no-op if the value is already the same and it's not being "held" */
+	if !command.Hold && math_utils.IsWithinMarginOfError(current_value, command.InputValue) {
 		return nil
 	}
 
-	if target_value_diff <= command.MaxChangeRate {
+	if is_button {
+		/* buttons handle interacting separately */
+		controller.CancelStopInteractingTimer(ctx, command.Controls)
+		if command.InputValue > 0.5 {
+			return controller.API.SetInteracting(command.Controls, 1.0)
+		}
+		return controller.API.SetInteracting(command.Controls, 0.0)
+	} else if target_value_diff <= command.MaxChangeRate {
 		/* if less than max change rate; change as-is */
 		if err := controller.StartInteractingIfNotAlready(ctx, command.Controls); err != nil {
 			return err
 		}
+		logger.Logger.Info("updating input value", "value", command.InputValue)
 		return controller.UpdateControlValue(ctx, command.Controls, command.InputValue)
 	} else {
 		/* if not generate steps to reach the target value */

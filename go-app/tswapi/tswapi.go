@@ -27,6 +27,7 @@ type ITSWAPI interface {
 	SetInteracting(control string, value float64) error
 	SetInputValue(control string, value float64) error
 	GetInputValue(control string) (float64, error)
+	GetIsButton(control string) (bool, error)
 	GetActiveCab() (TSWAPIActiveCab, error)
 	CreateCurrentDrivableActorSubscription(id int) error
 	GetCurrentDrivableActorSubscription(id int) (TSWAPI_GetCurrentDrivableActorSubscriptionResponse, error)
@@ -197,6 +198,18 @@ func (c *TSWAPI) GetInputValue(control string) (float64, error) {
 	}
 	values := data["Values"].(map[string]any)
 	return values["InputValue"].(float64), nil
+}
+
+func (c *TSWAPI) GetIsButton(control string) (bool, error) {
+	set_path := fmt.Sprintf("/get/CurrentDrivableActor/%s.ObjectClass", url.PathEscape(control))
+	req_url := fmt.Sprintf("%s%s", c.Config.BaseURL, set_path)
+	set_req, _ := http.NewRequest("GET", req_url, nil)
+	data, err := c.executeTswApiRequest(set_req)
+	if err != nil {
+		return false, err
+	}
+	values := data["Values"].(map[string]any)
+	return values["ObjectClass"].(string) == "PushButtonComponent", nil
 }
 
 func (c *TSWAPI) GetActiveCab() (TSWAPIActiveCab, error) {
