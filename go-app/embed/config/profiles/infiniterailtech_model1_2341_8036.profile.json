@@ -754,7 +754,7 @@
         },
         {
           "type": "direct_control",
-          "controls": "MasterController",
+          "controls": "ThrottleAndBrake",
           "rail_class_information": [
             { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 A" },
             { "class_name": "DTG.:.M3EMUPack01.:.LIRR M3 B" }
