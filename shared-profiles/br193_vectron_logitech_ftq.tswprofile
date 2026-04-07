@@ -1,0 +1,374 @@
+{
+  "name": "BR193 Vectron",
+  "controls": [
+    {
+      "name": "LeverL",
+      "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "AFB_Speed_{SIDE}",
+          "input_value": {
+            "min": 0,
+            "max": 1,
+            "invert": true
+          },
+          "notify": true
+        },
+        {
+          "type": "api_control",
+          "controls": "AFB_Speed_{SIDE}",
+          "input_value": {
+            "min": 0,
+            "max": 1,
+            "invert": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "LeverC",
+      "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "MasterController_{SIDE}",
+          "input_value": {
+            "min": -1,
+            "max": 1,
+            "invert": true,
+            "steps": [
+              null,
+              0,
+              null
+            ]
+          },
+          "notify": true
+        },
+        {
+          "type": "api_control",
+          "controls": "MasterController_{SIDE}",
+          "input_value": {
+            "min": -1,
+            "max": 1,
+            "invert": true,
+            "steps": [
+              null,
+              0,
+              null
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "LeverR",
+      "assignments": [
+        {
+          "type": "linear",
+          "thresholds": [
+          	{ "value": 0.02, "action_activate": { "controls": "TrainBrake_{SIDE}", "value": 0.00, "hold": true }, "action_deactivate": { "controls": "TrainBrake_{SIDE}", "value": 0.00, "hold": true } },
+          	{ "value": 0.05, "action_activate": { "controls": "TrainBrake_{SIDE}", "value": 0.10, "hold": true }, "action_deactivate": { "controls": "TrainBrake_{SIDE}", "value": 0.10, "hold": true } },
+          	{ "value": 0.22, "action_activate": { "controls": "TrainBrake_{SIDE}", "value": 0.19 }, "action_deactivate": { "controls": "TrainBrake_{SIDE}", "value": 0.19 } },
+          	{ "value": 0.25, "action_activate": { "controls": "TrainBrake_{SIDE}", "value": 0.28 }, "action_deactivate": { "controls": "TrainBrake_{SIDE}", "value": 0.28 } },
+          	{ "value": 0.35, "action_activate": { "controls": "TrainBrake_{SIDE}", "value": 0.37 }, "action_deactivate": { "controls": "TrainBrake_{SIDE}", "value": 0.37 } },
+          	{ "value": 0.45, "action_activate": { "controls": "TrainBrake_{SIDE}", "value": 0.46 }, "action_deactivate": { "controls": "TrainBrake_{SIDE}", "value": 0.46 } },
+          	{ "value": 0.55, "action_activate": { "controls": "TrainBrake_{SIDE}", "value": 0.54 }, "action_deactivate": { "controls": "TrainBrake_{SIDE}", "value": 0.54 } },
+          	{ "value": 0.65, "action_activate": { "controls": "TrainBrake_{SIDE}", "value": 0.63 }, "action_deactivate": { "controls": "TrainBrake_{SIDE}", "value": 0.63 } },
+          	{ "value": 0.75, "action_activate": { "controls": "TrainBrake_{SIDE}", "value": 0.72 }, "action_deactivate": { "controls": "TrainBrake_{SIDE}", "value": 0.72 } },
+          	{ "value": 0.85, "action_activate": { "controls": "TrainBrake_{SIDE}", "value": 0.81 }, "action_deactivate": { "controls": "TrainBrake_{SIDE}", "value": 0.81 } },
+          	{ "value": 0.95, "action_activate": { "controls": "TrainBrake_{SIDE}", "value": 0.90 }, "action_deactivate": { "controls": "TrainBrake_{SIDE}", "value": 0.90 } }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RevR",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "controls": "TrainBrake_{SIDE}",
+            "value": 1,
+            "notify": true
+          },
+          "action_deactivate": {
+            "controls": "TrainBrake_{SIDE}",
+            "value": 0.9
+          }
+        },
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "controls": "TrainBrake_{SIDE}",
+            "api_value": 1,
+            "notify": true
+          },
+          "action_deactivate": {
+            "controls": "TrainBrake_{SIDE}",
+            "api_value": 0.9
+          }
+        }
+      ]
+    },
+    {
+      "name": "RevL",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.1,
+          "action_activate": {
+            "controls": "AFB_ProxySwitchControl",
+            "value": 1,
+            "hold": true,
+            "notify": true
+          },
+          "action_deactivate": {
+            "controls": "AFB_ProxySwitchControl",
+            "value": 0,
+            "notify": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "ButLU",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.1,
+          "action_activate": {
+            "controls": "AFB_Confirm_Speed_{SIDE}",
+            "value": 1,
+            "hold": true,
+            "notify": true
+          },
+          "action_deactivate": {
+            "controls": "AFB_Confirm_Speed_{SIDE}",
+            "value": 0,
+            "notify": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "ButLD",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "controls": "SifaPedal_{SIDE}",
+            "value": 0,
+            "notify": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "ButCU",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.1,
+          "action_activate": {
+            "controls": "TrainLength_{SIDE}",
+            "value": 1,
+            "hold": true,
+            "notify": true
+          },
+          "action_deactivate": {
+            "controls": "TrainLength_{SIDE}",
+            "value": 1,
+            "notify": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "ButCD",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.1,
+          "action_activate": {
+            "controls": "PZB_Acknowledge_{SIDE}",
+            "value": 1,
+            "hold": true,
+            "notify": true
+          },
+          "action_deactivate": {
+            "controls": "PZB_Acknowledge_{SIDE}",
+            "value": 0.5,
+            "notify": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "ButRU",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.1,
+          "action_activate": {
+            "controls": "Horn_{SIDE}",
+            "value": 1,
+            "hold": true,
+            "notify": true
+          },
+          "action_deactivate": {
+            "controls": "Horn_{SIDE}",
+            "value": 0.5,
+            "notify": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "ButRD",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.1,
+          "action_activate": {
+            "controls": "Horn_{SIDE}",
+            "value": 0,
+            "hold": true,
+            "notify": true
+          },
+          "action_deactivate": {
+            "controls": "Horn_{SIDE}",
+            "value": 0.5,
+            "notify": true
+          }
+        }
+      ]
+    }
+  ],
+  "auto_select": true,
+  "controller": {
+    "usb_id": "06A3:0C2D",
+    "mapping": {
+      "name": "Logitech Flight Throttle Quadrant",
+      "usb_id": "06A3:0C2D",
+      "data": [
+        {
+          "kind": "axis",
+          "index": 0,
+          "name": "LeverL"
+        },
+        {
+          "kind": "axis",
+          "index": 1,
+          "name": "LeverC"
+        },
+        {
+          "kind": "axis",
+          "index": 2,
+          "name": "LeverR"
+        },
+        {
+          "kind": "button",
+          "index": 0,
+          "name": "ButLU"
+        },
+        {
+          "kind": "button",
+          "index": 1,
+          "name": "ButLD"
+        },
+        {
+          "kind": "button",
+          "index": 2,
+          "name": "ButCU"
+        },
+        {
+          "kind": "button",
+          "index": 3,
+          "name": "ButCD"
+        },
+        {
+          "kind": "button",
+          "index": 4,
+          "name": "ButRU"
+        },
+        {
+          "kind": "button",
+          "index": 5,
+          "name": "ButRD"
+        },
+        {
+          "kind": "button",
+          "index": 6,
+          "name": "RevL"
+        },
+        {
+          "kind": "button",
+          "index": 7,
+          "name": "RevC"
+        },
+        {
+          "kind": "button",
+          "index": 8,
+          "name": "RevR"
+        }
+      ]
+    },
+    "calibration": {
+      "usb_id": "06A3:0C2D",
+      "data": [
+        {
+          "id": "LeverL",
+          "deadzone": 2,
+          "invert": false,
+          "min": -32768,
+          "max": 32768,
+          "idle": -32768,
+          "easing_curve": [
+            0,
+            0,
+            1,
+            1
+          ]
+        },
+        {
+          "id": "LeverC",
+          "deadzone": 2,
+          "invert": false,
+          "min": -32768,
+          "max": 32768,
+          "idle": -32768,
+          "easing_curve": [
+            0,
+            0,
+            1,
+            1
+          ]
+        },
+        {
+          "id": "LeverR",
+          "deadzone": 2,
+          "invert": false,
+          "min": -32768,
+          "max": 32768,
+          "idle": -32768,
+          "easing_curve": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
+      ]
+    }
+  },
+  "rail_class_information": [
+    { "class_name": "RVM_FTF_DB_Vectron_C" },
+    { "class_name": "RVM_FTF_FT_Vectron_C" },
+    { "class_name": "RVM_KWG_RP_Vectron_C" }
+  ],
+  "apps": [
+    "Train Sim World"
+  ]
+}

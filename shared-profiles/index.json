@@ -1,6 +1,42 @@
 {
   "profiles": [
     {
+      "usb_id": "06A3:0C2D",
+      "file": "./abe_8_12_allegra_logitech_ftq.tswprofile",
+      "name": "ABe 8/12 Allegra - Logitech Flight Throttle Quadrant",
+      "author": {
+        "name": "w/",
+        "url": "https://github.com/MOPC222"
+      }
+    },
+    {
+      "usb_id": "06A3:0C2D",
+      "file": "./br193_vectron_logitech_ftq.tswprofile",
+      "name": "BR193 Vectron - Logitech Flight Throttle Quadrant",
+      "author": {
+        "name": "w/",
+        "url": "https://github.com/MOPC222"
+      }
+    },
+    {
+      "usb_id": "06A3:0C2D",
+      "file": "./sd40_logitech_ftq_left.tswprofile",
+      "name": "SD40-2 - Left Side - Buttons Facing Away - Logitech Flight Throttle Quadrant",
+      "author": {
+        "name": "w/",
+        "url": "https://github.com/MOPC222"
+      }
+    },
+    {
+      "usb_id": "06A3:0C2D",
+      "file": "./mp15dc_logitech_ftq_left.tswprofile",
+      "name": "MP15DC - Left Side - Buttons Facing Away - Logitech Flight Throttle Quadrant",
+      "author": {
+        "name": "w/",
+        "url": "https://github.com/MOPC222"
+      }
+    },
+    {
       "usb_id": "33DD:0002",
       "file": "./class170o_zuiki_mascon.tswprofile",
       "name": "Class 170 - ZUIKI MASCON",

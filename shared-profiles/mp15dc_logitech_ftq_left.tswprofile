@@ -1,0 +1,351 @@
+{
+  "name": "MP15DC, Left Side Buttons Away",
+  "controls": [
+    {
+      "name": "LeverL",
+      "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "Throttle",
+          "input_value": {
+            "min": 0.125,
+            "max": 1,
+            "steps": [0.125,0.25,0.375,0.5,0.625,0.75,0.875,1],
+            "max_change_rate": 0.05,
+            "invert": true
+          },
+          "notify": true
+        }
+      ]
+    },
+    {
+      "name": "LeverC",
+      "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "IndependentBrake",
+          "input_value": {
+            "min": 0.25,
+            "max": 1,
+            "max_change_rate": 0.05,
+            "invert": true
+          },
+          "notify": true
+        }
+      ]
+    },
+    {
+      "name": "LeverR",
+      "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "AutomaticBrake_26L",
+          "input_value": {
+            "min": 0,
+            "max": 0.9,
+			"steps": [0,0.125,0.2,null,0.6,0.7,0.9],
+            "max_change_rate": 0.05
+          },
+          "notify": true
+        }
+      ]
+    },
+    {
+      "name": "RevL",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.1,
+          "action_activate": {
+            "controls": "Throttle",
+            "value": 0,
+            "max_change_rate": 0.05,
+            "notify": true
+          },
+          "action_deactivate": {
+            "controls": "Throttle",
+            "value": 0.125,
+            "max_change_rate": 0.05,
+            "notify": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "RevC",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.1,
+          "action_activate": {
+            "controls": "IndependentBrake",
+            "value": 0,
+            "max_change_rate": 0.025,
+            "hold": true,
+            "notify": true
+          },
+          "action_deactivate": {
+            "controls": "IndependentBrake",
+            "value": 0.25,
+            "max_change_rate": 0.025
+          }
+        }
+      ]
+    },
+    {
+      "name": "RevR",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.1,
+          "action_activate": {
+            "controls": "AutomaticBrake_26L",
+            "value": 1,
+            "max_change_rate": 0.025,
+            "notify": true
+          },
+          "action_deactivate": {
+            "controls": "AutomaticBrake_26L",
+            "value": 0.9,
+            "max_change_rate": 0.025
+          }
+        }
+      ]
+    },
+    {
+      "name": "ButCU",
+      "assignments": [
+        {
+          "type": "toggle",
+          "threshold": 0.1,
+          "action_activate": {
+            "controls": "Reverser",
+            "value": -1,
+            "max_change_rate": 0.1,
+            "notify": true
+          },
+          "action_deactivate": {
+            "controls": "Reverser",
+            "value": 0.5,
+            "max_change_rate": 0.1,
+            "notify": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "ButRU",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.1,
+          "action_activate": {
+            "controls": "Horn",
+            "value": 1,
+            "hold": true,
+            "notify": true
+          },
+          "action_deactivate": {
+            "controls": "Horn",
+            "value": 0,
+            "notify": true
+          }
+        },
+        {
+          "type": "momentary",
+          "threshold": 0.1,
+          "action_deactivate": {
+            "controls": "Bell",
+            "value": 0,
+            "notify": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "ButLD",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.1,
+          "action_activate": {
+            "controls": "Sander",
+            "value": 1,
+            "hold": true,
+            "notify": true
+          },
+          "action_deactivate": {
+            "controls": "Sander",
+            "value": 0,
+            "notify": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "ButCD",
+      "assignments": [
+        {
+          "type": "toggle",
+          "threshold": 0.1,
+          "action_activate": {
+            "controls": "Reverser",
+            "value": 1,
+            "max_change_rate": 0.1,
+            "notify": true
+          },
+          "action_deactivate": {
+            "controls": "Reverser",
+            "value": 0.5,
+            "max_change_rate": 0.1,
+            "notify": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "ButRD",
+      "assignments": [
+        {
+          "type": "toggle",
+          "threshold": 0.1,
+          "action_activate": {
+            "controls": "Bell",
+            "value": 1,
+            "notify": true
+          },
+          "action_deactivate": {
+            "controls": "Bell",
+            "value": 0,
+            "notify": true
+          }
+        }
+      ]
+    }
+  ],
+  "auto_select": true,
+  "controller": {
+    "usb_id": "06A3:0C2D",
+    "mapping": {
+      "name": "Logitech Flight Throttle Quadrant",
+      "usb_id": "06A3:0C2D",
+      "data": [
+        {
+          "kind": "axis",
+          "index": 0,
+          "name": "LeverL"
+        },
+        {
+          "kind": "axis",
+          "index": 1,
+          "name": "LeverC"
+        },
+        {
+          "kind": "axis",
+          "index": 2,
+          "name": "LeverR"
+        },
+        {
+          "kind": "button",
+          "index": 0,
+          "name": "ButLU"
+        },
+        {
+          "kind": "button",
+          "index": 1,
+          "name": "ButLD"
+        },
+        {
+          "kind": "button",
+          "index": 2,
+          "name": "ButCU"
+        },
+        {
+          "kind": "button",
+          "index": 3,
+          "name": "ButCD"
+        },
+        {
+          "kind": "button",
+          "index": 4,
+          "name": "ButRU"
+        },
+        {
+          "kind": "button",
+          "index": 5,
+          "name": "ButRD"
+        },
+        {
+          "kind": "button",
+          "index": 6,
+          "name": "RevL"
+        },
+        {
+          "kind": "button",
+          "index": 7,
+          "name": "RevC"
+        },
+        {
+          "kind": "button",
+          "index": 8,
+          "name": "RevR"
+        }
+      ]
+    },
+    "calibration": {
+      "usb_id": "06A3:0C2D",
+      "data": [
+        {
+          "id": "LeverL",
+          "deadzone": 5,
+          "invert": false,
+          "min": -32768,
+          "max": 32768,
+          "idle": -32768,
+          "easing_curve": [
+            0,
+            0,
+            1,
+            1
+          ]
+        },
+        {
+          "id": "LeverC",
+          "deadzone": 5,
+          "invert": false,
+          "min": -32768,
+          "max": 32768,
+          "idle": -32768,
+          "easing_curve": [
+            0,
+            0,
+            1,
+            1
+          ]
+        },
+        {
+          "id": "LeverR",
+          "deadzone": 5,
+          "invert": false,
+          "min": -32768,
+          "max": 32768,
+          "idle": -32768,
+          "easing_curve": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
+      ]
+    }
+  },
+  "rail_class_information": [
+    {
+      "class_name": "RVM_SFJ_CT_MP15DC_C"
+    }
+  ],
+  "apps": [
+    "Train Sim World"
+  ]
+}
