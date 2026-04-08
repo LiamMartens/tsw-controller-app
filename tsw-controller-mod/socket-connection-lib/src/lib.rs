@@ -116,8 +116,8 @@ pub extern "C" fn tsw_controller_mod_start() {
                             }
                         }
                         Err(e) => {
-                            println!("[socket_connection_lib][error] failed to connect to socket - retrying in 5s | {}", e);
-                            tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                            println!("[socket_connection_lib][error] failed to connect to socket - retrying in 3s | {}", e);
+                            tokio::time::sleep(std::time::Duration::from_secs(3)).await;
                             /* update port index to next one */
                             let mut state_guard = state_arc_clone.write().unwrap_or_else(|poisoned| poisoned.into_inner());
                             state_guard.current_port_index = (state_guard.current_port_index + 1) % WS_PORT_OPTIONS.len();
