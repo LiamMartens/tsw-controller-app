@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"time"
 	"tsw_controller_app/config_loader"
 	"tsw_controller_app/logger"
@@ -87,7 +88,11 @@ func main() {
 						return
 					case msg := <-logchan:
 						if msg.LogLevel == "info" || msg.LogLevel == "error" {
-							event_to_send := axiom.Event{ingest.TimestampField: time.Now(), "message": msg.Message}
+							event_to_send := axiom.Event{
+								ingest.TimestampField: time.Now(),
+								"message":             msg.Message,
+								"platform":            runtime.GOOS,
+							}
 							go ax.IngestEvents(context.Background(), AXIOM_DATASET, []axiom.Event{event_to_send})
 						}
 					}
