@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 	"tsw_controller_app/chan_utils"
 	"tsw_controller_app/logger"
@@ -29,6 +31,12 @@ type SocketConnection struct {
 }
 
 var _ TSWConnector = (*SocketConnection)(nil)
+
+func (c *SocketConnection) Port() int {
+	addr_split := strings.Split(c.Server.Addr, ":")
+	port, _ := strconv.Atoi(addr_split[len(addr_split)-1])
+	return port
+}
 
 func (c *SocketConnection) WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := c.WsUpgrader.Upgrade(w, r, nil)

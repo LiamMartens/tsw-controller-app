@@ -156,7 +156,7 @@ func (a *App) GetVersion() string {
 	return VERSION
 }
 
-func (a *App) GetDeviceIP() (string, error) {
+func (a *App) GetControlServerAddr() (string, error) {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
 		return "", err
@@ -164,7 +164,9 @@ func (a *App) GetDeviceIP() (string, error) {
 	defer conn.Close()
 
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
-	return localAddr.IP.String(), nil
+	ip := localAddr.IP.String()
+	port := a.connector.Port()
+	return fmt.Sprintf("%s:%d", ip, port), nil
 }
 
 func (a *App) LoadConfiguration() {

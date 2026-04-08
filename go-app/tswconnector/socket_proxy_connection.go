@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strconv"
+	"strings"
 	"time"
 	"tsw_controller_app/chan_utils"
 	"tsw_controller_app/logger"
@@ -83,6 +85,15 @@ func (c *SocketProxyConnection) waitForMessage(conn *websocket.Conn) chan Socket
 		}
 	}()
 	return received
+}
+
+func (c *SocketProxyConnection) Port() int {
+	if c.connection == nil {
+		return SOCKET_CONNECTION_PORT_RANGE_START
+	}
+	addr_split := strings.Split(c.connection.LocalAddr().String(), ":")
+	port, _ := strconv.Atoi(addr_split[len(addr_split)-1])
+	return port
 }
 
 func (c *SocketProxyConnection) IsActive() bool {

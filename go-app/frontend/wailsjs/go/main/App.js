@@ -18,16 +18,16 @@ export function GetCabControlState() {
   return window['go']['main']['App']['GetCabControlState']();
 }
 
+export function GetControlServerAddr() {
+  return window['go']['main']['App']['GetControlServerAddr']();
+}
+
 export function GetControllerConfiguration(arg1) {
   return window['go']['main']['App']['GetControllerConfiguration'](arg1);
 }
 
 export function GetControllers() {
   return window['go']['main']['App']['GetControllers']();
-}
-
-export function GetDeviceIP() {
-  return window['go']['main']['App']['GetDeviceIP']();
 }
 
 export function GetLastInstalledModVersion() {
