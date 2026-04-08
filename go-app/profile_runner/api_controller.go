@@ -97,6 +97,7 @@ func (c *ApiController_ControlStates_Control) StartInteractingIfNotAlready(api t
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 	if c.InteractingState.InteractingSince == nil {
+		logger.Logger.Debug("starting interaction with", "control", c.ControlName)
 		if err := api.SetInteracting(c.ControlName, 1.0); err != nil {
 			return err
 		}
@@ -110,6 +111,7 @@ func (c *ApiController_ControlStates_Control) StopInteractingIfNotAlready(api ts
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 	if c.InteractingState.InteractingSince != nil {
+		logger.Logger.Debug("stopping interaction with", "control", c.ControlName)
 		if err := api.SetInteracting(c.ControlName, 0.0); err != nil {
 			return err
 		}
