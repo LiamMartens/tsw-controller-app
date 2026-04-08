@@ -15,6 +15,8 @@ use tungstenite::{protocol::Message, Utf8Bytes};
 use windows::Win32::Foundation::HMODULE;
 use windows::Win32::System::LibraryLoader::{GetModuleFileNameW};
 
+static WS_PORT_OPTIONS: &[u16] = &[63241, 63242];
+
 struct DLLLocoStateControlTarget {
     value: c_float,
     max_change_rate: c_float,
@@ -37,7 +39,8 @@ struct DLLState {
     rt: Option<Runtime>,
     stop_tx: Option<Arc<broadcast::Sender<()>>>,
     outgoing_tx: Option<mpsc::Sender<String>>,
-    loco: Option<DLLLocoState>
+    loco: Option<DLLLocoState>,
+    current_port_index: usize,
 }
 
 static STATE: Lazy<Arc<RwLock<DLLState>>> = Lazy::new(|| {
@@ -45,7 +48,8 @@ static STATE: Lazy<Arc<RwLock<DLLState>>> = Lazy::new(|| {
         rt: None,
         stop_tx: None,
         outgoing_tx: None,
-        loco: None
+        loco: None,
+        current_port_index: 0,
     }))
 });
 
@@ -126,12 +130,14 @@ pub fn mod_init(hmod: HMODULE) {
     let (out_tx, mut out_rx) = mpsc::channel::<String>(64);
     let stop_tx_arc = Arc::new(stop_tx);
 
-    let ws_url = "ws://127.0.0.1:63241".to_string();
-
     let socket_thread_stop_tx = Arc::clone(&stop_tx_arc);
     rt.spawn(async move {
         loop {
-            println!("[tscmod][info] attempting to connect to socket");
+            let current_port = STATE.read().unwrap_or_else(
+                |poisoned| poisoned.into_inner()
+            ).current_port_index;
+            let ws_url = format!("ws://127.0.0.1:{}", WS_PORT_OPTIONS[current_port]);
+            println!("[tscmod][info] attempting to connect to socket on port {}", WS_PORT_OPTIONS[current_port]);
             let mut sockst_stop_rx = socket_thread_stop_tx.subscribe();
             tokio::select! {
                 _ = sockst_stop_rx.recv() => {
@@ -227,6 +233,9 @@ pub fn mod_init(hmod: HMODULE) {
                         Err(e) => {
                             println!("[socket_connection_lib][error] failed to connect to socket - retrying in 5s | {}", e);
                             tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                            /* update port index to next one */
+                            let mut state_guard = STATE.write().unwrap_or_else(|poisoned| poisoned.into_inner());
+                            state_guard.current_port_index = (state_guard.current_port_index + 1) % WS_PORT_OPTIONS.len();
                             continue;
                         }
                     }
