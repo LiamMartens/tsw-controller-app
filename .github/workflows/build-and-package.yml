@@ -269,6 +269,8 @@ jobs:
           $env:VERSION=(Get-Content -Path RELEASE_VERSION -First 1)
           cd go-app
            ./windows_build.ps1
+        env:
+          AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
       - run: |
           New-Item -ItemType Directory -Path "tswcontrollerapp_windows"
           Copy-Item -Path "go-app/build/bin/tsw-controller-app.exe" -Destination "tswcontrollerapp_windows/tsw-controller-app.exe"
@@ -335,7 +337,9 @@ jobs:
       - run: |
           VERSION=$(head -n 1 RELEASE_VERSION)
           cd go-app
-          wails build -tags webkit2_41 -ldflags="-X 'main.VERSION=$VERSION'"
+          wails build -tags webkit2_41 -ldflags="-X 'main.VERSION=$VERSION' -X 'main.AXIOM_TOKEN=$AXIOM_TOKEN'"
+        env:
+          AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
 
       - uses: actions/upload-artifact@v4
         with:
@@ -402,7 +406,9 @@ jobs:
       - run: |
           VERSION=$(head -n 1 RELEASE_VERSION)
           cd go-app
-          wails build -ldflags="-X 'main.VERSION=$VERSION'"
+          wails build -ldflags="-X 'main.VERSION=$VERSION' -X 'main.AXIOM_TOKEN=$AXIOM_TOKEN'"
+        env:
+          AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
       - run: |
           cd go-app
           chmod +x build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app

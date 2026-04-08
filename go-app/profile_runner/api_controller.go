@@ -76,8 +76,8 @@ func (s *ApiController_ActiveCab) Update(api tswapi.ITSWAPI) error {
 }
 
 func (c *ApiController_ControlStates_Control) GetTargetCommand() (*ApiController_Command, bool) {
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
+	c.Mutex.RLock()
+	defer c.Mutex.RUnlock()
 	return c.TargetCommand, c.TargetCommand != nil
 }
 
@@ -248,8 +248,8 @@ func (controller *ApiController) ProcessPendingControlState(ctx context.Context,
 * Iterates over the current pending interacting states and processes any target commands
  */
 func (controller *ApiController) ProcessPendingControlStates(ctx context.Context) error {
-	controller.controlStates.mutex.Lock()
-	defer controller.controlStates.mutex.Unlock()
+	controller.controlStates.mutex.RLock()
+	defer controller.controlStates.mutex.RUnlock()
 	for control, controlstate := range controller.controlStates.controls {
 		if _, has_target_command := controlstate.GetTargetCommand(); has_target_command {
 			/*
@@ -257,9 +257,7 @@ func (controller *ApiController) ProcessPendingControlStates(ctx context.Context
 				to early release the controlstates lock itself
 			*/
 			controlname := fmt.Sprintf("%s", control)
-			defer func() {
-				go controller.ProcessPendingControlState(ctx, controlname)
-			}()
+			go controller.ProcessPendingControlState(ctx, controlname)
 		}
 	}
 	return nil

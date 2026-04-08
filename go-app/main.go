@@ -1,14 +1,18 @@
 package main
 
 import (
+	"context"
 	"embed"
 	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 	"tsw_controller_app/config_loader"
 	"tsw_controller_app/logger"
 
+	"github.com/axiomhq/axiom-go/axiom"
+	"github.com/axiomhq/axiom-go/axiom/ingest"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -17,6 +21,10 @@ import (
 )
 
 var VERSION = "1.0.0"
+
+var AXIOM_TOKEN = ""
+var AXIOM_ORG_ID = "tswcontrollerutility-szqw"
+var AXIOM_DATASET = "app_logs"
 
 //go:embed all:frontend/dist
 var assets embed.FS
@@ -63,6 +71,28 @@ func main() {
 		Mode:            mode,
 		ProxySettings:   proxy_settings,
 	})
+
+	if AXIOM_TOKEN != "" && AXIOM_ORG_ID != "" {
+		ax, err := axiom.NewClient(axiom.SetPersonalTokenConfig(AXIOM_TOKEN, AXIOM_ORG_ID))
+		if err != nil {
+			logger.Logger.Error("could not instantiate logging client", "error", err)
+		} else {
+			go func() {
+				ctx := context.Background()
+				logchan, unsubscribe := logger.Logger.Listen()
+				defer unsubscribe()
+				for {
+					select {
+					case <-ctx.Done():
+						return
+					case msg := <-logchan:
+						event_to_send := axiom.Event{ingest.TimestampField: time.Now(), "message": msg.Message}
+						go ax.IngestEvents(context.Background(), AXIOM_DATASET, []axiom.Event{event_to_send})
+					}
+				}
+			}()
+		}
+	}
 
 	err = wails.Run(&options.App{
 		Title:  "TSW Controller Utility",

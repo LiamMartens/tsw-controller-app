@@ -95,6 +95,7 @@ func (g *GlobalLogger) Error(msg string, args ...any) {
 }
 
 var Logger = GlobalLogger{
+	mutex: sync.RWMutex{},
 	slogger: slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slog.LevelDebug,
 	})),
