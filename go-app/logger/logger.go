@@ -46,7 +46,12 @@ func (g *GlobalLogger) PropertiesFromArgs(args ...any) map[string]string {
 	for index, arg := range args {
 		if index%2 == 1 {
 			/* uneven indexes are the values */
-			properties[fmt.Sprintf("%v", args[index-1])] = fmt.Sprintf("%#v", arg)
+			key := fmt.Sprintf("%v", args[index-1])
+			if as_err, ok := arg.(error); ok {
+				properties[key] = fmt.Sprintf("%#v", as_err.Error())
+			} else {
+				properties[key] = fmt.Sprintf("%#v", arg)
+			}
 		}
 	}
 	return properties
