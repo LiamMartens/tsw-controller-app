@@ -90,6 +90,7 @@ func main() {
 						if msg.LogLevel == "info" || msg.LogLevel == "error" {
 							event_to_send := axiom.Event{
 								ingest.TimestampField: time.Now(),
+								"version":             VERSION,
 								"message":             msg.Message,
 								"platform":            runtime.GOOS,
 							}
