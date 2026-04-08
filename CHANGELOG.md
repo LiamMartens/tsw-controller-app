@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.13.0
+- Fix API control handling of push button components
+
 ## v1.12.0
 - Added inspect dialog for debugging controller values
 - Disabled status bar overlay for android

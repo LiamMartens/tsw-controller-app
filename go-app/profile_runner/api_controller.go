@@ -15,6 +15,8 @@ import (
 
 const API_CONTROLLER_QUEUE_BUFFER_SIZE = 32
 
+type FormattedControlName = string
+
 type ApiController_Command struct {
 	Controls      string
 	InputValue    float64
@@ -22,15 +24,20 @@ type ApiController_Command struct {
 	MaxChangeRate float64
 }
 
-type ApiController_Interacting_Control struct {
-	Cancel        context.CancelFunc
-	Timer         *time.Timer
-	TargetCommand *ApiController_Command
+type ApiController_ControlStates_Control_InteractingState struct {
+	InteractingSince *time.Time
 }
 
-type ApiController_Interacting struct {
+type ApiController_ControlStates_Control struct {
+	Mutex            sync.RWMutex
+	ControlName      FormattedControlName
+	InteractingState *ApiController_ControlStates_Control_InteractingState
+	TargetCommand    *ApiController_Command
+}
+
+type ApiController_ControlStates struct {
 	mutex    sync.RWMutex
-	controls map[string]ApiController_Interacting_Control
+	controls map[FormattedControlName]*ApiController_ControlStates_Control
 }
 
 type ApiController_ControlTargets struct {
@@ -47,7 +54,7 @@ type ApiController struct {
 	API            tswapi.ITSWAPI
 	ControlChannel chan ApiController_Command
 	ActiveCab      ApiController_ActiveCab
-	interacting    ApiController_Interacting
+	controlStates  ApiController_ControlStates
 }
 
 func (c *ApiController_Command) ToString() string {
@@ -66,6 +73,75 @@ func (s *ApiController_ActiveCab) Update(api tswapi.ITSWAPI) error {
 		return err
 	}
 	return nil
+}
+
+func (c *ApiController_ControlStates_Control) GetTargetCommand() (*ApiController_Command, bool) {
+	c.Mutex.RLock()
+	defer c.Mutex.RUnlock()
+	return c.TargetCommand, c.TargetCommand != nil
+}
+
+func (c *ApiController_ControlStates_Control) ClearTargetCommand() {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+	c.TargetCommand = nil
+}
+
+func (c *ApiController_ControlStates_Control) UpdateTargetCommand(tc ApiController_Command) {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+	c.TargetCommand = &tc
+}
+
+func (c *ApiController_ControlStates_Control) StartInteractingIfNotAlready(api tswapi.ITSWAPI) error {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+	if c.InteractingState.InteractingSince == nil {
+		logger.Logger.Debug("starting interaction with", "control", c.ControlName)
+		if err := api.SetInteracting(c.ControlName, 1.0); err != nil {
+			return err
+		}
+		now := time.Now()
+		c.InteractingState.InteractingSince = &now
+	}
+	return nil
+}
+
+func (c *ApiController_ControlStates_Control) StopInteractingIfNotAlready(api tswapi.ITSWAPI) error {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+	if c.InteractingState.InteractingSince != nil {
+		logger.Logger.Debug("stopping interaction with", "control", c.ControlName)
+		if err := api.SetInteracting(c.ControlName, 0.0); err != nil {
+			return err
+		}
+		c.InteractingState.InteractingSince = nil
+	}
+	return nil
+}
+
+func (c *ApiController_ControlStates_Control) SetInputValue(api tswapi.ITSWAPI, value float64) error {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+	if err := api.SetInputValue(c.ControlName, value); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *ApiController) getControlStateRef(control FormattedControlName) *ApiController_ControlStates_Control {
+	c.controlStates.mutex.Lock()
+	defer c.controlStates.mutex.Unlock()
+	if _, has_controlstate := c.controlStates.controls[control]; !has_controlstate {
+		c.controlStates.controls[control] = &ApiController_ControlStates_Control{
+			ControlName: control,
+			InteractingState: &ApiController_ControlStates_Control_InteractingState{
+				InteractingSince: nil,
+			},
+			TargetCommand: nil,
+		}
+	}
+	return c.controlStates.controls[control]
 }
 
 func (controller *ApiController) formatControlName(control string) (string, error) {
@@ -103,124 +179,66 @@ func (controller *ApiController) formatControlName(control string) (string, erro
 	return formatted_control, nil
 }
 
-func (controller *ApiController) StartInteractingIfNotAlready(ctx context.Context, control string) error {
-	controller.interacting.mutex.Lock()
-	defer controller.interacting.mutex.Unlock()
-
-	if interacting, is_interacting := controller.interacting.controls[control]; is_interacting {
-		/* already interacting; reset timer */
-		interacting.Timer.Reset(time.Second * 1)
+func (controller *ApiController) ProcessPendingControlState(ctx context.Context, control FormattedControlName) error {
+	controlstate := controller.getControlStateRef(control)
+	targetcmd, has_targetcmd := controlstate.GetTargetCommand()
+	if !has_targetcmd {
 		return nil
 	}
-
-	/* start interaction if not already */
-	err := controller.API.SetInteracting(control, 1.0)
-	if err != nil {
-		logger.Logger.Error("could not start interacting", "control", control, "error", err)
-		return err
-	}
-
-	logger.Logger.Debug("started interacting with", "control", control)
-	childctx, childctxcancel := context.WithCancel(ctx)
-	stop_interacting_timer := time.NewTimer(time.Second * 1)
-	controller.interacting.controls[control] = ApiController_Interacting_Control{
-		Cancel: childctxcancel,
-		Timer:  stop_interacting_timer,
-	}
-
-	/* start go routine which will stop the interaction */
-	go func() {
-		defer stop_interacting_timer.Stop()
-		select {
-		case <-childctx.Done():
-			return
-		case <-stop_interacting_timer.C:
-			if controller.interacting.controls[control].TargetCommand != nil {
-				stop_interacting_timer.Reset(time.Second * 1)
-			} else if err := controller.API.SetInteracting(control, 0.0); err != nil {
-				logger.Logger.Debug("could not stop interacting with", "control", control)
-				stop_interacting_timer.Reset(time.Second * 1)
-			} else {
-				controller.interacting.mutex.Lock()
-				delete(controller.interacting.controls, control)
-				controller.interacting.mutex.Unlock()
-			}
-		}
-	}()
-	return nil
-}
-
-func (controller *ApiController) UpdateControlValue(ctx context.Context, control string, value float64) error {
-	if err := controller.API.SetInputValue(control, value); err != nil {
-		logger.Logger.Error("could not update value", "error", err)
-		return err
-	}
-
-	return nil
-}
-
-func (controller *ApiController) getControlTargetCommand(control string) *ApiController_Command {
-	controller.interacting.mutex.Lock()
-	defer controller.interacting.mutex.Unlock()
-
-	controlstate, has_controlstate := controller.interacting.controls[control]
-	if !has_controlstate || controlstate.TargetCommand == nil {
-		return nil
-	}
-	return controlstate.TargetCommand
-}
-
-func (controller *ApiController) clearControlTargetCommand(command ApiController_Command) {
-	controller.interacting.mutex.Lock()
-	defer controller.interacting.mutex.Unlock()
-
-	controlstate, has_controlstate := controller.interacting.controls[command.Controls]
-	/* clear target command if the same */
-	if has_controlstate && controlstate.TargetCommand != nil && controlstate.TargetCommand.ToString() == command.ToString() {
-		controlstate.TargetCommand = nil
-		controller.interacting.controls[command.Controls] = controlstate
-	}
-}
-
-func (controller *ApiController) ProcessPendingControlCommand(ctx context.Context, control string) error {
-	command_ptr := controller.getControlTargetCommand(control)
-	if command_ptr == nil {
-		return nil
-	}
-	command := *command_ptr
-	/* defer clear for this command */
-	defer controller.clearControlTargetCommand(command)
 
 	/* we're just silently ignoring this error here and starting from a default of 0.0f on failure which is acceptable in most cases */
 	current_value := 0.0
-	current_value, _ = controller.API.GetInputValue(command.Controls)
-	target_value_diff := math.Abs(current_value - command.InputValue)
-	/* no-op if the value is already the same */
-	if math_utils.IsWithinMarginOfError(current_value, command.InputValue) {
+	is_button, _ := controller.API.GetIsButton(control)
+	current_value, _ = controller.API.GetInputValue(control)
+	target_value_diff := math.Abs(current_value - targetcmd.InputValue)
+
+	if !targetcmd.Hold && math_utils.IsWithinMarginOfError(current_value, targetcmd.InputValue) {
+		controlstate.ClearTargetCommand()
+		if !is_button {
+			controlstate.StopInteractingIfNotAlready(controller.API)
+		}
 		return nil
 	}
 
-	if target_value_diff <= command.MaxChangeRate {
-		/* if less than max change rate; change as-is */
-		if err := controller.StartInteractingIfNotAlready(ctx, command.Controls); err != nil {
+	if is_button {
+		/**
+		* buttons handle the interacting state differently than lever-like controls; so we handle them separately
+		 */
+		if targetcmd.InputValue > 0.5 {
+			if err := controlstate.StartInteractingIfNotAlready(controller.API); err != nil {
+				return err
+			}
+			if err := controlstate.SetInputValue(controller.API, 1.0); err != nil {
+				return err
+			}
+		} else {
+			if err := controlstate.SetInputValue(controller.API, 0.0); err != nil {
+				return err
+			}
+			if err := controlstate.StopInteractingIfNotAlready(controller.API); err != nil {
+				return err
+			}
+		}
+	} else {
+		if err := controlstate.StartInteractingIfNotAlready(controller.API); err != nil {
 			return err
 		}
-		return controller.UpdateControlValue(ctx, command.Controls, command.InputValue)
-	} else {
-		/* if not generate steps to reach the target value */
-		num_steps := int(math.Ceil(target_value_diff / command.MaxChangeRate))
-		for step := 1; step <= num_steps; step++ {
-			if err := controller.StartInteractingIfNotAlready(ctx, command.Controls); err != nil {
-				return err
-			}
-			set_value := current_value
-			if current_value < command.InputValue {
-				set_value = math.Min(current_value+(float64(step)*command.MaxChangeRate), command.InputValue)
-			} else {
-				set_value = math.Max(current_value-(float64(step)*command.MaxChangeRate), command.InputValue)
-			}
-			if err := controller.UpdateControlValue(ctx, command.Controls, set_value); err != nil {
-				return err
+		if target_value_diff <= targetcmd.MaxChangeRate {
+			/* if less than max change rate; change as-is */
+			return controlstate.SetInputValue(controller.API, targetcmd.InputValue)
+		} else {
+			/* if not generate steps to reach the target value */
+			num_steps := int(math.Ceil(target_value_diff / targetcmd.MaxChangeRate))
+			for step := 1; step <= num_steps; step++ {
+				set_value := current_value
+				if current_value < targetcmd.InputValue {
+					set_value = math.Min(current_value+(float64(step)*targetcmd.MaxChangeRate), targetcmd.InputValue)
+				} else {
+					set_value = math.Max(current_value-(float64(step)*targetcmd.MaxChangeRate), targetcmd.InputValue)
+				}
+				if err := controlstate.SetInputValue(controller.API, set_value); err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -232,11 +250,16 @@ func (controller *ApiController) ProcessPendingControlCommand(ctx context.Contex
 * Iterates over the current pending interacting states and processes any target commands
  */
 func (controller *ApiController) ProcessPendingControlStates(ctx context.Context) error {
-	controller.interacting.mutex.Lock()
-	defer controller.interacting.mutex.Unlock()
-	for control, controlstate := range controller.interacting.controls {
-		if controlstate.TargetCommand != nil {
-			go controller.ProcessPendingControlCommand(ctx, control)
+	controller.controlStates.mutex.RLock()
+	defer controller.controlStates.mutex.RUnlock()
+	for control, controlstate := range controller.controlStates.controls {
+		if _, has_target_command := controlstate.GetTargetCommand(); has_target_command {
+			/*
+				create a copy of the control name and then defer spawning the go routine
+				to early release the controlstates lock itself
+			*/
+			controlname := fmt.Sprintf("%s", control)
+			go controller.ProcessPendingControlState(ctx, controlname)
 		}
 	}
 	return nil
@@ -244,8 +267,7 @@ func (controller *ApiController) ProcessPendingControlStates(ctx context.Context
 
 /*
 * Processes the incoming control command:
-* - Starts interacting with the control from an API pespective
-* - Assigns incoming command as the target command
+* - Assigns incoming command as the target command for further processing
  */
 func (controller *ApiController) ProcessControlCommand(ctx context.Context, command ApiController_Command) error {
 	control, err := controller.formatControlName(command.Controls)
@@ -254,20 +276,13 @@ func (controller *ApiController) ProcessControlCommand(ctx context.Context, comm
 		return err
 	}
 
-	if err := controller.StartInteractingIfNotAlready(ctx, control); err != nil {
-		return err
-	}
-
-	controller.interacting.mutex.Lock()
-	defer controller.interacting.mutex.Unlock()
-	controlstate := controller.interacting.controls[control]
-	controlstate.TargetCommand = &ApiController_Command{
+	controller.getControlStateRef(control).UpdateTargetCommand(ApiController_Command{
 		Controls:      control,
 		InputValue:    command.InputValue,
 		Hold:          command.Hold,
 		MaxChangeRate: command.MaxChangeRate,
-	}
-	controller.interacting.controls[control] = controlstate
+	})
+
 	return nil
 }
 
@@ -301,9 +316,9 @@ func NewAPIController(twapi tswapi.ITSWAPI) *ApiController {
 			Front:     false,
 			Back:      false,
 		},
-		interacting: ApiController_Interacting{
+		controlStates: ApiController_ControlStates{
 			mutex:    sync.RWMutex{},
-			controls: map[string]ApiController_Interacting_Control{},
+			controls: map[FormattedControlName]*ApiController_ControlStates_Control{},
 		},
 	}
 	return &controller
