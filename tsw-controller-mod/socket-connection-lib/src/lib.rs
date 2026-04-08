@@ -7,6 +7,8 @@ use tokio::sync::mpsc::{self, Sender};
 use tokio_tungstenite::connect_async;
 use tungstenite::{protocol::Message, Utf8Bytes};
 
+static WS_PORT_OPTIONS: &[u16] = &[63241, 63242];
+
 /// C callback signature: void (*MessageCallback)(const char*)
 pub type MessageCallback = extern "C" fn(*const std::ffi::c_char);
 
@@ -16,6 +18,7 @@ struct DLLState {
     stop_tx: Option<Sender<()>>,
     outgoing_tx: Option<Sender<String>>,
     callback: Option<MessageCallback>,
+    current_port_index: usize,
 }
 
 static STATE: Lazy<Arc<RwLock<DLLState>>> = Lazy::new(|| {
@@ -24,6 +27,7 @@ static STATE: Lazy<Arc<RwLock<DLLState>>> = Lazy::new(|| {
         stop_tx: None,
         outgoing_tx: None,
         callback: None,
+        current_port_index: 0,
     }))
 });
 
@@ -44,12 +48,15 @@ pub extern "C" fn tsw_controller_mod_start() {
     let (stop_tx, mut stop_rx) = mpsc::channel::<()>(1);
     let (out_tx, mut out_rx) = mpsc::channel::<String>(64);
 
-    let ws_url = "ws://127.0.0.1:63241".to_string();
-    let state_clone = STATE.clone();
+    let state_arc_clone = STATE.clone();
 
     rt.spawn(async move {
         loop {
-            println!("[socket_connection_lib][info] attempting to connect to socket");
+            let current_port = state_arc_clone.read().unwrap_or_else(
+                |poisoned| poisoned.into_inner()
+            ).current_port_index;
+            let ws_url = format!("ws://127.0.0.1:{}", WS_PORT_OPTIONS[current_port]);
+            println!("[socket_connection_lib][info] attempting to connect to socket using port {}", WS_PORT_OPTIONS[current_port]);
             tokio::select! {
                 _ = stop_rx.recv() => {
                     break;
@@ -62,7 +69,7 @@ pub extern "C" fn tsw_controller_mod_start() {
                             let (reconnect_tx, mut reconnect_rx) = mpsc::channel::<()>(1);
 
                             // Forward incoming WS messages to callback
-                            let state_c = state_clone.clone();
+                            let state_c = state_arc_clone.clone();
                             tokio::spawn(async move {
                                 while let Some(Ok(msg)) = ws_read.next().await {
                                   match msg {
@@ -111,6 +118,9 @@ pub extern "C" fn tsw_controller_mod_start() {
                         Err(e) => {
                             println!("[socket_connection_lib][error] failed to connect to socket - retrying in 5s | {}", e);
                             tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                            /* update port index to next one */
+                            let mut state_guard = state_arc_clone.write().unwrap_or_else(|poisoned| poisoned.into_inner());
+                            state_guard.current_port_index = (state_guard.current_port_index + 1) % WS_PORT_OPTIONS.len();
                             continue;
                         }
                     }

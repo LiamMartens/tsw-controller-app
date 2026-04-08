@@ -12,11 +12,11 @@
     },
     {
       "id": "MasterController",
-      "deadzone": 237,
+      "deadzone": 257,
       "invert": true,
-      "min": -32000,
-      "max": 32000,
-      "idle": -32000,
+      "min": -26358,
+      "max": -634,
+      "idle": -26358,
       "easing_curve": [0, 0, 1, 1],
       "thresholds": [
         {
