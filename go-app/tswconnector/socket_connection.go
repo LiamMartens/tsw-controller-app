@@ -16,8 +16,10 @@ import (
 )
 
 const SOCKET_CONNECTION_OUTGOING_QUEUE_BUFFER_SIZE = 32
+
+/* socket conn will try to bind to ports 63241, 63242 and 63243 */
 const SOCKET_CONNECTION_PORT_RANGE_START = 63241
-const SOCKET_CONNECTION_PORT_RANGE_END = 63242
+const SOCKET_CONNECTION_PORT_RANGE_END = 63243
 
 type SocketConnection struct {
 	WsUpgrader       *websocket.Upgrader

@@ -15,7 +15,7 @@ use tungstenite::{protocol::Message, Utf8Bytes};
 use windows::Win32::Foundation::HMODULE;
 use windows::Win32::System::LibraryLoader::{GetModuleFileNameW};
 
-static WS_PORT_OPTIONS: &[u16] = &[63241, 63242];
+static WS_PORT_OPTIONS: &[u16] = &[63241, 63242, 63243];
 
 struct DLLLocoStateControlTarget {
     value: c_float,

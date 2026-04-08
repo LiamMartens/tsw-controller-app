@@ -7,7 +7,7 @@ use tokio::sync::mpsc::{self, Sender};
 use tokio_tungstenite::connect_async;
 use tungstenite::{protocol::Message, Utf8Bytes};
 
-static WS_PORT_OPTIONS: &[u16] = &[63241, 63242];
+static WS_PORT_OPTIONS: &[u16] = &[63241, 63242, 63243];
 
 /// C callback signature: void (*MessageCallback)(const char*)
 pub type MessageCallback = extern "C" fn(*const std::ffi::c_char);
