@@ -3,6 +3,7 @@ module tsw_controller_app
 go 1.25.8
 
 require (
+	github.com/axiomhq/axiom-go v0.31.1
 	github.com/creasty/go-easing v0.0.0-20161107103139-0cfd96d3a544
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/go-playground/validator/v10 v10.30.1
@@ -16,7 +17,6 @@ require (
 )
 
 require (
-	github.com/axiomhq/axiom-go v0.31.1 // indirect
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect

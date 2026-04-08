@@ -86,8 +86,10 @@ func main() {
 					case <-ctx.Done():
 						return
 					case msg := <-logchan:
-						event_to_send := axiom.Event{ingest.TimestampField: time.Now(), "message": msg.Message}
-						go ax.IngestEvents(context.Background(), AXIOM_DATASET, []axiom.Event{event_to_send})
+						if msg.LogLevel == "info" || msg.LogLevel == "error" {
+							event_to_send := axiom.Event{ingest.TimestampField: time.Now(), "message": msg.Message}
+							go ax.IngestEvents(context.Background(), AXIOM_DATASET, []axiom.Event{event_to_send})
+						}
 					}
 				}
 			}()
