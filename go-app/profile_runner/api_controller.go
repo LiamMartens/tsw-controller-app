@@ -177,21 +177,6 @@ func (controller *ApiController) formatControlName(control string) (string, erro
 	return formatted_control, nil
 }
 
-func (controller *ApiController) clearControlTargetCommand(command ApiController_Command) {
-	controller.controlStates.mutex.Lock()
-	defer controller.controlStates.mutex.Unlock()
-
-	controlstate, has_controlstate := controller.controlStates.controls[command.Controls]
-	/* clear target command if the same and not hold */
-	if has_controlstate &&
-		controlstate.TargetCommand != nil &&
-		!controlstate.TargetCommand.Hold &&
-		controlstate.TargetCommand.ToString() == command.ToString() {
-		controlstate.TargetCommand = nil
-		controller.controlStates.controls[command.Controls] = controlstate
-	}
-}
-
 func (controller *ApiController) ProcessPendingControlState(ctx context.Context, control FormattedControlName) error {
 	controlstate := controller.getControlStateRef(control)
 	targetcmd, has_targetcmd := controlstate.GetTargetCommand()
@@ -222,11 +207,11 @@ func (controller *ApiController) ProcessPendingControlState(ctx context.Context,
 				return err
 			}
 			if err := controlstate.SetInputValue(controller.API, 1.0); err != nil {
-				return nil
+				return err
 			}
 		} else {
 			if err := controlstate.SetInputValue(controller.API, 0.0); err != nil {
-				return nil
+				return err
 			}
 			if err := controlstate.StopInteractingIfNotAlready(controller.API); err != nil {
 				return err
@@ -267,7 +252,14 @@ func (controller *ApiController) ProcessPendingControlStates(ctx context.Context
 	defer controller.controlStates.mutex.Unlock()
 	for control, controlstate := range controller.controlStates.controls {
 		if _, has_target_command := controlstate.GetTargetCommand(); has_target_command {
-			go controller.ProcessPendingControlState(ctx, control)
+			/*
+				create a copy of the control name and then defer spawning the go routine
+				to early release the controlstates lock itself
+			*/
+			controlname := fmt.Sprintf("%s", control)
+			defer func() {
+				go controller.ProcessPendingControlState(ctx, controlname)
+			}()
 		}
 	}
 	return nil
