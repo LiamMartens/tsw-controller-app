@@ -107,7 +107,9 @@ func (a *App) startupRun() {
 	}()
 
 	go func() {
-		a.connector.Start()
+		if err := a.connector.Start(); err != nil {
+			logger.Logger.Error("could not start direct control server", "error", err)
+		}
 	}()
 
 	go func() {

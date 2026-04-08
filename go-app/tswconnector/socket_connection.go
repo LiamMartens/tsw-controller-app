@@ -127,7 +127,7 @@ func NewSocketConnection(ctx context.Context) *SocketConnection {
 		Addr:    fmt.Sprintf("0.0.0.0:%d", SOCKET_CONNECTION_PORT),
 		Handler: mux,
 	}
-	controller := SocketConnection{
+	conn := SocketConnection{
 		WsUpgrader: &websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true
@@ -137,6 +137,6 @@ func NewSocketConnection(ctx context.Context) *SocketConnection {
 		OutgoingChannels: map_utils.NewLockMap[uuid.UUID, chan TSWConnector_Message](),
 		Subscribers:      pubsub_utils.NewPubSubSlice[TSWConnector_Message](),
 	}
-	mux.HandleFunc("/", controller.WebsocketHandler)
-	return &controller
+	mux.HandleFunc("/", conn.WebsocketHandler)
+	return &conn
 }
