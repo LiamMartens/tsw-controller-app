@@ -203,13 +203,13 @@ func (a *App) LoadConfiguration() {
 				}
 			}
 			if calibration != nil {
-				logger.Logger.Info("[App] registering SDL map and calibration for controller", "name", sdl_mapping.Name, "usb_id", sdl_mapping.UsbID)
+				logger.Logger.Debug("[App] registering SDL map and calibration for controller", "name", sdl_mapping.Name, "usb_id", sdl_mapping.UsbID)
 				a.sdl_controller_manager.RegisterConfig(sdl_mapping, *calibration)
 			}
 		}
 
 		for _, profile := range profiles {
-			logger.Logger.Info("[App] registering profile", "profile", profile.Id(), profile.Name)
+			logger.Logger.Debug("[App] registering profile", "profile", profile.Id(), "name", profile.Name)
 			a.profile_runner.RegisterProfile(profile)
 		}
 	}

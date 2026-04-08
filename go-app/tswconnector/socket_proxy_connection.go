@@ -46,13 +46,22 @@ func (c *SocketProxyConnection) dial() chan SocketProxyConnection_ConnectionResu
 		dialer := websocket.Dialer{
 			HandshakeTimeout: 5 * time.Second,
 		}
-		u := url.URL{Scheme: "ws", Host: fmt.Sprintf("%s:%d", c.ServerAddr, SOCKET_CONNECTION_PORT), Path: "/"}
-		conn, _, err := dialer.Dial(u.String(), nil)
-		if err != nil {
-			logger.Logger.Error("[SocketProxyConnection::dial] could not connect to server", "error", err)
-			done <- SocketProxyConnection_ConnectionResult{connection: nil, err: err}
-		} else {
-			done <- SocketProxyConnection_ConnectionResult{connection: conn, err: nil}
+		for port := SOCKET_CONNECTION_PORT_RANGE_START; port <= SOCKET_CONNECTION_PORT_RANGE_END; port++ {
+			u := url.URL{Scheme: "ws", Host: fmt.Sprintf("%s:%d", c.ServerAddr, port), Path: "/"}
+			conn, _, err := dialer.Dial(u.String(), nil)
+			if err != nil {
+				/*
+					if the dial was unsuccessfull we can retry except if this is the last port in the range;
+					if the last port has been reached we will also send a message to the channel to propagate the error
+				*/
+				logger.Logger.Error("[SocketProxyConnection::dial] could not connect to server", "error", err, "port", port)
+				if port >= SOCKET_CONNECTION_PORT_RANGE_END {
+					done <- SocketProxyConnection_ConnectionResult{connection: nil, err: err}
+				}
+			} else {
+				/* if the dial was successfull then we can return the connection */
+				done <- SocketProxyConnection_ConnectionResult{connection: conn, err: nil}
+			}
 		}
 	}()
 	return done

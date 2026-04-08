@@ -3,7 +3,6 @@ package controller_mgr
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -170,7 +169,7 @@ func (vm *VirtualControllerManager) registerDeviceFromConnectorEvent(msg tswconn
 	device_id := msg.Properties["device_id"]
 	device_name := msg.Properties["device_name"]
 	if strings.HasPrefix(unique_id, "virtual:") && strings.HasPrefix(device_id, "virtual:") {
-		fmt.Printf("registering device: %s - %s", unique_id, device_id)
+		logger.Logger.Debug("[VirtualControllerManager::registerDeviceFromConnectorEvent] registering device", "unique_id", unique_id, "device_id", device_id)
 		if vm.controllers.Contains(unique_id) {
 			/* already registered; silently ignore */
 			return nil
@@ -195,7 +194,7 @@ func (vm *VirtualControllerManager) registerDeviceFromConnectorEvent(msg tswconn
 func (vm *VirtualControllerManager) deregisterDeviceFromConnectorEvent(msg tswconnector.TSWConnector_Message) error {
 	unique_id := msg.Properties["unique_id"]
 	if strings.HasPrefix(unique_id, "virtual:") {
-		fmt.Printf("de-registering device: %s", unique_id)
+		logger.Logger.Debug("[VirtualControllerManager::deregisterDeviceFromConnectorEvent] deregistering device", "unique_id", unique_id)
 		vm.controllers.Delete(unique_id)
 		return nil
 	}
@@ -208,7 +207,6 @@ func (vm *VirtualControllerManager) updateDeviceControlValueFromConnectorEvent(m
 	control_name := msg.Properties["control"]
 	control_value, _ := strconv.ParseFloat(msg.Properties["value"], 64)
 	device, has_device := vm.controllers.Get(unique_id)
-	fmt.Printf("updating control: %s\n", control_name)
 	if !has_device {
 		return MissingVirtualDeviveError
 	}

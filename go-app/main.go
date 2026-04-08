@@ -34,15 +34,17 @@ func main() {
 	arg_proxy := flag.String("proxy", "", "Enter the proxy address")
 	flag.Parse()
 
-	fmt.Printf("Version %s\n", VERSION)
+	logger.Logger.Debug("[main] version", "version", VERSION)
 
 	config_dir, err := os.UserConfigDir()
 	if err != nil {
+		logger.Logger.Error("[main] could not determine user configuration directory", "error", err)
 		panic(fmt.Errorf("could not find user config directory %e", err))
 	}
 
 	exec_file, err := os.Executable()
 	if err != nil {
+		logger.Logger.Error("[main] could not determine own executable", "error", err)
 		panic(fmt.Errorf("could not find executable %e", err))
 	}
 
@@ -59,7 +61,7 @@ func main() {
 	mode := AppConfig_Mode_Default
 	var proxy_settings *AppConfig_ProxySettings
 	if arg_proxy != nil && *arg_proxy != "" {
-		fmt.Printf("enabling proxy mode: %s\n", *arg_proxy)
+		logger.Logger.Debug("[main] running in proxy mode", "proxy", *arg_proxy)
 		mode = AppConfig_Mode_Proxy
 		proxy_settings = &AppConfig_ProxySettings{
 			Addr: *arg_proxy,
