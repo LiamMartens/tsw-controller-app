@@ -227,18 +227,15 @@ func (controller *ApiController) ProcessPendingControlState(ctx context.Context,
 			/* if less than max change rate; change as-is */
 			return controlstate.SetInputValue(controller.API, targetcmd.InputValue)
 		} else {
-			/* if not generate steps to reach the target value */
-			num_steps := int(math.Ceil(target_value_diff / targetcmd.MaxChangeRate))
-			for step := 1; step <= num_steps; step++ {
-				set_value := current_value
-				if current_value < targetcmd.InputValue {
-					set_value = math.Min(current_value+(float64(step)*targetcmd.MaxChangeRate), targetcmd.InputValue)
-				} else {
-					set_value = math.Max(current_value-(float64(step)*targetcmd.MaxChangeRate), targetcmd.InputValue)
-				}
-				if err := controlstate.SetInputValue(controller.API, set_value); err != nil {
-					return err
-				}
+			/* increment by step at each cycle */
+			set_value := current_value
+			if current_value < targetcmd.InputValue {
+				set_value = math.Min(current_value+targetcmd.MaxChangeRate, targetcmd.InputValue)
+			} else {
+				set_value = math.Max(current_value-targetcmd.MaxChangeRate, targetcmd.InputValue)
+			}
+			if err := controlstate.SetInputValue(controller.API, set_value); err != nil {
+				return err
 			}
 		}
 	}
