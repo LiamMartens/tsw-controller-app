@@ -50,21 +50,20 @@ func (c *SocketProxyConnection) dial() chan SocketProxyConnection_ConnectionResu
 		}
 		for port := SOCKET_CONNECTION_PORT_RANGE_START; port <= SOCKET_CONNECTION_PORT_RANGE_END; port++ {
 			u := url.URL{Scheme: "ws", Host: fmt.Sprintf("%s:%d", c.ServerAddr, port), Path: "/"}
-			conn, _, err := dialer.Dial(u.String(), nil)
+			conn, response, err := dialer.Dial(u.String(), nil)
 			if err != nil {
 				/*
 					if the dial was unsuccessfull we can retry except if this is the last port in the range;
 					if the last port has been reached we will also send a message to the channel to propagate the error
 				*/
 				logger.Logger.Error("[SocketProxyConnection::dial] could not connect to server", "error", err, "port", port)
-				if port >= SOCKET_CONNECTION_PORT_RANGE_END {
-					done <- SocketProxyConnection_ConnectionResult{connection: nil, err: err}
-				}
-			} else {
+			} else if response.Header.Get("X-TSW-Version") != "" {
 				/* if the dial was successfull then we can return the connection */
 				done <- SocketProxyConnection_ConnectionResult{connection: conn, err: nil}
+				return
 			}
 		}
+		done <- SocketProxyConnection_ConnectionResult{connection: nil, err: fmt.Errorf("exhausted all port options without connecting to proxy")}
 	}()
 	return done
 }
