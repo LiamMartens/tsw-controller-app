@@ -145,7 +145,17 @@ pub fn mod_init(hmod: HMODULE) {
                 }
                 conect_res = connect_async(ws_url.as_str()) => {
                     match conect_res {
-                        Ok((ws_stream, _)) => {
+                        Ok((ws_stream, response)) => {
+                            let header = response.headers().get("X-TSW-Version");
+                            if header.is_none() || header.unwrap().is_empty() {
+                                println!("[socket_connection_lib][error] connected to unknown socket server - switching and retrying in 3s");
+                                tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+                                /* update port index to next one */
+                                let mut state_guard = STATE.write().unwrap_or_else(|poisoned| poisoned.into_inner());
+                                state_guard.current_port_index = (state_guard.current_port_index + 1) % WS_PORT_OPTIONS.len();
+                                continue;
+                            }
+
                             let (mut ws_write, mut ws_read) = ws_stream.split();
 
                             let (reconnect_tx, mut reconnect_rx) = mpsc::channel::<()>(1);

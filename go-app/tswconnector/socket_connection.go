@@ -24,6 +24,7 @@ const SOCKET_CONNECTION_PORT_RANGE_START = 63241
 const SOCKET_CONNECTION_PORT_RANGE_END = 63243
 
 type SocketConnection struct {
+	Version          string
 	WsUpgrader       *websocket.Upgrader
 	Server           *http.Server
 	OutgoingChannels *map_utils.LockMap[uuid.UUID, chan TSWConnector_Message]
@@ -39,6 +40,8 @@ func (c *SocketConnection) Port() int {
 }
 
 func (c *SocketConnection) WebsocketHandler(w http.ResponseWriter, r *http.Request) {
+	headers := make(http.Header)
+	headers.Add("X-TSW-Version", c.Version)
 	conn, err := c.WsUpgrader.Upgrade(w, r, nil)
 	if err != nil {
 		logger.Logger.Error("[SocketConnection::WebsocketHandler] websocket upgrade error", "error", err.Error())
@@ -143,7 +146,7 @@ func (c *SocketConnection) Forward(from uuid.UUID, m TSWConnector_Message) error
 	return nil
 }
 
-func NewSocketConnection(ctx context.Context) *SocketConnection {
+func NewSocketConnection(ctx context.Context, version string) *SocketConnection {
 	mux := http.NewServeMux()
 	server := &http.Server{
 		BaseContext: func(l net.Listener) context.Context {
@@ -153,6 +156,7 @@ func NewSocketConnection(ctx context.Context) *SocketConnection {
 		Handler: mux,
 	}
 	conn := SocketConnection{
+		Version: version,
 		WsUpgrader: &websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true

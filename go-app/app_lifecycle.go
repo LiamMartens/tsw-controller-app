@@ -23,7 +23,7 @@ func (a *App) startupInitialize() {
 	var tsw_api *tswapi.TSWAPI
 	switch a.config.Mode {
 	case AppConfig_Mode_Default:
-		connector = tswconnector.NewSocketConnection(a.ctx)
+		connector = tswconnector.NewSocketConnection(a.ctx, VERSION)
 		tsw_api = tswapi.NewTSWAPI(tswapi.TSWAPIConfig{
 			BaseURL: "http://localhost:31270",
 		})
