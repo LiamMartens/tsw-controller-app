@@ -126,6 +126,8 @@ jobs:
             ~/AppData/Local/vcpkg/archives
             ${{ github.workspace }}/build_cmake_shared_deps/_deps
             ${{ github.workspace }}/build_cmake_shared_deps/ep_downloads
+            ${{ github.workspace }}/RE-UE4ss/build_cmake_shared_deps/_deps
+            ${{ github.workspace }}/RE-UE4ss/build_cmake_shared_deps/ep_downloads
           key: cmake-deps-${{ runner.os }}-${{ steps.cache_key.outputs.hash }}
           restore-keys: |
             cmake-deps-${{ runner.os }}-
@@ -186,17 +188,17 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ue4ssdll
-          path: RE-UE4SS/Binaries/Game__Shipping__Win64/UE4SS/UE4SS.dll
+          path: RE-UE4SS/build_cmake_Game__Shipping__Win64/Game__Shipping__Win64/bin/UE4SS.dll
 
       - uses: actions/upload-artifact@v4
         with:
           name: ue4ssproxy
-          path: RE-UE4SS/Binaries/Game__Shipping__Win64/proxy/dwmapi.dll
+          path: RE-UE4SS/build_cmake_Game__Shipping__Win64/Game__Shipping__Win64/bin/dwmapi.dll
 
       - uses: actions/upload-artifact@v4
         with:
           name: tswcontrollermod
-          path: RE-UE4SS/Binaries/Game__Shipping__Win64/TSWControllerMod/*.dll
+          path: RE-UE4SS/build_cmake_Game__Shipping__Win64/Game__Shipping__Win64/bin/TSWControllerMod.dll
 
   build__mod_assets:
     runs-on: ubuntu-22.04
