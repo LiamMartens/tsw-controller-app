@@ -42,7 +42,7 @@ func (c *SocketConnection) Port() int {
 func (c *SocketConnection) WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	headers := make(http.Header)
 	headers.Add("X-TSW-Version", c.Version)
-	conn, err := c.WsUpgrader.Upgrade(w, r, nil)
+	conn, err := c.WsUpgrader.Upgrade(w, r, headers)
 	if err != nil {
 		logger.Logger.Error("[SocketConnection::WebsocketHandler] websocket upgrade error", "error", err.Error())
 		return
