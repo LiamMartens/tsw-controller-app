@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.14.1
+- Minor changes to mods and socket lib
+
 ## v1.14.0
 - Minor update to max change rate handling in API control
 - Updated direct control to try multiple ports
