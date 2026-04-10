@@ -5,10 +5,10 @@ use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::ffi::{CStr};
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use tokio::runtime::Runtime;
-use tokio::sync::broadcast;
+use tokio::sync::{broadcast, RwLock};
 use tokio::sync::mpsc::{self};
 use tokio_tungstenite::connect_async;
 use tungstenite::{protocol::Message, Utf8Bytes};
@@ -133,9 +133,7 @@ pub fn mod_init(hmod: HMODULE) {
     let socket_thread_stop_tx = Arc::clone(&stop_tx_arc);
     rt.spawn(async move {
         loop {
-            let current_port = STATE.read().unwrap_or_else(
-                |poisoned| poisoned.into_inner()
-            ).current_port_index;
+            let current_port = STATE.read().await.current_port_index;
             let ws_url = format!("ws://127.0.0.1:{}", WS_PORT_OPTIONS[current_port]);
             println!("[tscmod][info] attempting to connect to socket on port {}", WS_PORT_OPTIONS[current_port]);
             let mut sockst_stop_rx = socket_thread_stop_tx.subscribe();
@@ -151,7 +149,7 @@ pub fn mod_init(hmod: HMODULE) {
                                 println!("[socket_connection_lib][error] connected to unknown socket server - switching and retrying in 3s");
                                 tokio::time::sleep(std::time::Duration::from_secs(3)).await;
                                 /* update port index to next one */
-                                let mut state_guard = STATE.write().unwrap_or_else(|poisoned| poisoned.into_inner());
+                                let mut state_guard = STATE.write().await;
                                 state_guard.current_port_index = (state_guard.current_port_index + 1) % WS_PORT_OPTIONS.len();
                                 continue;
                             }
@@ -186,7 +184,7 @@ pub fn mod_init(hmod: HMODULE) {
 
                                                         /* now apply value */
                                                         if properties.contains_key("controls") && properties.contains_key("value") {
-                                                            let mut guard = STATE.write().unwrap_or_else(|poisoned| poisoned.into_inner());
+                                                            let mut guard = STATE.write().await;
                                                             let st = &mut *guard;
                                                             if st.loco.is_some() {
                                                                 let value: f32 = properties["value"].parse().unwrap();
@@ -244,7 +242,7 @@ pub fn mod_init(hmod: HMODULE) {
                             println!("[socket_connection_lib][error] failed to connect to socket - retrying in 3s | {}", e);
                             tokio::time::sleep(std::time::Duration::from_secs(3)).await;
                             /* update port index to next one */
-                            let mut state_guard = STATE.write().unwrap_or_else(|poisoned| poisoned.into_inner());
+                            let mut state_guard = STATE.write().await;
                             state_guard.current_port_index = (state_guard.current_port_index + 1) % WS_PORT_OPTIONS.len();
                             continue;
                         }
@@ -257,62 +255,62 @@ pub fn mod_init(hmod: HMODULE) {
     let read_state_lib = Arc::clone(&lib);
     let read_state_thread_stop_tx = Arc::clone(&stop_tx_arc);
     rt.spawn(async move {
-        unsafe {
-            let mut read_state_stop_rx = read_state_thread_stop_tx.subscribe();
-            loop {
-                tokio::select! {
-                    _ = read_state_stop_rx.recv() => {
-                        break;
-                    }
-                    _ = tokio::time::sleep(Duration::from_millis(300)) => {
-                        let lib = read_state_lib.lock().unwrap();
-                        let mut guard = STATE.write().unwrap_or_else(|poisoned| poisoned.into_inner());
-                        let st = &mut *guard;
+        let mut read_state_stop_rx = read_state_thread_stop_tx.subscribe();
+        loop {
+            tokio::select! {
+                _ = read_state_stop_rx.recv() => {
+                    break;
+                }
+                _ = tokio::time::sleep(Duration::from_millis(300)) => {
+                    let lib = read_state_lib.lock().unwrap();
+                    let mut guard = STATE.write().await;
+                    let st = &mut *guard;
 
-                        let loconame = get_loco_name(&lib);
-                        if st.loco.is_none() || (
-                            /* send name if changed */
-                            st.loco.as_ref().unwrap().drivable.name != loconame
-                            /* or it's been 2 secs - just to make sure */
-                            || st.loco.as_ref().unwrap().drivable.lastsent.elapsed() > Duration::from_secs(2)
-                         ) {
-                            let controls = get_controller_list(&lib);
-                            let loco = DLLLocoState {
-                                drivable:  DLLLocoStateDrivableActor{
-                                    name: loconame.to_string(),
-                                    lastsent: Instant::now(),
-                                },
-                                controls: controls,
-                                /* this will reset the controlvalues and controltarget values */
-                                controlvalues: HashMap::new(),
-                                controltargetvalues: HashMap::new()
-                            };
-                            st.loco = Some(loco);
+                    let loconame = unsafe { get_loco_name(&lib) };
+                    if st.loco.is_none() || (
+                        /* send name if changed */
+                        st.loco.as_ref().unwrap().drivable.name != loconame
+                        /* or it's been 2 secs - just to make sure */
+                        || st.loco.as_ref().unwrap().drivable.lastsent.elapsed() > Duration::from_secs(2)
+                        ) {
+                        let controls = unsafe { get_controller_list(&lib) };
+                        let loco = DLLLocoState {
+                            drivable:  DLLLocoStateDrivableActor{
+                                name: loconame.to_string(),
+                                lastsent: Instant::now(),
+                            },
+                            controls: controls,
+                            /* this will reset the controlvalues and controltarget values */
+                            controlvalues: HashMap::new(),
+                            controltargetvalues: HashMap::new()
+                        };
+                        st.loco = Some(loco);
 
-                            let drivable_msg = format!("current_drivable_actor,name={}", loconame);
-                            if let Some(tx) = &st.outgoing_tx {
-                                let drivable_send_result = tx.try_send(drivable_msg);
-                                if let Err(e) = drivable_send_result {
-                                    println!("[tscmod][error] failed to send message {}", e.to_string());
-                                }
+                        let drivable_msg = format!("current_drivable_actor,name={}", loconame);
+                        if let Some(tx) = &st.outgoing_tx {
+                            let drivable_send_result = tx.try_send(drivable_msg);
+                            if let Err(e) = drivable_send_result {
+                                println!("[tscmod][error] failed to send message {}", e.to_string());
                             }
                         }
+                    }
 
-                        let loco = st.loco.as_mut().unwrap();
-                        for (control_name, index) in loco.controls.iter() {
-                            let controlvalue = get_controller_value(&lib, (*index) as c_int, libraildriver::Kind::Current as c_int);
-                            if loco.controlvalues.contains_key(control_name) && loco.controlvalues[control_name] == controlvalue {
-                                /* skip sending if value is unchanged */
-                                continue;
-                            }
+                    let loco = st.loco.as_mut().unwrap();
+                    for (control_name, index) in loco.controls.iter() {
+                        let controlvalue = unsafe {
+                            get_controller_value(&lib, (*index) as c_int, libraildriver::Kind::Current as c_int)
+                        };
+                        if loco.controlvalues.contains_key(control_name) && loco.controlvalues[control_name] == controlvalue {
+                            /* skip sending if value is unchanged */
+                            continue;
+                        }
 
-                            loco.controlvalues.insert(control_name.to_string(), controlvalue);
-                            let msg = format!("sync_control_value,name={},property={},value={},normal_value={}", control_name, control_name, controlvalue, controlvalue);
-                            if let Some(tx) = st.outgoing_tx.as_ref() {
-                                let send_result = tx.try_send(msg);
-                                if let Err(e) = send_result {
-                                    println!("[tscmod][error] failed to send message {}", e.to_string());
-                                }
+                        loco.controlvalues.insert(control_name.to_string(), controlvalue);
+                        let msg = format!("sync_control_value,name={},property={},value={},normal_value={}", control_name, control_name, controlvalue, controlvalue);
+                        if let Some(tx) = st.outgoing_tx.as_ref() {
+                            let send_result = tx.try_send(msg);
+                            if let Err(e) = send_result {
+                                println!("[tscmod][error] failed to send message {}", e.to_string());
                             }
                         }
                     }
@@ -333,7 +331,7 @@ pub fn mod_init(hmod: HMODULE) {
                 _ = tokio::time::sleep(Duration::from_millis(33)) => {
                     /* check state */
                     let lib = control_tick_lib.lock().unwrap();
-                    let mut guard = STATE.write().unwrap_or_else(|poisoned| poisoned.into_inner());
+                    let mut guard = STATE.write().await;
                     let st = &mut *guard;
                     if !st.loco.is_some() {
                         continue;
@@ -376,7 +374,7 @@ pub fn mod_init(hmod: HMODULE) {
 }
 
 pub fn mod_destroy() {
-    let mut st = STATE.write().unwrap_or_else(|poisoned| poisoned.into_inner());
+    let mut st = STATE.blocking_write();
     if let Some(stop_tx) = st.stop_tx.take() {
         let _ = stop_tx.send(());
     }
