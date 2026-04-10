@@ -84,11 +84,11 @@ pub extern "C" fn tsw_controller_mod_start() {
                                 while let Some(Ok(msg)) = ws_read.next().await {
                                   match msg {
                                      tungstenite::Message::Text(text) => {
-                                        let guard = state_c.read().await;
-                                        if let Some(cb) = guard.callback {
+                                        if let Some(cb) = state_c.read().await.callback {
                                             if let Ok(cstr) = CString::new(text.to_string()) {
                                                 println!("[socket_connection_lib][info] received message from socket | {}", text);
-                                                cb(cstr.as_ptr());
+                                                let boxed_cstr = Box::new(cstr);
+                                                cb(boxed_cstr.as_ptr());
                                                 // ⚠️ Important: must keep CString alive until cb returns
                                                 // that's why cstr lives inside this block
                                             }
