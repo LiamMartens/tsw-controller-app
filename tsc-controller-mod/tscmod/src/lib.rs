@@ -110,7 +110,7 @@ pub fn mod_init(hmod: HMODULE) {
     let dlldir = dllpath.parent().unwrap();
     let raildriverpath = dlldir.join("RailDriver64.dll");
 
-    let mut st = STATE.write().unwrap_or_else(|poisoned| poisoned.into_inner());
+    let mut st = STATE.blocking_write();
     if st.rt.is_some() {
         return; // already running
     }
