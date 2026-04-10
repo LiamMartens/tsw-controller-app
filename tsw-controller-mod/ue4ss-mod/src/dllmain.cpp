@@ -477,11 +477,14 @@ class TSWControllerMod : public RC::CppUserModBase
 
     static void on_direct_control_message_received(const char* raw_message)
     {
-        /* update DC target state */
-        std::unique_lock<std::shared_mutex> lock(TSWControllerMod::DIRECT_CONTROL_TARGET_STATE_MUTEX);
+        /* quick nullptr check */
+        if (!raw_message) return;
 
         auto message = RC::ensure_str(std::string{raw_message});
         auto parts = TSWControllerMod::wstring_split(message, STR(","));
+
+        /* update DC target state */
+        std::unique_lock<std::shared_mutex> lock(TSWControllerMod::DIRECT_CONTROL_TARGET_STATE_MUTEX);
         /* format: direct_control,controls={control_name},value={target_value},max_change_rate={max_rate},flags={flag|flag} */
         if (parts[0] != STR("direct_control")) return;
         std::map<RC::StringType, RC::StringType> properties;
