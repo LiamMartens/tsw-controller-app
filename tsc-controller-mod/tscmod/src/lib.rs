@@ -123,7 +123,7 @@ pub fn mod_init(hmod: HMODULE) {
     };
 
     // create tokio runtime
-    let rt = tokio::runtime::Builder::new_multi_thread().enable_all().build().expect("Failed to create runtime");
+    let rt = tokio::runtime::Builder::new_current_thread().enable_all().build().expect("Failed to create runtime");
 
     // create channels
     let (stop_tx, _) = broadcast::channel::<()>(1);

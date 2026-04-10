@@ -43,7 +43,7 @@ pub extern "C" fn tsw_controller_mod_start() {
     }
 
     // create tokio runtime
-    let rt =  tokio::runtime::Builder::new_multi_thread().enable_all().build().expect("Failed to create runtime");
+    let rt =  tokio::runtime::Builder::new_current_thread().enable_all().build().expect("Failed to create runtime");
 
     // create channels
     let (stop_tx, mut stop_rx) = mpsc::channel::<()>(1);
