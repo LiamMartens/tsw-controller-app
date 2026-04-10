@@ -1,6 +1,12 @@
 
 # CHANGELOG
 
+## v1.14.0
+- Minor update to max change rate handling in API control
+- Updated direct control to try multiple ports
+- Updated logging
+- Updated default calibration and SDL map for M3
+
 ## v1.13.0
 - Fix API control handling of push button components
 

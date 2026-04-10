@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 	"tsw_controller_app/chan_utils"
 	"tsw_controller_app/logger"
@@ -16,9 +18,13 @@ import (
 )
 
 const SOCKET_CONNECTION_OUTGOING_QUEUE_BUFFER_SIZE = 32
-const SOCKET_CONNECTION_PORT = 63241
+
+/* socket conn will try to bind to ports 63241, 63242 and 63243 */
+const SOCKET_CONNECTION_PORT_RANGE_START = 63241
+const SOCKET_CONNECTION_PORT_RANGE_END = 63243
 
 type SocketConnection struct {
+	Version          string
 	WsUpgrader       *websocket.Upgrader
 	Server           *http.Server
 	OutgoingChannels *map_utils.LockMap[uuid.UUID, chan TSWConnector_Message]
@@ -27,8 +33,16 @@ type SocketConnection struct {
 
 var _ TSWConnector = (*SocketConnection)(nil)
 
+func (c *SocketConnection) Port() int {
+	addr_split := strings.Split(c.Server.Addr, ":")
+	port, _ := strconv.Atoi(addr_split[len(addr_split)-1])
+	return port
+}
+
 func (c *SocketConnection) WebsocketHandler(w http.ResponseWriter, r *http.Request) {
-	conn, err := c.WsUpgrader.Upgrade(w, r, nil)
+	headers := make(http.Header)
+	headers.Add("X-TSW-Version", c.Version)
+	conn, err := c.WsUpgrader.Upgrade(w, r, headers)
 	if err != nil {
 		logger.Logger.Error("[SocketConnection::WebsocketHandler] websocket upgrade error", "error", err.Error())
 		return
@@ -97,7 +111,21 @@ func (c *SocketConnection) Stop() error {
 }
 
 func (c *SocketConnection) Start() error {
-	return c.Server.ListenAndServe()
+	/* try to bind each port in the range; if successfull return nil */
+	for port := SOCKET_CONNECTION_PORT_RANGE_START; port <= SOCKET_CONNECTION_PORT_RANGE_END; port++ {
+		c.Server.Addr = fmt.Sprintf("0.0.0.0:%d", port)
+		logger.Logger.Debug("[SocketConnection::start] Starting direct control server", "addr", c.Server.Addr)
+		err := c.Server.ListenAndServe()
+		if err == http.ErrServerClosed {
+			/*
+				server closed is the only acceptable error because this is a graceful shutdown;
+				any other error should continue trying the next port until exhausted
+			*/
+			return nil
+		}
+		logger.Logger.Error("[SocketConnection::start] could not start direct control server", "addr", c.Server.Addr)
+	}
+	return fmt.Errorf("exhausted all port options")
 }
 
 func (c *SocketConnection) Send(m TSWConnector_Message) error {
@@ -118,16 +146,17 @@ func (c *SocketConnection) Forward(from uuid.UUID, m TSWConnector_Message) error
 	return nil
 }
 
-func NewSocketConnection(ctx context.Context) *SocketConnection {
+func NewSocketConnection(ctx context.Context, version string) *SocketConnection {
 	mux := http.NewServeMux()
 	server := &http.Server{
 		BaseContext: func(l net.Listener) context.Context {
 			return ctx
 		},
-		Addr:    fmt.Sprintf("0.0.0.0:%d", SOCKET_CONNECTION_PORT),
+		Addr:    fmt.Sprintf("0.0.0.0:%d", SOCKET_CONNECTION_PORT_RANGE_START),
 		Handler: mux,
 	}
 	conn := SocketConnection{
+		Version: version,
 		WsUpgrader: &websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strconv"
+	"strings"
 	"time"
 	"tsw_controller_app/chan_utils"
 	"tsw_controller_app/logger"
@@ -46,14 +48,22 @@ func (c *SocketProxyConnection) dial() chan SocketProxyConnection_ConnectionResu
 		dialer := websocket.Dialer{
 			HandshakeTimeout: 5 * time.Second,
 		}
-		u := url.URL{Scheme: "ws", Host: fmt.Sprintf("%s:%d", c.ServerAddr, SOCKET_CONNECTION_PORT), Path: "/"}
-		conn, _, err := dialer.Dial(u.String(), nil)
-		if err != nil {
-			logger.Logger.Error("[SocketProxyConnection::dial] could not connect to server", "error", err)
-			done <- SocketProxyConnection_ConnectionResult{connection: nil, err: err}
-		} else {
-			done <- SocketProxyConnection_ConnectionResult{connection: conn, err: nil}
+		for port := SOCKET_CONNECTION_PORT_RANGE_START; port <= SOCKET_CONNECTION_PORT_RANGE_END; port++ {
+			u := url.URL{Scheme: "ws", Host: fmt.Sprintf("%s:%d", c.ServerAddr, port), Path: "/"}
+			conn, response, err := dialer.Dial(u.String(), nil)
+			if err != nil {
+				/*
+					if the dial was unsuccessfull we can retry except if this is the last port in the range;
+					if the last port has been reached we will also send a message to the channel to propagate the error
+				*/
+				logger.Logger.Error("[SocketProxyConnection::dial] could not connect to server", "error", err, "port", port)
+			} else if response.Header.Get("X-TSW-Version") != "" {
+				/* if the dial was successfull then we can return the connection */
+				done <- SocketProxyConnection_ConnectionResult{connection: conn, err: nil}
+				return
+			}
 		}
+		done <- SocketProxyConnection_ConnectionResult{connection: nil, err: fmt.Errorf("exhausted all port options without connecting to proxy")}
 	}()
 	return done
 }
@@ -74,6 +84,15 @@ func (c *SocketProxyConnection) waitForMessage(conn *websocket.Conn) chan Socket
 		}
 	}()
 	return received
+}
+
+func (c *SocketProxyConnection) Port() int {
+	if c.connection == nil {
+		return SOCKET_CONNECTION_PORT_RANGE_START
+	}
+	addr_split := strings.Split(c.connection.LocalAddr().String(), ":")
+	port, _ := strconv.Atoi(addr_split[len(addr_split)-1])
+	return port
 }
 
 func (c *SocketProxyConnection) IsActive() bool {

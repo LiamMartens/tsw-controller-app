@@ -23,7 +23,7 @@ func (a *App) startupInitialize() {
 	var tsw_api *tswapi.TSWAPI
 	switch a.config.Mode {
 	case AppConfig_Mode_Default:
-		connector = tswconnector.NewSocketConnection(a.ctx)
+		connector = tswconnector.NewSocketConnection(a.ctx, VERSION)
 		tsw_api = tswapi.NewTSWAPI(tswapi.TSWAPIConfig{
 			BaseURL: "http://localhost:31270",
 		})
@@ -198,10 +198,10 @@ func (a *App) startupRun() {
 				if !ok {
 					return
 				}
-				logger.Logger.Info("reloading configuration")
+				logger.Logger.Debug("[App::watcher] Automatically reloading configuration")
 				a.LoadConfiguration()
 			case err, ok := <-watcher.Errors:
-				logger.Logger.Error("error received while watching config directories", "error", err)
+				logger.Logger.Error("[App::watcher] error received while watching config directories", "error", err)
 				if !ok {
 					return
 				}

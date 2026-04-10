@@ -10,11 +10,11 @@ export function GetAlwaysOnTop():Promise<boolean>;
 
 export function GetCabControlState():Promise<main.Interop_Cab_ControlState>;
 
+export function GetControlServerAddr():Promise<string>;
+
 export function GetControllerConfiguration(arg1:string):Promise<main.Interop_ControllerConfiguration>;
 
 export function GetControllers():Promise<Array<main.Interop_GenericController>>;
-
-export function GetDeviceIP():Promise<string>;
 
 export function GetLastInstalledModVersion():Promise<string>;
 

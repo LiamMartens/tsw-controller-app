@@ -111,25 +111,40 @@ jobs:
         with:
           python-version: '3.9'
 
-      # Specifically use MSVC toolset v19.39.33523
-      - name: Install VS2022 BuildTools 17.9.7
-        run: choco install -y visualstudio2022buildtools --version=117.9.7.0 --params "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --installChannelUri https://aka.ms/vs/17/release/180911598_-255012421/channel"
-
-      - name: Setup xmake
-        uses: xmake-io/github-action-setup-xmake@v1
-        with:
-          xmake-version: '2.9.3'
-
-      - name: Cache
+      # Cache for third-party dependencies fetched by CMake
+      # NOTE: This caching approach was carefully designed to avoid PatternSleuth (Rust) cache issues
+      # The cache key includes CMakeLists.txt hashes which should catch most dependency changes
+      # For Rust version changes, the weekly cache invalidation in CI provides a safety net
+      # Caching is disabled for production releases to ensure clean builds
+      # Dependencies are shared between MSVC and Clang-CL builds since most are compiler-agnostic
+      - name: Cache CMake Dependencies
+        if: ${{ inputs.enable-caching }}
         uses: actions/cache@v4
         with:
           path: |
-            RE-UE4SS/.xmake
-            RE-UE4SS/Binaries
-            RE-UE4SS/Intermediates
-            ~/AppData/Local/.xmake
+            ~/.cmake/packages
             ~/AppData/Local/vcpkg/archives
-          key: ${{ runner.os }}_ue4ssmod_xmake_${{ hashFiles('RE-UE4SS/**/xmake.lua') }}
+            ${{ github.workspace }}/build_cmake_shared_deps/_deps
+            ${{ github.workspace }}/build_cmake_shared_deps/ep_downloads
+            ${{ github.workspace }}/RE-UE4ss/build_cmake_shared_deps/_deps
+            ${{ github.workspace }}/RE-UE4ss/build_cmake_shared_deps/ep_downloads
+          key: cmake-deps-${{ runner.os }}-${{ steps.cache_key.outputs.hash }}
+          restore-keys: |
+            cmake-deps-${{ runner.os }}-
+
+      - name: Setup MSVC Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+          vsversion: "2022"
+
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: 'latest'
+
+      - name: Setup Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v5
 
       - uses: actions/download-artifact@v7
         name: Download socket connection lib
@@ -140,7 +155,6 @@ jobs:
       - name: Copy proxy generator stub
         run: |
           Copy-Item -Path RE-UE4SS_stub/* -Destination RE-UE4SS -Recurse -Force
-          Get-ChildItem -File -Recurse -Path RE-UE4SS
 
       - name: Copy custom mod
         run: |
@@ -152,27 +166,38 @@ jobs:
           includes("KismetDebuggerMod")
           includes("TSWControllerMod")
           "@ | Out-File -FilePath "RE-UE4SS/cppmods/xmake.lua" -Encoding utf8
+          @"
+          set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+          add_subdirectory("KismetDebuggerMod")
+          add_subdirectory("EventViewerMod")
+          add_subdirectory("TSWControllerMod")
+          get_property(TARGETS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY BUILDSYSTEM_TARGETS)
+          foreach(target ${TARGETS})
+              set_target_properties(${target} PROPERTIES FOLDER "mods")
+          endforeach()
+          "@ | Out-File -FilePath "RE-UE4SS/cppmods/CMakeLists.txt" -Encoding utf8
 
       - name: Build
         run: |
           cd ./RE-UE4SS
-          xmake f -m "Game__Shipping__Win64" -y --ue4ssProxyPath=C:/Windows/System32/dwmapi.dll
-          xmake build
+          cmake -B build_cmake_Game__Shipping__Win64 -G Ninja -DCMAKE_BUILD_TYPE=Game__Shipping__Win64 -DUE4SS_PROXY_PATH="C:/Windows/System32/dwmapi.dll"
+          cmake --build build_cmake_Game__Shipping__Win64
+          Get-ChildItem -File -Recurse -Path build_cmake_Game__Shipping__Win64
 
       - uses: actions/upload-artifact@v4
         with:
           name: ue4ssdll
-          path: RE-UE4SS/Binaries/Game__Shipping__Win64/UE4SS/UE4SS.dll
+          path: RE-UE4SS/build_cmake_Game__Shipping__Win64/Game__Shipping__Win64/bin/UE4SS.dll
 
       - uses: actions/upload-artifact@v4
         with:
           name: ue4ssproxy
-          path: RE-UE4SS/Binaries/Game__Shipping__Win64/proxy/dwmapi.dll
+          path: RE-UE4SS/build_cmake_Game__Shipping__Win64/Game__Shipping__Win64/bin/dwmapi.dll
 
       - uses: actions/upload-artifact@v4
         with:
           name: tswcontrollermod
-          path: RE-UE4SS/Binaries/Game__Shipping__Win64/TSWControllerMod/*.dll
+          path: RE-UE4SS/build_cmake_Game__Shipping__Win64/Game__Shipping__Win64/bin/TSWControllerMod.dll
 
   build__mod_assets:
     runs-on: ubuntu-22.04

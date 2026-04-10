@@ -1,9 +1,7 @@
-import { MutableRefObject, Suspense, useRef } from "react";
+import { MutableRefObject, Suspense, useMemo, useRef } from "react";
 import QRCode from "react-qr-code";
-import { GetDeviceIP } from "../../../../wailsjs/go/main/App";
 import { BrowserOpenURL } from "../../../../wailsjs/runtime/runtime";
-import { useDeviceIP } from "../../../swr";
-import { ErrorBoundary } from "react-error-boundary";
+import { useControlServerAddr } from "../../../swr";
 import { Modal } from "../../../components";
 
 type Props = {
@@ -12,7 +10,13 @@ type Props = {
 };
 
 const ConnectRemoteControllerModalContent = () => {
-  const { data: deviceIP } = useDeviceIP();
+  const { data: controlServerAddr } = useControlServerAddr();
+  const controlServerInfo = useMemo(() => {
+    if (!controlServerAddr) return null
+    const addrSplit = controlServerAddr.split(":")
+    const port = parseInt(addrSplit.at(-1)!);
+    return { addr: controlServerAddr.substring(0, controlServerAddr.length - String(port).length - 1), port }
+  }, [controlServerAddr])
 
   const handleOpenAppLink = () => {
     BrowserOpenURL(
@@ -36,19 +40,19 @@ const ConnectRemoteControllerModalContent = () => {
 
       <div>
         <div className="flex justify-center">
-          {deviceIP && (
+          {controlServerInfo && (
             <div className="p-4 bg-white rounded-md">
               <QRCode
                 value={JSON.stringify({
                   connection: {
-                    ip: deviceIP,
-                    port: 63241,
+                    ip: controlServerInfo.addr,
+                    port: controlServerInfo.port,
                   },
                 })}
               />
             </div>
           )}
-          {!deviceIP && (
+          {!controlServerInfo && (
             <div className="alert alert-error">
               Could not determine connection address for remote controller
             </div>

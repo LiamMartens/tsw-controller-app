@@ -68,7 +68,7 @@ func (mgr *SDLMgr) joyDeviceAdded(event *sdl.JoyDeviceAddedEvent) (*SDLMgr_Joyst
 		InternalJoystick: nil,
 	}
 
-	logger.Logger.Info("[SDLMgr_Joystick::Open] opening joystick", "joystick", joystick.DeviceID(), "name", joystick.Name)
+	logger.Logger.Debug("[SDLMgr_Joystick::Open] opening joystick", "joystick", joystick.DeviceID(), "name", joystick.Name)
 	joystick.InternalJoystick = sdl.JoystickOpen(joy_index)
 	if joystick.InternalJoystick == nil {
 		return nil, fmt.Errorf("could not open joystick for use: %w", sdl.GetError())

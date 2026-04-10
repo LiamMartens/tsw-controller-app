@@ -2,15 +2,16 @@
   "name": "Infinite Railtech: Model #01",
   "usb_id": "1209:5389",
   "data": [
+
     {
       "kind": "axis",
       "index": 0,
-      "name": "MasterController"
+      "name": "Wiper"
     },
     {
       "kind": "axis",
       "index": 1,
-      "name": "Wiper"
+      "name": "MasterController"
     },
     {
       "kind": "button",
