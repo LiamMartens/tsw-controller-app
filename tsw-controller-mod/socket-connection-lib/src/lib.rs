@@ -32,13 +32,17 @@ static STATE: Lazy<Arc<RwLock<DLLState>>> = Lazy::new(|| {
     }))
 });
 
+async fn cycle_current_port_index() {
+    let mut state_guard = STATE.write().await;
+    state_guard.current_port_index = (state_guard.current_port_index + 1) % WS_PORT_OPTIONS.len();
+}
+
 /// Start WebSocket loop inside a Tokio runtime
 #[no_mangle]
 pub extern "C" fn tsw_controller_mod_start() {
     println!("[socket_connection_lib][info] starting tsw_controller_mod");
 
-    let mut st = STATE.blocking_write();
-    if st.rt.is_some() {
+    if STATE.blocking_write().rt.is_some() {
         return; // already running
     }
 
@@ -49,11 +53,12 @@ pub extern "C" fn tsw_controller_mod_start() {
     let (stop_tx, mut stop_rx) = mpsc::channel::<()>(1);
     let (out_tx, mut out_rx) = mpsc::channel::<String>(64);
 
-    let state_arc_clone = STATE.clone();
-
     rt.spawn(async move {
         loop {
-            let current_port = state_arc_clone.read().await.current_port_index;
+            let current_port = {
+                STATE.read().await.current_port_index
+            };
+
             let ws_url = format!("ws://127.0.0.1:{}", WS_PORT_OPTIONS[current_port]);
             println!("[socket_connection_lib][info] attempting to connect to socket using port {}", WS_PORT_OPTIONS[current_port]);
 
@@ -69,8 +74,7 @@ pub extern "C" fn tsw_controller_mod_start() {
                                 println!("[socket_connection_lib][error] connected to unknown socket server - switching and retrying in 3s");
                                 tokio::time::sleep(std::time::Duration::from_secs(3)).await;
                                 /* update port index to next one */
-                                let mut state_guard = STATE.write().await;
-                                state_guard.current_port_index = (state_guard.current_port_index + 1) % WS_PORT_OPTIONS.len();
+                                cycle_current_port_index().await;
                                 continue;
                             }
 
@@ -79,12 +83,12 @@ pub extern "C" fn tsw_controller_mod_start() {
                             let (reconnect_tx, mut reconnect_rx) = mpsc::channel::<()>(1);
 
                             // Forward incoming WS messages to callback
-                            let state_c = state_arc_clone.clone();
                             tokio::spawn(async move {
                                 while let Some(Ok(msg)) = ws_read.next().await {
                                   match msg {
-                                     tungstenite::Message::Text(text) => {
-                                        if let Some(cb) = state_c.read().await.callback {
+                                    tungstenite::Message::Text(text) => {
+                                        let state_guard = STATE.read().await;
+                                        if let Some(cb) = state_guard.callback {
                                             if let Ok(cstr) = CString::new(text.to_string()) {
                                                 println!("[socket_connection_lib][info] received message from socket | {}", text);
                                                 let boxed_cstr = Box::new(cstr);
@@ -93,11 +97,11 @@ pub extern "C" fn tsw_controller_mod_start() {
                                                 // that's why cstr lives inside this block
                                             }
                                         }
-                                     },
-                                     tungstenite::Message::Close(_) => {
-                                      break;
-                                     },
-                                     _ => {},
+                                    },
+                                    tungstenite::Message::Close(_) => {
+                                        break;
+                                    },
+                                    _ => {},
                                   }
                                 }
                                 /* if this while ends - the read resulted in an error - try send reconnect_tx */
@@ -109,7 +113,7 @@ pub extern "C" fn tsw_controller_mod_start() {
                             loop {
                                 tokio::select! {
                                     Some(msg) = out_rx.recv() => {
-                                      println!("[socket_connection_lib][info] sending message | {}", msg);
+                                        println!("[socket_connection_lib][info] sending message | {}", msg);
                                         if let Err(e) = ws_write.send(Message::Text(Utf8Bytes::from(msg))).await {
                                            println!("[socket_connection_lib][info] failed to send message | {}", e);
                                             break; // reconnect
@@ -128,9 +132,7 @@ pub extern "C" fn tsw_controller_mod_start() {
                         Err(e) => {
                             println!("[socket_connection_lib][error] failed to connect to socket - retrying in 3s | {}", e);
                             tokio::time::sleep(std::time::Duration::from_secs(3)).await;
-                            /* update port index to next one */
-                            let mut state_guard = state_arc_clone.write().await;
-                            state_guard.current_port_index = (state_guard.current_port_index + 1) % WS_PORT_OPTIONS.len();
+                            cycle_current_port_index().await;
                             continue;
                         }
                     }
@@ -139,9 +141,12 @@ pub extern "C" fn tsw_controller_mod_start() {
         }
     });
 
-    st.rt = Some(rt);
-    st.stop_tx = Some(stop_tx);
-    st.outgoing_tx = Some(out_tx);
+    {
+        let mut state_guard = STATE.blocking_write();
+        state_guard.rt = Some(rt);
+        state_guard.stop_tx = Some(stop_tx);
+        state_guard.outgoing_tx = Some(out_tx);
+    }
 }
 
 /// Stop the module
@@ -173,7 +178,7 @@ pub extern "C" fn tsw_controller_mod_send_message(message: *const std::ffi::c_ch
         raw_str.to_str().ok().map(|s| s.to_owned())
     };
     if let Some(msg) = cstr {
-        let st = STATE.blocking_write();
+        let st = STATE.blocking_read();
         if let Some(tx) = &st.outgoing_tx {
             println!("[socket_connection_lib][info] sending message {}",msg.clone());
             let send_result = tx.try_send(msg);
