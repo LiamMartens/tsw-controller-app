@@ -3,17 +3,17 @@ use libc::{c_char, c_float, c_int};
 use libloading::Library;
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
-use std::ffi::{CStr};
+use std::ffi::CStr;
 use std::path::PathBuf;
-use std::sync::{Arc};
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::runtime::Runtime;
-use tokio::sync::{broadcast, Mutex, RwLock};
 use tokio::sync::mpsc::{self};
+use tokio::sync::{broadcast, Mutex, RwLock};
 use tokio_tungstenite::connect_async;
 use tungstenite::{protocol::Message, Utf8Bytes};
 use windows::Win32::Foundation::HMODULE;
-use windows::Win32::System::LibraryLoader::{GetModuleFileNameW};
+use windows::Win32::System::LibraryLoader::GetModuleFileNameW;
 
 static WS_PORT_OPTIONS: &[u16] = &[63241, 63242, 63243];
 
@@ -21,19 +21,19 @@ static WS_PORT_OPTIONS: &[u16] = &[63241, 63242, 63243];
 struct DLLLocoStateControlTarget {
     value: c_float,
     max_change_rate: c_float,
-    hold: bool
+    hold: bool,
 }
 
 struct DLLLocoStateDrivableActor {
     name: String,
-    lastsent: Instant
+    lastsent: Instant,
 }
 
 struct DLLLocoState {
     drivable: DLLLocoStateDrivableActor,
     controls: HashMap<String, usize>,
     controlvalues: HashMap<String, c_float>,
-    controltargetvalues: HashMap<String, DLLLocoStateControlTarget>
+    controltargetvalues: HashMap<String, DLLLocoStateControlTarget>,
 }
 
 struct DLLState {
@@ -41,7 +41,7 @@ struct DLLState {
     raildriver_lib: Option<Arc<Mutex<Library>>>,
     stop_tx: Option<Arc<broadcast::Sender<()>>>,
     outgoing_tx: Option<mpsc::Sender<String>>,
-    loco: Option<DLLLocoState>,
+    loco: Option<Arc<Mutex<DLLLocoState>>>,
     current_port_index: usize,
 }
 
@@ -113,73 +113,86 @@ async fn cycle_current_port_index() {
 
 async fn process_incoming_control_message(text: Utf8Bytes) {
     let msg_split: Vec<&str> = text.split(",").collect();
-    if msg_split[0] == "direct_control" {
-        /* collect properties from direct control message */
-        let mut properties = HashMap::<&str, &str>::new();
-        for part in msg_split.iter().skip(1) {
-            let valuesplit: Vec<&str> = part.split("=").collect();
-            if valuesplit.len() == 2 {
-                properties.insert(valuesplit[0], valuesplit[1]);
-            }
-        }
+    if msg_split[0] != "direct_control" {
+        return;
+    }
 
-        /* now apply value */
-        if properties.contains_key("controls") && properties.contains_key("value") {
-            let mut guard = STATE.write().await;
-            if let Some(loco) = guard.loco.as_mut() {
-                let value: f32 = properties["value"].parse().unwrap();
-                let max_change_rate: f32 = match properties.contains_key("max_change_rate") {
-                    true => properties["max_change_rate"].parse().unwrap(),
-                    false => 999.0f32 /* 999 should be more than enough */
-                };
-                let hold: bool = match properties.contains_key("flags") {
-                    true => properties["flags"].split(',').any(|s| s.trim().contains("hold")),
-                    false => false
-                };
-                loco.controltargetvalues.insert(
-                    properties["controls"].to_string(),
-                    DLLLocoStateControlTarget { value, max_change_rate, hold }
-                );
-            }
+    /* collect properties from direct control message */
+    let mut properties = HashMap::<&str, &str>::new();
+    for part in msg_split.iter().skip(1) {
+        let valuesplit: Vec<&str> = part.split("=").collect();
+        if valuesplit.len() == 2 {
+            properties.insert(valuesplit[0], valuesplit[1]);
         }
+    }
+    if !properties.contains_key("controls") || !properties.contains_key("value") {
+        return;
+    }
+
+    /* now apply value */
+    let mut guard = STATE.write().await;
+    if let Some(loco) = guard.loco.as_mut().cloned() {
+        let value: f32 = match properties["value"].parse() {
+            Ok(v) => v,
+            Err(_) => return,
+        };
+        let max_change_rate: f32 = match properties.contains_key("max_change_rate") {
+            true => match properties["max_change_rate"].parse() {
+                Ok(v) => v,
+                Err(_) => return,
+            },
+            false => 999.0f32, /* 999 should be more than enough */
+        };
+        let hold: bool = match properties.contains_key("flags") {
+            true => properties["flags"].split(',').any(|s| s.trim().contains("hold")),
+            false => false,
+        };
+        loco.lock()
+            .await
+            .controltargetvalues
+            .insert(properties["controls"].to_string(), DLLLocoStateControlTarget { value, max_change_rate, hold });
     }
 }
 
 async fn update_current_loco() {
     let mut state_guard = STATE.write().await;
-    if state_guard.raildriver_lib.is_none() {
-        return;
-    }
+    let rdlib_mutex = match state_guard.raildriver_lib.as_ref() {
+        Some(v) => v,
+        None => return,
+    };
 
-    let rdlib_mutex = state_guard.raildriver_lib.as_ref().unwrap();
-    let loconame = unsafe {
+    let current_loconame = unsafe {
         let rdlib = rdlib_mutex.lock().await;
         get_loco_name(&rdlib)
     };
 
-    if state_guard.loco.is_none() || (
-        /* send name if changed */
-        state_guard.loco.as_ref().unwrap().drivable.name != loconame
-        /* or it's been 2 secs - just to make sure */
-        || state_guard.loco.as_ref().unwrap().drivable.lastsent.elapsed() > Duration::from_secs(2)
-    ) {
+    let should_update_loco = match state_guard.loco.as_ref() {
+        None => true,
+        Some(loco) => {
+            let guard = loco.lock().await;
+            let should_update: bool = guard.drivable.name != current_loconame || guard.drivable.lastsent.elapsed() > Duration::from_secs(2);
+            should_update
+        }
+    };
+
+    if should_update_loco {
         let controls = unsafe {
             let rdlib = rdlib_mutex.lock().await;
             get_controller_list(&rdlib)
         };
         let loco = DLLLocoState {
-            drivable:  DLLLocoStateDrivableActor{
-                name: loconame.to_string(),
+            drivable: DLLLocoStateDrivableActor {
+                name: current_loconame.to_string(),
                 lastsent: Instant::now(),
             },
             controls: controls,
             /* this will reset the controlvalues and controltarget values */
             controlvalues: HashMap::new(),
-            controltargetvalues: HashMap::new()
+            controltargetvalues: HashMap::new(),
         };
-        state_guard.loco = Some(loco);
+        state_guard.loco = Some(Arc::new(Mutex::new(loco)));
 
-        let drivable_msg = format!("current_drivable_actor,name={}", loconame);
+        let drivable_msg = format!("current_drivable_actor,name={}", current_loconame);
         if let Some(tx) = state_guard.outgoing_tx.as_ref() {
             let drivable_send_result = tx.try_send(drivable_msg);
             if let Err(e) = drivable_send_result {
@@ -191,26 +204,34 @@ async fn update_current_loco() {
 
 async fn send_current_loco_control_values() {
     let mut state_guard = STATE.write().await;
-    if state_guard.raildriver_lib.is_none() || state_guard.loco.is_none() {
-        return;
-    }
+    let rdlib_mutex = match state_guard.raildriver_lib.as_mut() {
+        Some(v) => v.clone(),
+        None => return,
+    };
 
-    let loco_controls = state_guard.loco.as_ref().unwrap().controls.clone();
+    let loco_mutex = match state_guard.loco.as_mut().cloned() {
+        Some(loco) => loco,
+        None => return,
+    };
+    let mut loco = loco_mutex.lock().await;
+    let loco_controls = loco.controls.clone();
+
     for (control_name, index) in loco_controls.iter() {
         let controlvalue = unsafe {
-            let rdlib_mutex = state_guard.raildriver_lib.as_ref().unwrap();
             let rdlib = rdlib_mutex.lock().await;
             get_controller_value(&rdlib, (*index) as c_int, libraildriver::Kind::Current as c_int)
         };
 
-        let loco_ref = state_guard.loco.as_mut().unwrap();
-        if loco_ref.controlvalues.contains_key(control_name) && loco_ref.controlvalues[control_name] == controlvalue {
+        if loco.controlvalues.contains_key(control_name) && loco.controlvalues[control_name] == controlvalue {
             /* skip sending if value is unchanged */
             continue;
         }
 
-        loco_ref.controlvalues.insert(control_name.to_string(), controlvalue);
-        let msg = format!("sync_control_value,name={},property={},value={},normal_value={}", control_name, control_name, controlvalue, controlvalue);
+        loco.controlvalues.insert(control_name.to_string(), controlvalue);
+        let msg = format!(
+            "sync_control_value,name={},property={},value={},normal_value={}",
+            control_name, control_name, controlvalue, controlvalue
+        );
         if let Some(tx) = state_guard.outgoing_tx.as_ref() {
             let send_result = tx.try_send(msg);
             if let Err(e) = send_result {
@@ -222,41 +243,44 @@ async fn send_current_loco_control_values() {
 
 async fn update_loco_from_control_target_values() {
     let mut state_guard = STATE.write().await;
-    if state_guard.raildriver_lib.is_none() || state_guard.loco.is_none() {
-        return;
-    }
+    let rdlib_mutex = match state_guard.raildriver_lib.as_mut() {
+        Some(v) => v.clone(),
+        None => return,
+    };
 
-    let controls = state_guard.loco.as_ref().unwrap().controls.clone();
-    let controltargetvalues = state_guard.loco.as_ref().unwrap().controltargetvalues.clone();
-    for key in controltargetvalues.keys() {
+    let loco_mutex = match state_guard.loco.as_mut().cloned() {
+        Some(loco) => loco,
+        None => return,
+    };
+    let mut loco = loco_mutex.lock().await;
+    let controls = loco.controls.clone();
+    let controltargetvalues = loco.controltargetvalues.clone();
+    for (key, target_state) in controltargetvalues.iter() {
         if !controls.contains_key(key) {
             /* skip and delete from targets if not available in loco */
-            state_guard.loco.as_mut().unwrap().controltargetvalues.remove(key);
+            loco.controltargetvalues.remove(key);
             continue;
         }
 
         let control_index = controls[key];
-        let currentvalue =  unsafe {
-            let rdlib_mutex = state_guard.raildriver_lib.as_ref().unwrap();
+        let currentvalue = unsafe {
             let rdlib = rdlib_mutex.lock().await;
             get_controller_value(&rdlib, control_index as c_int, libraildriver::Kind::Current as c_int)
         };
 
-        let target_state = controltargetvalues.get(key).unwrap();
         let delta = target_state.value - currentvalue;
         let next_value = match delta > 0.0 {
             true => currentvalue + delta.abs().min(target_state.max_change_rate),
-            false => currentvalue - delta.abs().min(target_state.max_change_rate)
+            false => currentvalue - delta.abs().min(target_state.max_change_rate),
         };
 
         unsafe {
-            let rdlib_mutex = state_guard.raildriver_lib.as_ref().unwrap();
             let rdlib = rdlib_mutex.lock().await;
             set_controller_value(&rdlib, control_index as c_int, next_value as c_float);
         }
         if !target_state.hold && (next_value - target_state.value).abs() < 0.05f32 {
             /* has reached target value within margin of error of 0.05 */
-            state_guard.loco.as_mut().unwrap().controltargetvalues.remove(key);
+            loco.controltargetvalues.remove(key);
         }
     }
 }
@@ -272,8 +296,7 @@ pub fn mod_init(hmod: HMODULE) {
         return; // already running
     }
 
-    let rt =  tokio::runtime::Builder::new_multi_thread().worker_threads(1)
-        .enable_all().build().expect("Failed to create runtime");
+    let rt = tokio::runtime::Builder::new_multi_thread().worker_threads(1).enable_all().build().expect("Failed to create runtime");
 
     unsafe {
         let lib = libloading::Library::new(raildriverpath).unwrap();
@@ -300,8 +323,8 @@ pub fn mod_init(hmod: HMODULE) {
                 conect_res = connect_async(ws_url.as_str()) => {
                     match conect_res {
                         Ok((ws_stream, response)) => {
-                            let header = response.headers().get("X-TSW-Version");
-                            if header.is_none() || header.unwrap().is_empty() {
+                            let header = response.headers().get("X-TSW-Version").filter(|h| h.is_empty());
+                            if header.is_none() {
                                 println!("[socket_connection_lib][error] connected to unknown socket server - switching and retrying in 3s");
                                 tokio::time::sleep(std::time::Duration::from_secs(3)).await;
                                 cycle_current_port_index().await;
@@ -411,11 +434,14 @@ pub fn mod_init(hmod: HMODULE) {
 }
 
 pub fn mod_destroy() {
-    let mut st = STATE.blocking_write();
-    if let Some(stop_tx) = st.stop_tx.take() {
+    let mut guard = STATE.blocking_write();
+    if let Some(stop_tx) = guard.stop_tx.take() {
         let _ = stop_tx.send(());
     }
-    st.rt.take().unwrap().shutdown_background(); // dropping runtime shuts it down
+    // dropping runtime shuts it down
+    if let Some(rt) = guard.rt.take() {
+        rt.shutdown_background();
+    }
 }
 
 #[no_mangle]
