@@ -323,7 +323,7 @@ pub fn mod_init(hmod: HMODULE) {
                 conect_res = connect_async(ws_url.as_str()) => {
                     match conect_res {
                         Ok((ws_stream, response)) => {
-                            let header = response.headers().get("X-TSW-Version").filter(|h| h.is_empty());
+                            let header = response.headers().get("X-TSW-Version").filter(|h| !h.is_empty());
                             if header.is_none() {
                                 println!("[socket_connection_lib][error] connected to unknown socket server - switching and retrying in 3s");
                                 tokio::time::sleep(std::time::Duration::from_secs(3)).await;
