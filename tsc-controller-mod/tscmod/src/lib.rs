@@ -272,7 +272,9 @@ pub fn mod_init(hmod: HMODULE) {
         return; // already running
     }
 
-    let rt = tokio::runtime::Builder::new_current_thread().enable_all().build().expect("Failed to create runtime");
+    let rt =  tokio::runtime::Builder::new_multi_thread().worker_threads(1)
+        .enable_all().build().expect("Failed to create runtime");
+
     unsafe {
         let lib = libloading::Library::new(raildriverpath).unwrap();
         lib.get::<unsafe extern "C" fn(bool)>(b"SetRailDriverConnected").unwrap()(true);
