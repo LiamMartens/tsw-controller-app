@@ -37,7 +37,7 @@
     },
     "threshold_tolerance": {
       "type": "number",
-      "description": "Defines the tolerance for the threshold"
+      "description": "Defines the tolerance for the threshold. Defaults to (1/(max(1, num_steps-1))/2) or 0.1; whichever is the lowest."
     }
   },
   "required": ["threshold"]

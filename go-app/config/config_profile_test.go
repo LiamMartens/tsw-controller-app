@@ -83,9 +83,9 @@ func TestConfigProfile_DirectOrSyncControl_InputValue_CalculateOutputValue_Simpl
 	}
 	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.0, nil))
 	assert.Equal(t, 0.0, *input_value.CalculateOutputValue(0.1, nil))
-	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.2, nil))
+	assert.Nil(t, input_value.CalculateOutputValue(0.2, nil))
 	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.3, nil))
-	assert.Equal(t, 0.5, *input_value.CalculateOutputValue(0.3333, nil))
+	assert.Equal(t, 0.55, *input_value.CalculateOutputValue(0.4, nil))
 	assert.Equal(t, 0.7, *input_value.CalculateOutputValue(0.6, nil))
 	assert.Equal(t, 0.7751, *input_value.CalculateOutputValue(0.7, nil))
 	assert.Equal(t, 0.8501, *input_value.CalculateOutputValue(0.8, nil))

@@ -51,14 +51,14 @@ func TestConfigProfile_Linear_GenerateThresholds(t *testing.T) {
 
 		// should have generated 8 thresholds
 		assert.Len(t, thresholds, 8)
-		assert.Equal(t, thresholds[0].Value.GetValue(map[string]float64{}), 0.0)
-		assert.Equal(t, thresholds[1].Value.GetValue(map[string]float64{}), 0.1)
-		assert.Equal(t, thresholds[2].Value.GetValue(map[string]float64{}), 0.2)
-		assert.Equal(t, thresholds[3].Value.GetValue(map[string]float64{}), 0.3)
-		assert.Equal(t, thresholds[4].Value.GetValue(map[string]float64{}), 0.33)
-		assert.Equal(t, thresholds[5].Value.GetValue(map[string]float64{}), 0.36)
-		assert.Equal(t, thresholds[6].Value.GetValue(map[string]float64{}), 0.39)
-		assert.Equal(t, thresholds[7].Value.GetValue(map[string]float64{}), 0.6)
+		assert.Equal(t, thresholds[0].Value.GetValue(map[string]float64{}, false), 0.0)
+		assert.Equal(t, thresholds[1].Value.GetValue(map[string]float64{}, false), 0.1)
+		assert.Equal(t, thresholds[2].Value.GetValue(map[string]float64{}, false), 0.2)
+		assert.Equal(t, thresholds[3].Value.GetValue(map[string]float64{}, false), 0.3)
+		assert.Equal(t, thresholds[4].Value.GetValue(map[string]float64{}, false), 0.33)
+		assert.Equal(t, thresholds[5].Value.GetValue(map[string]float64{}, false), 0.36)
+		assert.Equal(t, thresholds[6].Value.GetValue(map[string]float64{}, false), 0.39)
+		assert.Equal(t, thresholds[7].Value.GetValue(map[string]float64{}, false), 0.6)
 	})
 
 	t.Run("with named thresholds", func(t *testing.T) {

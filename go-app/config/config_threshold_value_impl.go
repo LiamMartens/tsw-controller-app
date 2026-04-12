@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"tsw_controller_app/math_utils"
 )
 
 type thresholdValueAsObject struct {
@@ -10,13 +11,17 @@ type thresholdValueAsObject struct {
 	Reference *string  `json:"reference"`
 }
 
-func (v *Config_Threshold_Value) GetValue(thresholds map[string]float64) float64 {
+func (v *Config_Threshold_Value) GetValue(thresholds map[string]float64, inverted bool) float64 {
+	threshold_value := v.Value
 	if v.Reference != nil {
 		if value, has_ref := thresholds[*v.Reference]; has_ref {
-			return value
+			threshold_value = value
 		}
 	}
-	return v.Value
+	if inverted {
+		return math_utils.InvertInputValue(threshold_value)
+	}
+	return threshold_value
 }
 
 func (v *Config_Threshold_Value) UnmarshalJSON(data []byte) error {

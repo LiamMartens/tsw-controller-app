@@ -12,12 +12,12 @@ type Config_Controller_Profile_Control_Assignment_Linear_Threshold_Resolved stru
 func (c *Config_Controller_Profile_Control_Assignment_Linear_Threshold) Resolve(thresholds map[string]float64) Config_Controller_Profile_Control_Assignment_Linear_Threshold_Resolved {
 	var value_end *float64 = nil
 	if c.ValueEnd != nil {
-		value := c.ValueEnd.GetValue(thresholds)
+		value := c.ValueEnd.GetValue(thresholds, false)
 		value_end = &value
 	}
 
 	return Config_Controller_Profile_Control_Assignment_Linear_Threshold_Resolved{
-		Value:    c.Value.GetValue(thresholds),
+		Value:    c.Value.GetValue(thresholds, false),
 		ValueEnd: value_end,
 	}
 }
