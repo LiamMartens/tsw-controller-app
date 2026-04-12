@@ -2,6 +2,8 @@ package string_utils
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSluggify(t *testing.T) {
@@ -29,9 +31,7 @@ func TestSluggify(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
 			actual := Sluggify(tt.input)
-			if actual != tt.expected {
-				t.Errorf("Sluggify(%q) = %q; want %q", tt.input, actual, tt.expected)
-			}
+			assert.Equalf(t, tt.expected, actual, "Sluggify(%q) = %q; want %q", tt.input, actual, tt.expected)
 		})
 	}
 }
