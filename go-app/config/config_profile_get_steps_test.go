@@ -72,10 +72,10 @@ func TestConfigProfile_DirectLike_InputValue_GetSteps_PreDefinedStepsWithFreeRan
 
 	steps := input_value.GetSteps(map[string]float64{}, false)
 	assert.Len(t, steps, 5)
-	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 0.0, ValueEnd: 0.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.0, ValueEnd: 0.0, Tolerance: 0.125}}, steps[0])
+	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 0.0, ValueEnd: 0.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.0, ValueEnd: 0.0, Tolerance: 0.1}}, steps[0])
 	assert.Equal(t, ControlStepDefinition{IsFreeRange: true, ValueStart: 0.0, ValueEnd: 0.5, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.0, ValueEnd: 0.5, Tolerance: 0}}, steps[1])
-	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 0.5, ValueEnd: 0.5, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.5, ValueEnd: 0.5, Tolerance: 0.125}}, steps[2])
-	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 0.75, ValueEnd: 0.75, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.75, ValueEnd: 0.75, Tolerance: 0.125}}, steps[3])
+	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 0.5, ValueEnd: 0.5, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.5, ValueEnd: 0.5, Tolerance: 0.1}}, steps[2])
+	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 0.75, ValueEnd: 0.75, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.75, ValueEnd: 0.75, Tolerance: 0.1}}, steps[3])
 	assert.Equal(t, ControlStepDefinition{IsFreeRange: true, ValueStart: 0.75, ValueEnd: 1.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.75, ValueEnd: 1.0, Tolerance: 0}}, steps[4])
 }
 
@@ -95,7 +95,7 @@ func TestConfigProfile_DirectLike_InputValue_GetSteps_PreDefinedStepsWithFreeRan
 
 	steps := input_value.GetSteps(map[string]float64{}, false)
 	assert.Len(t, steps, 5)
-	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 0.0, ValueEnd: 0.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.0, ValueEnd: 0.0, Tolerance: 0.125}}, steps[0])
+	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 0.0, ValueEnd: 0.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.0, ValueEnd: 0.0, Tolerance: 0.1}}, steps[0])
 	assert.Equal(t, ControlStepDefinition{IsFreeRange: true, ValueStart: 0.0, ValueEnd: 0.5, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.1, ValueEnd: 0.4, Tolerance: 0.0}}, steps[1])
 	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 0.5, ValueEnd: 0.5, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.5, ValueEnd: 0.5, Tolerance: 0.05}}, steps[2])
 	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 0.75, ValueEnd: 0.75, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.75, ValueEnd: 0.75, Tolerance: 0.05}}, steps[3])
@@ -111,11 +111,44 @@ func TestConfigProfile_DirectLike_InputValue_GetSteps_PreDefinedStepsWithFreeRan
 
 	steps := input_value.GetSteps(map[string]float64{}, false)
 	assert.Len(t, steps, 5)
-	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: -1.0, ValueEnd: -1.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.0, ValueEnd: 0.0, Tolerance: 0.125}}, steps[0])
-	assert.Equal(t, ControlStepDefinition{IsFreeRange: true, ValueStart: -1.0, ValueEnd: 0.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.0, ValueEnd: 0.5, Tolerance: 0}}, steps[1])
-	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 0.0, ValueEnd: 0.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.5, ValueEnd: 0.5, Tolerance: 0.125}}, steps[2])
-	assert.Equal(t, ControlStepDefinition{IsFreeRange: true, ValueStart: 0.0, ValueEnd: 1.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.5, ValueEnd: 1.0, Tolerance: 0}}, steps[3])
-	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 1.0, ValueEnd: 1.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 1.0, ValueEnd: 1.0, Tolerance: 0.125}}, steps[4])
+	assert.Equal(
+		t,
+		ControlStepDefinition{
+			IsFreeRange: false, ValueStart: -1.0, ValueEnd: -1.0,
+			Threshold: ControlStepDefinition_Threshold{ValueStart: 0.0, ValueEnd: 0.0, Tolerance: 0.1},
+		},
+		steps[0],
+	)
+	assert.Equal(
+		t,
+		ControlStepDefinition{
+			IsFreeRange: true, ValueStart: -1.0, ValueEnd: 0.0,
+			Threshold: ControlStepDefinition_Threshold{ValueStart: 0.0, ValueEnd: 0.5, Tolerance: 0},
+		},
+		steps[1],
+	)
+	assert.Equal(
+		t,
+		ControlStepDefinition{
+			IsFreeRange: false, ValueStart: 0.0, ValueEnd: 0.0,
+			Threshold: ControlStepDefinition_Threshold{ValueStart: 0.5, ValueEnd: 0.5, Tolerance: 0.1},
+		},
+		steps[2],
+	)
+	assert.Equal(
+		t,
+		ControlStepDefinition{
+			IsFreeRange: true, ValueStart: 0.0, ValueEnd: 1.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.5, ValueEnd: 1.0, Tolerance: 0},
+		},
+		steps[3],
+	)
+	assert.Equal(
+		t,
+		ControlStepDefinition{
+			IsFreeRange: false, ValueStart: 1.0, ValueEnd: 1.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 1.0, ValueEnd: 1.0, Tolerance: 0.1},
+		},
+		steps[4],
+	)
 }
 
 func TestConfigProfile_DirectLike_InputValue_GetSteps_WithNamedThresholds(t *testing.T) {
@@ -134,9 +167,27 @@ func TestConfigProfile_DirectLike_InputValue_GetSteps_WithNamedThresholds(t *tes
 		"middle": 0.75,
 	}, false)
 	assert.Len(t, steps, 3)
-	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 0.0, ValueEnd: 0.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.0, ValueEnd: 0.0, Tolerance: 0.25}}, steps[0])
-	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 0.5, ValueEnd: 0.5, Threshold: ControlStepDefinition_Threshold{ValueStart: 0.75, ValueEnd: 0.75, Tolerance: 0.25}}, steps[1])
-	assert.Equal(t, ControlStepDefinition{IsFreeRange: false, ValueStart: 1.0, ValueEnd: 1.0, Threshold: ControlStepDefinition_Threshold{ValueStart: 1.0, ValueEnd: 1.0, Tolerance: 0.25}}, steps[2])
+	assert.Equal(t,
+		ControlStepDefinition{
+			IsFreeRange: false, ValueStart: 0.0, ValueEnd: 0.0,
+			Threshold: ControlStepDefinition_Threshold{ValueStart: 0.0, ValueEnd: 0.0, Tolerance: 0.1},
+		},
+		steps[0],
+	)
+	assert.Equal(t,
+		ControlStepDefinition{
+			IsFreeRange: false, ValueStart: 0.5, ValueEnd: 0.5,
+			Threshold: ControlStepDefinition_Threshold{ValueStart: 0.75, ValueEnd: 0.75, Tolerance: 0.1},
+		},
+		steps[1],
+	)
+	assert.Equal(t,
+		ControlStepDefinition{
+			IsFreeRange: false, ValueStart: 1.0, ValueEnd: 1.0,
+			Threshold: ControlStepDefinition_Threshold{ValueStart: 1.0, ValueEnd: 1.0, Tolerance: 0.1},
+		},
+		steps[2],
+	)
 }
 
 func TestConfigProfile_DirectLike_InputValue_GetSteps_WithInvertedThresholds(t *testing.T) {

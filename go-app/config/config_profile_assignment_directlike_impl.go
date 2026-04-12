@@ -155,7 +155,7 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Get
 	for ix, step := range stepslist {
 		num_steps := len(stepslist)
 		default_threshold_step := math_utils.RoundToMarginOfError(1.0 / math.Max(1.0, float64(num_steps)-1.0))
-		/* apply a default threshold of (1/num_steps/2) or 0.1 ; whichever is lower */
+		/* apply a default threshold of (1/(max(1, num_steps-1))/2) or 0.1 ; whichever is lower */
 		default_threshold_tolerance := math.Min(math_utils.RoundToMarginOfError(default_threshold_step/2.0), 0.1)
 		step_threshold := ControlStepDefinition_Threshold{}
 		if len(step_thresholds) > ix {
