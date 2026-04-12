@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.14.2
+- Fix invert handling in step thresholds
+
 ## v1.14.1
 - Minor changes to mods and socket lib
 
