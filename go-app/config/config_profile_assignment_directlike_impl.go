@@ -4,8 +4,6 @@ import (
 	"math"
 	"tsw_controller_app/cmp_utils"
 	"tsw_controller_app/math_utils"
-
-	"github.com/goforj/godump"
 )
 
 type StepList_Item struct {
@@ -211,8 +209,6 @@ func (c *Config_Controller_Profile_Control_Assignment_DirectLike_InputValue) Get
 			})
 		}
 	}
-
-	godump.Dump(defs)
 
 	return defs
 }
