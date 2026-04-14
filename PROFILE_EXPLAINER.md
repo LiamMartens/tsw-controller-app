@@ -33,7 +33,8 @@ Used for buttons that act while held.
 ```json
 {
   "type": "momentary",
-  "threshold": 0.5,
+  "threshold": 0.9,
+  "match": "exceeds",
   "action_activate": { ... },
   "action_deactivate": { ... }
 }
@@ -42,6 +43,95 @@ Used for buttons that act while held.
 - **Triggers** when input value crosses `threshold`.
 - **Deactivates** when input falls below `threshold`. (optional - by default if the `action_activate` defines a keystroke to be held; it will be released automatically when releasing the gamepad control)
 - Ideal for **press-and-hold** style controls.
+
+#### Properties
+
+| Property | Description | Required |
+|----------|-------------|----------|
+| `threshold` | The threshold value that triggers the action | ✅ Yes |
+| `match` | How to interpret the threshold. Defaults to `"exceeds"` where the action is executed when the value exceeds the threshold. Can also be set to `"equals"` for an exact comparison | No |
+| `action_activate` | The action to execute when the threshold is exceeded | ✅ Yes |
+| `action_deactivate` | The action to execute when the threshold is no longer exceeded. Defaults to releasing the previously activated key(s) | No |
+
+#### Examples
+
+##### Simple Key Press
+
+```json
+{
+  "type": "momentary",
+  "threshold": 0.9,
+  "action_activate": {
+    "keys": "h"
+  }
+}
+```
+
+##### Key Press with Timing
+
+```json
+{
+  "type": "momentary",
+  "threshold": 0.9,
+  "action_activate": {
+    "keys": "w",
+    "press_time": 0.2,
+    "wait_time": 0.2
+  }
+}
+```
+
+##### Direct Control with API Fallback
+
+```json
+{
+  "type": "momentary",
+  "threshold": 0.9,
+  "action_activate": {
+    "controls": "Throttle_{SIDE}",
+    "value": 1.0,
+    "hold": true,
+    "enable_api_fallback": true
+  },
+  "action_deactivate": {
+    "controls": "Throttle_{SIDE}",
+    "value": 0.0,
+    "enable_api_fallback": true
+  }
+}
+```
+
+##### Conditional Momentary
+
+Momentary assignments can be conditioned on other control values:
+
+```json
+{
+  "type": "momentary",
+  "threshold": 0.9,
+  "conditions": [
+    {
+      "control": "mylever",
+      "operator": "gte",
+      "value": 0.5
+    }
+  ],
+  "action_activate": {
+    "keys": "h"
+  }
+}
+```
+
+In the above example, the assignment will only execute if `mylever` exceeds 0.5.
+
+#### Supported Action Types
+
+Momentary assignments support the following action types:
+
+- **KeysAction**: Key presses with optional timing
+- **DirectControlAction**: Direct control with optional `hold`, `notify`, `enable_api_fallback`, `use_normalized`, `max_change_rate`
+- **APIControlAction**: API control with optional `hold`, `max_change_rate`
+- **VirtualAction**: Virtual control actions
 
 ### 🔁 Toggle
 
