@@ -497,7 +497,7 @@ Maps an analog controller input to a continuous value in-game. This is the prima
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
 | `controls`          | The UE4SS control identifier to control (e.g., `Throttle`, `AutomaticBrake`, `IndependentBrake`)                                            | ✅ Yes   |
 | `input_value`       | Defines the input value constraints and mapping                                                    | ✅ Yes   |
-| `control_range`     | Remaps a partial input range to a full 0-1 or 0,-1 output range (see [control_range example](#control-range-remapping))                      | No       |
+| `control_range`     | Remaps a partial input range to a full 0-1 or 0,-1 output range                  | No       |
 | `hold`              | Whether to continuously hold this value. Useful for levers which automatically reset (such as the Deadman or some brake levers)          | No       |
 | `use_normalized`    | Whether to use normalized values (-1 to 1) instead of raw values (0 to 1) [rarely used]                                                                    | No       |
 | `enable_api_fallback` | Whether to enable fallback to the TSW API if direct control is unavailable                                                                  | No       |
@@ -668,9 +668,18 @@ In the above example, the IndependentBrake is only controlled when the Reverser 
 }
 ```
 
-### 🧭 SyncControl
+### 🧭 SyncControl [DEPRECATED]
 
-An alternative to `DirectControl` for locomotives that don't work with direct control.
+An alternative to `DirectControl` for locomotives that don't work with direct control. Unlike DirectControl which directly sets values, SyncControl uses a **state machine approach** that reads the current in-game state and uses **keypresses** to incrementally reach the desired target value.
+
+**Note**: this control mode is generally not recommended anymore since there is no reason to use it in favor of direct control or API control.
+
+**How It Works:**
+1. The profile runner reads the current in-game control value via the TSW connector event `sync_control_value`
+2. It compares the current value to the target value derived from your controller input
+3. If the values differ beyond a **margin of error (0.005)**, it triggers keypresses (`action_increase` or `action_decrease`) to move toward the target
+4. The Moving state tracks direction: `-1` (decreasing), `0` (idle), `1` (increasing)
+5. When the current value reaches the target (within margin of error), keypresses are released
 
 ```json
 {
@@ -686,8 +695,49 @@ An alternative to `DirectControl` for locomotives that don't work with direct co
 }
 ```
 
-- **Reads current in-game state** and uses **keypresses** to reach desired state.
-- Ideal for **syncing with controls that don't respond well to direct manipulation**.
+#### Properties
+
+| Name                | Description                                                                                                                                  | Required |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `type`              | Must be `"sync_control"`                                                                                                                     | ✅ Yes   |
+| `identifier`        | The sync control identifier to control; can be identified using the Cab Debugger                                                             | ✅ Yes   |
+| `input_value`       | Defines the input value constraints and mapping (same as DirectControl)                                                                      | ✅ Yes   |
+| `action_increase`   | The key action to press when increasing the control value                                                                                    | ✅ Yes   |
+| `action_decrease`   | The key action to press when decreasing the control value                                                                                    | ✅ Yes   |
+| `control_range`     | Remaps a partial input range to a full 0-1 or 0,-1 output range             | No       |
+| `conditions`        | Optional conditions that must be met for the assignment to execute                                                                           | No       |
+| `rail_class_information` | Optional list of rail classes this assignment applies to                                           | No       |
+
+#### input_value Properties
+
+SyncControl uses the same `input_value` properties as DirectControl:
+
+| Name                | Description                                                                                                                                  | Required |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `min`               | The minimum reachable value in the game cab                                                                                                  | ✅ Yes   |
+| `max`               | The maximum reachable value in the game cab                                                                                                  | ✅ Yes   |
+| `step`              | The step increment to auto-generate discrete values                                                                                          | No       |
+| `steps`             | Array of discrete values. Can include `null` to create free range zones between detents                                                      | No       |
+| `invert`            | Whether to reverse the input value direction                                                                                                 | No       |
+| `max_change_rate`   | The maximum rate at which the control value can change per frame                                                                             | No       |
+| `step_thresholds`   | Custom threshold definitions for each step (see [Step Thresholds](#step-thresholds-custom-thresholds-for-stepped-controls)) | No       |
+
+#### State Machine Behavior
+
+SyncControl maintains an internal state machine for each controlled identifier:
+
+**Moving States:**
+- `-1` (Decreasing): The control is actively decreasing toward the target
+- `0` (Idle): The control is at the target value or no movement is needed
+- `1` (Increasing): The control is actively increasing toward the target
+
+**Margin of Error:**
+The system uses a margin of error of `0.005` to determine when to stop moving. This prevents micro-adjustments and ensures smooth stopping at target values.
+
+**State Transitions:**
+1. **Start Increasing**: When `target > current` and `abs(target - current) > 0.005` and not already moving
+2. **Start Decreasing**: When `target < current` and `abs(target - current) > 0.005` and not already moving
+3. **Stop Moving**: When the control reaches or exceeds the target value (within margin of error)
 
 ### 🎚️ ApiControl
 
