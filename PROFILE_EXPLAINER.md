@@ -470,7 +470,7 @@ Linear assignments support the following action types:
 
 ### 🎚️ DirectControl
 
-Maps an analog controller input to a continuous value in-game.
+Maps an analog controller input to a continuous value in-game. This is the primary method for controlling cab levers and other continuous controls in Train Sim World, Train Simulator Classic and Wonders of Sodor.
 
 ```json
 {
@@ -486,17 +486,187 @@ Maps an analog controller input to a continuous value in-game.
 ```
 
 - **Directly updates** a game control based on physical control input.
-- Used for **continuous analog mappings**.
+- Used for **continuous analog mappings** (throttles, brakes, levers).
 - Supports `step` or `steps` to quantize values.
 - Can be used with the `{SIDE}` placeholder to automatically select the correct side of the cab. This is specifically for controls named `Throttle_F` or `Throttle_B` where the `F` and `B` mark the side of the cab.
 **Note: some locomotives don't use the F and R placeholders. The Czech route locomotives for example use 1 and 2. To support this you can use the expanded placeholder which defines which characters to use for front and back: {SIDE:F:B} [example with 1/2: {SIDE:1:2}]**
 
-#### Options
+#### Properties
 
-| Name     | Description                                                                                                                                  |
-| -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `hold`   | Whether to continuously hold this value. Useful for levers which automatically reset. (such as the Tube Deadman or some brake levers)        |
-| `notify` | Whether to enable the in-game notifier when changing values to display the current value (defaults to `true` but can be explicitly disabled) |
+| Name                | Description                                                                                                                                  | Required |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `controls`          | The UE4SS control identifier to control (e.g., `Throttle`, `AutomaticBrake`, `IndependentBrake`)                                            | ✅ Yes   |
+| `input_value`       | Defines the input value constraints and mapping                                                    | ✅ Yes   |
+| `control_range`     | Remaps a partial input range to a full 0-1 or 0,-1 output range (see [control_range example](#control-range-remapping))                      | No       |
+| `hold`              | Whether to continuously hold this value. Useful for levers which automatically reset (such as the Deadman or some brake levers)          | No       |
+| `use_normalized`    | Whether to use normalized values (-1 to 1) instead of raw values (0 to 1) [rarely used]                                                                    | No       |
+| `enable_api_fallback` | Whether to enable fallback to the TSW API if direct control is unavailable                                                                  | No       |
+| `notify`            | Whether to enable the in-game notifier when changing values to display the current value (defaults to `true`)                                  | No       |
+| `conditions` | Optional conditions that must be met for the assignment to execute | No |
+| `rail_class_information` | Optional list of rail classes this assignment applies to | No |
+
+#### input_value Properties
+
+| Name                | Description                                                                                                                                  | Required |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `min`               | The minimum reachable value in the game cab                                                | ✅ Yes   |
+| `max`               | The maximum reachable value in the game cab                                              | ✅ Yes   |
+| `step`              | The step increment to auto-generate discrete values (alternative to `steps`)                                                                 | No       |
+| `steps`             | Array of discrete values. Can include `null` to create free range zones between detents                                                      | No       |
+| `invert`            | Whether to reverse the input value direction (mapping 0-1 to 1-0)                                                                                                | No       |
+| `max_change_rate`   | The maximum rate at which the control value can change per frame  (rarely necessary)                                                                            | No       |
+| `step_thresholds`   | Custom threshold definitions for each step (see [step_thresholds](#step-thresholds-custom-thresholds-for-stepped-controls)) | No       |
+
+##### Step Thresholds - Custom Thresholds for Stepped Controls
+
+The `step_thresholds` option allows you to define custom threshold values for each step in a direct control mapping. This is particularly useful when you want to remap a continuous analog input to match a notched control (e.g., a throttle with detents) or when you need to create custom value ranges.
+
+```json
+{
+  "type": "direct_control",
+  "controls": "Throttle1",
+  "input_value": {
+    "min": 0.1,
+    "max": 1.0,
+    "steps": [0.1, null, 1.0],
+    "step_thresholds": [
+      { "threshold": 0.2, "threshold_tolerance": 0.05 },
+      { "threshold": 0.5, "threshold_end": 0.6, "threshold_tolerance": 0.03 },
+      { "threshold": 0.8 }
+    ]
+  }
+}
+```
+
+**Threshold Properties:**
+
+| Property                    | Description                                                                                                                                  | Required |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `threshold`                 | The actual threshold value where the step begins (can use named references from calibration)                                                 | ✅ Yes   |
+| `threshold_end`             | The end value for range-based thresholds (optional)                                                                                          | No       |
+| `threshold_tolerance`       | The tolerance around the threshold (optional)                                                                                                | No       |
+
+**How It Works:**
+
+1. **Single Threshold**: When only `threshold` is specified, it defines a single point value. The control will snap to this value when the input matches the threshold (+- the tolerance).
+
+2. **Range Threshold**: When both `threshold` and `threshold_end` are specified, it defines a range. The control will accept any input value within this range and map it proportionally. This is mostly useful for free range steps.
+
+3. **Tolerance**: The `threshold_tolerance` defines how much deviation from the threshold is acceptable. For example, if `threshold` is 0.5 and `threshold_tolerance` is 0.05, the control will accept input values between 0.45 and 0.55.
+
+4. **Default Tolerance**: If no tolerance is specified, a default tolerance is calculated based on the number of steps (approximately half the step size).
+
+5. **Free Range Zones**: When a step is marked as a free range zone (using `null` in the `steps` array), it gets special handling with no tolerance by default. The threshold defines the boundaries of the free range.
+
+**Note:** The number of `step_thresholds` should match the number of `steps` as each step threshold definition corresponds to each step.
+
+**Use Cases:**
+
+- **Notched Controls**: Match a physical control with detents (like a notched throttle) by defining thresholds at each detent position.
+- **Custom Value Ranges**: Create custom value ranges where certain input values map to specific output values.
+
+##### Control Range - Remapping Partial Ranges
+
+The `control_range` property allows you to remap a partial input range to a full 0-1 or 0,-1 output range. This can be useful for mapping a single physical lever or control to multiple in-game controls while retaining a full 0-1 direct control range.
+
+```json
+{
+  "type": "direct_control",
+  "controls": "Throttle1",
+  "input_value": {
+    "min": 0.0,
+    "max": 1.0
+  },
+  "control_range": {
+    "start": 0.2,
+    "end": 0.8
+  }
+}
+```
+
+In the above example, an input value of 0.2 maps to 0.0, 0.8 maps to 1.0, and values outside this range are clamped. This effectively remaps the 0.2-0.8 input range to the full 0-1 output range.
+
+**Control Range Properties:**
+
+| Property | Description                                                                                                                                  | Required |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `start`  | The start value of the input range to remap (depending on value direction, this is the min or max)                                         | ✅ Yes   |
+| `end`    | The end value of the input range to remap                                                                                                   | ✅ Yes   |
+
+##### Steps with Free Range Zones
+
+The `steps` array can include `null` values to create free range zones between detents. This is useful for controls that are partly notched and partly free.
+
+```json
+{
+  "type": "direct_control",
+  "controls": "AutomaticBrake1",
+  "input_value": {
+    "min": 0,
+    "max": 0.8,
+    "steps": [0, 0.125, null, 0.6, 0.7, 0.8]
+  }
+}
+```
+
+In the above example:
+- Steps at 0, 0.125 are discrete detents
+- The `null` creates a free range zone between 0.125 and 0.6
+- Steps at 0.6, 0.7, 0.8 are discrete detents after the free range zone
+
+##### Conditional Direct Control Assignments
+
+Direct Control assignments can be conditioned on other control values, allowing the same physical control to map to different game controls based on conditions.
+
+```json
+{
+  "type": "direct_control",
+  "conditions": [
+    {
+      "control": "mylever",
+      "operator": "lt",
+      "value": 0.5
+    }
+  ],
+  "controls": "IndependentBrake",
+  "input_value": {
+    "min": 0.25,
+    "max": 1,
+    "invert": true
+  }
+}
+```
+
+In the above example, the IndependentBrake is only controlled when the Reverser (`mylever`) is less than 0.5. When the Reverser exceeds 0.5, a separate Direct Control assignment would map to DynamicBrake.
+
+#### Examples
+
+##### Basic Throttle Mapping
+
+```json
+{
+  "type": "direct_control",
+  "controls": "Throttle_{SIDE}",
+  "input_value": {
+    "min": 0,
+    "max": 1
+  }
+}
+```
+
+##### Brake with Discrete Steps
+
+```json
+{
+  "type": "direct_control",
+  "controls": "AutomaticBrake_{SIDE}",
+  "input_value": {
+    "min": 0,
+    "max": 0.8,
+    "steps": [0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.8]
+  }
+}
+```
 
 ### 🧭 SyncControl
 
@@ -571,7 +741,20 @@ Each assignment triggers an action when activated (and optionally when deactivat
 
 - Sends a value directly to a UE4SS control.
 - Can be held or pulsed.
-- Can be defined as a relative value (instead of sending the absolute value)
+- Can be defined as a relative value (instead of sending the absolute value).
+
+#### Direct Control Action Properties
+
+| Property                | Description                                                                                                                                  | Required |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `controls`              | The UE4SS control identifier to control                                                           | ✅ Yes   |
+| `value`                 | The value to send to the control                                                                                                             | ✅ Yes   |
+| `max_change_rate`       | The maximum rate at which the control value can change per frame                                                                             | No       |
+| `relative`              | Whether to use the value as a relative adjustment instead of absolute                                                                        | No       |
+| `hold`                  | Whether to continuously hold the value by sending it repeatedly                                                                              | No       |
+| `use_normalized`        | Whether to use normalized values instead of raw values (rarely used)                                                                                      | No       |
+| `notify`                | Whether to enable the in-game notifier when changing values                                                                                  | No       |
+| `enable_api_fallback`   | Whether to enable fallback to the TSW API if direct control is unavailable                                                                   | No       |
 
 ### 🎛️ Api Control Action
 
@@ -608,14 +791,16 @@ Used by `DirectControl`, `SyncControl`, and `ApiControl` to map axis input to co
   "max": 1.0,
   "step": 0.1,
   "steps": [0.0, 0.2, null, 0.5, null, 1.0],
-  "invert": true
+  "invert": true,
+  "max_change_rate": 0.05
 }
 ```
 
 - `min` / `max`: Range of values.
-- `step`: Optional increment size.
+- `step`: Optional increment size for auto-generating discrete values.
 - `steps`: Optional list of discrete valid values. Can be used with `null` values to create zones of free motion between detents.
-- `invert`: Whether to reverse the axis.
+- `invert`: Whether to reverse the axis direction.
+- `max_change_rate`: The maximum rate at which the control value can change per frame (optional).
 - `step_thresholds`: Optional array of threshold definitions for remapping values to match notched or stepped controls.
 
 ### 📏 Step Thresholds
@@ -641,11 +826,11 @@ The `step_thresholds` option allows you to define custom threshold values for ea
 
 #### Threshold Properties
 
-| Property | Description | Required |
-|----------|-------------|----------|
-| `threshold` | The actual threshold value where the step begins | ✅ Yes |
-| `threshold_end` | The end value for range-based thresholds (optional) | No |
-| `threshold_tolerance` | The tolerance around the threshold (optional) | No |
+| Property                    | Description                                                                                                                                  | Required |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `threshold`                 | The actual threshold value where the step begins (can use named references from calibration)                                                 | ✅ Yes   |
+| `threshold_end`             | The end value for range-based thresholds (optional)                                                                                          | No       |
+| `threshold_tolerance`       | The tolerance around the threshold (optional)                                                                                                | No       |
 
 #### How It Works
 
@@ -659,7 +844,7 @@ The `step_thresholds` option allows you to define custom threshold values for ea
 
 5. **Free Range Zones**: When a step is marked as a free range zone (using `null` in the `steps` array), it gets special handling with no tolerance by default. The threshold defines the boundaries of the free range.
 
-**Note** it is important to note that the number of `step_thresholds` should match the number of `steps` as each step threshold definition corresponds to each step.
+**Note:** It is important that the number of `step_thresholds` matches the number of `steps` as each step threshold definition corresponds to each step.
 
 #### Use Cases
 
@@ -772,6 +957,7 @@ The `rail_class_information` section is an array of supported rail class names:
 - Use `Momentary` for temporary actions like horn or bell.
 - Use `Toggle` for switches with two states.
 - Use `VirtualAction` for controlling virtual controls.
+- Use `DirectControl` as an action within `Momentary` or `Toggle` assignments for discrete control value changes (e.g., setting brake levels with buttons).
 
 ---
 
