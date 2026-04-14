@@ -52,6 +52,8 @@ Used for buttons that act while held.
 | `match` | How to interpret the threshold. Defaults to `"exceeds"` where the action is executed when the value exceeds the threshold. Can also be set to `"equals"` for an exact comparison | No |
 | `action_activate` | The action to execute when the threshold is exceeded | ✅ Yes |
 | `action_deactivate` | The action to execute when the threshold is no longer exceeded. Defaults to releasing the previously activated key(s) | No |
+| `conditions` | Optional conditions that must be met for the assignment to execute | No |
+| `rail_class_information` | Optional list of rail classes this assignment applies to | No |
 
 #### Examples
 
@@ -140,15 +142,148 @@ Used for toggle switches that alternate between two states.
 ```json
 {
   "type": "toggle",
-  "threshold": 0.5,
+  "threshold": 0.9,
+  "match": "exceeds",
   "action_activate": { ... },
   "action_deactivate": { ... }
 }
 ```
 
-- **First activation** runs `action_activate`.
-- **Next activation** runs `action_deactivate`.
+- **First activation** (when threshold is exceeded and no prior call exists) runs `action_activate`.
+- **Second activation** (when threshold is exceeded and the previous call was also above threshold with the same action) runs `action_deactivate`.
+- **Key release** (when below threshold and previous call was above threshold) releases key actions.
 - Useful for switches like headlights, engine start, etc.
+
+#### Properties
+
+| Property | Description | Required |
+|----------|-------------|----------|
+| `threshold` | The threshold value that triggers the toggle action | ✅ Yes |
+| `match` | How to interpret the threshold. Defaults to `"exceeds"` where the action is executed when the value exceeds the threshold. Can also be set to `"equals"` for an exact comparison | No |
+| `action_activate` | The action to execute on the first toggle (when transitioning from off to on) | ✅ Yes |
+| `action_deactivate` | The action to execute on the second toggle (when transitioning from on to off) | ✅ Yes |
+| `conditions` | Optional conditions that must be met for the assignment to execute | No |
+| `rail_class_information` | Optional list of rail classes this assignment applies to | No |
+
+#### Toggle State Machine
+
+The Toggle assignment maintains internal state to track whether it has been activated. The behavior follows this logic:
+
+1. **Initial State (No prior call)**: When the threshold is exceeded, `action_activate` is executed.
+2. **Toggled State (Previous call was above threshold)**: When the threshold is exceeded again, `action_deactivate` is executed.
+3. **Below Threshold**: When the input falls below the threshold:
+   - If the previous action was a key press, it is released.
+   - If the previous action was a direct control or API control, no action is taken (the value is not automatically reverted).
+
+#### Examples
+
+##### Simple Key Toggle
+
+```json
+{
+  "type": "toggle",
+  "threshold": 0.9,
+  "action_activate": {
+    "keys": "x"
+  },
+  "action_deactivate": {
+    "keys": "shift+x"
+  }
+}
+```
+
+Pressing the button once triggers `x`, pressing again triggers `shift+x`.
+
+##### Direct Control Toggle
+
+```json
+{
+  "type": "toggle",
+  "threshold": 0.9,
+  "action_activate": {
+    "controls": "MarkerLight_R",
+    "value": 1
+  },
+  "action_deactivate": {
+    "controls": "MarkerLight_R",
+    "value": 0.5
+  }
+}
+```
+
+Pressing the button once sets the marker light to 1, pressing again sets it to 0.5.
+
+##### Toggle with Timing
+
+```json
+{
+  "type": "toggle",
+  "threshold": 0.9,
+  "action_activate": {
+    "keys": "w",
+    "press_time": 0.2,
+    "wait_time": 0.2
+  },
+  "action_deactivate": {
+    "keys": "s",
+    "press_time": 0.2,
+    "wait_time": 0.2
+  }
+}
+```
+
+##### Conditional Toggle
+
+Toggle assignments can be conditioned on other control values:
+
+```json
+{
+  "type": "toggle",
+  "threshold": 0.9,
+  "conditions": [
+    {
+      "control": "mylever",
+      "operator": "gte",
+      "value": 0.5
+    }
+  ],
+  "action_activate": {
+    "keys": "h"
+  },
+  "action_deactivate": {
+    "keys": "shift+h"
+  }
+}
+```
+
+In the above example, the toggle will only execute if `mylever` exceeds 0.5.
+
+##### Toggle with Equals Match
+
+```json
+{
+  "type": "toggle",
+  "threshold": 0.5,
+  "match": "equals",
+  "action_activate": {
+    "keys": "a"
+  },
+  "action_deactivate": {
+    "keys": "b"
+  }
+}
+```
+
+This toggle only triggers when the input value exactly equals 0.5.
+
+#### Supported Action Types
+
+Toggle assignments support the following action types:
+
+- **KeysAction**: Key presses with optional timing
+- **DirectControlAction**: Direct control with optional `hold`, `notify`, `enable_api_fallback`, `use_normalized`, `max_change_rate`
+- **APIControlAction**: API control with optional `hold`, `max_change_rate`
+- **VirtualAction**: Virtual control actions
 
 ### 📈 Linear
 
