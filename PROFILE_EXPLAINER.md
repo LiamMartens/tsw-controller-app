@@ -292,15 +292,181 @@ Used for analog levers or sliders with multiple threshold points.
 ```json
 {
   "type": "linear",
+  "neutral": 0.5,
   "thresholds": [
-    { "threshold": 0.2, "action_activate": { ... }, "action_deactivate": { ... } },
-    { "threshold": 0.7, "action_activate": { ... }, "action_deactivate": { ... } }
+    { "value": 0.2, "action_activate": { ... } },
+    { "value": 0.5, "action_activate": { ... } },
+    { "value": 0.8, "action_activate": { ... } }
   ]
 }
 ```
 
 - Triggers **different actions** based on **axis position thresholds**.
-- Ideal for **brake levers**, **throttles**, etc.
+- Ideal for manual implementation of **brake levers**, **throttles**, etc.
+- Supports **auto-generation** of thresholds using `value_end` and `value_step`.
+- Supports **neutral value mapping** to center the input range.
+
+#### Properties
+
+| Property | Description | Required |
+|----------|-------------|----------|
+| `thresholds` | Array of threshold definitions with actions | ✅ Yes |
+| `neutral` | Optional neutral/idle value for value normalization (e.g., 0.5 for centering 0-1 range to -1 to 1) | No |
+| `conditions` | Optional conditions that must be met for the assignment to execute | No |
+| `rail_class_information` | Optional list of rail classes this assignment applies to | No |
+
+#### Threshold Properties
+
+| Property | Description | Required |
+|----------|-------------|----------|
+| `value` | The threshold value to exceed. Can use named references from calibration | ✅ Yes |
+| `value_end` | End value for auto-generating thresholds (exclusive) | No |
+| `value_step` | Step increment for auto-generating thresholds between `value` and `value_end` | No |
+| `action_activate` | The action to execute when the threshold is exceeded | ✅ Yes |
+| `action_deactivate` | The action to execute when the value falls below the threshold | No |
+
+#### Auto-Generation of Thresholds
+
+When `value_end` and `value_step` are provided, the system automatically generates multiple thresholds between `value` and `value_end`:
+
+```json
+{
+  "type": "linear",
+  "thresholds": [
+    {
+      "value": 0.3,
+      "value_end": 0.6,
+      "value_step": 0.05,
+      "action_activate": { "keys": "w" }
+    }
+  ]
+}
+```
+
+This generates thresholds at: 0.3, 0.35, 0.40, 0.45, 0.50, 0.55 (all triggering the same action).
+
+#### Neutral Value Mapping
+
+The `neutral` property allows you to map the input value range around a neutral point. This is useful for levers that have a centered neutral position:
+
+```json
+{
+  "type": "linear",
+  "neutral": 0.5,
+  "thresholds": [
+    { "value": -0.5, "action_activate": { "keys": "s" } },
+    { "value": 0.5, "action_activate": { "keys": "w" } }
+  ]
+}
+```
+
+With `neutral: 0.5`, a raw input of 0.0 becomes -1.0 (neutralized), and 1.0 becomes 1.0.
+
+#### Threshold Exceeding Logic
+
+The Linear assignment uses asymmetric threshold logic (signifying applying power as opposed to mathmatical operations):
+- **Negative values**: A value "exceeds" the threshold when it is **less than** the threshold (more negative)
+- **Positive values**: A value "exceeds" the threshold when it is **greater than or equal to** the threshold
+
+#### State Machine Behavior
+
+Linear assignments track which thresholds are currently exceeding and which were previously passed:
+
+1. **Activation**: When new thresholds start exceeding (that weren't previously passed), their `action_activate` is triggered.
+2. **Deactivation**: When thresholds stop exceeding (were passed but no longer are), their `action_deactivate` is triggered if defined.
+3. **Key release**: If `action_deactivate` is not defined but `action_activate` uses keys, the keys are released.
+4. **Clear state**: If neither deactivation nor key release is possible, the previous call is cleared to allow re-triggering.
+
+#### Examples
+
+##### Simple Key Press at Thresholds
+
+```json
+{
+  "type": "linear",
+  "thresholds": [
+    { "value": 0.2, "action_activate": { "keys": "a" } },
+    { "value": 0.5, "action_activate": { "keys": "d" } },
+    { "value": 0.8, "action_activate": { "keys": "f" } }
+  ]
+}
+```
+
+As the lever moves from 0 to 1:
+- At 0.2: triggers `a`
+- At 0.5: triggers `d`
+- At 0.8: triggers `f`
+
+##### Brake Lever with Neutral Position
+
+```json
+{
+  "type": "linear",
+  "neutral": 0.5,
+  "thresholds": [
+    { "value": -0.5, "action_activate": { "keys": "s" } },
+    { "value": 0.5, "action_activate": { "keys": "w" } }
+  ]
+}
+```
+
+With a neutral value of 0.5, the lever's centered position (0.5 raw) is treated as 0 (neutralized), allowing negative and positive threshold values.
+
+##### Auto-Generated Thresholds for Notched Control
+
+```json
+{
+  "type": "linear",
+  "thresholds": [
+    {
+      "value": 0.0,
+      "value_end": 0.5,
+      "value_step": 0.1,
+      "action_activate": { "keys": "1" }
+    },
+    {
+      "value": 0.6,
+      "value_end": 1.0,
+      "value_step": 0.1,
+      "action_activate": { "keys": "2" }
+    }
+  ]
+}
+```
+
+This creates 6 thresholds for each range (0.0, 0.1, 0.2, 0.3, 0.4, 0.5 and 0.6, 0.7, 0.8, 0.9, 1.0), all triggering the same action within each range.
+
+##### Conditional Linear Assignment
+
+Linear assignments can be conditioned on other control values:
+
+```json
+{
+  "type": "linear",
+  "conditions": [
+    {
+      "control": "mylever",
+      "operator": "gte",
+      "value": 0.5
+    }
+  ],
+  "thresholds": [
+    { "value": 0.2, "action_activate": { "keys": "a" } },
+    { "value": 0.7, "action_activate": { "keys": "d" } }
+  ]
+}
+```
+
+In the above example, the assignment will only execute if `mylever` exceeds 0.5.
+
+#### Supported Action Types
+
+Linear assignments support the following action types:
+
+- **KeysAction**: Key presses for discrete actions at thresholds
+- **DirectControlAction**: Direct control with optional `hold`, `notify`, `enable_api_fallback`, `use_normalized`, `max_change_rate`
+- **APIControlAction**: API control with optional `hold`, `max_change_rate`
+- **VirtualAction**: Virtual control actions
 
 ### 🎚️ DirectControl
 
