@@ -741,7 +741,7 @@ The system uses a margin of error of `0.005` to determine when to stop moving. T
 
 ### 🎚️ ApiControl
 
-Maps an analog controller input to a continuous value in-game using the HTTP API.
+Maps an analog controller input to a continuous value in-game using the HTTP API. Runs at 15fps processing loop.
 
 ```json
 {
@@ -749,15 +749,89 @@ Maps an analog controller input to a continuous value in-game using the HTTP API
   "controls": "Throttle1",
   "input_value": {
     "min": 0.0,
-    "max": 1.0,
-    "invert": true
+    "max": 1.0
   }
 }
 ```
 
-- **Directly updates** a game control based on axis input using the HTTP API. May result in slight overhead compared to the full direct control mode, but does not require additional mod to be installed.
-- Used for **continuous analog mappings**.
-- Supports `step` or `steps` to quantize values.
+#### Properties
+
+| Property | Description | Required |
+|----------|-------------|----------|
+| `controls` | The direct/api control name to control; can be identified using the Cab Debugger | ✅ Yes |
+| `input_value` | Defines the input value constraints | ✅ Yes |
+| `control_range` | Remaps partial input ranges to full 0-1 or 0,-1 output ranges | No |
+| `hold` | Boolean to keep the control active after input is released | No |
+
+##### input_value Properties
+
+| Property | Description | Required |
+|----------|-------------|----------|
+| `min` | The minimum reachable value in the game cab | ✅ Yes |
+| `max` | The maximum reachable value in the game cab | ✅ Yes |
+| `max_change_rate` | The maximum rate at which this control can change (useful for realistic throttle simulation) | No |
+| `step` / `steps` | Quantize values to discrete steps or define free range zones | No |
+| `invert` | Whether to invert the input value before calculating the game value | No |
+
+##### control_range Properties
+
+| Property | Description | Required |
+|----------|-------------|----------|
+| `start` | The starting value of the partial range | ✅ Yes |
+| `end` | The ending value of the partial range | ✅ Yes |
+
+- Example: A lever that only moves from 0.3 to 0.7 can be remapped to full 0-1 range
+
+**Processing Behavior:**
+- Runs at 15fps (66.67ms tick rate)
+- **Button-like controls**: Instantly set to 0.0 or 1.0 based on input threshold
+- **Lever-like controls**: Incrementally approach target value respecting `max_change_rate`
+- **With `hold: true`**: Control maintains state after input is released
+
+**Example with ControlRange:**
+```json
+{
+  "type": "api_control",
+  "controls": "Throttle1",
+  "input_value": {
+    "min": 0.0,
+    "max": 1.0
+  },
+  "control_range": {
+    "start": 0.3,
+    "end": 0.7
+  }
+}
+```
+*Maps the partial range 0.3-0.7 to full 0-1 output range*
+
+**Example with MaxChangeRate:**
+```json
+{
+  "type": "api_control",
+  "controls": "Throttle1",
+  "input_value": {
+    "min": 0.0,
+    "max": 1.0,
+    "max_change_rate": 0.1
+  }
+}
+```
+*Throttle can only change by 0.1 per frame, required for certain locomotives / controls - but rare*
+
+**Example with Hold:**
+```json
+{
+  "type": "api_control",
+  "controls": "Brake1",
+  "input_value": {
+    "min": 0.0,
+    "max": 1.0
+  },
+  "hold": true
+}
+```
+*Brake maintains applied state after button release*
 
 ---
 
