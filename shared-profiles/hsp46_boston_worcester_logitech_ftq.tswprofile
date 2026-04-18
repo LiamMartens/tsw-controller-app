@@ -1,18 +1,17 @@
 {
-  "name": "SD40-2, Left Side Buttons Away",
+  "name": "HSP46",
   "controls": [
     {
       "name": "LeverL",
       "assignments": [
         {
           "type": "direct_control",
-          "controls": "Throttle",
+          "controls": "MasterController",
           "input_value": {
-            "min": 0.125,
+            "min": 0,
             "max": 1,
-            "steps": [0.125,0.25,0.375,0.5,0.625,0.75,0.875,1],
-            "max_change_rate": 0.05,
-            "invert": true
+            "steps": [0,0.125,0.25,0.375,0.5,0.625,0.75,0.875],
+            "max_change_rate": 0.05
           },
           "notify": true
         }
@@ -23,38 +22,12 @@
       "assignments": [
         {
           "type": "direct_control",
-          "conditions": [
-            {
-              "control": "RevL",
-              "operator": "lt",
-              "value": 0.5
-            }
-          ],
-          "controls": "IndependentBrake",
+          "controls": "AutomaticBrake",
           "input_value": {
-            "min": 0.25,
-            "max": 1,
-            "max_change_rate": 0.05,
-            "invert": true
-          },
-          "notify": true
-        },
-        {
-          "type": "direct_control",
-          "conditions": [
-            {
-              "control": "RevL",
-              "operator": "gt",
-              "value": 0.5
-            }
-          ],
-          "controls": "DynamicBrake",
-          "input_value": {
-            "min": 0.11,
-            "max": 1,
-            "steps": [0.11,0.22,0.33,0.44,0.55,0.66,0.77,0.88,1],
-            "max_change_rate": 0.05,
-            "invert": true
+            "min": 0,
+            "max": 0.9,
+			"steps": [0,0.125,null,0.7,0.8,0.9],
+            "max_change_rate": 0.05
           },
           "notify": true
         }
@@ -65,12 +38,12 @@
       "assignments": [
         {
           "type": "direct_control",
-          "controls": "AutomaticBrake",
+          "controls": "IndependentBrake",
           "input_value": {
             "min": 0,
-            "max": 0.8,
-			"steps": [0,0.125,null,0.6,0.7,0.8],
-            "max_change_rate": 0.05
+            "max": 1,
+            "max_change_rate": 0.05,
+            "invert": true
           },
           "notify": true
         }
@@ -83,8 +56,8 @@
           "type": "momentary",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "Throttle",
-            "value": 0,
+            "controls": "MasterController",
+            "value": 1,
             "max_change_rate": 0.05,
             "notify": true
           }
@@ -96,48 +69,17 @@
       "assignments": [
         {
           "type": "momentary",
-          "conditions": [
-            {
-              "control": "RevL",
-              "operator": "lt",
-              "value": 0.5
-            }
-          ],
           "threshold": 0.1,
           "action_activate": {
-            "controls": "IndependentBrake",
-            "value": 0,
-            "max_change_rate": 0.025,
-            "hold": true,
+            "controls": "AutomaticBrake",
+            "value": 1,
+            "max_change_rate": 0.05,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "IndependentBrake",
-            "value": 0.25,
-            "max_change_rate": 0.025
-          }
-        },
-        {
-          "type": "momentary",
-          "conditions": [
-            {
-              "control": "RevL",
-              "operator": "gt",
-              "value": 0.5
-            }
-          ],
-          "threshold": 0.1,
-          "action_activate": {
-            "controls": "DynamicBrake",
-            "value": 0,
-            "max_change_rate": 0.025,
-            "hold": true,
-            "notify": true
-          },
-          "action_deactivate": {
-            "controls": "DynamicBrake",
-            "value": 0.11,
-            "max_change_rate": 0.025
+            "controls": "AutomaticBrake",
+            "value": 0.9,
+            "max_change_rate": 0.05
           }
         }
       ]
@@ -149,14 +91,15 @@
           "type": "momentary",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "AutomaticBrake",
-            "value": 1,
+            "controls": "IndependentBrake",
+            "value": -0.25,
             "max_change_rate": 0.025,
+            "hold": true,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "AutomaticBrake",
-            "value": 0.8,
+            "controls": "IndependentBrake",
+            "value": 0,
             "max_change_rate": 0.025
           }
         }
@@ -166,16 +109,16 @@
       "name": "ButLU",
       "assignments": [
         {
-          "type": "toggle",
+          "type": "momentary",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "SandLead",
+            "controls": "LeadTruckSand",
             "value": 1,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "SandLead",
-            "value": 0,
+            "controls": "LeadTruckSand",
+            "value": 0.5,
             "notify": true
           }
         }
@@ -188,13 +131,13 @@
           "type": "momentary",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "AlerterReset",
+            "controls": "Acknowledge_R",
             "value": 1,
             "hold": true,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "AlerterReset",
+            "controls": "Acknowledge_R",
             "value": 0,
             "notify": true
           }
@@ -208,29 +151,15 @@
           "type": "momentary",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "Horn",
+            "controls": "Horn_FR",
             "value": 1,
             "hold": true,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "Horn",
-            "value": 0,
+            "controls": "Horn_FR",
+            "value": 0.5,
             "notify": true
-          }
-        },
-        {
-          "type": "momentary",
-          "threshold": 0.1,
-          "action_activate": {
-            "controls": "Bell",
-            "value": 0,
-            "notify": false
-          },
-          "action_deactivate": {
-            "controls": "Bell",
-            "value": 0,
-            "notify": false
           }
         }
       ]
@@ -242,14 +171,14 @@
           "type": "momentary",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "Sander",
+            "controls": "Sand",
             "value": 1,
             "hold": true,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "Sander",
-            "value": 0,
+            "controls": "Sand",
+            "value": 0.5,
             "notify": true
           }
         }
@@ -262,33 +191,14 @@
           "type": "momentary",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "AlerterReset",
+            "controls": "AlerterResetNew",
             "value": 1,
             "hold": true,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "AlerterReset",
-            "value": 0,
-            "notify": true
-          }
-        }
-      ]
-    },
-    {
-      "name": "ButRD",
-      "assignments": [
-        {
-          "type": "toggle",
-          "threshold": 0.1,
-          "action_activate": {
-            "controls": "Bell",
-            "value": 1,
-            "notify": true
-          },
-          "action_deactivate": {
-            "controls": "Bell",
-            "value": 0,
+            "controls": "AlerterResetNew",
+            "value": 0.5,
             "notify": true
           }
         }
@@ -299,7 +209,7 @@
   "controller": {
     "usb_id": "06A3:0C2D",
     "mapping": {
-      "name": "Logitech Flight Throttle Quadrant",
+      "name": "Logitech Flight MasterController Quadrant",
       "usb_id": "06A3:0C2D",
       "data": [
         {
@@ -414,8 +324,7 @@
   },
   "rail_class_information": [
     {
-      "class_name": "RVM_TTC_SD40-2_C",
-      "class_name": "RVM_NYS_SD40-2_C"
+      "class_name": "RVM_BOW_MBTA_HSP46_Mod_C"
     }
   ],
   "apps": [

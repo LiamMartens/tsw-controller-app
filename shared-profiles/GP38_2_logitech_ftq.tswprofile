@@ -1,5 +1,5 @@
 {
-  "name": "SD40-2, Left Side Buttons Away",
+  "name": "GP38-2, Left Side Buttons Away",
   "controls": [
     {
       "name": "LeverL",
@@ -169,12 +169,12 @@
           "type": "toggle",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "SandLead",
+            "controls": "LeadAxleSand",
             "value": 1,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "SandLead",
+            "controls": "LeadAxleSand",
             "value": 0,
             "notify": true
           }
@@ -242,13 +242,13 @@
           "type": "momentary",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "Sander",
+            "controls": "Sand",
             "value": 1,
             "hold": true,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "Sander",
+            "controls": "Sand",
             "value": 0,
             "notify": true
           }
@@ -414,8 +414,7 @@
   },
   "rail_class_information": [
     {
-      "class_name": "RVM_TTC_SD40-2_C",
-      "class_name": "RVM_NYS_SD40-2_C"
+      "class_name": "RVM_SFJ_CT_GP38-2_C"
     }
   ],
   "apps": [

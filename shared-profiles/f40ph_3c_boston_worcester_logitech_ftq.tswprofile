@@ -1,5 +1,5 @@
 {
-  "name": "SD40-2, Left Side Buttons Away",
+  "name": "F40PH-3C, Left Side Buttons Away",
   "controls": [
     {
       "name": "LeverL",
@@ -8,9 +8,9 @@
           "type": "direct_control",
           "controls": "Throttle",
           "input_value": {
-            "min": 0.125,
+            "min": 0,
             "max": 1,
-            "steps": [0.125,0.25,0.375,0.5,0.625,0.75,0.875,1],
+            "steps": [0,0.125,0.25,0.375,0.5,0.625,0.75,0.875,1],
             "max_change_rate": 0.05,
             "invert": true
           },
@@ -23,36 +23,10 @@
       "assignments": [
         {
           "type": "direct_control",
-          "conditions": [
-            {
-              "control": "RevL",
-              "operator": "lt",
-              "value": 0.5
-            }
-          ],
           "controls": "IndependentBrake",
           "input_value": {
-            "min": 0.25,
+            "min": 0,
             "max": 1,
-            "max_change_rate": 0.05,
-            "invert": true
-          },
-          "notify": true
-        },
-        {
-          "type": "direct_control",
-          "conditions": [
-            {
-              "control": "RevL",
-              "operator": "gt",
-              "value": 0.5
-            }
-          ],
-          "controls": "DynamicBrake",
-          "input_value": {
-            "min": 0.11,
-            "max": 1,
-            "steps": [0.11,0.22,0.33,0.44,0.55,0.66,0.77,0.88,1],
             "max_change_rate": 0.05,
             "invert": true
           },
@@ -68,8 +42,8 @@
           "controls": "AutomaticBrake",
           "input_value": {
             "min": 0,
-            "max": 0.8,
-			"steps": [0,0.125,null,0.6,0.7,0.8],
+            "max": 0.85,
+			"steps": [0,0.125,null,0.65,0.7,0.85],
             "max_change_rate": 0.05
           },
           "notify": true
@@ -96,47 +70,17 @@
       "assignments": [
         {
           "type": "momentary",
-          "conditions": [
-            {
-              "control": "RevL",
-              "operator": "lt",
-              "value": 0.5
-            }
-          ],
           "threshold": 0.1,
           "action_activate": {
             "controls": "IndependentBrake",
-            "value": 0,
+            "value": -0.25,
             "max_change_rate": 0.025,
             "hold": true,
             "notify": true
           },
           "action_deactivate": {
             "controls": "IndependentBrake",
-            "value": 0.25,
-            "max_change_rate": 0.025
-          }
-        },
-        {
-          "type": "momentary",
-          "conditions": [
-            {
-              "control": "RevL",
-              "operator": "gt",
-              "value": 0.5
-            }
-          ],
-          "threshold": 0.1,
-          "action_activate": {
-            "controls": "DynamicBrake",
             "value": 0,
-            "max_change_rate": 0.025,
-            "hold": true,
-            "notify": true
-          },
-          "action_deactivate": {
-            "controls": "DynamicBrake",
-            "value": 0.11,
             "max_change_rate": 0.025
           }
         }
@@ -151,13 +95,13 @@
           "action_activate": {
             "controls": "AutomaticBrake",
             "value": 1,
-            "max_change_rate": 0.025,
+            "max_change_rate": 0.05,
             "notify": true
           },
           "action_deactivate": {
             "controls": "AutomaticBrake",
-            "value": 0.8,
-            "max_change_rate": 0.025
+            "value": 0.85,
+            "max_change_rate": 0.05
           }
         }
       ]
@@ -169,12 +113,12 @@
           "type": "toggle",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "SandLead",
+            "controls": "SandingLeadTruck",
             "value": 1,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "SandLead",
+            "controls": "SandingLeadTruck",
             "value": 0,
             "notify": true
           }
@@ -188,13 +132,13 @@
           "type": "momentary",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "AlerterReset",
+            "controls": "ACSAcknowledge_ACSPanel",
             "value": 1,
             "hold": true,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "AlerterReset",
+            "controls": "ACSAcknowledge_ACSPanel",
             "value": 0,
             "notify": true
           }
@@ -242,13 +186,13 @@
           "type": "momentary",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "Sander",
+            "controls": "Sand",
             "value": 1,
             "hold": true,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "Sander",
+            "controls": "Sand",
             "value": 0,
             "notify": true
           }
@@ -414,8 +358,7 @@
   },
   "rail_class_information": [
     {
-      "class_name": "RVM_TTC_SD40-2_C",
-      "class_name": "RVM_NYS_SD40-2_C"
+      "class_name": "RVM_BOW_MBTA_F40PH-3C_Mod_C"
     }
   ],
   "apps": [

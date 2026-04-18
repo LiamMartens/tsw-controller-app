@@ -1,18 +1,17 @@
 {
-  "name": "SD40-2, Left Side Buttons Away",
+  "name": "Bi-Level Cab Car CTX",
   "controls": [
     {
       "name": "LeverL",
       "assignments": [
         {
           "type": "direct_control",
-          "controls": "Throttle",
+          "controls": "AutomaticBrake",
           "input_value": {
-            "min": 0.125,
-            "max": 1,
-            "steps": [0.125,0.25,0.375,0.5,0.625,0.75,0.875,1],
-            "max_change_rate": 0.05,
-            "invert": true
+            "min": 0,
+            "max": 0.85,
+			"steps": [0,0.125,null,0.65,0.7,0.85],
+            "max_change_rate": 0.025
           },
           "notify": true
         }
@@ -23,36 +22,11 @@
       "assignments": [
         {
           "type": "direct_control",
-          "conditions": [
-            {
-              "control": "RevL",
-              "operator": "lt",
-              "value": 0.5
-            }
-          ],
-          "controls": "IndependentBrake",
+          "controls": "Reverser",
           "input_value": {
-            "min": 0.25,
+            "min": 0,
             "max": 1,
-            "max_change_rate": 0.05,
-            "invert": true
-          },
-          "notify": true
-        },
-        {
-          "type": "direct_control",
-          "conditions": [
-            {
-              "control": "RevL",
-              "operator": "gt",
-              "value": 0.5
-            }
-          ],
-          "controls": "DynamicBrake",
-          "input_value": {
-            "min": 0.11,
-            "max": 1,
-            "steps": [0.11,0.22,0.33,0.44,0.55,0.66,0.77,0.88,1],
+            "steps": [0,0.5,1],
             "max_change_rate": 0.05,
             "invert": true
           },
@@ -65,12 +39,12 @@
       "assignments": [
         {
           "type": "direct_control",
-          "controls": "AutomaticBrake",
+          "controls": "PowerHandle",
           "input_value": {
-            "min": 0,
-            "max": 0.8,
-			"steps": [0,0.125,null,0.6,0.7,0.8],
-            "max_change_rate": 0.05
+            "min": -1,
+            "max": 0.92,
+            "steps": [-1,-0.81,-0.72,-0.63,-0.54,-0.45,-0.35,-0.26,0.2,0.33,0.42,0.52,0.62,0.72,0.82,0.92],
+            "max_change_rate": 0.025
           },
           "notify": true
         }
@@ -83,61 +57,16 @@
           "type": "momentary",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "Throttle",
-            "value": 0,
-            "max_change_rate": 0.05,
-            "notify": true
-          }
-        }
-      ]
-    },
-    {
-      "name": "RevC",
-      "assignments": [
-        {
-          "type": "momentary",
-          "conditions": [
-            {
-              "control": "RevL",
-              "operator": "lt",
-              "value": 0.5
-            }
-          ],
-          "threshold": 0.1,
-          "action_activate": {
-            "controls": "IndependentBrake",
-            "value": 0,
+            "controls": "AutomaticBrake",
+            "value": 1,
             "max_change_rate": 0.025,
             "hold": true,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "IndependentBrake",
-            "value": 0.25,
-            "max_change_rate": 0.025
-          }
-        },
-        {
-          "type": "momentary",
-          "conditions": [
-            {
-              "control": "RevL",
-              "operator": "gt",
-              "value": 0.5
-            }
-          ],
-          "threshold": 0.1,
-          "action_activate": {
-            "controls": "DynamicBrake",
-            "value": 0,
-            "max_change_rate": 0.025,
-            "hold": true,
+            "controls": "AutomaticBrake",
+            "value": 0.85,
             "notify": true
-          },
-          "action_deactivate": {
-            "controls": "DynamicBrake",
-            "value": 0.11,
-            "max_change_rate": 0.025
           }
         }
       ]
@@ -149,15 +78,17 @@
           "type": "momentary",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "AutomaticBrake",
+            "controls": "PowerHandle",
             "value": 1,
             "max_change_rate": 0.025,
+            "hold": true,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "AutomaticBrake",
-            "value": 0.8,
-            "max_change_rate": 0.025
+            "controls": "PowerHandle",
+            "value": 0.92,
+            "max_change_rate": 0.025,
+            "notify": true
           }
         }
       ]
@@ -169,12 +100,12 @@
           "type": "toggle",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "SandLead",
+            "controls": "Sander",
             "value": 1,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "SandLead",
+            "controls": "Sander",
             "value": 0,
             "notify": true
           }
@@ -188,13 +119,13 @@
           "type": "momentary",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "AlerterReset",
+            "controls": "TMSReset",
             "value": 1,
             "hold": true,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "AlerterReset",
+            "controls": "TMSReset",
             "value": 0,
             "notify": true
           }
@@ -242,13 +173,12 @@
           "type": "momentary",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "Sander",
+            "controls": "ContactSignaller",
             "value": 1,
-            "hold": true,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "Sander",
+            "controls": "ContactSignaller",
             "value": 0,
             "notify": true
           }
@@ -262,13 +192,13 @@
           "type": "momentary",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "AlerterReset",
+            "controls": "TMSReset",
             "value": 1,
             "hold": true,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "AlerterReset",
+            "controls": "TMSReset",
             "value": 0,
             "notify": true
           }
@@ -299,7 +229,7 @@
   "controller": {
     "usb_id": "06A3:0C2D",
     "mapping": {
-      "name": "Logitech Flight Throttle Quadrant",
+      "name": "Logitech Flight PowerHandle Quadrant",
       "usb_id": "06A3:0C2D",
       "data": [
         {
@@ -414,8 +344,7 @@
   },
   "rail_class_information": [
     {
-      "class_name": "RVM_TTC_SD40-2_C",
-      "class_name": "RVM_NYS_SD40-2_C"
+      "class_name": "RVM_SFJ_CT_BiLevelCoach_CabCar_Mod_C"
     }
   ],
   "apps": [

@@ -1,0 +1,306 @@
+{
+  "name": "M8",
+  "controls": [
+    {
+      "name": "LeverC",
+      "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "MasterController",
+          "input_value": {
+            "min": 0,
+            "max": 1,
+            "steps": [0.1,null,0.4,0.5,0.5,0.6,null,1],
+            "max_change_rate": 0.05
+          },
+          "notify": true
+        },
+        {
+          "type": "api_control",
+          "controls": "MasterController",
+          "input_value": {
+            "min": 0,
+            "max": 1,
+            "steps": [0.1,null,0.4,0.5,0.5,0.6,null,1]
+          }
+        }
+      ]
+    },
+    {
+      "name": "RevC",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "controls": "Horn",
+            "value": 1,
+            "hold": true
+          },
+          "action_deactivate": {
+            "controls": "Horn",
+            "value": 0
+          }
+        },
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "controls": "Horn",
+            "api_value": 1
+          },
+          "action_deactivate": {
+            "controls": "Horn",
+            "api_value": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "ButLU",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "controls": "Acknowledge",
+            "value": 1,
+            "hold": true
+          },
+          "action_deactivate": {
+            "controls": "Acknowledge",
+            "value": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "ButCU",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "controls": "DriverBuzzer",
+            "value": 1,
+            "hold": true
+          },
+          "action_deactivate": {
+            "controls": "DriverBuzzer",
+            "value": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "ButRU",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "controls": "Horn",
+            "value": 1,
+            "hold": true
+          },
+          "action_deactivate": {
+            "controls": "Horn",
+            "value": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "ButLD",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "controls": "GuardDoorRelease_L",
+            "value": 1,
+            "hold": true
+          },
+          "action_deactivate": {
+            "controls": "GuardDoorRelease_L",
+            "value": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "ButCD",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "controls": "GuardDoorClose_R",
+            "value": 1,
+            "hold": true
+          },
+          "action_deactivate": {
+            "controls": "GuardDoorClose_R",
+            "value": 0
+          }
+        },
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "controls": "GuardDoorClose_L",
+            "value": 1,
+            "hold": true
+          },
+          "action_deactivate": {
+            "controls": "GuardDoorClose_L",
+            "value": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "ButRD",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "controls": "GuardDoorRelease_R",
+            "value": 1,
+            "hold": true
+          },
+          "action_deactivate": {
+            "controls": "GuardDoorRelease_R",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ],
+  "auto_select": true,
+  "controller": {
+    "usb_id": "06A3:0C2D",
+    "mapping": {
+      "name": "Logitech Flight Throttle Quadrant",
+      "usb_id": "06A3:0C2D",
+      "data": [
+        {
+          "kind": "axis",
+          "index": 0,
+          "name": "LeverL"
+        },
+        {
+          "kind": "axis",
+          "index": 1,
+          "name": "LeverC"
+        },
+        {
+          "kind": "axis",
+          "index": 2,
+          "name": "LeverR"
+        },
+        {
+          "kind": "button",
+          "index": 0,
+          "name": "ButLU"
+        },
+        {
+          "kind": "button",
+          "index": 1,
+          "name": "ButLD"
+        },
+        {
+          "kind": "button",
+          "index": 2,
+          "name": "ButCU"
+        },
+        {
+          "kind": "button",
+          "index": 3,
+          "name": "ButCD"
+        },
+        {
+          "kind": "button",
+          "index": 4,
+          "name": "ButRU"
+        },
+        {
+          "kind": "button",
+          "index": 5,
+          "name": "ButRD"
+        },
+        {
+          "kind": "button",
+          "index": 6,
+          "name": "RevL"
+        },
+        {
+          "kind": "button",
+          "index": 7,
+          "name": "RevC"
+        },
+        {
+          "kind": "button",
+          "index": 8,
+          "name": "RevR"
+        }
+      ]
+    },
+    "calibration": {
+      "usb_id": "06A3:0C2D",
+      "data": [
+        {
+          "id": "LeverL",
+          "deadzone": 5,
+          "invert": false,
+          "min": -32768,
+          "max": 32768,
+          "idle": -32768,
+          "easing_curve": [
+            0,
+            0,
+            1,
+            1
+          ]
+        },
+        {
+          "id": "LeverC",
+          "deadzone": 5,
+          "invert": false,
+          "min": -32768,
+          "max": 32768,
+          "idle": -32768,
+          "easing_curve": [
+            0,
+            0,
+            1,
+            1
+          ]
+        },
+        {
+          "id": "LeverR",
+          "deadzone": 5,
+          "invert": false,
+          "min": -32768,
+          "max": 32768,
+          "idle": -32768,
+          "easing_curve": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
+      ]
+    }
+  },
+  "rail_class_information": [
+    {
+      "class_name": "RVM_NYS_MNR_M8_A_C"
+    }
+  ],
+  "apps": [
+    "Train Sim World"
+  ]
+}

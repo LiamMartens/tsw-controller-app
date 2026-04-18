@@ -37,6 +37,69 @@
       }
     },
     {
+      "usb_id": "06A3:0C2D",
+      "file": "./m8_logitech_ftq.tswprofile",
+      "name": "M8 - Logitech Flight Throttle Quadrant",
+      "author": {
+        "name": "w/",
+        "url": "https://github.com/MOPC222"
+      }
+    },
+    {
+      "usb_id": "06A3:0C2D",
+      "file": "./GP38_2_logitech_ftq.tswprofile",
+      "name": "GP38-2 - Logitech Flight Throttle Quadrant",
+      "author": {
+        "name": "w/",
+        "url": "https://github.com/MOPC222"
+      }
+    },
+    {
+      "usb_id": "06A3:0C2D",
+      "file": "./bilevel_cab_ctx_logitech_ftq.tswprofile",
+      "name": "Bi-Level Cab Car CTX - Logitech Flight Throttle Quadrant",
+      "author": {
+        "name": "w/",
+        "url": "https://github.com/MOPC222"
+      }
+    },
+    {
+      "usb_id": "06A3:0C2D",
+      "file": "./gallery_cab_car_ct97_logitech_ftq.tswprofile",
+      "name": "Gallery Cab Car CT97 - Logitech Flight Throttle Quadrant",
+      "author": {
+        "name": "w/",
+        "url": "https://github.com/MOPC222"
+      }
+    },
+    {
+      "usb_id": "06A3:0C2D",
+      "file": "./f40ph_2cat_logitech_ftq.tswprofile",
+      "name": "F40PH-2CAT - Logitech Flight Throttle Quadrant",
+      "author": {
+        "name": "w/",
+        "url": "https://github.com/MOPC222"
+      }
+    },
+    {
+      "usb_id": "06A3:0C2D",
+      "file": "./f40ph_3c_boston_worcester_logitech_ftq.tswprofile",
+      "name": "F40PH-3c Boston Worcester - Logitech Flight Throttle Quadrant",
+      "author": {
+        "name": "w/",
+        "url": "https://github.com/MOPC222"
+      }
+    },
+    {
+      "usb_id": "06A3:0C2D",
+      "file": "./hsp46_boston_worcester_logitech_ftq.tswprofile",
+      "name": "HSP46 Boston Worcester - Logitech Flight Throttle Quadrant",
+      "author": {
+        "name": "w/",
+        "url": "https://github.com/MOPC222"
+      }
+    },
+    {
       "usb_id": "33DD:0002",
       "file": "./class170o_zuiki_mascon.tswprofile",
       "name": "Class 170 - ZUIKI MASCON",

@@ -1,5 +1,5 @@
 {
-  "name": "SD40-2, Left Side Buttons Away",
+  "name": "F40PH-2CAT, Left Side Buttons Away",
   "controls": [
     {
       "name": "LeverL",
@@ -32,7 +32,7 @@
           ],
           "controls": "IndependentBrake",
           "input_value": {
-            "min": 0.25,
+            "min": 0,
             "max": 1,
             "max_change_rate": 0.05,
             "invert": true
@@ -69,7 +69,7 @@
           "input_value": {
             "min": 0,
             "max": 0.8,
-			"steps": [0,0.125,null,0.6,0.7,0.8],
+			"steps": [0,0.2050,0.4050,0.6050,0.8],
             "max_change_rate": 0.05
           },
           "notify": true
@@ -106,14 +106,14 @@
           "threshold": 0.1,
           "action_activate": {
             "controls": "IndependentBrake",
-            "value": 0,
+            "value": -0.25,
             "max_change_rate": 0.025,
             "hold": true,
             "notify": true
           },
           "action_deactivate": {
             "controls": "IndependentBrake",
-            "value": 0.25,
+            "value": 0,
             "max_change_rate": 0.025
           }
         },
@@ -169,12 +169,12 @@
           "type": "toggle",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "SandLead",
+            "controls": "LeadAxleSand",
             "value": 1,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "SandLead",
+            "controls": "LeadAxleSand",
             "value": 0,
             "notify": true
           }
@@ -242,13 +242,13 @@
           "type": "momentary",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "Sander",
+            "controls": "Sand",
             "value": 1,
             "hold": true,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "Sander",
+            "controls": "Sand",
             "value": 0,
             "notify": true
           }
@@ -414,8 +414,7 @@
   },
   "rail_class_information": [
     {
-      "class_name": "RVM_TTC_SD40-2_C",
-      "class_name": "RVM_NYS_SD40-2_C"
+      "class_name": "RVM_SFJ_CT_f40PH-2CAT_Mod_C"
     }
   ],
   "apps": [

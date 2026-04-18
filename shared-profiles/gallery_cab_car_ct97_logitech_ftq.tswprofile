@@ -1,5 +1,5 @@
 {
-  "name": "SD40-2, Left Side Buttons Away",
+  "name": "Gallery Cab Car CT97, Left Side Buttons Away",
   "controls": [
     {
       "name": "LeverL",
@@ -30,9 +30,9 @@
               "value": 0.5
             }
           ],
-          "controls": "IndependentBrake",
+          "controls": "ParkingBrake",
           "input_value": {
-            "min": 0.25,
+            "min": 0,
             "max": 1,
             "max_change_rate": 0.05,
             "invert": true
@@ -69,7 +69,7 @@
           "input_value": {
             "min": 0,
             "max": 0.8,
-			"steps": [0,0.125,null,0.6,0.7,0.8],
+			"steps": [0,0.2050,0.4050,0.6050,0.8],
             "max_change_rate": 0.05
           },
           "notify": true
@@ -96,36 +96,6 @@
       "assignments": [
         {
           "type": "momentary",
-          "conditions": [
-            {
-              "control": "RevL",
-              "operator": "lt",
-              "value": 0.5
-            }
-          ],
-          "threshold": 0.1,
-          "action_activate": {
-            "controls": "IndependentBrake",
-            "value": 0,
-            "max_change_rate": 0.025,
-            "hold": true,
-            "notify": true
-          },
-          "action_deactivate": {
-            "controls": "IndependentBrake",
-            "value": 0.25,
-            "max_change_rate": 0.025
-          }
-        },
-        {
-          "type": "momentary",
-          "conditions": [
-            {
-              "control": "RevL",
-              "operator": "gt",
-              "value": 0.5
-            }
-          ],
           "threshold": 0.1,
           "action_activate": {
             "controls": "DynamicBrake",
@@ -169,13 +139,13 @@
           "type": "toggle",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "SandLead",
+            "controls": "Sander",
             "value": 1,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "SandLead",
-            "value": 0,
+            "controls": "Sander",
+            "value": 0.5,
             "notify": true
           }
         }
@@ -188,14 +158,14 @@
           "type": "momentary",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "AlerterReset",
-            "value": 1,
+            "controls": "SafetyPedal",
+            "value": 0,
             "hold": true,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "AlerterReset",
-            "value": 0,
+            "controls": "SafetyPedal",
+            "value": 1,
             "notify": true
           }
         }
@@ -239,17 +209,16 @@
       "name": "ButLD",
       "assignments": [
         {
-          "type": "momentary",
+          "type": "toggle",
           "threshold": 0.1,
           "action_activate": {
             "controls": "Sander",
-            "value": 1,
-            "hold": true,
+            "value": 0,
             "notify": true
           },
           "action_deactivate": {
             "controls": "Sander",
-            "value": 0,
+            "value": 0.5,
             "notify": true
           }
         }
@@ -262,14 +231,14 @@
           "type": "momentary",
           "threshold": 0.1,
           "action_activate": {
-            "controls": "AlerterReset",
-            "value": 1,
+            "controls": "SafetyPedal",
+            "value": 0,
             "hold": true,
             "notify": true
           },
           "action_deactivate": {
-            "controls": "AlerterReset",
-            "value": 0,
+            "controls": "SafetyPedal",
+            "value": 1,
             "notify": true
           }
         }
@@ -414,8 +383,7 @@
   },
   "rail_class_information": [
     {
-      "class_name": "RVM_TTC_SD40-2_C",
-      "class_name": "RVM_NYS_SD40-2_C"
+      "class_name": "RVM_SFJ_CT_Nippon_CabCar_Mod_C"
     }
   ],
   "apps": [
