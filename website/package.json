@@ -10,16 +10,16 @@
   },
   "dependencies": {
     "@json-editor/json-editor": "^2.16.0",
-    "next": "16.2.0",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "next": "16.2.4",
+    "react": "19.2.5",
+    "react-dom": "19.2.5",
     "react-error-boundary": "^6.1.1",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "swr": "^2.4.1"
   },
   "devDependencies": {
-    "@apidevtools/json-schema-ref-parser": "^15.3.1",
+    "@apidevtools/json-schema-ref-parser": "^15.3.5",
     "@tailwindcss/postcss": "^4.2.2",
     "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^20",
@@ -27,8 +27,8 @@
     "@types/react-dom": "^19",
     "daisyui": "^5.5.19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.0",
-    "postcss": "^8.5.8",
+    "eslint-config-next": "16.2.4",
+    "postcss": "^8.5.10",
     "tailwindcss": "^4.2.2",
     "typescript": "^5"
   }
