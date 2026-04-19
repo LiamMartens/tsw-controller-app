@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "format": "oxfmt",
+    "lint": "oxlint",
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "start": "next start"
   },
   "dependencies": {
     "@json-editor/json-editor": "^2.16.0",
@@ -26,8 +27,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "daisyui": "^5.5.19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.4",
+    "oxfmt": "^0.45.0",
+    "oxlint": "^1.60.0",
     "postcss": "^8.5.10",
     "tailwindcss": "^4.2.2",
     "typescript": "^5"

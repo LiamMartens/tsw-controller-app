@@ -19,11 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function DocsPage({
-  params,
-}: {
-  params: Promise<Params>;
-}) {
+export default async function DocsPage({ params }: { params: Promise<Params> }) {
   const slug = (await params).slug;
   const definition = pages[slug];
 

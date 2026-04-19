@@ -4,6 +4,7 @@ import useSWR from "swr";
 import jsonSchema from "../_profile-builder-json-schema/profile.complete.schema.json";
 import {
   ChangeEventHandler,
+  startTransition,
   Suspense,
   useCallback,
   useEffect,
@@ -21,10 +22,12 @@ declare class JSONEditor {
 }
 
 const useIsClientReady = () => {
-  const [isClientReady, setIsClientRaedy] = useState(false);
+  const [isClientReady, setIsClientReady] = useState(false);
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setIsClientRaedy(true);
+      startTransition(() => {
+        setIsClientReady(true);
+      });
     }
   }, []);
   return isClientReady;
@@ -32,10 +35,7 @@ const useIsClientReady = () => {
 
 const useJsonEditorLibrary = () => {
   return useSWR(
-    [
-      "lib",
-      "https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js",
-    ],
+    ["lib", "https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"],
     async () => {
       return new Promise<HTMLScriptElement>((resolve, reject) => {
         const script =
@@ -96,12 +96,8 @@ const ProfileEditorContent = () => {
   const handleContainerRef = useCallback((ref: HTMLElement | null) => {
     if (!ref || typeof JSONEditor === "undefined" || editorRef.current) return;
 
-    const profile_data_raw = new URL(window.location.href).searchParams.get(
-      "profile",
-    );
-    const profile_data = profile_data_raw
-      ? JSON.parse(atob(profile_data_raw))
-      : {};
+    const profile_data_raw = new URL(window.location.href).searchParams.get("profile");
+    const profile_data = profile_data_raw ? JSON.parse(atob(profile_data_raw)) : {};
 
     editorRef.current = new JSONEditor(ref, {
       schema: jsonSchema,
@@ -115,7 +111,7 @@ const ProfileEditorContent = () => {
   return (
     <>
       <div id="editor" ref={handleContainerRef} />
-      <div className="px-6 mx-auto max-w-4xl sticky bottom-4">
+      <div className="mx-auto max-w-4xl sticky bottom-4">
         <div className="bg-base-100 border-base-content/5 border rounded-lg shadow-xl">
           <div className="m-4 flex items-center gap-2">
             <button className="btn btn-primary" onClick={handleSave}>
