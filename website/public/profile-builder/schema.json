@@ -1,1 +1,1351 @@
-{"type":"object","properties":{"name":{"type":"string","minLength":1,"description":"The name of this profile"},"extends":{"type":"string","description":"The name of the profile to extend from. The profile inheritance happens on a control basis; if you have the control defined here it will not be resolved from the extended profile. Note: when saving the profile for sharing the fully resolved profile is saved without the extends fields to make sure profiles are independently shareable."},"auto_select":{"type":"boolean","description":"Whether this profile supports auto-detection. Requires the supported controller USB ID and rail class information to be set"},"controls":{"type":"array","items":{"type":"object","properties":{"name":{"type":"string","description":"The given name of this control (as calibrated)","minLength":1},"assignments":{"type":"array","items":{"allOf":[{"oneOf":[{"allOf":[{"type":"object","title":"Momentary","description":"The momentary switch assignment essentially just acts like a normal button","properties":{"type":{"enum":["momentary"]},"threshold":{"type":"number","description":"The threshold which the gamepad control needs to exceed before triggering the action. For most momentary implementations this can be any value since most buttons report a value of 0 or 1"},"match":{"enum":["exceeds","equals"],"default":"exceeds","description":"Defines how to interpret the threshold. Defaults to exceeds where the action is executed when the value exceeds the threshold. Can also be set to equals for an exact comparison"},"action_activate":{"description":"The actual action to activate when the threshold is exceeded","oneOf":[{"type":"object","title":"Keys Action","properties":{"keys":{"type":"string","description":"The keys to trigger (a list of key identifiers separated by +'s)","examples":["q+pagedown"]},"press_time":{"type":"number","minimum":0,"description":"The number of seconds to hold the button down; can be omitted to just hold it until released"},"wait_time":{"type":"number","minimum":0,"description":"The minimum time in seconds to wait between keystrokes; can be omitted"}},"required":["keys"]},{"type":"object","title":"Direct Control Action","properties":{"controls":{"type":"string","description":"This is the direct control identifier which can be found using the Cab Debugger","examples":["Throttle","AutomaticBrake_{SIDE}"]},"value":{"type":"number","description":"The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"},"max_change_rate":{"type":"number","description":"The maximum rate at which this control can change"},"relative":{"type":"boolean","description":"Defines whether to use the value as a relative adjustment instead of an absolute one."},"hold":{"type":"boolean","description":"Defines whether to hold the value by continuously sending the input value to the cab. This is only required for momentary levers which do not hold positions on their own in the game. (ie some independent brakes)"},"use_normalized":{"type":"boolean","description":"Whether to use the normalized value instead of the non-normalized value"},"notify":{"type":"boolean","description":"Enables showing the in-game notification when changing values"}},"required":["controls","value"]},{"type":"object","title":"API Control Action","properties":{"controls":{"type":"string","description":"This is the direct api control identifier which can be found using the Cab Debugger (same as the direct control one). Does not support the {SIDE} placeholder.","examples":["Throttle","AutomaticBrake_F"]},"api_value":{"type":"number","description":"The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"},"hold":{"type":"boolean"},"max_change_rate":{"type":"number"}},"required":["controls","api_value"]},{"type":"object","title":"Virtual Action","description":"A virtual control action","properties":{"type":{"enum":["virtual"]},"control":{"type":"string","description":"The name of the virtual control to update. Should start with 'virtual:' for clear segmentation","examples":["virtual:Button1"],"pattern":"^virtual:"},"value":{"type":"number"}},"required":["type","control","value"]}]},"action_deactivate":{"description":"The action to activate when the threshold is not exceeded anymore. This defaults to just releasing the previously activated key(s).","oneOf":[{"type":"object","title":"Keys Action","properties":{"keys":{"type":"string","description":"The keys to trigger (a list of key identifiers separated by +'s)","examples":["q+pagedown"]},"press_time":{"type":"number","minimum":0,"description":"The number of seconds to hold the button down; can be omitted to just hold it until released"},"wait_time":{"type":"number","minimum":0,"description":"The minimum time in seconds to wait between keystrokes; can be omitted"}},"required":["keys"]},{"type":"object","title":"Direct Control Action","properties":{"controls":{"type":"string","description":"This is the direct control identifier which can be found using the Cab Debugger","examples":["Throttle","AutomaticBrake_{SIDE}"]},"value":{"type":"number","description":"The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"},"max_change_rate":{"type":"number","description":"The maximum rate at which this control can change"},"relative":{"type":"boolean","description":"Defines whether to use the value as a relative adjustment instead of an absolute one."},"hold":{"type":"boolean","description":"Defines whether to hold the value by continuously sending the input value to the cab. This is only required for momentary levers which do not hold positions on their own in the game. (ie some independent brakes)"},"use_normalized":{"type":"boolean","description":"Whether to use the normalized value instead of the non-normalized value"},"notify":{"type":"boolean","description":"Enables showing the in-game notification when changing values"}},"required":["controls","value"]},{"type":"object","title":"API Control Action","properties":{"controls":{"type":"string","description":"This is the direct api control identifier which can be found using the Cab Debugger (same as the direct control one). Does not support the {SIDE} placeholder.","examples":["Throttle","AutomaticBrake_F"]},"api_value":{"type":"number","description":"The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"},"hold":{"type":"boolean"},"max_change_rate":{"type":"number"}},"required":["controls","api_value"]},{"type":"object","title":"Virtual Action","description":"A virtual control action","properties":{"type":{"enum":["virtual"]},"control":{"type":"string","description":"The name of the virtual control to update. Should start with 'virtual:' for clear segmentation","examples":["virtual:Button1"],"pattern":"^virtual:"},"value":{"type":"number"}},"required":["type","control","value"]}]}},"required":["type","threshold","action_activate"]},{"type":"object","properties":{"conditions":{"type":"array","description":"The conditions to apply to this assignment","items":{"type":"object","required":["control","operator","value"],"properties":{"control":{"type":"string","description":"This is the control which needs to meet the condition"},"operator":{"enum":["gte","lte","gt","lt","eq"],"description":"The operation to apply to the control value (greater than, less than, ..)"},"value":{"type":"number","description":"The comparison value"}}}},"rail_class_information":{"type":"array","description":"Defines the supported rail class names (can be found at the top of the cab debugger)","items":{"type":"object","properties":{"class_name":{"type":"string"}}}}}}]},{"allOf":[{"type":"object","title":"Toggle","description":"The toggle assignment acts like a switch. Activating one action when pressed once, and activating another when pressed again.","properties":{"type":{"enum":["toggle"]},"threshold":{"type":"number","description":"The threshold which the gamepad control needs to exceed before triggering the action. For most toggle implementations this can be any value since most buttons report a value of 0 or 1"},"match":{"enum":["exceeds","equals"],"default":"exceeds","description":"Defines how to interpret the threshold. Defaults to exceeds where the action is executed when the value exceeds the threshold. Can also be set to equals for an exact comparison"},"action_activate":{"description":"The actual action to activate when toggling the first time","oneOf":[{"type":"object","title":"Keys Action","properties":{"keys":{"type":"string","description":"The keys to trigger (a list of key identifiers separated by +'s)","examples":["q+pagedown"]},"press_time":{"type":"number","minimum":0,"description":"The number of seconds to hold the button down; can be omitted to just hold it until released"},"wait_time":{"type":"number","minimum":0,"description":"The minimum time in seconds to wait between keystrokes; can be omitted"}},"required":["keys"]},{"type":"object","title":"Direct Control Action","properties":{"controls":{"type":"string","description":"This is the direct control identifier which can be found using the Cab Debugger","examples":["Throttle","AutomaticBrake_{SIDE}"]},"value":{"type":"number","description":"The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"},"max_change_rate":{"type":"number","description":"The maximum rate at which this control can change"},"relative":{"type":"boolean","description":"Defines whether to use the value as a relative adjustment instead of an absolute one."},"hold":{"type":"boolean","description":"Defines whether to hold the value by continuously sending the input value to the cab. This is only required for momentary levers which do not hold positions on their own in the game. (ie some independent brakes)"},"use_normalized":{"type":"boolean","description":"Whether to use the normalized value instead of the non-normalized value"},"notify":{"type":"boolean","description":"Enables showing the in-game notification when changing values"}},"required":["controls","value"]},{"type":"object","title":"API Control Action","properties":{"controls":{"type":"string","description":"This is the direct api control identifier which can be found using the Cab Debugger (same as the direct control one). Does not support the {SIDE} placeholder.","examples":["Throttle","AutomaticBrake_F"]},"api_value":{"type":"number","description":"The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"},"hold":{"type":"boolean"},"max_change_rate":{"type":"number"}},"required":["controls","api_value"]},{"type":"object","title":"Virtual Action","description":"A virtual control action","properties":{"type":{"enum":["virtual"]},"control":{"type":"string","description":"The name of the virtual control to update. Should start with 'virtual:' for clear segmentation","examples":["virtual:Button1"],"pattern":"^virtual:"},"value":{"type":"number"}},"required":["type","control","value"]}]},"action_deactivate":{"description":"The action to execute when toggling the second time","oneOf":[{"type":"object","title":"Keys Action","properties":{"keys":{"type":"string","description":"The keys to trigger (a list of key identifiers separated by +'s)","examples":["q+pagedown"]},"press_time":{"type":"number","minimum":0,"description":"The number of seconds to hold the button down; can be omitted to just hold it until released"},"wait_time":{"type":"number","minimum":0,"description":"The minimum time in seconds to wait between keystrokes; can be omitted"}},"required":["keys"]},{"type":"object","title":"Direct Control Action","properties":{"controls":{"type":"string","description":"This is the direct control identifier which can be found using the Cab Debugger","examples":["Throttle","AutomaticBrake_{SIDE}"]},"value":{"type":"number","description":"The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"},"max_change_rate":{"type":"number","description":"The maximum rate at which this control can change"},"relative":{"type":"boolean","description":"Defines whether to use the value as a relative adjustment instead of an absolute one."},"hold":{"type":"boolean","description":"Defines whether to hold the value by continuously sending the input value to the cab. This is only required for momentary levers which do not hold positions on their own in the game. (ie some independent brakes)"},"use_normalized":{"type":"boolean","description":"Whether to use the normalized value instead of the non-normalized value"},"notify":{"type":"boolean","description":"Enables showing the in-game notification when changing values"}},"required":["controls","value"]},{"type":"object","title":"API Control Action","properties":{"controls":{"type":"string","description":"This is the direct api control identifier which can be found using the Cab Debugger (same as the direct control one). Does not support the {SIDE} placeholder.","examples":["Throttle","AutomaticBrake_F"]},"api_value":{"type":"number","description":"The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"},"hold":{"type":"boolean"},"max_change_rate":{"type":"number"}},"required":["controls","api_value"]},{"type":"object","title":"Virtual Action","description":"A virtual control action","properties":{"type":{"enum":["virtual"]},"control":{"type":"string","description":"The name of the virtual control to update. Should start with 'virtual:' for clear segmentation","examples":["virtual:Button1"],"pattern":"^virtual:"},"value":{"type":"number"}},"required":["type","control","value"]}]}},"required":["type","threshold","action_activate","action_deactivate"]},{"type":"object","properties":{"conditions":{"type":"array","description":"The conditions to apply to this assignment","items":{"type":"object","required":["control","operator","value"],"properties":{"control":{"type":"string","description":"This is the control which needs to meet the condition"},"operator":{"enum":["gte","lte","gt","lt","eq"],"description":"The operation to apply to the control value (greater than, less than, ..)"},"value":{"type":"number","description":"The comparison value"}}}},"rail_class_information":{"type":"array","description":"Defines the supported rail class names (can be found at the top of the cab debugger)","items":{"type":"object","properties":{"class_name":{"type":"string"}}}}}}]},{"allOf":[{"type":"object","title":"Linear","description":"The linear assignment acts like a customized lever, triggering actions as values get exceeded at specific thresholds.","properties":{"type":{"enum":["linear"]},"neutral":{"type":"number","description":"The linear value which is considered neutral or idle - this can be used to map the lever value from 0-1 to -1 to 1"},"thresholds":{"type":"array","items":{"type":"object","properties":{"value":{"type":"number","description":"The threshold to exceed. When a neutral value is set; the value will exceed when below the -x.x value"},"value_end":{"type":"number","description":"When used in combination with value_step, can generate a set of thresholds between value and value_end by value_step to repeat the same action(s)"},"value_step":{"type":"number","description":"Only used in combination with value_end"},"action_activate":{"description":"The actual action to activate when the threshold is exceeded","oneOf":[{"type":"object","title":"Keys Action","properties":{"keys":{"type":"string","description":"The keys to trigger (a list of key identifiers separated by +'s)","examples":["q+pagedown"]},"press_time":{"type":"number","minimum":0,"description":"The number of seconds to hold the button down; can be omitted to just hold it until released"},"wait_time":{"type":"number","minimum":0,"description":"The minimum time in seconds to wait between keystrokes; can be omitted"}},"required":["keys"]},{"type":"object","title":"Direct Control Action","properties":{"controls":{"type":"string","description":"This is the direct control identifier which can be found using the Cab Debugger","examples":["Throttle","AutomaticBrake_{SIDE}"]},"value":{"type":"number","description":"The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"},"max_change_rate":{"type":"number","description":"The maximum rate at which this control can change"},"relative":{"type":"boolean","description":"Defines whether to use the value as a relative adjustment instead of an absolute one."},"hold":{"type":"boolean","description":"Defines whether to hold the value by continuously sending the input value to the cab. This is only required for momentary levers which do not hold positions on their own in the game. (ie some independent brakes)"},"use_normalized":{"type":"boolean","description":"Whether to use the normalized value instead of the non-normalized value"},"notify":{"type":"boolean","description":"Enables showing the in-game notification when changing values"}},"required":["controls","value"]},{"type":"object","title":"API Control Action","properties":{"controls":{"type":"string","description":"This is the direct api control identifier which can be found using the Cab Debugger (same as the direct control one). Does not support the {SIDE} placeholder.","examples":["Throttle","AutomaticBrake_F"]},"api_value":{"type":"number","description":"The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"},"hold":{"type":"boolean"},"max_change_rate":{"type":"number"}},"required":["controls","api_value"]},{"type":"object","title":"Virtual Action","description":"A virtual control action","properties":{"type":{"enum":["virtual"]},"control":{"type":"string","description":"The name of the virtual control to update. Should start with 'virtual:' for clear segmentation","examples":["virtual:Button1"],"pattern":"^virtual:"},"value":{"type":"number"}},"required":["type","control","value"]}]},"action_deactivate":{"description":"The action to execute when the lever goes below the threshold (optional)","oneOf":[{"type":"object","title":"Keys Action","properties":{"keys":{"type":"string","description":"The keys to trigger (a list of key identifiers separated by +'s)","examples":["q+pagedown"]},"press_time":{"type":"number","minimum":0,"description":"The number of seconds to hold the button down; can be omitted to just hold it until released"},"wait_time":{"type":"number","minimum":0,"description":"The minimum time in seconds to wait between keystrokes; can be omitted"}},"required":["keys"]},{"type":"object","title":"Direct Control Action","properties":{"controls":{"type":"string","description":"This is the direct control identifier which can be found using the Cab Debugger","examples":["Throttle","AutomaticBrake_{SIDE}"]},"value":{"type":"number","description":"The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"},"max_change_rate":{"type":"number","description":"The maximum rate at which this control can change"},"relative":{"type":"boolean","description":"Defines whether to use the value as a relative adjustment instead of an absolute one."},"hold":{"type":"boolean","description":"Defines whether to hold the value by continuously sending the input value to the cab. This is only required for momentary levers which do not hold positions on their own in the game. (ie some independent brakes)"},"use_normalized":{"type":"boolean","description":"Whether to use the normalized value instead of the non-normalized value"},"notify":{"type":"boolean","description":"Enables showing the in-game notification when changing values"}},"required":["controls","value"]},{"type":"object","title":"API Control Action","properties":{"controls":{"type":"string","description":"This is the direct api control identifier which can be found using the Cab Debugger (same as the direct control one). Does not support the {SIDE} placeholder.","examples":["Throttle","AutomaticBrake_F"]},"api_value":{"type":"number","description":"The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"},"hold":{"type":"boolean"},"max_change_rate":{"type":"number"}},"required":["controls","api_value"]},{"type":"object","title":"Virtual Action","description":"A virtual control action","properties":{"type":{"enum":["virtual"]},"control":{"type":"string","description":"The name of the virtual control to update. Should start with 'virtual:' for clear segmentation","examples":["virtual:Button1"],"pattern":"^virtual:"},"value":{"type":"number"}},"required":["type","control","value"]}]}}},"required":["value","action_activate"]}},"required":["type","thresholds"]},{"type":"object","properties":{"conditions":{"type":"array","description":"The conditions to apply to this assignment","items":{"type":"object","required":["control","operator","value"],"properties":{"control":{"type":"string","description":"This is the control which needs to meet the condition"},"operator":{"enum":["gte","lte","gt","lt","eq"],"description":"The operation to apply to the control value (greater than, less than, ..)"},"value":{"type":"number","description":"The comparison value"}}}},"rail_class_information":{"type":"array","description":"Defines the supported rail class names (can be found at the top of the cab debugger)","items":{"type":"object","properties":{"class_name":{"type":"string"}}}}}}]},{"allOf":[{"type":"object","title":"Direct Control","description":"The direct control assignment gives complete control over the cab levers by mapping the gamepad lever value directly onto the game","properties":{"type":{"enum":["direct_control"]},"controls":{"type":"string","description":"The direct control name to control; can be identified using the Cab Debugger"},"hold":{"type":"boolean","description":"Defines whether to hold the value by continuously sending the input value to the cab. This is only required for momentary levers which do not hold positions on their own in the game. (ie some independent brakes)"},"use_normalized":{"type":"boolean","description":"Whether to use the normalized value instead of the non-normalized value"},"notify":{"type":"boolean","description":"Enables showing the in-game notification when changing values","default":true},"control_range":{"type":"object","description":"The control range that will be remapped to 0,1 or 0,-1. This is useful when direct mapping partial ranges.","required":["start","end"],"properties":{"start":{"type":"number"},"end":{"type":"number"}}},"input_value":{"type":"object","title":"Direct Like Input Value","description":"Defines the input value constraints of the direct like control","properties":{"min":{"type":"number","description":"The minimum reachable value in the game cab; can be identified using the Cab Debugger"},"max":{"type":"number","description":"The maximum reachable value in the game cab; can be identified using the Cab Debugger"},"max_change_rate":{"type":"number","description":"The maximum rate at which this control can change"},"step":{"type":"number","description":"The step value to increase/decrease the values in (optional)"},"steps":{"type":"array","description":"Acts similarly to step but allows for finer control and can be combined with null values to define free range zones. This is useful if you have a control which is partly notched and partly free","examples":[[0.2,0.4,0.6,null,1]],"items":{"type":["null","number"]}},"invert":{"type":"boolean","description":"Whether to invert the input value before calculating the game value"},"step_thresholds":{"type":"array","items":{"type":"object","title":"Step Threshold Definition","description":"Defines the threshold of a step which can be used to remap a direct/api control like value","properties":{"threshold":{"type":"number","description":"Defines the actual threshold value"},"threshold_end":{"type":"number","description":"Defines the threshold end value for ranges"},"threshold_tolerance":{"type":"number","description":"Defines the tolerance for the threshold"}},"required":["threshold"]}}},"required":["min","max"]}},"required":["type","controls","input_value"]},{"type":"object","properties":{"conditions":{"type":"array","description":"The conditions to apply to this assignment","items":{"type":"object","required":["control","operator","value"],"properties":{"control":{"type":"string","description":"This is the control which needs to meet the condition"},"operator":{"enum":["gte","lte","gt","lt","eq"],"description":"The operation to apply to the control value (greater than, less than, ..)"},"value":{"type":"number","description":"The comparison value"}}}},"rail_class_information":{"type":"array","description":"Defines the supported rail class names (can be found at the top of the cab debugger)","items":{"type":"object","properties":{"class_name":{"type":"string"}}}}}}]},{"allOf":[{"type":"object","title":"API Control","description":"The direct control assignment gives complete control over the cab levers by mapping the gamepad lever value directly onto the game's HTTP API. May introduce slight overhead compared to direct control","properties":{"type":{"enum":["api_control"]},"controls":{"type":"string","description":"The direct/api control name to control; can be identified using the Cab Debugger"},"control_range":{"type":"object","description":"The control range that will be remapped to 0,1 or 0,-1. This is useful when direct mapping partial ranges.","required":["start","end"],"properties":{"start":{"type":"number"},"end":{"type":"number"}}},"hold":{"type":"boolean"},"input_value":{"type":"object","title":"Direct Like Input Value","description":"Defines the input value constraints of the direct like control","properties":{"min":{"type":"number","description":"The minimum reachable value in the game cab; can be identified using the Cab Debugger"},"max":{"type":"number","description":"The maximum reachable value in the game cab; can be identified using the Cab Debugger"},"max_change_rate":{"type":"number","description":"The maximum rate at which this control can change"},"step":{"type":"number","description":"The step value to increase/decrease the values in (optional)"},"steps":{"type":"array","description":"Acts similarly to step but allows for finer control and can be combined with null values to define free range zones. This is useful if you have a control which is partly notched and partly free","examples":[[0.2,0.4,0.6,null,1]],"items":{"type":["null","number"]}},"invert":{"type":"boolean","description":"Whether to invert the input value before calculating the game value"},"step_thresholds":{"type":"array","items":{"type":"object","title":"Step Threshold Definition","description":"Defines the threshold of a step which can be used to remap a direct/api control like value","properties":{"threshold":{"type":"number","description":"Defines the actual threshold value"},"threshold_end":{"type":"number","description":"Defines the threshold end value for ranges"},"threshold_tolerance":{"type":"number","description":"Defines the tolerance for the threshold"}},"required":["threshold"]}}},"required":["min","max"]}},"required":["type","controls","input_value"]},{"type":"object","properties":{"conditions":{"type":"array","description":"The conditions to apply to this assignment","items":{"type":"object","required":["control","operator","value"],"properties":{"control":{"type":"string","description":"This is the control which needs to meet the condition"},"operator":{"enum":["gte","lte","gt","lt","eq"],"description":"The operation to apply to the control value (greater than, less than, ..)"},"value":{"type":"number","description":"The comparison value"}}}},"rail_class_information":{"type":"array","description":"Defines the supported rail class names (can be found at the top of the cab debugger)","items":{"type":"object","properties":{"class_name":{"type":"string"}}}}}}]},{"allOf":[{"type":"object","title":"Sync Control","description":"Sync control uses the value listener to increase the value up to the right value using keybinds","properties":{"type":{"enum":["sync_control"]},"identifier":{"type":"string","description":"The sync control identifier to control; can be identified using the Cab Debugger"},"control_range":{"type":"object","description":"The control range that will be remapped to 0,1 or 0,-1. This is useful when direct mapping partial ranges.","required":["start","end"],"properties":{"start":{"type":"number"},"end":{"type":"number"}}},"input_value":{"type":"object","title":"Direct Like Input Value","description":"Defines the input value constraints of the direct like control","properties":{"min":{"type":"number","description":"The minimum reachable value in the game cab; can be identified using the Cab Debugger"},"max":{"type":"number","description":"The maximum reachable value in the game cab; can be identified using the Cab Debugger"},"max_change_rate":{"type":"number","description":"The maximum rate at which this control can change"},"step":{"type":"number","description":"The step value to increase/decrease the values in (optional)"},"steps":{"type":"array","description":"Acts similarly to step but allows for finer control and can be combined with null values to define free range zones. This is useful if you have a control which is partly notched and partly free","examples":[[0.2,0.4,0.6,null,1]],"items":{"type":["null","number"]}},"invert":{"type":"boolean","description":"Whether to invert the input value before calculating the game value"},"step_thresholds":{"type":"array","items":{"type":"object","title":"Step Threshold Definition","description":"Defines the threshold of a step which can be used to remap a direct/api control like value","properties":{"threshold":{"type":"number","description":"Defines the actual threshold value"},"threshold_end":{"type":"number","description":"Defines the threshold end value for ranges"},"threshold_tolerance":{"type":"number","description":"Defines the tolerance for the threshold"}},"required":["threshold"]}}},"required":["min","max"]},"action_increase":{"type":"object","title":"Keys Action","properties":{"keys":{"type":"string","description":"The keys to trigger (a list of key identifiers separated by +'s)","examples":["q+pagedown"]},"press_time":{"type":"number","minimum":0,"description":"The number of seconds to hold the button down; can be omitted to just hold it until released"},"wait_time":{"type":"number","minimum":0,"description":"The minimum time in seconds to wait between keystrokes; can be omitted"}},"required":["keys"]},"action_decrease":{"type":"object","title":"Keys Action","properties":{"keys":{"type":"string","description":"The keys to trigger (a list of key identifiers separated by +'s)","examples":["q+pagedown"]},"press_time":{"type":"number","minimum":0,"description":"The number of seconds to hold the button down; can be omitted to just hold it until released"},"wait_time":{"type":"number","minimum":0,"description":"The minimum time in seconds to wait between keystrokes; can be omitted"}},"required":["keys"]}},"required":["type","identifier","input_value","action_increase","action_decrease"]},{"type":"object","properties":{"conditions":{"type":"array","description":"The conditions to apply to this assignment","items":{"type":"object","required":["control","operator","value"],"properties":{"control":{"type":"string","description":"This is the control which needs to meet the condition"},"operator":{"enum":["gte","lte","gt","lt","eq"],"description":"The operation to apply to the control value (greater than, less than, ..)"},"value":{"type":"number","description":"The comparison value"}}}},"rail_class_information":{"type":"array","description":"Defines the supported rail class names (can be found at the top of the cab debugger)","items":{"type":"object","properties":{"class_name":{"type":"string"}}}}}}]}]}]}}},"required":["name","assignments"]}},"controller":{"type":"object","properties":{"usb_id":{"type":"string","description":"The supported controller USB identifier (Vendor:Product)"},"mapping":{"type":"object","additionalProperties":true,"description":"This is a copy of the SDL mapping. This can be embedded for portability"},"calibration":{"type":"object","additionalProperties":true,"description":"This is a copy of the controller calibration. This can be embedded for portability"}}},"rail_class_information":{"type":"array","description":"Defines the supported rail class names (can be found at the top of the cab debugger)","items":{"type":"object","properties":{"class_name":{"type":"string"}}}}},"required":["name","controls"]}
+{
+  "type": "object",
+  "properties": {
+    "name": { "type": "string", "minLength": 1, "description": "The name of this profile" },
+    "extends": {
+      "type": "string",
+      "description": "The name of the profile to extend from. The profile inheritance happens on a control basis; if you have the control defined here it will not be resolved from the extended profile. Note: when saving the profile for sharing the fully resolved profile is saved without the extends fields to make sure profiles are independently shareable."
+    },
+    "auto_select": {
+      "type": "boolean",
+      "description": "Whether this profile supports auto-detection. Requires the supported controller USB ID and rail class information to be set"
+    },
+    "controls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The given name of this control (as calibrated)",
+            "minLength": 1
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "type": "object",
+                          "title": "Momentary",
+                          "description": "The momentary switch assignment essentially just acts like a normal button",
+                          "properties": {
+                            "type": { "enum": ["momentary"] },
+                            "threshold": {
+                              "type": "number",
+                              "description": "The threshold which the gamepad control needs to exceed before triggering the action. For most momentary implementations this can be any value since most buttons report a value of 0 or 1"
+                            },
+                            "match": {
+                              "enum": ["exceeds", "equals"],
+                              "default": "exceeds",
+                              "description": "Defines how to interpret the threshold. Defaults to exceeds where the action is executed when the value exceeds the threshold. Can also be set to equals for an exact comparison"
+                            },
+                            "action_activate": {
+                              "description": "The actual action to activate when the threshold is exceeded",
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "title": "Keys Action",
+                                  "properties": {
+                                    "keys": {
+                                      "type": "string",
+                                      "description": "The keys to trigger (a list of key identifiers separated by +'s)",
+                                      "examples": ["q+pagedown"]
+                                    },
+                                    "press_time": {
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "description": "The number of seconds to hold the button down; can be omitted to just hold it until released"
+                                    },
+                                    "wait_time": {
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "description": "The minimum time in seconds to wait between keystrokes; can be omitted"
+                                    }
+                                  },
+                                  "required": ["keys"]
+                                },
+                                {
+                                  "type": "object",
+                                  "title": "Direct Control Action",
+                                  "properties": {
+                                    "controls": {
+                                      "type": "string",
+                                      "description": "This is the direct control identifier which can be found using the Cab Debugger",
+                                      "examples": ["Throttle", "AutomaticBrake_{SIDE}"]
+                                    },
+                                    "value": {
+                                      "type": "number",
+                                      "description": "The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"
+                                    },
+                                    "max_change_rate": {
+                                      "type": "number",
+                                      "description": "The maximum rate at which this control can change"
+                                    },
+                                    "relative": {
+                                      "type": "boolean",
+                                      "description": "Defines whether to use the value as a relative adjustment instead of an absolute one."
+                                    },
+                                    "hold": {
+                                      "type": "boolean",
+                                      "description": "Defines whether to hold the value by continuously sending the input value to the cab. This is only required for momentary levers which do not hold positions on their own in the game. (ie some independent brakes)"
+                                    },
+                                    "use_normalized": {
+                                      "type": "boolean",
+                                      "description": "Whether to use the normalized value instead of the non-normalized value"
+                                    },
+                                    "notify": {
+                                      "type": "boolean",
+                                      "description": "Enables showing the in-game notification when changing values"
+                                    },
+                                    "enable_api_fallback": {
+                                      "type": "boolean",
+                                      "description": "Determines whether to enable fallback to the TSW API if available"
+                                    }
+                                  },
+                                  "required": ["controls", "value"]
+                                },
+                                {
+                                  "type": "object",
+                                  "title": "API Control Action",
+                                  "properties": {
+                                    "controls": {
+                                      "type": "string",
+                                      "description": "This is the direct api control identifier which can be found using the Cab Debugger (same as the direct control one). Does not support the {SIDE} placeholder.",
+                                      "examples": ["Throttle", "AutomaticBrake_F"]
+                                    },
+                                    "api_value": {
+                                      "type": "number",
+                                      "description": "The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"
+                                    },
+                                    "hold": { "type": "boolean" },
+                                    "max_change_rate": { "type": "number" }
+                                  },
+                                  "required": ["controls", "api_value"]
+                                },
+                                {
+                                  "type": "object",
+                                  "title": "Virtual Action",
+                                  "description": "A virtual control action",
+                                  "properties": {
+                                    "type": { "enum": ["virtual"] },
+                                    "control": {
+                                      "type": "string",
+                                      "description": "The name of the virtual control to update. Should start with 'virtual:' for clear segmentation",
+                                      "examples": ["virtual:Button1"],
+                                      "pattern": "^virtual:"
+                                    },
+                                    "value": { "type": "number" }
+                                  },
+                                  "required": ["type", "control", "value"]
+                                }
+                              ]
+                            },
+                            "action_deactivate": {
+                              "description": "The action to activate when the threshold is not exceeded anymore. This defaults to just releasing the previously activated key(s).",
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "title": "Keys Action",
+                                  "properties": {
+                                    "keys": {
+                                      "type": "string",
+                                      "description": "The keys to trigger (a list of key identifiers separated by +'s)",
+                                      "examples": ["q+pagedown"]
+                                    },
+                                    "press_time": {
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "description": "The number of seconds to hold the button down; can be omitted to just hold it until released"
+                                    },
+                                    "wait_time": {
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "description": "The minimum time in seconds to wait between keystrokes; can be omitted"
+                                    }
+                                  },
+                                  "required": ["keys"]
+                                },
+                                {
+                                  "type": "object",
+                                  "title": "Direct Control Action",
+                                  "properties": {
+                                    "controls": {
+                                      "type": "string",
+                                      "description": "This is the direct control identifier which can be found using the Cab Debugger",
+                                      "examples": ["Throttle", "AutomaticBrake_{SIDE}"]
+                                    },
+                                    "value": {
+                                      "type": "number",
+                                      "description": "The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"
+                                    },
+                                    "max_change_rate": {
+                                      "type": "number",
+                                      "description": "The maximum rate at which this control can change"
+                                    },
+                                    "relative": {
+                                      "type": "boolean",
+                                      "description": "Defines whether to use the value as a relative adjustment instead of an absolute one."
+                                    },
+                                    "hold": {
+                                      "type": "boolean",
+                                      "description": "Defines whether to hold the value by continuously sending the input value to the cab. This is only required for momentary levers which do not hold positions on their own in the game. (ie some independent brakes)"
+                                    },
+                                    "use_normalized": {
+                                      "type": "boolean",
+                                      "description": "Whether to use the normalized value instead of the non-normalized value"
+                                    },
+                                    "notify": {
+                                      "type": "boolean",
+                                      "description": "Enables showing the in-game notification when changing values"
+                                    },
+                                    "enable_api_fallback": {
+                                      "type": "boolean",
+                                      "description": "Determines whether to enable fallback to the TSW API if available"
+                                    }
+                                  },
+                                  "required": ["controls", "value"]
+                                },
+                                {
+                                  "type": "object",
+                                  "title": "API Control Action",
+                                  "properties": {
+                                    "controls": {
+                                      "type": "string",
+                                      "description": "This is the direct api control identifier which can be found using the Cab Debugger (same as the direct control one). Does not support the {SIDE} placeholder.",
+                                      "examples": ["Throttle", "AutomaticBrake_F"]
+                                    },
+                                    "api_value": {
+                                      "type": "number",
+                                      "description": "The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"
+                                    },
+                                    "hold": { "type": "boolean" },
+                                    "max_change_rate": { "type": "number" }
+                                  },
+                                  "required": ["controls", "api_value"]
+                                },
+                                {
+                                  "type": "object",
+                                  "title": "Virtual Action",
+                                  "description": "A virtual control action",
+                                  "properties": {
+                                    "type": { "enum": ["virtual"] },
+                                    "control": {
+                                      "type": "string",
+                                      "description": "The name of the virtual control to update. Should start with 'virtual:' for clear segmentation",
+                                      "examples": ["virtual:Button1"],
+                                      "pattern": "^virtual:"
+                                    },
+                                    "value": { "type": "number" }
+                                  },
+                                  "required": ["type", "control", "value"]
+                                }
+                              ]
+                            }
+                          },
+                          "required": ["type", "threshold", "action_activate"]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "conditions": {
+                              "type": "array",
+                              "description": "The conditions to apply to this assignment",
+                              "items": {
+                                "type": "object",
+                                "required": ["control", "operator", "value"],
+                                "properties": {
+                                  "control": {
+                                    "type": "string",
+                                    "description": "This is the control which needs to meet the condition"
+                                  },
+                                  "operator": {
+                                    "enum": ["gte", "lte", "gt", "lt", "eq"],
+                                    "description": "The operation to apply to the control value (greater than, less than, ..)"
+                                  },
+                                  "value": {
+                                    "type": "number",
+                                    "description": "The comparison value"
+                                  }
+                                }
+                              }
+                            },
+                            "rail_class_information": {
+                              "type": "array",
+                              "description": "Defines the supported rail class names (can be found at the top of the cab debugger)",
+                              "items": {
+                                "type": "object",
+                                "properties": { "class_name": { "type": "string" } }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "type": "object",
+                          "title": "Toggle",
+                          "description": "The toggle assignment acts like a switch. Activating one action when pressed once, and activating another when pressed again.",
+                          "properties": {
+                            "type": { "enum": ["toggle"] },
+                            "threshold": {
+                              "type": "number",
+                              "description": "The threshold which the gamepad control needs to exceed before triggering the action. For most toggle implementations this can be any value since most buttons report a value of 0 or 1"
+                            },
+                            "match": {
+                              "enum": ["exceeds", "equals"],
+                              "default": "exceeds",
+                              "description": "Defines how to interpret the threshold. Defaults to exceeds where the action is executed when the value exceeds the threshold. Can also be set to equals for an exact comparison"
+                            },
+                            "action_activate": {
+                              "description": "The actual action to activate when toggling the first time",
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "title": "Keys Action",
+                                  "properties": {
+                                    "keys": {
+                                      "type": "string",
+                                      "description": "The keys to trigger (a list of key identifiers separated by +'s)",
+                                      "examples": ["q+pagedown"]
+                                    },
+                                    "press_time": {
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "description": "The number of seconds to hold the button down; can be omitted to just hold it until released"
+                                    },
+                                    "wait_time": {
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "description": "The minimum time in seconds to wait between keystrokes; can be omitted"
+                                    }
+                                  },
+                                  "required": ["keys"]
+                                },
+                                {
+                                  "type": "object",
+                                  "title": "Direct Control Action",
+                                  "properties": {
+                                    "controls": {
+                                      "type": "string",
+                                      "description": "This is the direct control identifier which can be found using the Cab Debugger",
+                                      "examples": ["Throttle", "AutomaticBrake_{SIDE}"]
+                                    },
+                                    "value": {
+                                      "type": "number",
+                                      "description": "The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"
+                                    },
+                                    "max_change_rate": {
+                                      "type": "number",
+                                      "description": "The maximum rate at which this control can change"
+                                    },
+                                    "relative": {
+                                      "type": "boolean",
+                                      "description": "Defines whether to use the value as a relative adjustment instead of an absolute one."
+                                    },
+                                    "hold": {
+                                      "type": "boolean",
+                                      "description": "Defines whether to hold the value by continuously sending the input value to the cab. This is only required for momentary levers which do not hold positions on their own in the game. (ie some independent brakes)"
+                                    },
+                                    "use_normalized": {
+                                      "type": "boolean",
+                                      "description": "Whether to use the normalized value instead of the non-normalized value"
+                                    },
+                                    "notify": {
+                                      "type": "boolean",
+                                      "description": "Enables showing the in-game notification when changing values"
+                                    },
+                                    "enable_api_fallback": {
+                                      "type": "boolean",
+                                      "description": "Determines whether to enable fallback to the TSW API if available"
+                                    }
+                                  },
+                                  "required": ["controls", "value"]
+                                },
+                                {
+                                  "type": "object",
+                                  "title": "API Control Action",
+                                  "properties": {
+                                    "controls": {
+                                      "type": "string",
+                                      "description": "This is the direct api control identifier which can be found using the Cab Debugger (same as the direct control one). Does not support the {SIDE} placeholder.",
+                                      "examples": ["Throttle", "AutomaticBrake_F"]
+                                    },
+                                    "api_value": {
+                                      "type": "number",
+                                      "description": "The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"
+                                    },
+                                    "hold": { "type": "boolean" },
+                                    "max_change_rate": { "type": "number" }
+                                  },
+                                  "required": ["controls", "api_value"]
+                                },
+                                {
+                                  "type": "object",
+                                  "title": "Virtual Action",
+                                  "description": "A virtual control action",
+                                  "properties": {
+                                    "type": { "enum": ["virtual"] },
+                                    "control": {
+                                      "type": "string",
+                                      "description": "The name of the virtual control to update. Should start with 'virtual:' for clear segmentation",
+                                      "examples": ["virtual:Button1"],
+                                      "pattern": "^virtual:"
+                                    },
+                                    "value": { "type": "number" }
+                                  },
+                                  "required": ["type", "control", "value"]
+                                }
+                              ]
+                            },
+                            "action_deactivate": {
+                              "description": "The action to execute when toggling the second time",
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "title": "Keys Action",
+                                  "properties": {
+                                    "keys": {
+                                      "type": "string",
+                                      "description": "The keys to trigger (a list of key identifiers separated by +'s)",
+                                      "examples": ["q+pagedown"]
+                                    },
+                                    "press_time": {
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "description": "The number of seconds to hold the button down; can be omitted to just hold it until released"
+                                    },
+                                    "wait_time": {
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "description": "The minimum time in seconds to wait between keystrokes; can be omitted"
+                                    }
+                                  },
+                                  "required": ["keys"]
+                                },
+                                {
+                                  "type": "object",
+                                  "title": "Direct Control Action",
+                                  "properties": {
+                                    "controls": {
+                                      "type": "string",
+                                      "description": "This is the direct control identifier which can be found using the Cab Debugger",
+                                      "examples": ["Throttle", "AutomaticBrake_{SIDE}"]
+                                    },
+                                    "value": {
+                                      "type": "number",
+                                      "description": "The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"
+                                    },
+                                    "max_change_rate": {
+                                      "type": "number",
+                                      "description": "The maximum rate at which this control can change"
+                                    },
+                                    "relative": {
+                                      "type": "boolean",
+                                      "description": "Defines whether to use the value as a relative adjustment instead of an absolute one."
+                                    },
+                                    "hold": {
+                                      "type": "boolean",
+                                      "description": "Defines whether to hold the value by continuously sending the input value to the cab. This is only required for momentary levers which do not hold positions on their own in the game. (ie some independent brakes)"
+                                    },
+                                    "use_normalized": {
+                                      "type": "boolean",
+                                      "description": "Whether to use the normalized value instead of the non-normalized value"
+                                    },
+                                    "notify": {
+                                      "type": "boolean",
+                                      "description": "Enables showing the in-game notification when changing values"
+                                    },
+                                    "enable_api_fallback": {
+                                      "type": "boolean",
+                                      "description": "Determines whether to enable fallback to the TSW API if available"
+                                    }
+                                  },
+                                  "required": ["controls", "value"]
+                                },
+                                {
+                                  "type": "object",
+                                  "title": "API Control Action",
+                                  "properties": {
+                                    "controls": {
+                                      "type": "string",
+                                      "description": "This is the direct api control identifier which can be found using the Cab Debugger (same as the direct control one). Does not support the {SIDE} placeholder.",
+                                      "examples": ["Throttle", "AutomaticBrake_F"]
+                                    },
+                                    "api_value": {
+                                      "type": "number",
+                                      "description": "The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"
+                                    },
+                                    "hold": { "type": "boolean" },
+                                    "max_change_rate": { "type": "number" }
+                                  },
+                                  "required": ["controls", "api_value"]
+                                },
+                                {
+                                  "type": "object",
+                                  "title": "Virtual Action",
+                                  "description": "A virtual control action",
+                                  "properties": {
+                                    "type": { "enum": ["virtual"] },
+                                    "control": {
+                                      "type": "string",
+                                      "description": "The name of the virtual control to update. Should start with 'virtual:' for clear segmentation",
+                                      "examples": ["virtual:Button1"],
+                                      "pattern": "^virtual:"
+                                    },
+                                    "value": { "type": "number" }
+                                  },
+                                  "required": ["type", "control", "value"]
+                                }
+                              ]
+                            }
+                          },
+                          "required": ["type", "threshold", "action_activate", "action_deactivate"]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "conditions": {
+                              "type": "array",
+                              "description": "The conditions to apply to this assignment",
+                              "items": {
+                                "type": "object",
+                                "required": ["control", "operator", "value"],
+                                "properties": {
+                                  "control": {
+                                    "type": "string",
+                                    "description": "This is the control which needs to meet the condition"
+                                  },
+                                  "operator": {
+                                    "enum": ["gte", "lte", "gt", "lt", "eq"],
+                                    "description": "The operation to apply to the control value (greater than, less than, ..)"
+                                  },
+                                  "value": {
+                                    "type": "number",
+                                    "description": "The comparison value"
+                                  }
+                                }
+                              }
+                            },
+                            "rail_class_information": {
+                              "type": "array",
+                              "description": "Defines the supported rail class names (can be found at the top of the cab debugger)",
+                              "items": {
+                                "type": "object",
+                                "properties": { "class_name": { "type": "string" } }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "type": "object",
+                          "title": "Linear",
+                          "description": "The linear assignment acts like a customized lever, triggering actions as values get exceeded at specific thresholds.",
+                          "properties": {
+                            "type": { "enum": ["linear"] },
+                            "neutral": {
+                              "type": "number",
+                              "description": "The linear value which is considered neutral or idle - this can be used to map the lever value from 0-1 to -1 to 1"
+                            },
+                            "thresholds": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "type": "number",
+                                    "description": "The threshold to exceed. When a neutral value is set; the value will exceed when below the -x.x value"
+                                  },
+                                  "value_end": {
+                                    "type": "number",
+                                    "description": "When used in combination with value_step, can generate a set of thresholds between value and value_end by value_step to repeat the same action(s)"
+                                  },
+                                  "value_step": {
+                                    "type": "number",
+                                    "description": "Only used in combination with value_end"
+                                  },
+                                  "action_activate": {
+                                    "description": "The actual action to activate when the threshold is exceeded",
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "title": "Keys Action",
+                                        "properties": {
+                                          "keys": {
+                                            "type": "string",
+                                            "description": "The keys to trigger (a list of key identifiers separated by +'s)",
+                                            "examples": ["q+pagedown"]
+                                          },
+                                          "press_time": {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "description": "The number of seconds to hold the button down; can be omitted to just hold it until released"
+                                          },
+                                          "wait_time": {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "description": "The minimum time in seconds to wait between keystrokes; can be omitted"
+                                          }
+                                        },
+                                        "required": ["keys"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "title": "Direct Control Action",
+                                        "properties": {
+                                          "controls": {
+                                            "type": "string",
+                                            "description": "This is the direct control identifier which can be found using the Cab Debugger",
+                                            "examples": ["Throttle", "AutomaticBrake_{SIDE}"]
+                                          },
+                                          "value": {
+                                            "type": "number",
+                                            "description": "The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"
+                                          },
+                                          "max_change_rate": {
+                                            "type": "number",
+                                            "description": "The maximum rate at which this control can change"
+                                          },
+                                          "relative": {
+                                            "type": "boolean",
+                                            "description": "Defines whether to use the value as a relative adjustment instead of an absolute one."
+                                          },
+                                          "hold": {
+                                            "type": "boolean",
+                                            "description": "Defines whether to hold the value by continuously sending the input value to the cab. This is only required for momentary levers which do not hold positions on their own in the game. (ie some independent brakes)"
+                                          },
+                                          "use_normalized": {
+                                            "type": "boolean",
+                                            "description": "Whether to use the normalized value instead of the non-normalized value"
+                                          },
+                                          "notify": {
+                                            "type": "boolean",
+                                            "description": "Enables showing the in-game notification when changing values"
+                                          },
+                                          "enable_api_fallback": {
+                                            "type": "boolean",
+                                            "description": "Determines whether to enable fallback to the TSW API if available"
+                                          }
+                                        },
+                                        "required": ["controls", "value"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "title": "API Control Action",
+                                        "properties": {
+                                          "controls": {
+                                            "type": "string",
+                                            "description": "This is the direct api control identifier which can be found using the Cab Debugger (same as the direct control one). Does not support the {SIDE} placeholder.",
+                                            "examples": ["Throttle", "AutomaticBrake_F"]
+                                          },
+                                          "api_value": {
+                                            "type": "number",
+                                            "description": "The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"
+                                          },
+                                          "hold": { "type": "boolean" },
+                                          "max_change_rate": { "type": "number" }
+                                        },
+                                        "required": ["controls", "api_value"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "title": "Virtual Action",
+                                        "description": "A virtual control action",
+                                        "properties": {
+                                          "type": { "enum": ["virtual"] },
+                                          "control": {
+                                            "type": "string",
+                                            "description": "The name of the virtual control to update. Should start with 'virtual:' for clear segmentation",
+                                            "examples": ["virtual:Button1"],
+                                            "pattern": "^virtual:"
+                                          },
+                                          "value": { "type": "number" }
+                                        },
+                                        "required": ["type", "control", "value"]
+                                      }
+                                    ]
+                                  },
+                                  "action_deactivate": {
+                                    "description": "The action to execute when the lever goes below the threshold (optional)",
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "title": "Keys Action",
+                                        "properties": {
+                                          "keys": {
+                                            "type": "string",
+                                            "description": "The keys to trigger (a list of key identifiers separated by +'s)",
+                                            "examples": ["q+pagedown"]
+                                          },
+                                          "press_time": {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "description": "The number of seconds to hold the button down; can be omitted to just hold it until released"
+                                          },
+                                          "wait_time": {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "description": "The minimum time in seconds to wait between keystrokes; can be omitted"
+                                          }
+                                        },
+                                        "required": ["keys"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "title": "Direct Control Action",
+                                        "properties": {
+                                          "controls": {
+                                            "type": "string",
+                                            "description": "This is the direct control identifier which can be found using the Cab Debugger",
+                                            "examples": ["Throttle", "AutomaticBrake_{SIDE}"]
+                                          },
+                                          "value": {
+                                            "type": "number",
+                                            "description": "The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"
+                                          },
+                                          "max_change_rate": {
+                                            "type": "number",
+                                            "description": "The maximum rate at which this control can change"
+                                          },
+                                          "relative": {
+                                            "type": "boolean",
+                                            "description": "Defines whether to use the value as a relative adjustment instead of an absolute one."
+                                          },
+                                          "hold": {
+                                            "type": "boolean",
+                                            "description": "Defines whether to hold the value by continuously sending the input value to the cab. This is only required for momentary levers which do not hold positions on their own in the game. (ie some independent brakes)"
+                                          },
+                                          "use_normalized": {
+                                            "type": "boolean",
+                                            "description": "Whether to use the normalized value instead of the non-normalized value"
+                                          },
+                                          "notify": {
+                                            "type": "boolean",
+                                            "description": "Enables showing the in-game notification when changing values"
+                                          },
+                                          "enable_api_fallback": {
+                                            "type": "boolean",
+                                            "description": "Determines whether to enable fallback to the TSW API if available"
+                                          }
+                                        },
+                                        "required": ["controls", "value"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "title": "API Control Action",
+                                        "properties": {
+                                          "controls": {
+                                            "type": "string",
+                                            "description": "This is the direct api control identifier which can be found using the Cab Debugger (same as the direct control one). Does not support the {SIDE} placeholder.",
+                                            "examples": ["Throttle", "AutomaticBrake_F"]
+                                          },
+                                          "api_value": {
+                                            "type": "number",
+                                            "description": "The value to send to the cab. Acceptable values depend on the cab and can be determined by using the Cab Debugger"
+                                          },
+                                          "hold": { "type": "boolean" },
+                                          "max_change_rate": { "type": "number" }
+                                        },
+                                        "required": ["controls", "api_value"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "title": "Virtual Action",
+                                        "description": "A virtual control action",
+                                        "properties": {
+                                          "type": { "enum": ["virtual"] },
+                                          "control": {
+                                            "type": "string",
+                                            "description": "The name of the virtual control to update. Should start with 'virtual:' for clear segmentation",
+                                            "examples": ["virtual:Button1"],
+                                            "pattern": "^virtual:"
+                                          },
+                                          "value": { "type": "number" }
+                                        },
+                                        "required": ["type", "control", "value"]
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": ["value", "action_activate"]
+                            }
+                          },
+                          "required": ["type", "thresholds"]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "conditions": {
+                              "type": "array",
+                              "description": "The conditions to apply to this assignment",
+                              "items": {
+                                "type": "object",
+                                "required": ["control", "operator", "value"],
+                                "properties": {
+                                  "control": {
+                                    "type": "string",
+                                    "description": "This is the control which needs to meet the condition"
+                                  },
+                                  "operator": {
+                                    "enum": ["gte", "lte", "gt", "lt", "eq"],
+                                    "description": "The operation to apply to the control value (greater than, less than, ..)"
+                                  },
+                                  "value": {
+                                    "type": "number",
+                                    "description": "The comparison value"
+                                  }
+                                }
+                              }
+                            },
+                            "rail_class_information": {
+                              "type": "array",
+                              "description": "Defines the supported rail class names (can be found at the top of the cab debugger)",
+                              "items": {
+                                "type": "object",
+                                "properties": { "class_name": { "type": "string" } }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "type": "object",
+                          "title": "Direct Control",
+                          "description": "The direct control assignment gives complete control over the cab levers by mapping the gamepad lever value directly onto the game",
+                          "properties": {
+                            "type": { "enum": ["direct_control"] },
+                            "controls": {
+                              "type": "string",
+                              "description": "The direct control name to control; can be identified using the Cab Debugger"
+                            },
+                            "hold": {
+                              "type": "boolean",
+                              "description": "Defines whether to hold the value by continuously sending the input value to the cab. This is only required for momentary levers which do not hold positions on their own in the game. (ie some independent brakes)"
+                            },
+                            "use_normalized": {
+                              "type": "boolean",
+                              "description": "Whether to use the normalized value instead of the non-normalized value"
+                            },
+                            "enable_api_fallback": {
+                              "type": "boolean",
+                              "description": "Determines whether to enable fallback to the TSW API if available"
+                            },
+                            "notify": {
+                              "type": "boolean",
+                              "description": "Enables showing the in-game notification when changing values",
+                              "default": true
+                            },
+                            "control_range": {
+                              "type": "object",
+                              "description": "The control range that will be remapped to 0,1 or 0,-1. This is useful when direct mapping partial ranges.",
+                              "required": ["start", "end"],
+                              "properties": {
+                                "start": { "type": "number" },
+                                "end": { "type": "number" }
+                              }
+                            },
+                            "input_value": {
+                              "type": "object",
+                              "title": "Direct Like Input Value",
+                              "description": "Defines the input value constraints of the direct like control",
+                              "properties": {
+                                "min": {
+                                  "type": "number",
+                                  "description": "The minimum reachable value in the game cab; can be identified using the Cab Debugger"
+                                },
+                                "max": {
+                                  "type": "number",
+                                  "description": "The maximum reachable value in the game cab; can be identified using the Cab Debugger"
+                                },
+                                "max_change_rate": {
+                                  "type": "number",
+                                  "description": "The maximum rate at which this control can change"
+                                },
+                                "step": {
+                                  "type": "number",
+                                  "description": "The step value to increase/decrease the values in (optional)"
+                                },
+                                "steps": {
+                                  "type": "array",
+                                  "description": "Acts similarly to step but allows for finer control and can be combined with null values to define free range zones. This is useful if you have a control which is partly notched and partly free",
+                                  "examples": [[0.2, 0.4, 0.6, null, 1]],
+                                  "items": { "type": ["null", "number"] }
+                                },
+                                "invert": {
+                                  "type": "boolean",
+                                  "description": "Whether to invert the input value before calculating the game value"
+                                },
+                                "step_thresholds": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "title": "Step Threshold Definition",
+                                    "description": "Defines the threshold of a step which can be used to remap a direct/api control like value",
+                                    "properties": {
+                                      "threshold": {
+                                        "oneOf": [
+                                          {
+                                            "type": "number",
+                                            "description": "Defines the actual threshold value"
+                                          },
+                                          {
+                                            "type": "object",
+                                            "required": ["reference", "value"],
+                                            "properties": {
+                                              "reference": { "type": "string" },
+                                              "value": { "type": "number" }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "threshold_end": {
+                                        "oneOf": [
+                                          {
+                                            "type": "number",
+                                            "description": "Defines the threshold end value for ranges"
+                                          },
+                                          {
+                                            "type": "object",
+                                            "required": ["reference", "value"],
+                                            "properties": {
+                                              "reference": { "type": "string" },
+                                              "value": { "type": "number" }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "threshold_tolerance": {
+                                        "type": "number",
+                                        "description": "Defines the tolerance for the threshold. Defaults to (1/(max(1, num_steps-1))/2) or 0.1; whichever is the lowest."
+                                      }
+                                    },
+                                    "required": ["threshold"]
+                                  }
+                                }
+                              },
+                              "required": ["min", "max"]
+                            }
+                          },
+                          "required": ["type", "controls", "input_value"]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "conditions": {
+                              "type": "array",
+                              "description": "The conditions to apply to this assignment",
+                              "items": {
+                                "type": "object",
+                                "required": ["control", "operator", "value"],
+                                "properties": {
+                                  "control": {
+                                    "type": "string",
+                                    "description": "This is the control which needs to meet the condition"
+                                  },
+                                  "operator": {
+                                    "enum": ["gte", "lte", "gt", "lt", "eq"],
+                                    "description": "The operation to apply to the control value (greater than, less than, ..)"
+                                  },
+                                  "value": {
+                                    "type": "number",
+                                    "description": "The comparison value"
+                                  }
+                                }
+                              }
+                            },
+                            "rail_class_information": {
+                              "type": "array",
+                              "description": "Defines the supported rail class names (can be found at the top of the cab debugger)",
+                              "items": {
+                                "type": "object",
+                                "properties": { "class_name": { "type": "string" } }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "type": "object",
+                          "title": "API Control",
+                          "description": "The direct control assignment gives complete control over the cab levers by mapping the gamepad lever value directly onto the game's HTTP API. May introduce slight overhead compared to direct control",
+                          "properties": {
+                            "type": { "enum": ["api_control"] },
+                            "controls": {
+                              "type": "string",
+                              "description": "The direct/api control name to control; can be identified using the Cab Debugger"
+                            },
+                            "control_range": {
+                              "type": "object",
+                              "description": "The control range that will be remapped to 0,1 or 0,-1. This is useful when direct mapping partial ranges.",
+                              "required": ["start", "end"],
+                              "properties": {
+                                "start": { "type": "number" },
+                                "end": { "type": "number" }
+                              }
+                            },
+                            "hold": { "type": "boolean" },
+                            "input_value": {
+                              "type": "object",
+                              "title": "Direct Like Input Value",
+                              "description": "Defines the input value constraints of the direct like control",
+                              "properties": {
+                                "min": {
+                                  "type": "number",
+                                  "description": "The minimum reachable value in the game cab; can be identified using the Cab Debugger"
+                                },
+                                "max": {
+                                  "type": "number",
+                                  "description": "The maximum reachable value in the game cab; can be identified using the Cab Debugger"
+                                },
+                                "max_change_rate": {
+                                  "type": "number",
+                                  "description": "The maximum rate at which this control can change"
+                                },
+                                "step": {
+                                  "type": "number",
+                                  "description": "The step value to increase/decrease the values in (optional)"
+                                },
+                                "steps": {
+                                  "type": "array",
+                                  "description": "Acts similarly to step but allows for finer control and can be combined with null values to define free range zones. This is useful if you have a control which is partly notched and partly free",
+                                  "examples": [[0.2, 0.4, 0.6, null, 1]],
+                                  "items": { "type": ["null", "number"] }
+                                },
+                                "invert": {
+                                  "type": "boolean",
+                                  "description": "Whether to invert the input value before calculating the game value"
+                                },
+                                "step_thresholds": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "title": "Step Threshold Definition",
+                                    "description": "Defines the threshold of a step which can be used to remap a direct/api control like value",
+                                    "properties": {
+                                      "threshold": {
+                                        "oneOf": [
+                                          {
+                                            "type": "number",
+                                            "description": "Defines the actual threshold value"
+                                          },
+                                          {
+                                            "type": "object",
+                                            "required": ["reference", "value"],
+                                            "properties": {
+                                              "reference": { "type": "string" },
+                                              "value": { "type": "number" }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "threshold_end": {
+                                        "oneOf": [
+                                          {
+                                            "type": "number",
+                                            "description": "Defines the threshold end value for ranges"
+                                          },
+                                          {
+                                            "type": "object",
+                                            "required": ["reference", "value"],
+                                            "properties": {
+                                              "reference": { "type": "string" },
+                                              "value": { "type": "number" }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "threshold_tolerance": {
+                                        "type": "number",
+                                        "description": "Defines the tolerance for the threshold. Defaults to (1/(max(1, num_steps-1))/2) or 0.1; whichever is the lowest."
+                                      }
+                                    },
+                                    "required": ["threshold"]
+                                  }
+                                }
+                              },
+                              "required": ["min", "max"]
+                            }
+                          },
+                          "required": ["type", "controls", "input_value"]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "conditions": {
+                              "type": "array",
+                              "description": "The conditions to apply to this assignment",
+                              "items": {
+                                "type": "object",
+                                "required": ["control", "operator", "value"],
+                                "properties": {
+                                  "control": {
+                                    "type": "string",
+                                    "description": "This is the control which needs to meet the condition"
+                                  },
+                                  "operator": {
+                                    "enum": ["gte", "lte", "gt", "lt", "eq"],
+                                    "description": "The operation to apply to the control value (greater than, less than, ..)"
+                                  },
+                                  "value": {
+                                    "type": "number",
+                                    "description": "The comparison value"
+                                  }
+                                }
+                              }
+                            },
+                            "rail_class_information": {
+                              "type": "array",
+                              "description": "Defines the supported rail class names (can be found at the top of the cab debugger)",
+                              "items": {
+                                "type": "object",
+                                "properties": { "class_name": { "type": "string" } }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "type": "object",
+                          "title": "Sync Control",
+                          "description": "Sync control uses the value listener to increase the value up to the right value using keybinds",
+                          "properties": {
+                            "type": { "enum": ["sync_control"] },
+                            "identifier": {
+                              "type": "string",
+                              "description": "The sync control identifier to control; can be identified using the Cab Debugger"
+                            },
+                            "control_range": {
+                              "type": "object",
+                              "description": "The control range that will be remapped to 0,1 or 0,-1. This is useful when direct mapping partial ranges.",
+                              "required": ["start", "end"],
+                              "properties": {
+                                "start": { "type": "number" },
+                                "end": { "type": "number" }
+                              }
+                            },
+                            "input_value": {
+                              "type": "object",
+                              "title": "Direct Like Input Value",
+                              "description": "Defines the input value constraints of the direct like control",
+                              "properties": {
+                                "min": {
+                                  "type": "number",
+                                  "description": "The minimum reachable value in the game cab; can be identified using the Cab Debugger"
+                                },
+                                "max": {
+                                  "type": "number",
+                                  "description": "The maximum reachable value in the game cab; can be identified using the Cab Debugger"
+                                },
+                                "max_change_rate": {
+                                  "type": "number",
+                                  "description": "The maximum rate at which this control can change"
+                                },
+                                "step": {
+                                  "type": "number",
+                                  "description": "The step value to increase/decrease the values in (optional)"
+                                },
+                                "steps": {
+                                  "type": "array",
+                                  "description": "Acts similarly to step but allows for finer control and can be combined with null values to define free range zones. This is useful if you have a control which is partly notched and partly free",
+                                  "examples": [[0.2, 0.4, 0.6, null, 1]],
+                                  "items": { "type": ["null", "number"] }
+                                },
+                                "invert": {
+                                  "type": "boolean",
+                                  "description": "Whether to invert the input value before calculating the game value"
+                                },
+                                "step_thresholds": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "title": "Step Threshold Definition",
+                                    "description": "Defines the threshold of a step which can be used to remap a direct/api control like value",
+                                    "properties": {
+                                      "threshold": {
+                                        "oneOf": [
+                                          {
+                                            "type": "number",
+                                            "description": "Defines the actual threshold value"
+                                          },
+                                          {
+                                            "type": "object",
+                                            "required": ["reference", "value"],
+                                            "properties": {
+                                              "reference": { "type": "string" },
+                                              "value": { "type": "number" }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "threshold_end": {
+                                        "oneOf": [
+                                          {
+                                            "type": "number",
+                                            "description": "Defines the threshold end value for ranges"
+                                          },
+                                          {
+                                            "type": "object",
+                                            "required": ["reference", "value"],
+                                            "properties": {
+                                              "reference": { "type": "string" },
+                                              "value": { "type": "number" }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "threshold_tolerance": {
+                                        "type": "number",
+                                        "description": "Defines the tolerance for the threshold. Defaults to (1/(max(1, num_steps-1))/2) or 0.1; whichever is the lowest."
+                                      }
+                                    },
+                                    "required": ["threshold"]
+                                  }
+                                }
+                              },
+                              "required": ["min", "max"]
+                            },
+                            "action_increase": {
+                              "type": "object",
+                              "title": "Keys Action",
+                              "properties": {
+                                "keys": {
+                                  "type": "string",
+                                  "description": "The keys to trigger (a list of key identifiers separated by +'s)",
+                                  "examples": ["q+pagedown"]
+                                },
+                                "press_time": {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "description": "The number of seconds to hold the button down; can be omitted to just hold it until released"
+                                },
+                                "wait_time": {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "description": "The minimum time in seconds to wait between keystrokes; can be omitted"
+                                }
+                              },
+                              "required": ["keys"]
+                            },
+                            "action_decrease": {
+                              "type": "object",
+                              "title": "Keys Action",
+                              "properties": {
+                                "keys": {
+                                  "type": "string",
+                                  "description": "The keys to trigger (a list of key identifiers separated by +'s)",
+                                  "examples": ["q+pagedown"]
+                                },
+                                "press_time": {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "description": "The number of seconds to hold the button down; can be omitted to just hold it until released"
+                                },
+                                "wait_time": {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "description": "The minimum time in seconds to wait between keystrokes; can be omitted"
+                                }
+                              },
+                              "required": ["keys"]
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "identifier",
+                            "input_value",
+                            "action_increase",
+                            "action_decrease"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "conditions": {
+                              "type": "array",
+                              "description": "The conditions to apply to this assignment",
+                              "items": {
+                                "type": "object",
+                                "required": ["control", "operator", "value"],
+                                "properties": {
+                                  "control": {
+                                    "type": "string",
+                                    "description": "This is the control which needs to meet the condition"
+                                  },
+                                  "operator": {
+                                    "enum": ["gte", "lte", "gt", "lt", "eq"],
+                                    "description": "The operation to apply to the control value (greater than, less than, ..)"
+                                  },
+                                  "value": {
+                                    "type": "number",
+                                    "description": "The comparison value"
+                                  }
+                                }
+                              }
+                            },
+                            "rail_class_information": {
+                              "type": "array",
+                              "description": "Defines the supported rail class names (can be found at the top of the cab debugger)",
+                              "items": {
+                                "type": "object",
+                                "properties": { "class_name": { "type": "string" } }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "required": ["name", "assignments"]
+      }
+    },
+    "controller": {
+      "type": "object",
+      "properties": {
+        "usb_id": {
+          "type": "string",
+          "description": "The supported controller USB identifier (Vendor:Product)"
+        },
+        "mapping": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "This is a copy of the SDL mapping. This can be embedded for portability"
+        },
+        "calibration": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "This is a copy of the controller calibration. This can be embedded for portability"
+        }
+      }
+    },
+    "rail_class_information": {
+      "type": "array",
+      "description": "Defines the supported rail class names (can be found at the top of the cab debugger)",
+      "items": { "type": "object", "properties": { "class_name": { "type": "string" } } }
+    }
+  },
+  "required": ["name", "controls"]
+}
