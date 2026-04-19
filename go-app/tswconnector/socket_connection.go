@@ -29,6 +29,7 @@ type SocketConnection struct {
 	Server           *http.Server
 	OutgoingChannels *map_utils.LockMap[uuid.UUID, chan TSWConnector_Message]
 	Subscribers      *pubsub_utils.PubSubSlice[TSWConnector_Message]
+	ctx              context.Context
 }
 
 var _ TSWConnector = (*SocketConnection)(nil)
@@ -74,22 +75,22 @@ func (c *SocketConnection) WebsocketHandler(w http.ResponseWriter, r *http.Reque
 	for {
 		msg_type, msg, err := conn.ReadMessage()
 		if err != nil {
-			logger.Logger.Error("[ProfileRunner::WebsocketHandler] message read error", "error", err)
+			logger.Logger.Error("[SocketConnection::WebsocketHandler] message read error", "error", err)
 			return
 		}
 
 		if msg_type == websocket.CloseMessage {
-			logger.Logger.Debug("[ProfileRunner::WebsocketHandler] received close message from client")
+			logger.Logger.Debug("[SocketConnection::WebsocketHandler] received close message from client")
 			break
 		}
 
 		if msg_type == websocket.TextMessage {
 			socket_message := TSWConnector_Message_FromString(string(msg))
-			logger.Logger.Debug("[ProfileRunner::WebsocketHandler] received message from client", "message", socket_message)
+			logger.Logger.Debug("[SocketConnection::WebsocketHandler] received message from client", "message", socket_message)
 			c.Subscribers.EmitTimeout(time.Second, socket_message)
 			go c.Forward(conn_id, socket_message)
 		} else {
-			logger.Logger.Debug("[ProfileRunner::WebsocketHandler] received unsupported message %d", "message_type", msg_type)
+			logger.Logger.Debug("[SocketConnection::WebsocketHandler] received unsupported message type", "message_type", msg_type)
 		}
 	}
 
@@ -107,23 +108,41 @@ func (c *SocketConnection) IsActive() bool {
 }
 
 func (c *SocketConnection) Stop() error {
-	return c.Server.Close()
+	return c.Server.Shutdown(c.ctx)
 }
 
 func (c *SocketConnection) Start() error {
-	/* try to bind each port in the range; if successfull return nil */
+	/* try to bind each port in the range; if successful return nil */
 	for port := SOCKET_CONNECTION_PORT_RANGE_START; port <= SOCKET_CONNECTION_PORT_RANGE_END; port++ {
-		c.Server.Addr = fmt.Sprintf("0.0.0.0:%d", port)
-		logger.Logger.Debug("[SocketConnection::start] Starting direct control server", "addr", c.Server.Addr)
-		err := c.Server.ListenAndServe()
-		if err == http.ErrServerClosed {
-			/*
-				server closed is the only acceptable error because this is a graceful shutdown;
-				any other error should continue trying the next port until exhausted
-			*/
+		addr := fmt.Sprintf("0.0.0.0:%d", port)
+		logger.Logger.Debug("[SocketConnection::Start] Starting direct control server", "addr", addr)
+
+		/* Listen on the port first to ensure it's available */
+		listener, err := net.Listen("tcp", addr)
+		if err != nil {
+			logger.Logger.Error("[SocketConnection::Start] could not bind to port", "port", port, "error", err)
+			continue
+		}
+
+		/* Run server in a goroutine */
+		go func() {
+			if err := c.Server.Serve(listener); err != nil && err != http.ErrServerClosed {
+				logger.Logger.Error("[SocketConnection::Start] server serve error", "error", err)
+			}
+		}()
+
+		/* Check if server is actually running */
+		time.Sleep(300 * time.Millisecond)
+		conn, err := net.Dial("tcp", addr)
+		if err == nil {
+			conn.Close()
+			logger.Logger.Info("[SocketConnection::Start] server started successfully", "addr", addr)
 			return nil
 		}
-		logger.Logger.Error("[SocketConnection::start] could not start direct control server", "addr", c.Server.Addr)
+
+		/* Failed to connect, try next port */
+		logger.Logger.Error("[SocketConnection::Start] could not connect to server after listening", "addr", addr)
+		listener.Close()
 	}
 	return fmt.Errorf("exhausted all port options")
 }

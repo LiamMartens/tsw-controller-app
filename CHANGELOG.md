@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.14.3
+- Socket connection hardening
+
 ## v1.14.2
 - Fix invert handling in step thresholds
 
