@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.14.3
+- Add notice about Cab Debugger functionality
+
 ## v1.14.2
 - Fix invert handling in step thresholds
 
