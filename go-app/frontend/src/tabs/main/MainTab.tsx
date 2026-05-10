@@ -39,7 +39,11 @@ type FormValues = {
   profiles: Partial<Awaited<ReturnType<typeof GetSelectedProfiles>>>;
 };
 
-export const MainTab = () => {
+type Props = {
+  onOpenCabDebuggerTab: () => void;
+};
+
+export const MainTab = ({ onOpenCabDebuggerTab }: Props) => {
   const { data: version } = useVersion();
   const {
     data: lastInstalledModVersion,
@@ -47,7 +51,8 @@ export const MainTab = () => {
   } = useLastInstalledModVersion();
   const { data: profiles, mutate: refetchProfiles } = useProfiles();
   const { data: controllers, mutate: refetchControllers } = useControllers();
-  const [connectRemoteControllerOpen, setConnectRemoteControllerOpen] = useState(false);
+  const [connectRemoteControllerOpen, setConnectRemoteControllerOpen] =
+    useState(false);
 
   const form = useForm<FormValues>({
     defaultValues: { profiles: {} },
@@ -191,7 +196,12 @@ export const MainTab = () => {
             }
           >
             Check out the online documentation
-          </button>
+          </button>{" "}
+          - or perform a simple mapping from the{" "}
+          <button className="link" onClick={() => onOpenCabDebuggerTab()}>
+            Cab Debugger
+          </button>{" "}
+          tab
         </span>
       </div>
       <div>
@@ -269,8 +279,9 @@ export const MainTab = () => {
       {!lastInstalledModVersion && (
         <div role="alert" className="alert alert-soft alert-warning">
           <span>
-            It looks like you have not installed the Train Sim World or Train Simulator Clasic mod yet,
-            make sure you install the mod first for the best experience.
+            It looks like you have not installed the Train Sim World or Train
+            Simulator Clasic mod yet, make sure you install the mod first for
+            the best experience.
           </span>
           <div>
             <button

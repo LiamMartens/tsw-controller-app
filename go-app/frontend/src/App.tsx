@@ -79,7 +79,13 @@ const App = () => {
           }
         >
           <Suspense>
-            {tab === "main" && <MainTab />}
+            {tab === "main" && (
+              <MainTab
+                onOpenCabDebuggerTab={() =>
+                  tabsForm.setValue("tab", "cab_debugger")
+                }
+              />
+            )}
             {tab === "explore" && <ExploreTab />}
             {tab === "cab_debugger" && <CabDebuggerTab />}
             {tab === "calibration" && <CalibrationTab />}
