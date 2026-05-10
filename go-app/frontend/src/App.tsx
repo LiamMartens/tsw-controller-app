@@ -23,6 +23,10 @@ const App = () => {
   });
   const tab = tabsForm.watch("tab");
 
+  const handleOpenCabDebuggerTab = () => {
+    tabsForm.setValue("tab", "cab_debugger");
+  };
+
   return (
     <div className="p-2">
       <SelfUpdateBanner />
@@ -80,11 +84,7 @@ const App = () => {
         >
           <Suspense>
             {tab === "main" && (
-              <MainTab
-                onOpenCabDebuggerTab={() =>
-                  tabsForm.setValue("tab", "cab_debugger")
-                }
-              />
+              <MainTab onOpenCabDebuggerTab={handleOpenCabDebuggerTab} />
             )}
             {tab === "explore" && <ExploreTab />}
             {tab === "cab_debugger" && <CabDebuggerTab />}
