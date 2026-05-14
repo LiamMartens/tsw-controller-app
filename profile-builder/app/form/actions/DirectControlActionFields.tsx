@@ -1,158 +1,144 @@
-import { useFormContext, Controller } from "react-hook-form";
-import type { profile_builder_schema } from "../types";
+import { useForm } from "react-hook-form";
+import { directControlActionSchema } from "../schema";
+import z from "zod";
+import { BaseField, FieldGroup } from "../inputs";
+import { t } from "../../utils";
+import { useEffect, useRef } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import clsx from "clsx";
 
-interface ActionFieldsProps {
-  controlName: string;
-  name: string;
-}
+type Value = z.infer<typeof directControlActionSchema>;
 
-const getFieldPath = (controlName: string, name: string, field: string) =>
-  `${controlName}.${name}.${field}` as any;
+type Props = {
+  value: Value;
+  onChange: (value: Value) => void;
+};
 
-export const DirectControlActionFields = ({ controlName, name }: ActionFieldsProps) => {
-  const { control } = useFormContext<profile_builder_schema>();
+export const DirectControlActionFields = ({ value, onChange }: Props) => {
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
+  const form = useForm<Value>({
+    resolver: zodResolver(directControlActionSchema),
+    mode: "onBlur",
+    defaultValues: value,
+  });
+
+  useEffect(() => {
+    form.watch(() => {
+      form.handleSubmit(onChange)();
+    });
+  }, [onChangeRef, form]);
 
   return (
     <div className="space-y-3">
-      <Controller
-        name={getFieldPath(controlName, name, "controls")}
-        control={control}
-        render={({ field, fieldState }) => (
-          <div className="form-control w-full">
-            <label className="label">
-              <span className="label-text">Controls</span>
-            </label>
-            <input
-              {...field}
-              type="text"
-              placeholder="e.g. Throttle"
-              className="input input-bordered w-full"
-            />
-            {fieldState.error && (
-              <span className="text-error text-sm mt-1">{String(fieldState.error.message)}</span>
-            )}
-          </div>
+      <BaseField
+        legend={t("Controls")}
+        label={t("The direct control name to change")}
+        error={form.formState.errors.controls?.message}
+      >
+        <input
+          className={clsx(
+            "input input-bordered w-full",
+            form.formState.errors.controls && "input-error",
+          )}
+          {...form.register("controls")}
+        />
+      </BaseField>
+
+      <BaseField
+        legend={t("Value")}
+        label={t("The value to send to the direct control")}
+        error={form.formState.errors.value?.message}
+      >
+        <input
+          type="number"
+          className={clsx(
+            "input input-bordered w-full",
+            form.formState.errors.value && "input-error",
+          )}
+          {...form.register("value", { valueAsNumber: true })}
+        />
+      </BaseField>
+
+      <BaseField
+        legend={t("Maximum Change Rate")}
+        label={t(
+          "Defines the maximum change rate of the control. This is only required for some train controls who don't react well to instant changes.",
         )}
-      />
-      <Controller
-        name={getFieldPath(controlName, name, "value")}
-        control={control}
-        render={({ field, fieldState }) => (
-          <div className="form-control w-1/2">
-            <label className="label">
-              <span className="label-text">Value</span>
-            </label>
+        error={form.formState.errors.max_change_rate?.message}
+      >
+        <input
+          type="number"
+          className={clsx(
+            "input input-bordered w-full",
+            form.formState.errors.max_change_rate && "input-error",
+          )}
+          {...form.register("max_change_rate", {
+            setValueAs: (v) => {
+              if (String(v).trim() === "") return undefined;
+              return Number(v);
+            },
+          })}
+        />
+      </BaseField>
+
+      <FieldGroup legend={t("Options")}>
+        <div className="grid grid-cols-2 grid-flow-row auto-rows-max gap-4">
+          <label className="label whitespace-normal">
             <input
-              {...field}
-              onChange={(e) => field.onChange(parseFloat(e.target.value))}
-              type="number"
-              className="input input-bordered w-full"
+              type="checkbox"
+              className="checkbox"
+              {...form.register("relative")}
             />
-            {fieldState.error && (
-              <span className="text-error text-sm mt-1">{String(fieldState.error.message)}</span>
-            )}
-          </div>
-        )}
-      />
-      <Controller
-        name={getFieldPath(controlName, name, "max_change_rate")}
-        control={control}
-        render={({ field, fieldState }) => (
-          <div className="form-control w-1/2">
-            <label className="label">
-              <span className="label-text">Max Change Rate</span>
-            </label>
+            <p>
+              {t(
+                "Interpret the action as a relative change (eg: increase by 0.1 each time)",
+              )}
+            </p>
+          </label>
+
+          <label className="label whitespace-normal">
             <input
-              {...field}
-              onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))}
-              type="number"
-              min={0}
-              placeholder="Optional"
-              className="input input-bordered w-full"
+              type="checkbox"
+              className="checkbox"
+              {...form.register("hold")}
             />
-            {fieldState.error && (
-              <span className="text-error text-sm mt-1">{String(fieldState.error.message)}</span>
-            )}
-          </div>
-        )}
-      />
-      <div className="flex gap-4 flex-wrap">
-        <Controller
-          name={getFieldPath(controlName, name, "relative")}
-          control={control}
-          render={({ field }) => (
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                className="checkbox checkbox-sm"
-                checked={field.value || false}
-                onChange={(e) => field.onChange(e.target.checked)}
-              />
-              <span className="label-text">Relative</span>
-            </label>
-          )}
-        />
-        <Controller
-          name={getFieldPath(controlName, name, "hold")}
-          control={control}
-          render={({ field }) => (
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                className="checkbox checkbox-sm"
-                checked={field.value || false}
-                onChange={(e) => field.onChange(e.target.checked)}
-              />
-              <span className="label-text">Hold</span>
-            </label>
-          )}
-        />
-        <Controller
-          name={getFieldPath(controlName, name, "use_normalized")}
-          control={control}
-          render={({ field }) => (
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                className="checkbox checkbox-sm"
-                checked={field.value || false}
-                onChange={(e) => field.onChange(e.target.checked)}
-              />
-              <span className="label-text">Use Normalized</span>
-            </label>
-          )}
-        />
-        <Controller
-          name={getFieldPath(controlName, name, "notify")}
-          control={control}
-          render={({ field }) => (
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                className="checkbox checkbox-sm"
-                checked={field.value || false}
-                onChange={(e) => field.onChange(e.target.checked)}
-              />
-              <span className="label-text">Notify</span>
-            </label>
-          )}
-        />
-        <Controller
-          name={getFieldPath(controlName, name, "enable_api_fallback")}
-          control={control}
-          render={({ field }) => (
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                className="checkbox checkbox-sm"
-                checked={field.value || false}
-                onChange={(e) => field.onChange(e.target.checked)}
-              />
-              <span className="label-text">API Fallback</span>
-            </label>
-          )}
-        />
-      </div>
+            <p>{t("Enable hold (Continuously send the value to the API)")}</p>
+          </label>
+
+          <label className="label whitespace-normal">
+            <input
+              type="checkbox"
+              className="checkbox"
+              {...form.register("use_normalized")}
+            />
+            <p>{t("Send normalized value (rarely necessary)")}</p>
+          </label>
+
+          <label className="label whitespace-normal">
+            <input
+              type="checkbox"
+              className="checkbox"
+              {...form.register("notify")}
+            />
+            <p>{t("Enable in-game notifications (enabled by default)")}</p>
+          </label>
+
+          <label className="label whitespace-normal">
+            <input
+              type="checkbox"
+              className="checkbox"
+              {...form.register("enable_api_fallback")}
+            />
+            <p>
+              {t(
+                "Fallback to API if direct control is unavailable (enabled by default)",
+              )}
+            </p>
+          </label>
+        </div>
+      </FieldGroup>
     </div>
   );
 };

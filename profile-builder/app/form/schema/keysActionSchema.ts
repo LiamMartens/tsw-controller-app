@@ -2,7 +2,7 @@ import z from "zod";
 import { t } from "../../utils";
 
 export const keysActionchema = z.object({
-  keys: z.string(),
+  keys: z.string().regex(/[\w\+\-]*$/),
   press_time: z
     .number()
     .positive(t("The press time must be a positive number"))

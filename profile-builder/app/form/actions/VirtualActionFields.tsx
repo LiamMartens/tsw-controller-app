@@ -1,66 +1,52 @@
-import { useFormContext, Controller } from "react-hook-form";
-import type { profile_builder_schema } from "../types";
+import { useFormContext, Controller, useForm } from "react-hook-form";
+import z from "zod";
+import { virtualActionSchema } from "../schema";
+import { useRef } from "react";
+import { BaseField } from "../inputs";
+import { t } from "../../utils";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-interface ActionFieldsProps {
-  controlName: string;
-  name: string;
-}
+type Value = z.infer<typeof virtualActionSchema>;
 
-const getFieldPath = (controlName: string, name: string, field: string) =>
-  `${controlName}.${name}.${field}` as any;
+type Props = {
+  value: Value;
+  onChange: (value: Value) => void;
+};
 
-export const VirtualActionFields = ({ controlName, name }: ActionFieldsProps) => {
-  const { control } = useFormContext<profile_builder_schema>();
+export const VirtualActionFields = ({ value, onChange }: Props) => {
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
+  const form = useForm<Value>({
+    resolver: zodResolver(virtualActionSchema),
+    mode: "onBlur",
+    defaultValues: value,
+  });
 
   return (
     <div className="space-y-3">
-      <Controller
-        name={getFieldPath(controlName, name, "type")}
-        control={control}
-        render={({ field }) => (
-          <input type="hidden" value="virtual" {...field} />
-        )}
-      />
-      <Controller
-        name={getFieldPath(controlName, name, "control")}
-        control={control}
-        render={({ field, fieldState }) => (
-          <div className="form-control w-full">
-            <label className="label">
-              <span className="label-text">Control</span>
-            </label>
-            <input
-              {...field}
-              type="text"
-              placeholder="e.g. virtual:Button1"
-              className="input input-bordered w-full"
-            />
-            {fieldState.error && (
-              <span className="text-error text-sm mt-1">{String(fieldState.error.message)}</span>
-            )}
-          </div>
-        )}
-      />
-      <Controller
-        name={getFieldPath(controlName, name, "value")}
-        control={control}
-        render={({ field, fieldState }) => (
-          <div className="form-control w-1/2">
-            <label className="label">
-              <span className="label-text">Value</span>
-            </label>
-            <input
-              {...field}
-              onChange={(e) => field.onChange(parseFloat(e.target.value))}
-              type="number"
-              className="input input-bordered w-full"
-            />
-            {fieldState.error && (
-              <span className="text-error text-sm mt-1">{String(fieldState.error.message)}</span>
-            )}
-          </div>
-        )}
-      />
+      <BaseField
+        legend={t("Virtual Control Name")}
+        label={t("The name of the virtual control to set")}
+        error={form.formState.errors.control?.message}
+      >
+        <input
+          className="input input-bordered w-full"
+          {...form.register("control")}
+        />
+      </BaseField>
+
+      <BaseField
+        legend={t("Value")}
+        label={t("The value to set the virtual control to")}
+        error={form.formState.errors.value?.message}
+      >
+        <input
+          type="number"
+          className="input input-bordered w-full"
+          {...form.register("value", { valueAsNumber: true })}
+        />
+      </BaseField>
     </div>
   );
 };

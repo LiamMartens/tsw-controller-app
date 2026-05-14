@@ -9,6 +9,9 @@ import z from "zod";
 import { KeysActionField } from "./KeysActionFields";
 import { t } from "../../utils";
 import { ACTION_TYPES } from "../utils";
+import { VirtualActionFields } from "./VirtualActionFields";
+import { ApiControlActionFields } from "./ApiControlActionFields";
+import { DirectControlActionFields } from "./DirectControlActionFields";
 
 type AnyAction =
   | z.infer<typeof keysActionchema>
@@ -73,7 +76,12 @@ export const ActionSelector = ({ value, onChange }: Props) => {
               keys: { keys: "" },
               virtual: { type: "virtual", control: "", value: 0 },
               api_control: { controls: "", api_value: 0 },
-              direct_control: { controls: "", value: 0 },
+              direct_control: {
+                controls: "",
+                value: 0,
+                notify: true,
+                enable_api_fallback: true,
+              },
             };
             onChange(emptyValues[value]);
           }}
@@ -88,6 +96,18 @@ export const ActionSelector = ({ value, onChange }: Props) => {
 
       {action.type === "keys" && (
         <KeysActionField value={action.value} onChange={onChange} />
+      )}
+
+      {action.type === "virtual" && (
+        <VirtualActionFields value={action.value} onChange={onChange} />
+      )}
+
+      {action.type === "api_control" && (
+        <ApiControlActionFields value={action.value} onChange={onChange} />
+      )}
+
+      {action.type === "direct_control" && (
+        <DirectControlActionFields value={action.value} onChange={onChange} />
       )}
     </div>
   );

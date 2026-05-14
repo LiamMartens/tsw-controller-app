@@ -1,96 +1,100 @@
-import { useFormContext, Controller } from "react-hook-form";
-import type { profile_builder_schema } from "../types";
+import { useForm } from "react-hook-form";
+import { apiControlActionSchema } from "../schema";
+import z from "zod";
+import { BaseField, FieldGroup } from "../inputs";
+import { t } from "../../utils";
+import { useEffect, useRef } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import clsx from "clsx";
 
-interface ActionFieldsProps {
-  controlName: string;
-  name: string;
-}
+type Value = z.infer<typeof apiControlActionSchema>;
 
-const getFieldPath = (controlName: string, name: string, field: string) =>
-  `${controlName}.${name}.${field}` as any;
+type Props = {
+  value: Value;
+  onChange: (value: Value) => void;
+};
 
-export const ApiControlActionFields = ({ controlName, name }: ActionFieldsProps) => {
-  const { control } = useFormContext<profile_builder_schema>();
+export const ApiControlActionFields = ({ value, onChange }: Props) => {
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
+  const form = useForm<Value>({
+    resolver: zodResolver(apiControlActionSchema),
+    mode: "onBlur",
+    defaultValues: value,
+  });
+
+  useEffect(() => {
+    form.watch(() => {
+      form.handleSubmit(onChange)();
+    });
+  }, [onChangeRef, form]);
 
   return (
     <div className="space-y-3">
-      <Controller
-        name={getFieldPath(controlName, name, "controls")}
-        control={control}
-        render={({ field, fieldState }) => (
-          <div className="form-control w-full">
-            <label className="label">
-              <span className="label-text">Controls</span>
-            </label>
-            <input
-              {...field}
-              type="text"
-              placeholder="e.g. Throttle"
-              className="input input-bordered w-full"
-            />
-            {fieldState.error && (
-              <span className="text-error text-sm mt-1">{String(fieldState.error.message)}</span>
-            )}
-          </div>
+      <BaseField
+        legend={t("Controls")}
+        label={t("The API control name to change")}
+        error={form.formState.errors.controls?.message}
+      >
+        <input
+          className={clsx(
+            "input input-bordered w-full",
+            form.formState.errors.controls && "input-error",
+          )}
+          {...form.register("controls")}
+        />
+      </BaseField>
+
+      <BaseField
+        legend={t("Value")}
+        label={t("The value to send to the API")}
+        error={form.formState.errors.api_value?.message}
+      >
+        <input
+          type="number"
+          className={clsx(
+            "input input-bordered w-full",
+            form.formState.errors.api_value && "input-error",
+          )}
+          {...form.register("api_value", { valueAsNumber: true })}
+        />
+      </BaseField>
+
+      <BaseField
+        legend={t("Maximum Change Rate")}
+        label={t(
+          "Defines the maximum change rate of the control. This is only required for some train controls who don't react well to instant changes.",
         )}
-      />
-      <Controller
-        name={getFieldPath(controlName, name, "api_value")}
-        control={control}
-        render={({ field, fieldState }) => (
-          <div className="form-control w-1/2">
-            <label className="label">
-              <span className="label-text">API Value</span>
-            </label>
-            <input
-              {...field}
-              onChange={(e) => field.onChange(parseFloat(e.target.value))}
-              type="number"
-              className="input input-bordered w-full"
-            />
-            {fieldState.error && (
-              <span className="text-error text-sm mt-1">{String(fieldState.error.message)}</span>
-            )}
-          </div>
-        )}
-      />
-      <Controller
-        name={getFieldPath(controlName, name, "max_change_rate")}
-        control={control}
-        render={({ field, fieldState }) => (
-          <div className="form-control w-1/2">
-            <label className="label">
-              <span className="label-text">Max Change Rate</span>
-            </label>
-            <input
-              {...field}
-              onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))}
-              type="number"
-              min={0}
-              placeholder="Optional"
-              className="input input-bordered w-full"
-            />
-            {fieldState.error && (
-              <span className="text-error text-sm mt-1">{String(fieldState.error.message)}</span>
-            )}
-          </div>
-        )}
-      />
-      <Controller
-        name={getFieldPath(controlName, name, "hold")}
-        control={control}
-        render={({ field }) => (
-          <label className="flex items-center gap-2 cursor-pointer">
+        error={form.formState.errors.max_change_rate?.message}
+      >
+        <input
+          type="number"
+          className={clsx(
+            "input input-bordered w-full",
+            form.formState.errors.max_change_rate && "input-error",
+          )}
+          {...form.register("max_change_rate", {
+            setValueAs: (v) => {
+              if (String(v).trim() === "") return undefined;
+              return Number(v);
+            },
+          })}
+        />
+      </BaseField>
+
+      <FieldGroup legend={t("Options")}>
+        <div className="grid grid-cols-2 gap-4">
+          <label className="label whitespace-normal">
             <input
               type="checkbox"
-              className="checkbox checkbox-sm"
-              checked={field.value || false}
-              onChange={(e) => field.onChange(e.target.checked)}
+              className="checkbox"
+              {...form.register("hold")}
             />
-            <span className="label-text">Hold</span>
+            <p>{t("Enable hold (Continuously send the value to the API)")}</p>
           </label>
-        )}
-      />
+        </div>
+      </FieldGroup>
     </div>
   );
 };

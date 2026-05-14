@@ -21,9 +21,7 @@ export const KeysActionField = ({ value, onChange }: Props) => {
   const form = useForm<Value>({
     resolver: zodResolver(keysActionchema),
     mode: "onBlur",
-    defaultValues: {
-      keys: "",
-    },
+    defaultValues: value,
   });
 
   useEffect(() => {
@@ -40,7 +38,10 @@ export const KeysActionField = ({ value, onChange }: Props) => {
         error={form.formState.errors.keys?.message}
       >
         <input
-          className="input input-bordered w-full"
+          className={clsx(
+            "input input-bordered w-full",
+            form.formState.errors.keys && "input-error",
+          )}
           {...form.register("keys")}
         />
       </BaseField>
