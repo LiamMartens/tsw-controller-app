@@ -18,14 +18,7 @@ export const ControlsList = ({ form }: ControlsListProps) => {
   const handleAddControl = () => {
     append({
       name: "",
-      assignments: [
-        {
-          type: "momentary",
-          threshold: 0,
-          match: "exceeds",
-          action_activate: { keys: "" },
-        },
-      ],
+      assignments: [],
     });
   };
 

@@ -1,12 +1,13 @@
-import { FormProvider, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { profile_builder_schema } from "./types";
 import { createEmptyProfile } from "./utils";
 import { ProfileHeader } from "./ProfileHeader";
-import { ControlsList } from "./ControlsList";
 import { profileSchema } from "./schema/profileSchema";
 import { t } from "../utils";
+import { useEffect } from "react";
+import { ControlsList } from "./ControlsList";
 
 interface ProfileFormProps {
   initialProfile?: profile_builder_schema | null;
@@ -23,27 +24,31 @@ export const ProfileForm = ({ initialProfile, onSave }: ProfileFormProps) => {
     onSave(data);
   };
 
+  useEffect(() => {
+    form.watch(console.log);
+  }, [form]);
+
   return (
-    <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title">{t("Profile Information")}</h2>
-            <ProfileHeader form={form} />
-          </div>
+    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <div className="card bg-base-100 border border-base-300 shadow-xl">
+        <div className="card-body">
+          <h2 className="card-title">{t("Profile Information")}</h2>
+          <ProfileHeader form={form} />
         </div>
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title">{t("Controls")}</h2>
-            <ControlsList form={form} />
-          </div>
+      </div>
+
+      <div className="card bg-base-100 border border-base-300 shadow-xl">
+        <div className="card-body">
+          <h2 className="card-title">{t("Controls")}</h2>
+          <ControlsList form={form} />
         </div>
-        <div className="flex gap-4">
-          <button type="submit" className="btn btn-primary">
-            {t("Save Profile")}
-          </button>
-        </div>
-      </form>
-    </FormProvider>
+      </div>
+
+      <div className="flex gap-4">
+        <button type="submit" className="btn btn-primary">
+          {t("Save Profile")}
+        </button>
+      </div>
+    </form>
   );
 };

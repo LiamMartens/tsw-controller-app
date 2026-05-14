@@ -95,7 +95,7 @@ const ProfileHeaderControllerInformationSection = ({ form }: Props) => {
                 form.formState.errors.controller?.usb_id && "input-error",
               )}
               placeholder={t("VID:PID")}
-              {...form.register("name", { required: true })}
+              {...form.register("controller.usb_id", { required: true })}
             />
           </BaseField>
 
@@ -146,21 +146,18 @@ export const ProfileHeader = ({ form }: Props) => {
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4">
-        <fieldset className="fieldset">
-          <legend className="fieldset-legend">{t("Profile Name")}</legend>
+        <BaseField
+          legend={t("Profile Name")}
+          error={form.formState.errors.name?.message}
+        >
           <input
             className={clsx(
               "input input-bordered  w-full",
               form.formState.errors.name && "input-error",
             )}
-            {...form.register("name", { required: true })}
+            {...form.register("name")}
           />
-          {form.formState.errors.name && (
-            <p className="label text-error">
-              {form.formState.errors.name.message}
-            </p>
-          )}
-        </fieldset>
+        </BaseField>
 
         <BaseField
           legend={t("Extends")}
@@ -178,8 +175,12 @@ export const ProfileHeader = ({ form }: Props) => {
           />
         </BaseField>
 
-        <fieldset className="flex flex-col gap-2">
-          <label className="label">
+        <BaseField
+          label={t(
+            "Enables automatically selecting the profile based on the supported controller and/or rail class information",
+          )}
+        >
+          <label className="label text-base">
             <input
               type="checkbox"
               className="checkbox"
@@ -187,12 +188,7 @@ export const ProfileHeader = ({ form }: Props) => {
             />
             {t("Enable auto-select")}
           </label>
-          <p className="label whitespace-normal">
-            {t(
-              "Enables automatically selecting the profile based on the supported controller and/or rail class information",
-            )}
-          </p>
-        </fieldset>
+        </BaseField>
       </div>
 
       <ProfileHeaderRailClassInformationSection form={form} />

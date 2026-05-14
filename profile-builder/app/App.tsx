@@ -9,7 +9,9 @@ export const App = () => {
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      <h1 className="text-2xl font-bold mb-6">TSW Controller Profile Builder</h1>
+      <h1 className="text-2xl font-bold mb-6">
+        TSW Controller Profile Builder
+      </h1>
       <ProfileForm onSave={handleSave} />
     </div>
   );

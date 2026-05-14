@@ -1,6 +1,5 @@
 import { useFormContext, Controller, useFieldArray } from "react-hook-form";
 import type { profile_builder_schema } from "../../types";
-import { KeysActionFields } from "../../actions/KeysActionFields";
 import { CommonFields } from "../CommonFields";
 
 interface SyncControlFieldsProps {
@@ -9,7 +8,11 @@ interface SyncControlFieldsProps {
 
 export const SyncControlFields = ({ controlName }: SyncControlFieldsProps) => {
   const { control } = useFormContext<profile_builder_schema>();
-  const { fields: stepThresholds, append: appendStepThreshold, remove: removeStepThreshold } = useFieldArray({
+  const {
+    fields: stepThresholds,
+    append: appendStepThreshold,
+    remove: removeStepThreshold,
+  } = useFieldArray({
     control,
     name: `${controlName}.input_value.step_thresholds` as any,
   });
@@ -31,7 +34,9 @@ export const SyncControlFields = ({ controlName }: SyncControlFieldsProps) => {
               className="input input-bordered w-full"
             />
             {fieldState.error && (
-              <span className="text-error text-sm mt-1">{String(fieldState.error.message)}</span>
+              <span className="text-error text-sm mt-1">
+                {String(fieldState.error.message)}
+              </span>
             )}
           </div>
         )}
@@ -47,7 +52,13 @@ export const SyncControlFields = ({ controlName }: SyncControlFieldsProps) => {
             </label>
             <input
               {...field}
-              onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))}
+              onChange={(e) =>
+                field.onChange(
+                  e.target.value === ""
+                    ? undefined
+                    : parseFloat(e.target.value),
+                )
+              }
               type="number"
               step="0.01"
               placeholder="Optional"
@@ -66,7 +77,13 @@ export const SyncControlFields = ({ controlName }: SyncControlFieldsProps) => {
             </label>
             <input
               {...field}
-              onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))}
+              onChange={(e) =>
+                field.onChange(
+                  e.target.value === ""
+                    ? undefined
+                    : parseFloat(e.target.value),
+                )
+              }
               type="number"
               step="0.01"
               placeholder="Optional"
@@ -92,7 +109,9 @@ export const SyncControlFields = ({ controlName }: SyncControlFieldsProps) => {
               className="input input-bordered w-full"
             />
             {fieldState.error && (
-              <span className="text-error text-sm mt-1">{String(fieldState.error.message)}</span>
+              <span className="text-error text-sm mt-1">
+                {String(fieldState.error.message)}
+              </span>
             )}
           </div>
         )}
@@ -113,7 +132,9 @@ export const SyncControlFields = ({ controlName }: SyncControlFieldsProps) => {
               className="input input-bordered w-full"
             />
             {fieldState.error && (
-              <span className="text-error text-sm mt-1">{String(fieldState.error.message)}</span>
+              <span className="text-error text-sm mt-1">
+                {String(fieldState.error.message)}
+              </span>
             )}
           </div>
         )}
@@ -128,7 +149,13 @@ export const SyncControlFields = ({ controlName }: SyncControlFieldsProps) => {
             </label>
             <input
               {...field}
-              onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))}
+              onChange={(e) =>
+                field.onChange(
+                  e.target.value === ""
+                    ? undefined
+                    : parseFloat(e.target.value),
+                )
+              }
               type="number"
               min={0}
               placeholder="Optional"
@@ -147,7 +174,13 @@ export const SyncControlFields = ({ controlName }: SyncControlFieldsProps) => {
             </label>
             <input
               {...field}
-              onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))}
+              onChange={(e) =>
+                field.onChange(
+                  e.target.value === ""
+                    ? undefined
+                    : parseFloat(e.target.value),
+                )
+              }
               type="number"
               min={0}
               placeholder="Optional"

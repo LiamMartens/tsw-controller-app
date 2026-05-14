@@ -3,7 +3,7 @@ import clsx from "clsx";
 
 type Props = PropsWithChildren<{
   className?: string;
-  legend: string;
+  legend?: string;
   label?: string;
   error?: string;
 }>;
@@ -17,7 +17,7 @@ export const BaseField = ({
 }: Props) => {
   return (
     <fieldset className={clsx("fieldset", className)}>
-      <legend className="fieldset-legend">{legend}</legend>
+      {!!legend && <legend className="fieldset-legend">{legend}</legend>}
       <div className="flex flex-col gap-2">
         <div>{children}</div>
         {!!label && <p className="label whitespace-normal">{label}</p>}

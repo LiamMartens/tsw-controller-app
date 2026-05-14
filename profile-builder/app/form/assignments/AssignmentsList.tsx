@@ -18,7 +18,7 @@ export const AssignmentsList = ({ form, controlIndex }: Props) => {
   const handleAddAssignment = () => {
     append({
       type: "momentary",
-      threshold: 0,
+      threshold: 0.9,
       match: "exceeds",
       action_activate: { keys: "" },
     });

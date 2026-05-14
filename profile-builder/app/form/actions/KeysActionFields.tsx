@@ -1,83 +1,92 @@
-import { useFormContext, Controller } from "react-hook-form";
-import type { profile_builder_schema } from "../types";
+import z from "zod";
+import { keysActionchema } from "../schema";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { BaseField } from "../inputs";
+import { t } from "../../utils";
+import clsx from "clsx";
+import { useEffect, useRef } from "react";
 
-interface ActionFieldsProps {
-  controlName: string;
-  name: string;
-}
+type Value = z.infer<typeof keysActionchema>;
 
-const getFieldPath = (controlName: string, name: string, field: string) =>
-  `${controlName}.${name}.${field}` as any;
+type Props = {
+  value: Value;
+  onChange: (value: Value) => void;
+};
 
-export const KeysActionFields = ({ controlName, name }: ActionFieldsProps) => {
-  const { control } = useFormContext<profile_builder_schema>();
+export const KeysActionField = ({ value, onChange }: Props) => {
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
+  const form = useForm<Value>({
+    resolver: zodResolver(keysActionchema),
+    mode: "onBlur",
+    defaultValues: {
+      keys: "",
+    },
+  });
+
+  useEffect(() => {
+    form.watch(() => {
+      form.handleSubmit(onChange)();
+    });
+  }, [onChangeRef, form]);
 
   return (
     <div className="space-y-3">
-      <Controller
-        name={getFieldPath(controlName, name, "keys")}
-        control={control}
-        render={({ field, fieldState }) => (
-          <div className="form-control w-full">
-            <label className="label">
-              <span className="label-text">Keys</span>
-            </label>
-            <input
-              {...field}
-              type="text"
-              placeholder="e.g. q+pagedown"
-              className="input input-bordered w-full"
-            />
-            {fieldState.error && (
-              <span className="text-error text-sm mt-1">{String(fieldState.error.message)}</span>
-            )}
-          </div>
+      <BaseField
+        legend={t("Keys")}
+        label={t("The keys to activate. Can be multiple, eg: ctrl+d")}
+        error={form.formState.errors.keys?.message}
+      >
+        <input
+          className="input input-bordered w-full"
+          {...form.register("keys")}
+        />
+      </BaseField>
+
+      <BaseField
+        legend={t("Wait Time")}
+        label={t(
+          "(Optional) Specifies the number of seconds to wait between key actions",
         )}
-      />
-      <Controller
-        name={getFieldPath(controlName, name, "press_time")}
-        control={control}
-        render={({ field, fieldState }) => (
-          <div className="form-control w-1/2">
-            <label className="label">
-              <span className="label-text">Press Time (seconds)</span>
-            </label>
-            <input
-              {...field}
-              onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))}
-              type="number"
-              min={0}
-              placeholder="Optional"
-              className="input input-bordered w-full"
-            />
-            {fieldState.error && (
-              <span className="text-error text-sm mt-1">{String(fieldState.error.message)}</span>
-            )}
-          </div>
+        error={form.formState.errors.wait_time?.message}
+      >
+        <input
+          type="number"
+          className={clsx(
+            "input input-bordered w-full",
+            form.formState.errors.wait_time && "input-error",
+          )}
+          {...form.register("wait_time", {
+            setValueAs: (value) => {
+              if (String(value).trim() === "") return undefined;
+              return Number(value);
+            },
+          })}
+        />
+      </BaseField>
+
+      <BaseField
+        legend={t("Press Time")}
+        label={t(
+          "(Optional) Specifies the number of seconds to hold the keys for. When omitted, keys will be held until manually released.",
         )}
-      />
-      <Controller
-        name={getFieldPath(controlName, name, "wait_time")}
-        control={control}
-        render={({ field, fieldState }) => (
-          <div className="form-control w-1/2">
-            <label className="label">
-              <span className="label-text">Wait Time (seconds)</span>
-            </label>
-            <input
-              {...field}
-              onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))}
-              type="number"
-              min={0}
-              placeholder="Optional"
-              className="input input-bordered w-full"
-            />
-            {fieldState.error && (
-              <span className="text-error text-sm mt-1">{String(fieldState.error.message)}</span>
-            )}
-          </div>
-        )}
-      />
+      >
+        <input
+          type="number"
+          className={clsx(
+            "input input-bordered w-full",
+            form.formState.errors.press_time && "input-error",
+          )}
+          {...form.register("press_time", {
+            setValueAs: (value) => {
+              if (String(value).trim() === "") return undefined;
+              return Number(value);
+            },
+          })}
+        />
+      </BaseField>
     </div>
   );
 };

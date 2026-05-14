@@ -1,80 +1,81 @@
-import { useFormContext, Controller } from "react-hook-form";
-import type { profile_builder_schema } from "../types";
-import { ACTION_TYPES, getActionType } from "../utils";
-import { KeysActionFields } from "./KeysActionFields";
-import { DirectControlActionFields } from "./DirectControlActionFields";
-import { ApiControlActionFields } from "./ApiControlActionFields";
-import { VirtualActionFields } from "./VirtualActionFields";
+import { useMemo } from "react";
+import {
+  keysActionchema,
+  apiControlActionSchema,
+  virtualActionSchema,
+  directControlActionSchema,
+} from "../schema";
+import z from "zod";
+import { KeysActionField } from "./KeysActionFields";
+import { t } from "../../utils";
+import { ACTION_TYPES } from "../utils";
 
-interface ActionSelectorProps {
-  controlName: string;
-  name: string;
-}
+type AnyAction =
+  | z.infer<typeof keysActionchema>
+  | z.infer<typeof apiControlActionSchema>
+  | z.infer<typeof virtualActionSchema>
+  | z.infer<typeof directControlActionSchema>;
 
-const getFieldPath = (controlName: string, name: string, field: string) =>
-  `${controlName}.${name}.${field}` as any;
-
-const actionFieldComponents: Record<
-  string,
-  React.ComponentType<{ controlName: string; name: string }>
-> = {
-  keys: KeysActionFields,
-  direct_control: DirectControlActionFields,
-  api_control: ApiControlActionFields,
-  virtual: VirtualActionFields,
+type Props = {
+  value: unknown;
+  onChange: (value: AnyAction) => void;
 };
 
-export const ActionSelector = ({ controlName, name }: ActionSelectorProps) => {
-  const { control, watch, setValue } = useFormContext<profile_builder_schema>();
-  const actionPath = `${controlName}.${name}` as any;
-  const currentValue = watch(actionPath);
-  const currentType = getActionType(currentValue);
-  const actionType = currentType || "keys";
+export const ActionSelector = ({ value, onChange }: Props) => {
+  const action = useMemo(() => {
+    const keysAction = keysActionchema.safeParse(value);
+    if (keysAction.success)
+      return {
+        type: "keys" as const,
+        value: keysAction.data,
+      };
 
-  const ActionComponent =
-    actionFieldComponents[actionType] || actionFieldComponents.keys;
+    const apiControlAction = apiControlActionSchema.safeParse(value);
+    if (apiControlAction.success)
+      return {
+        type: "api_control" as const,
+        value: apiControlAction.data,
+      };
+
+    const virtualAction = virtualActionSchema.safeParse(value);
+    if (virtualAction.success)
+      return {
+        type: "virtual" as const,
+        value: virtualAction.data,
+      };
+
+    const directControlAction = directControlActionSchema.safeParse(value);
+    if (directControlAction.success)
+      return {
+        type: "direct_control" as const,
+        value: directControlAction.data,
+      };
+
+    return {
+      type: "keys" as const,
+      value: keysActionchema.parse({ keys: "" }),
+    };
+  }, [value]);
 
   return (
     <div className="space-y-3">
-      <Controller
-        name={getFieldPath(controlName, name, "keys")}
-        control={control}
-        render={({ field }) => <input type="hidden" {...field} />}
-      />
-      <Controller
-        name={getFieldPath(controlName, name, "controls")}
-        control={control}
-        render={({ field }) => <input type="hidden" {...field} />}
-      />
-      <Controller
-        name={getFieldPath(controlName, name, "api_value")}
-        control={control}
-        render={({ field }) => <input type="hidden" {...field} />}
-      />
-      <Controller
-        name={getFieldPath(controlName, name, "type")}
-        control={control}
-        render={({ field }) => <input type="hidden" {...field} />}
-      />
-      <div className="form-control w-1/3">
+      <div className="form-control">
         <label className="label">
-          <span className="label-text">Action Type</span>
+          <span className="label-text">{t("Action Type")}</span>
         </label>
         <select
           className="select select-bordered w-full"
-          value={actionType}
+          value={action.type}
           onChange={(e) => {
-            const newType = e.target.value;
-            setValue(
-              actionPath,
-              newType === "keys"
-                ? { keys: "" }
-                : newType === "direct_control"
-                  ? { controls: "", value: 0 }
-                  : newType === "api_control"
-                    ? { controls: "", api_value: 0 }
-                    : { type: "virtual", control: "", value: 0 },
-            );
+            const value = e.currentTarget.value as (typeof action)["type"];
+            if (value === action.type) return; /*ignore if same */
+            const emptyValues: Record<(typeof action)["type"], AnyAction> = {
+              keys: { keys: "" },
+              virtual: { type: "virtual", control: "", value: 0 },
+              api_control: { controls: "", api_value: 0 },
+              direct_control: { controls: "", value: 0 },
+            };
+            onChange(emptyValues[value]);
           }}
         >
           {ACTION_TYPES.map((t) => (
@@ -84,7 +85,10 @@ export const ActionSelector = ({ controlName, name }: ActionSelectorProps) => {
           ))}
         </select>
       </div>
-      <ActionComponent controlName={controlName} name={name} />
+
+      {action.type === "keys" && (
+        <KeysActionField value={action.value} onChange={onChange} />
+      )}
     </div>
   );
 };
