@@ -25,21 +25,21 @@ export const ASSIGNMENT_TYPES: { value: AssignmentType; label: string }[] = [
 ];
 
 export const ACTION_TYPES: { value: ActionValueType; label: string }[] = [
-  { value: "keys", label: "Keys Action" },
-  { value: "direct_control", label: "Direct Control Action" },
-  { value: "api_control", label: "API Control Action" },
-  { value: "virtual", label: "Virtual Action" },
+  { value: "keys", label: t("Keys Action") },
+  { value: "direct_control", label: t("Direct Control Action") },
+  { value: "api_control", label: t("API Control Action") },
+  { value: "virtual", label: t("Virtual Action") },
 ];
 
 export const CONDITION_OPERATORS: {
   value: "gte" | "lte" | "gt" | "lt" | "eq";
   label: string;
 }[] = [
-  { value: "gte", label: "Greater than or equal (>=)" },
-  { value: "lte", label: "Less than or equal (<=)" },
-  { value: "gt", label: "Greater than (>)" },
-  { value: "lt", label: "Less than (<)" },
-  { value: "eq", label: "Equals (==)" },
+  { value: "gte", label: t("Greater than or equal (>=)") },
+  { value: "lte", label: t("Less than or equal (<=)") },
+  { value: "gt", label: t("Greater than (>)") },
+  { value: "lt", label: t("Less than (<)") },
+  { value: "eq", label: t("Equals (==)") },
 ];
 
 export function createEmptyAssignment(

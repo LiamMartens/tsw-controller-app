@@ -29,8 +29,6 @@ const momentarySchema = z
   })
   .passthrough();
 
-const numberSchema = z.number().or(z.any().transform(() => 0));
-
 const MomentaryFieldsContent = ({ value, onChange }: ContentProps) => {
   const safeValue = useMemo((): z.infer<typeof momentarySchema> => {
     const validated = momentarySchema.safeParse(value);
