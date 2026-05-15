@@ -9,9 +9,7 @@ const stringify = (value?: Record<string, unknown> | null) =>
   value ? JSON.stringify(value, null, 2) : "";
 
 export const JsonTextareaInput = ({ value, onChange }: JsonTextareaProps) => {
-  const [internalStringValue, setInternalStringValue] = useState(
-    stringify(value),
-  );
+  const [internalStringValue, setInternalStringValue] = useState(stringify(value));
 
   return (
     <textarea

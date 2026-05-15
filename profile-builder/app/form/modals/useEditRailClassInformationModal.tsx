@@ -1,13 +1,6 @@
 import { createPortal } from "react-dom";
 import z from "zod";
-import {
-  useId,
-  useMemo,
-  useRef,
-  useEffect,
-  SubmitEvent,
-  useCallback,
-} from "react";
+import { useId, useMemo, useRef, useEffect, SubmitEvent, useCallback } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BaseField } from "../inputs";
@@ -31,11 +24,7 @@ type ModalProps = Props & {
   onChange: (value: RailClassSchema[]) => void;
 };
 
-const EditRailClassInformationModalComponent = ({
-  dialogId,
-  value,
-  onChange,
-}: ModalProps) => {
+const EditRailClassInformationModalComponent = ({ dialogId, value, onChange }: ModalProps) => {
   const form = useForm<{ rail_class_information: RailClassSchema[] }>({
     mode: "onChange",
     resolver: zodResolver(
@@ -54,10 +43,7 @@ const EditRailClassInformationModalComponent = ({
   const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.stopPropagation();
 
-    const submitter = e.nativeEvent.submitter as
-      | HTMLInputElement
-      | HTMLButtonElement
-      | null;
+    const submitter = e.nativeEvent.submitter as HTMLInputElement | HTMLButtonElement | null;
 
     if (submitter?.value === "cancel") {
       form.reset();
@@ -75,9 +61,7 @@ const EditRailClassInformationModalComponent = ({
   return (
     <dialog id={dialogId} className="modal">
       <div className="modal-box w-11/12 max-w-3xl">
-        <h3 className="font-bold text-lg">
-          {t("Edit rail class information")}
-        </h3>
+        <h3 className="font-bold text-lg">{t("Edit rail class information")}</h3>
         <div className="space-y-2 py-4">
           <div className="space-y-1">
             {fields.map((field, index) => (
@@ -89,20 +73,17 @@ const EditRailClassInformationModalComponent = ({
                   <BaseField
                     legend={t("Class Name")}
                     error={
-                      form.formState.errors.rail_class_information?.[index]
-                        ?.class_name?.message
+                      form.formState.errors.rail_class_information?.[index]?.class_name?.message
                     }
                   >
                     <input
                       className={clsx(
                         "input input-bordered w-full",
-                        form.formState.errors.rail_class_information?.[index]
-                          ?.class_name && "input-error",
+                        form.formState.errors.rail_class_information?.[index]?.class_name &&
+                          "input-error",
                       )}
                       placeholder={t("Class name")}
-                      {...form.register(
-                        `rail_class_information.${index}.class_name` as const,
-                      )}
+                      {...form.register(`rail_class_information.${index}.class_name` as const)}
                     />
                   </BaseField>
                 </div>
@@ -126,25 +107,11 @@ const EditRailClassInformationModalComponent = ({
               {t("Add rail class")}
             </button>
 
-            <form
-              method="dialog"
-              className="flex gap-2"
-              onSubmit={handleSubmit}
-            >
-              <button
-                name="action"
-                value="cancel"
-                type="submit"
-                className="btn btn-sm"
-              >
+            <form method="dialog" className="flex gap-2" onSubmit={handleSubmit}>
+              <button name="action" value="cancel" type="submit" className="btn btn-sm">
                 {t("Cancel")}
               </button>
-              <button
-                type="submit"
-                name="action"
-                value="save"
-                className="btn btn-sm btn-primary"
-              >
+              <button type="submit" name="action" value="save" className="btn btn-sm btn-primary">
                 {t("Save")}
               </button>
             </form>
@@ -155,15 +122,9 @@ const EditRailClassInformationModalComponent = ({
   );
 };
 
-export const useEditRailClassInformationModal = ({
-  value,
-  onChange,
-}: Props) => {
+export const useEditRailClassInformationModal = ({ value, onChange }: Props) => {
   const id = useId();
-  const dialogId = useMemo(
-    () => `edit-rail-class-dialog-` + id.replace(/[^\w]+/g, "-"),
-    [id],
-  );
+  const dialogId = useMemo(() => `edit-rail-class-dialog-` + id.replace(/[^\w]+/g, "-"), [id]);
 
   const safeValue = useMemo((): RailClassSchema[] => {
     const safe = z.array(railClassSchema).safeParse(value);

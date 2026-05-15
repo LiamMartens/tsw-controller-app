@@ -94,9 +94,7 @@ export const ActionSelector = ({ value, onChange }: Props) => {
         </select>
       </div>
 
-      {action.type === "keys" && (
-        <KeysActionField value={action.value} onChange={onChange} />
-      )}
+      {action.type === "keys" && <KeysActionField value={action.value} onChange={onChange} />}
 
       {action.type === "virtual" && (
         <VirtualActionFields value={action.value} onChange={onChange} />

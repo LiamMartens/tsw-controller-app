@@ -53,11 +53,7 @@ export const ControlCard = ({ form, index, onRemove }: Props) => {
         <AssignmentsList controlIndex={index} form={form} />
 
         <div className="flex justify-start border-t border-base-300 pt-4">
-          <button
-            type="button"
-            className="btn btn-error btn-xs btn-ghost"
-            onClick={handleRemove}
-          >
+          <button type="button" className="btn btn-error btn-xs btn-ghost" onClick={handleRemove}>
             {t("Remove Control")}
           </button>
         </div>

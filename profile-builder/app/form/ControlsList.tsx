@@ -25,19 +25,10 @@ export const ControlsList = ({ form }: ControlsListProps) => {
   return (
     <div className="space-y-2">
       {fields.map((field, index) => (
-        <ControlCard
-          key={field.id}
-          form={form}
-          index={index}
-          onRemove={() => remove(index)}
-        />
+        <ControlCard key={field.id} form={form} index={index} onRemove={() => remove(index)} />
       ))}
 
-      <button
-        type="button"
-        className="btn btn-sm w-full"
-        onClick={handleAddControl}
-      >
+      <button type="button" className="btn btn-sm w-full" onClick={handleAddControl}>
         {t("Add control")}
       </button>
     </div>

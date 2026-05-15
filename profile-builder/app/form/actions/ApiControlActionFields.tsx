@@ -86,11 +86,7 @@ export const ApiControlActionFields = ({ value, onChange }: Props) => {
       <FieldGroup legend={t("Options")}>
         <div className="grid grid-cols-2 gap-4">
           <label className="label whitespace-normal">
-            <input
-              type="checkbox"
-              className="checkbox"
-              {...form.register("hold")}
-            />
+            <input type="checkbox" className="checkbox" {...form.register("hold")} />
             <p>{t("Enable hold (Continuously send the value to the API)")}</p>
           </label>
         </div>

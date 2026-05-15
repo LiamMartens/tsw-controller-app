@@ -5,8 +5,7 @@ interface AssignmentHeaderProps {
   controlName: string;
 }
 
-const getFieldPath = (controlName: string, field: string) =>
-  `${controlName}.${field}` as any;
+const getFieldPath = (controlName: string, field: string) => `${controlName}.${field}` as any;
 
 export const AssignmentHeader = ({ controlName }: AssignmentHeaderProps) => {
   const { control } = useFormContext<profile_builder_schema>();
@@ -42,10 +41,7 @@ export const AssignmentHeader = ({ controlName }: AssignmentHeaderProps) => {
             <label className="label">
               <span className="label-text">Match</span>
             </label>
-            <select
-              {...field}
-              className="select select-bordered w-full"
-            >
+            <select {...field} className="select select-bordered w-full">
               <option value="exceeds">Exceeds</option>
               <option value="equals">Equals</option>
             </select>

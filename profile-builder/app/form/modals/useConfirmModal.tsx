@@ -15,12 +15,7 @@ type ConfirmDialogProps = {
   onSubmit: (event: SubmitEvent<HTMLDialogElement>) => void;
 };
 
-const ConfirmDialog = ({
-  dialogId,
-  title,
-  body,
-  onSubmit,
-}: ConfirmDialogProps) => {
+const ConfirmDialog = ({ dialogId, title, body, onSubmit }: ConfirmDialogProps) => {
   return (
     <dialog id={dialogId} className="modal" onSubmit={onSubmit}>
       <div className="modal-box">
@@ -30,11 +25,7 @@ const ConfirmDialog = ({
           <button className="btn btn-sm" name="cancel" value="cancel">
             {t("Cancel")}
           </button>
-          <button
-            className="btn btn-sm btn-primary"
-            name="action"
-            value="confirm"
-          >
+          <button className="btn btn-sm btn-primary" name="action" value="confirm">
             {t("Confirm")}
           </button>
         </form>
@@ -65,12 +56,7 @@ export const useConfirmModal = ({ title, body, onConfirm }: ModalProps) => {
     confirm,
     render: () =>
       createPortal(
-        <ConfirmDialog
-          dialogId={dialogId}
-          title={title}
-          body={body}
-          onSubmit={handleSubmit}
-        />,
+        <ConfirmDialog dialogId={dialogId} title={title} body={body} onSubmit={handleSubmit} />,
         document.body,
       ),
   };

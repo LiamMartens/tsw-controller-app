@@ -75,16 +75,11 @@ const MomentaryFieldsContent = ({ value, onChange }: ContentProps) => {
         </BaseField>
         <BaseField
           legend={t("Match")}
-          label={t(
-            "Defines how to match the threshold value (defaults to exceeds)",
-          )}
+          label={t("Defines how to match the threshold value (defaults to exceeds)")}
           error={form.formState.errors.match?.message}
         >
           <select
-            className={clsx(
-              "select w-full",
-              form.formState.errors.match && "select-error",
-            )}
+            className={clsx("select w-full", form.formState.errors.match && "select-error")}
             {...form.register("match")}
           >
             <option value="exceeds">{t("Exceeds")}</option>
@@ -148,11 +143,7 @@ const MomentaryFieldsContent = ({ value, onChange }: ContentProps) => {
   );
 };
 
-export const MomentaryFields = ({
-  form,
-  controlIndex,
-  assignmentIndex,
-}: Props) => {
+export const MomentaryFields = ({ form, controlIndex, assignmentIndex }: Props) => {
   return (
     <Controller
       control={form.control}

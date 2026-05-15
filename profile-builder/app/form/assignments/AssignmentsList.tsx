@@ -36,11 +36,7 @@ export const AssignmentsList = ({ form, controlIndex }: Props) => {
         />
       ))}
 
-      <button
-        type="button"
-        className="btn btn-sm w-full"
-        onClick={handleAddAssignment}
-      >
+      <button type="button" className="btn btn-sm w-full" onClick={handleAddAssignment}>
         {t("Add Assignment")}
       </button>
     </div>

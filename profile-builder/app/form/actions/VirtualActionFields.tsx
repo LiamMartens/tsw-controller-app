@@ -30,10 +30,7 @@ export const VirtualActionFields = ({ value, onChange }: Props) => {
         label={t("The name of the virtual control to set")}
         error={form.formState.errors.control?.message}
       >
-        <input
-          className="input input-bordered w-full"
-          {...form.register("control")}
-        />
+        <input className="input input-bordered w-full" {...form.register("control")} />
       </BaseField>
 
       <BaseField

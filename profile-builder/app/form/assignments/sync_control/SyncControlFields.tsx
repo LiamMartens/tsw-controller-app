@@ -34,9 +34,7 @@ export const SyncControlFields = ({ controlName }: SyncControlFieldsProps) => {
               className="input input-bordered w-full"
             />
             {fieldState.error && (
-              <span className="text-error text-sm mt-1">
-                {String(fieldState.error.message)}
-              </span>
+              <span className="text-error text-sm mt-1">{String(fieldState.error.message)}</span>
             )}
           </div>
         )}
@@ -53,11 +51,7 @@ export const SyncControlFields = ({ controlName }: SyncControlFieldsProps) => {
             <input
               {...field}
               onChange={(e) =>
-                field.onChange(
-                  e.target.value === ""
-                    ? undefined
-                    : parseFloat(e.target.value),
-                )
+                field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))
               }
               type="number"
               step="0.01"
@@ -78,11 +72,7 @@ export const SyncControlFields = ({ controlName }: SyncControlFieldsProps) => {
             <input
               {...field}
               onChange={(e) =>
-                field.onChange(
-                  e.target.value === ""
-                    ? undefined
-                    : parseFloat(e.target.value),
-                )
+                field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))
               }
               type="number"
               step="0.01"
@@ -109,9 +99,7 @@ export const SyncControlFields = ({ controlName }: SyncControlFieldsProps) => {
               className="input input-bordered w-full"
             />
             {fieldState.error && (
-              <span className="text-error text-sm mt-1">
-                {String(fieldState.error.message)}
-              </span>
+              <span className="text-error text-sm mt-1">{String(fieldState.error.message)}</span>
             )}
           </div>
         )}
@@ -132,9 +120,7 @@ export const SyncControlFields = ({ controlName }: SyncControlFieldsProps) => {
               className="input input-bordered w-full"
             />
             {fieldState.error && (
-              <span className="text-error text-sm mt-1">
-                {String(fieldState.error.message)}
-              </span>
+              <span className="text-error text-sm mt-1">{String(fieldState.error.message)}</span>
             )}
           </div>
         )}
@@ -150,11 +136,7 @@ export const SyncControlFields = ({ controlName }: SyncControlFieldsProps) => {
             <input
               {...field}
               onChange={(e) =>
-                field.onChange(
-                  e.target.value === ""
-                    ? undefined
-                    : parseFloat(e.target.value),
-                )
+                field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))
               }
               type="number"
               min={0}
@@ -175,11 +157,7 @@ export const SyncControlFields = ({ controlName }: SyncControlFieldsProps) => {
             <input
               {...field}
               onChange={(e) =>
-                field.onChange(
-                  e.target.value === ""
-                    ? undefined
-                    : parseFloat(e.target.value),
-                )
+                field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))
               }
               type="number"
               min={0}

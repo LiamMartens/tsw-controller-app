@@ -22,9 +22,7 @@ const ProfileHeaderRailClassInformationSection = ({ form }: Props) => {
   return (
     <div className="collapse collapse-arrow bg-base-100 border-base-300 border">
       <input type="checkbox" className="peer" />
-      <div className="collapse-title font-semibold">
-        {t("Supported Rail Classes")}
-      </div>
+      <div className="collapse-title font-semibold">{t("Supported Rail Classes")}</div>
       <div className="collapse-content">
         <div className="flex flex-col gap-2">
           {railFields.map((field, index) => (
@@ -39,9 +37,7 @@ const ProfileHeaderRailClassInformationSection = ({ form }: Props) => {
                     type="text"
                     placeholder="Rail class name"
                     className="input input-bordered w-full"
-                    {...form.register(
-                      `rail_class_information.${index}.class_name`,
-                    )}
+                    {...form.register(`rail_class_information.${index}.class_name`)}
                   />
                 </BaseField>
                 <button
@@ -53,10 +49,7 @@ const ProfileHeaderRailClassInformationSection = ({ form }: Props) => {
                 </button>
               </div>
               <p className="label whitespace-normal text-error">
-                {
-                  form.formState.errors.rail_class_information?.[index]
-                    ?.class_name?.message
-                }
+                {form.formState.errors.rail_class_information?.[index]?.class_name?.message}
               </p>
             </div>
           ))}
@@ -77,16 +70,12 @@ const ProfileHeaderControllerInformationSection = ({ form }: Props) => {
   return (
     <div className="collapse collapse-arrow bg-base-100 border-base-300 border">
       <input type="checkbox" className="peer" />
-      <div className="collapse-title font-semibold">
-        {t("Controller Information")}
-      </div>
+      <div className="collapse-title font-semibold">{t("Controller Information")}</div>
       <div className="collapse-content">
         <div>
           <BaseField
             legend={t("USB ID")}
-            label={t(
-              "(Optional) defines the supported controller USB ID for this profile",
-            )}
+            label={t("(Optional) defines the supported controller USB ID for this profile")}
             error={form.formState.errors.controller?.usb_id?.message}
           >
             <input
@@ -105,15 +94,10 @@ const ProfileHeaderControllerInformationSection = ({ form }: Props) => {
             render={({ field, fieldState }) => (
               <BaseField
                 legend={t("SDL Mapping")}
-                label={t(
-                  "(Optional) embeds the SDL mapping into the profile for easier sharing",
-                )}
+                label={t("(Optional) embeds the SDL mapping into the profile for easier sharing")}
                 error={fieldState.error?.message}
               >
-                <JsonTextareaInput
-                  value={field.value}
-                  onChange={field.onChange}
-                />
+                <JsonTextareaInput value={field.value} onChange={field.onChange} />
               </BaseField>
             )}
           />
@@ -129,10 +113,7 @@ const ProfileHeaderControllerInformationSection = ({ form }: Props) => {
                 )}
                 error={fieldState.error?.message}
               >
-                <JsonTextareaInput
-                  value={field.value}
-                  onChange={field.onChange}
-                />
+                <JsonTextareaInput value={field.value} onChange={field.onChange} />
               </BaseField>
             )}
           />
@@ -146,10 +127,7 @@ export const ProfileHeader = ({ form }: Props) => {
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4">
-        <BaseField
-          legend={t("Profile Name")}
-          error={form.formState.errors.name?.message}
-        >
+        <BaseField legend={t("Profile Name")} error={form.formState.errors.name?.message}>
           <input
             className={clsx(
               "input input-bordered  w-full",
@@ -181,11 +159,7 @@ export const ProfileHeader = ({ form }: Props) => {
           )}
         >
           <label className="label text-base">
-            <input
-              type="checkbox"
-              className="checkbox"
-              {...form.register("auto_select")}
-            />
+            <input type="checkbox" className="checkbox" {...form.register("auto_select")} />
             {t("Enable auto-select")}
           </label>
         </BaseField>

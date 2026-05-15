@@ -26,7 +26,9 @@ export const LinearFields = ({ controlName }: LinearFieldsProps) => {
             </label>
             <input
               {...field}
-              onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))}
+              onChange={(e) =>
+                field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))
+              }
               type="number"
               step="0.01"
               placeholder="Optional (0-1 maps to -1 to 1)"
@@ -42,9 +44,7 @@ export const LinearFields = ({ controlName }: LinearFieldsProps) => {
       {fields.map((field, index) => (
         <div key={field.id} className="collapse collapse-arrow bg-base-200 rounded-lg">
           <input type="checkbox" />
-          <div className="collapse-title font-medium">
-            Threshold {index + 1}
-          </div>
+          <div className="collapse-title font-medium">Threshold {index + 1}</div>
           <div className="collapse-content space-y-3">
             <Controller
               name={`${controlName}.thresholds.${index}.value`}
@@ -62,7 +62,9 @@ export const LinearFields = ({ controlName }: LinearFieldsProps) => {
                     className="input input-bordered w-full"
                   />
                   {fieldState.error && (
-                    <span className="text-error text-sm mt-1">{String(fieldState.error.message)}</span>
+                    <span className="text-error text-sm mt-1">
+                      {String(fieldState.error.message)}
+                    </span>
                   )}
                 </div>
               )}
@@ -77,7 +79,9 @@ export const LinearFields = ({ controlName }: LinearFieldsProps) => {
                   </label>
                   <input
                     {...field}
-                    onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))}
+                    onChange={(e) =>
+                      field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))
+                    }
                     type="number"
                     step="0.01"
                     placeholder="Optional (with value_step)"
@@ -96,7 +100,9 @@ export const LinearFields = ({ controlName }: LinearFieldsProps) => {
                   </label>
                   <input
                     {...field}
-                    onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))}
+                    onChange={(e) =>
+                      field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))
+                    }
                     type="number"
                     step="0.01"
                     placeholder="Optional (with value_end)"
@@ -105,14 +111,16 @@ export const LinearFields = ({ controlName }: LinearFieldsProps) => {
                 </div>
               )}
             />
-            <ActionSelector controlName={`${controlName}.thresholds.${index}`} name="action_activate" />
-            <ActionSelector controlName={`${controlName}.thresholds.${index}`} name="action_deactivate" />
+            <ActionSelector
+              controlName={`${controlName}.thresholds.${index}`}
+              name="action_activate"
+            />
+            <ActionSelector
+              controlName={`${controlName}.thresholds.${index}`}
+              name="action_deactivate"
+            />
             <div className="flex justify-end">
-              <button
-                type="button"
-                className="btn btn-error btn-sm"
-                onClick={() => remove(index)}
-              >
+              <button type="button" className="btn btn-error btn-sm" onClick={() => remove(index)}>
                 Remove Threshold
               </button>
             </div>

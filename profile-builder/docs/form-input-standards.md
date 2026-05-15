@@ -27,15 +27,16 @@ const form = useForm<z.infer<typeof schema>>({
 
 A `<fieldset>` wrapper used for **every** input. Always use it — never render a raw `<input>` or `<select>` without it.
 
-| Prop | Required | Purpose |
-|------|----------|---------|
-| `legend` | No | Fieldset legend text |
-| `label` | No | Descriptive helper text (rendered as `<p className="label">`) |
-| `error` | No | Validation error message (rendered in `text-error`) |
-| `className` | No | Extra classes on the `<fieldset>` |
-| `children` | Yes | The actual input element |
+| Prop        | Required | Purpose                                                       |
+| ----------- | -------- | ------------------------------------------------------------- |
+| `legend`    | No       | Fieldset legend text                                          |
+| `label`     | No       | Descriptive helper text (rendered as `<p className="label">`) |
+| `error`     | No       | Validation error message (rendered in `text-error`)           |
+| `className` | No       | Extra classes on the `<fieldset>`                             |
+| `children`  | Yes      | The actual input element                                      |
 
 **Styling conventions:**
+
 - Inputs use `input input-bordered w-full` (DaisyUI).
 - Error state adds `input-error`.
 - Labels use `label whitespace-normal` for wrapping.
@@ -54,11 +55,11 @@ A `<fieldset>` wrapper used for **every** input. Always use it — never render 
 
 A styled `<fieldset>` variant for **grouping related inputs** (e.g. action selectors). Adds a background, border, padding, and rounded corners.
 
-| Prop | Required | Purpose |
-|------|----------|---------|
-| `legend` | No | Group legend |
-| `label` | No | Group-level helper text |
-| `children` | Yes | Input elements inside |
+| Prop       | Required | Purpose                 |
+| ---------- | -------- | ----------------------- |
+| `legend`   | No       | Group legend            |
+| `label`    | No       | Group-level helper text |
+| `children` | Yes      | Input elements inside   |
 
 ---
 
@@ -76,10 +77,7 @@ A styled `<fieldset>` variant for **grouping related inputs** (e.g. action selec
 - Apply `select-error` class when there is an error.
 
 ```tsx
-<select
-  className={clsx("select w-full", error && "select-error")}
-  {...form.register("match")}
->
+<select className={clsx("select w-full", error && "select-error")} {...form.register("match")}>
   <option value="exceeds">{t("Exceeds")}</option>
   <option value="equals">{t("Exact match")}</option>
 </select>
@@ -112,9 +110,11 @@ const { fields, append, remove } = useFieldArray({
   name: "controls",
 });
 
-{fields.map((field, index) => (
-  <ControlCard key={field.id} form={form} index={index} onRemove={() => remove(index)} />
-))}
+{
+  fields.map((field, index) => (
+    <ControlCard key={field.id} form={form} index={index} onRemove={() => remove(index)} />
+  ));
+}
 ```
 
 ---
@@ -129,9 +129,7 @@ const { fields, append, remove } = useFieldArray({
 <Controller
   control={form.control}
   name={`controls.${index}.assignments.${assignmentIndex}`}
-  render={({ field }) => (
-    <MomentaryFieldsContent value={field.value} onChange={field.onChange} />
-  )}
+  render={({ field }) => <MomentaryFieldsContent value={field.value} onChange={field.onChange} />}
 />
 ```
 

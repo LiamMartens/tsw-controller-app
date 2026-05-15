@@ -9,11 +9,7 @@ export type AssignmentType =
   | "api_control"
   | "sync_control";
 
-export type ActionValueType =
-  | "keys"
-  | "direct_control"
-  | "api_control"
-  | "virtual";
+export type ActionValueType = "keys" | "direct_control" | "api_control" | "virtual";
 
 export const ASSIGNMENT_TYPES: { value: AssignmentType; label: string }[] = [
   { value: "momentary", label: t("Momentary") },

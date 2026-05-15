@@ -86,56 +86,28 @@ export const DirectControlActionFields = ({ value, onChange }: Props) => {
       <FieldGroup legend={t("Options")}>
         <div className="grid grid-cols-2 grid-flow-row auto-rows-max gap-4">
           <label className="label whitespace-normal">
-            <input
-              type="checkbox"
-              className="checkbox"
-              {...form.register("relative")}
-            />
-            <p>
-              {t(
-                "Interpret the action as a relative change (eg: increase by 0.1 each time)",
-              )}
-            </p>
+            <input type="checkbox" className="checkbox" {...form.register("relative")} />
+            <p>{t("Interpret the action as a relative change (eg: increase by 0.1 each time)")}</p>
           </label>
 
           <label className="label whitespace-normal">
-            <input
-              type="checkbox"
-              className="checkbox"
-              {...form.register("hold")}
-            />
+            <input type="checkbox" className="checkbox" {...form.register("hold")} />
             <p>{t("Enable hold (Continuously send the value to the API)")}</p>
           </label>
 
           <label className="label whitespace-normal">
-            <input
-              type="checkbox"
-              className="checkbox"
-              {...form.register("use_normalized")}
-            />
+            <input type="checkbox" className="checkbox" {...form.register("use_normalized")} />
             <p>{t("Send normalized value (rarely necessary)")}</p>
           </label>
 
           <label className="label whitespace-normal">
-            <input
-              type="checkbox"
-              className="checkbox"
-              {...form.register("notify")}
-            />
+            <input type="checkbox" className="checkbox" {...form.register("notify")} />
             <p>{t("Enable in-game notifications (enabled by default)")}</p>
           </label>
 
           <label className="label whitespace-normal">
-            <input
-              type="checkbox"
-              className="checkbox"
-              {...form.register("enable_api_fallback")}
-            />
-            <p>
-              {t(
-                "Fallback to API if direct control is unavailable (enabled by default)",
-              )}
-            </p>
+            <input type="checkbox" className="checkbox" {...form.register("enable_api_fallback")} />
+            <p>{t("Fallback to API if direct control is unavailable (enabled by default)")}</p>
           </label>
         </div>
       </FieldGroup>

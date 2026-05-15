@@ -8,7 +8,11 @@ interface ApiControlFieldsProps {
 
 export const ApiControlFields = ({ controlName }: ApiControlFieldsProps) => {
   const { control } = useFormContext<profile_builder_schema>();
-  const { fields: stepThresholds, append: appendStepThreshold, remove: removeStepThreshold } = useFieldArray({
+  const {
+    fields: stepThresholds,
+    append: appendStepThreshold,
+    remove: removeStepThreshold,
+  } = useFieldArray({
     control,
     name: `${controlName}.input_value.step_thresholds` as any,
   });
@@ -46,7 +50,9 @@ export const ApiControlFields = ({ controlName }: ApiControlFieldsProps) => {
             </label>
             <input
               {...field}
-              onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))}
+              onChange={(e) =>
+                field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))
+              }
               type="number"
               step="0.01"
               placeholder="Optional"
@@ -65,7 +71,9 @@ export const ApiControlFields = ({ controlName }: ApiControlFieldsProps) => {
             </label>
             <input
               {...field}
-              onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))}
+              onChange={(e) =>
+                field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))
+              }
               type="number"
               step="0.01"
               placeholder="Optional"
@@ -142,7 +150,9 @@ export const ApiControlFields = ({ controlName }: ApiControlFieldsProps) => {
             </label>
             <input
               {...field}
-              onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))}
+              onChange={(e) =>
+                field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))
+              }
               type="number"
               min={0}
               placeholder="Optional"
@@ -161,7 +171,9 @@ export const ApiControlFields = ({ controlName }: ApiControlFieldsProps) => {
             </label>
             <input
               {...field}
-              onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))}
+              onChange={(e) =>
+                field.onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))
+              }
               type="number"
               min={0}
               placeholder="Optional"

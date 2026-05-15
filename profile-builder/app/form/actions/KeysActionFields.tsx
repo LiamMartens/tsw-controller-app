@@ -48,9 +48,7 @@ export const KeysActionField = ({ value, onChange }: Props) => {
 
       <BaseField
         legend={t("Wait Time")}
-        label={t(
-          "(Optional) Specifies the number of seconds to wait between key actions",
-        )}
+        label={t("(Optional) Specifies the number of seconds to wait between key actions")}
         error={form.formState.errors.wait_time?.message}
       >
         <input

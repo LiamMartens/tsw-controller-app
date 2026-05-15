@@ -4,12 +4,10 @@ import schema from "../app/schema.json" with { type: "json" };
 import openapiTS, { astToString } from "openapi-typescript";
 
 /** @type {(node: ts.Node) => node is ts.InterfaceDeclaration} */
-const isInterfaceDeclaration = (node) =>
-  node.kind == ts.SyntaxKind.InterfaceDeclaration;
+const isInterfaceDeclaration = (node) => node.kind == ts.SyntaxKind.InterfaceDeclaration;
 
 /** @type {(node: ts.Node) => node is ts.PropertySignature} */
-const isPropertySignature = (node) =>
-  node.kind == ts.SyntaxKind.PropertySignature;
+const isPropertySignature = (node) => node.kind == ts.SyntaxKind.PropertySignature;
 
 const ast = await openapiTS({
   openapi: "3.1",
