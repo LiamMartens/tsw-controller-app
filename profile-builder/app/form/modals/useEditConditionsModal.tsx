@@ -84,11 +84,11 @@ const EditConditionsModalComponent = ({
       <div className="modal-box w-11/12 max-w-3xl">
         <h3 className="font-bold text-lg">{t("Edit conditions")}</h3>
         <div className="space-y-2 py-4">
-          <div className="space-y-2">
+          <div className="space-y-1">
             {fields.map((field, index) => (
               <div
                 key={field.id}
-                className="flex gap-2 items-start border-b border-base-300 pb-4 last:border-0"
+                className="flex gap-2 items-start border-b border-base-300 last:border-0"
               >
                 <div className="flex-1 grid grid-cols-3 gap-2">
                   <BaseField
@@ -156,7 +156,7 @@ const EditConditionsModalComponent = ({
                 </div>
                 <button
                   type="button"
-                  className="btn btn-error btn-xs btn-ghost mt-10"
+                  className="btn btn-error btn-sm btn-ghost mt-9"
                   onClick={() => remove(index)}
                 >
                   {t("Remove")}
@@ -165,21 +165,21 @@ const EditConditionsModalComponent = ({
             ))}
           </div>
 
-          <button
-            type="button"
-            className="btn btn-sm"
-            onClick={() =>
-              append({
-                control: "",
-                operator: "gte" as const,
-                value: 0,
-              })
-            }
-          >
-            {t("Add condition")}
-          </button>
-
           <div className="modal-action">
+            <button
+              type="button"
+              className="btn btn-sm mr-auto"
+              onClick={() =>
+                append({
+                  control: "",
+                  operator: "gte" as const,
+                  value: 0,
+                })
+              }
+            >
+              {t("Add condition")}
+            </button>
+
             <form
               method="dialog"
               className="flex gap-2"
