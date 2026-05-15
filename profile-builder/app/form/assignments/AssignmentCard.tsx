@@ -4,6 +4,7 @@ import { AssignmentTypeSelector } from "./AssignmentTypeSelector";
 import z from "zod";
 import { profileSchema } from "../schema";
 import { useConfirmModal } from "../modals/useConfirmModal";
+import { useEditConditionsModal } from "../modals/useEditConditionsModal";
 
 type Props = {
   form: UseFormReturn<z.infer<typeof profileSchema>>;
@@ -18,11 +19,25 @@ export const AssignmentCard = ({
   assignmentIndex,
   onRemoveAssignment,
 }: Props) => {
-  const { confirm, render: ConfirmDeleteComponent } = useConfirmModal({
-    title: t("Are you sure?"),
-    body: t("Are you sure you want to remove this assignment?"),
-    onConfirm: () => onRemoveAssignment(),
-  });
+  const { confirm: confirmDelete, render: ConfirmDeleteComponent } =
+    useConfirmModal({
+      title: t("Are you sure?"),
+      body: t("Are you sure you want to remove this assignment?"),
+      onConfirm: () => onRemoveAssignment(),
+    });
+
+  const { open: openEditConditionsModal, render: EditConditionsModal } =
+    useEditConditionsModal({
+      value: form.watch(
+        `controls.${controlIndex}.assignments.${assignmentIndex}`,
+      ).conditions,
+      onChange: (conditions) =>
+        form.setValue(
+          `controls.${controlIndex}.assignments.${assignmentIndex}.conditions`,
+          conditions,
+          { shouldTouch: true, shouldDirty: true },
+        ),
+    });
 
   return (
     <div className="collapse collapse-arrow bg-base-200 rounded-lg">
@@ -40,18 +55,26 @@ export const AssignmentCard = ({
           assignmentIndex={assignmentIndex}
         />
 
-        <div className="flex justify-start border-t border-base-300 pt-4">
+        <div className="flex justify-start gap-4 border-t border-base-300 pt-4">
           <button
             type="button"
             className="btn btn-error btn-xs btn-ghost"
-            onClick={() => confirm()}
+            onClick={() => confirmDelete()}
           >
             {t("Remove Assignment")}
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary btn-xs btn-ghost"
+            onClick={() => openEditConditionsModal()}
+          >
+            {t("Edit Conditions")}
           </button>
         </div>
       </div>
 
       <ConfirmDeleteComponent />
+      <EditConditionsModal />
     </div>
   );
 };

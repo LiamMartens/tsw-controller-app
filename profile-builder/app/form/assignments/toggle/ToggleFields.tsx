@@ -35,16 +35,17 @@ const ToggleFieldsContent = ({ value, onChange }: ContentProps) => {
     return validated.success
       ? validated.data
       : {
-          type: "momentary",
+          type: "toggle",
           threshold: 0.9,
           match: "exceeds",
           action_activate: { keys: "" },
+          action_deactivate: { keys: "" },
         };
   }, [value]);
 
-  const form = useForm<z.infer<typeof momentarySchema>>({
+  const form = useForm<z.infer<typeof toggleSchema>>({
     mode: "onChange",
-    resolver: zodResolver(momentarySchema),
+    resolver: zodResolver(toggleSchema),
     defaultValues: safeValue,
   });
 
@@ -96,7 +97,7 @@ const ToggleFieldsContent = ({ value, onChange }: ContentProps) => {
       <FieldGroup
         legend={t("Action Activate")}
         label={t(
-          "This is the action that will activate when the control matches/exceeds the threshold",
+          "This is the action that will activate when the control matches/exceeds the threshold for the first time and subsequently, every other time.",
         )}
       >
         <ActionSelector
@@ -113,7 +114,7 @@ const ToggleFieldsContent = ({ value, onChange }: ContentProps) => {
       <FieldGroup
         legend={t("Action De-activate")}
         label={t(
-          "This is the action that will trigger when the control is returned to the normal position. Defaults to releasing the keys if not provided.",
+          "This is the action that will activate when the control matches/exceeds the threshold for the second time and subsequently, every other time.",
         )}
       >
         <label className="label mb-4">
