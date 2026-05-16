@@ -76,11 +76,16 @@ const ToggleFieldsContent = ({ value, onChange }: ContentProps) => {
         </BaseField>
         <BaseField
           legend={t("Match")}
-          label={t("Defines how to match the threshold value (defaults to exceeds)")}
+          label={t(
+            "Defines how to match the threshold value (defaults to exceeds)",
+          )}
           error={form.formState.errors.match?.message}
         >
           <select
-            className={clsx("select w-full", form.formState.errors.match && "select-error")}
+            className={clsx(
+              "select w-full",
+              form.formState.errors.match && "select-error",
+            )}
             {...form.register("match")}
           >
             <option value="exceeds">{t("Exceeds")}</option>
@@ -90,7 +95,7 @@ const ToggleFieldsContent = ({ value, onChange }: ContentProps) => {
       </div>
 
       <FieldGroup
-        legend={t("Action Activate")}
+        legend={t("Toggle Activation Action")}
         label={t(
           "This is the action that will activate when the control matches/exceeds the threshold for the first time and subsequently, every other time.",
         )}
@@ -107,49 +112,37 @@ const ToggleFieldsContent = ({ value, onChange }: ContentProps) => {
       </FieldGroup>
 
       <FieldGroup
-        legend={t("Action De-activate")}
+        legend={t("Toggle De-activation Action")}
         label={t(
           "This is the action that will activate when the control matches/exceeds the threshold for the second time and subsequently, every other time.",
         )}
       >
-        <label className="label mb-4">
-          <input
-            type="checkbox"
-            checked={!!actionDeactivate}
-            className="checkbox"
-            onChange={(e) =>
-              form.setValue(
-                "action_deactivate",
-                e.currentTarget.checked ? { keys: "" } : undefined,
-                { shouldDirty: true, shouldTouch: true },
-              )
-            }
-          />
-          {t("Enable de-activation action")}
-        </label>
-
-        {!!actionDeactivate && (
-          <ActionSelector
-            value={actionDeactivate}
-            onChange={(v) =>
-              form.setValue("action_deactivate", v, {
-                shouldDirty: true,
-                shouldTouch: true,
-              })
-            }
-          />
-        )}
+        <ActionSelector
+          value={actionDeactivate}
+          onChange={(v) =>
+            form.setValue("action_deactivate", v, {
+              shouldDirty: true,
+              shouldTouch: true,
+            })
+          }
+        />
       </FieldGroup>
     </>
   );
 };
 
-export const ToggleFields = ({ form, controlIndex, assignmentIndex }: Props) => {
+export const ToggleFields = ({
+  form,
+  controlIndex,
+  assignmentIndex,
+}: Props) => {
   return (
     <Controller
       control={form.control}
       name={`controls.${controlIndex}.assignments.${assignmentIndex}`}
-      render={({ field }) => <ToggleFieldsContent value={field.value} onChange={field.onChange} />}
+      render={({ field }) => (
+        <ToggleFieldsContent value={field.value} onChange={field.onChange} />
+      )}
     />
   );
 };
