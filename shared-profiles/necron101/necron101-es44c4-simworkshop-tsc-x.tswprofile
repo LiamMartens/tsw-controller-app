@@ -1,0 +1,343 @@
+{
+  "name": "ES44C4 - Simworkshop TSC-X - Necron101",
+  "controls": [
+    {
+      "name": "Throttle",
+      "assignments": [
+        {
+          "conditions": [
+            {
+              "control": "Throttle",
+              "operator": "lte",
+              "value": 0.49
+            }
+          ],
+          "type": "direct_control",
+          "controls": "Throttle(Lever)",
+          "input_value": {
+            "min": 0,
+            "max": 1,
+            "invert": true
+          },
+          "control_range": {
+            "start": 0,
+            "end": 0.49
+          }
+        },
+        {
+          "conditions": [
+            {
+              "control": "Throttle",
+              "operator": "gte",
+              "value": 0.51
+            }
+          ],
+          "type": "direct_control",
+          "controls": "DynamicBrake(Lever)",
+          "input_value": {
+            "min": 0,
+            "max": 1
+          },
+          "control_range": {
+            "start": 0.51,
+            "end": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "Brake",
+      "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "AutomaticBrake(Lever)",
+          "input_value": {
+            "min": 0,
+            "max": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "Brake 2 / AFB",
+      "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "IndependentBrake(Lever)",
+          "input_value": {
+            "min": 0,
+            "max": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reverser Forward",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "keys": "w"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reverser Backward",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "keys": "s"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Red",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "keys": "Ctrl+w"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Alerter",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "keys": "q"
+          }
+        }
+      ]
+    },
+    {
+      "name": "E Stop",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "keys": "Backspace",
+            "press_time": 0.1
+          },
+          "action_deactivate": {
+            "keys": "Backspace",
+            "press_time": 0.1
+          }
+        }
+      ]
+    },
+    {
+      "name": "Black 3",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "keys": "l"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rotary 2 L",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "keys": " "
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rotary 2 R",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "keys": "b"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rotary 1 L",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "keys": "Shift+h"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rotary 1 R",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "keys": "h"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Yellow",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.5,
+          "action_activate": {
+            "keys": "x"
+          }
+        }
+      ]
+    }
+  ],
+  "controller": {
+    "usb_id": "3134:3138",
+    "mapping": {
+      "name": "Sim Workshop TSC-X - ES44C4 - Simworkshop TSC-X",
+      "usb_id": "3134:3138",
+      "data": [
+        {
+          "kind": "button",
+          "index": 11,
+          "name": "Rotary 2 R"
+        },
+        {
+          "kind": "button",
+          "index": 12,
+          "name": "E Stop"
+        },
+        {
+          "kind": "button",
+          "index": 6,
+          "name": "Red"
+        },
+        {
+          "kind": "button",
+          "index": 5,
+          "name": "Yellow"
+        },
+        {
+          "kind": "axis",
+          "index": 0,
+          "name": "Throttle"
+        },
+        {
+          "kind": "axis",
+          "index": 2,
+          "name": "Brake 2 / AFB"
+        },
+        {
+          "kind": "button",
+          "index": 1,
+          "name": "Black 1"
+        },
+        {
+          "kind": "button",
+          "index": 10,
+          "name": "Rotary 2 L"
+        },
+        {
+          "kind": "button",
+          "index": 13,
+          "name": "Reverser Forward"
+        },
+        {
+          "kind": "axis",
+          "index": 1,
+          "name": "Brake"
+        },
+        {
+          "kind": "button",
+          "index": 2,
+          "name": "Black 2"
+        },
+        {
+          "kind": "button",
+          "index": 4,
+          "name": "White 2"
+        },
+        {
+          "kind": "button",
+          "index": 7,
+          "name": "Black 3"
+        },
+        {
+          "kind": "button",
+          "index": 8,
+          "name": "Rotary 1 L"
+        },
+        {
+          "kind": "button",
+          "index": 9,
+          "name": "Rotary 1 R"
+        },
+        {
+          "kind": "button",
+          "index": 0,
+          "name": "Alerter"
+        },
+        {
+          "kind": "button",
+          "index": 14,
+          "name": "Reverser Backward"
+        },
+        {
+          "kind": "button",
+          "index": 3,
+          "name": "White 1"
+        }
+      ]
+    },
+    "calibration": {
+      "usb_id": "3134:3138",
+      "data": [
+        {
+          "id": "Throttle",
+          "deadzone": 647,
+          "invert": false,
+          "min": -32293,
+          "max": 32439,
+          "idle": -32293,
+          "easing_curve": [0, 0, 1, 1]
+        },
+        {
+          "id": "Brake",
+          "deadzone": 613,
+          "invert": false,
+          "min": -32440,
+          "max": 28853,
+          "idle": -32440,
+          "easing_curve": [0, 0, 1, 1]
+        },
+        {
+          "id": "Brake 2 / AFB",
+          "deadzone": 599,
+          "invert": false,
+          "min": -27442,
+          "max": 32439,
+          "idle": -27442,
+          "easing_curve": [0, 0, 1, 1]
+        }
+      ]
+    }
+  }
+}
