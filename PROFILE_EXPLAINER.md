@@ -1021,7 +1021,7 @@ A controller profile is defined in a JSON file with the following structure:
   ],
   "controller": {
     "usb_id": "0x1234",
-    "mapping": "Standard",
+    "mapping":{ ... },
     "calibration": { ... }
   },
   "rail_class_information": [

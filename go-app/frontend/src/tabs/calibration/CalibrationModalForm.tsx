@@ -166,12 +166,22 @@ export const CalibrationModalForm = ({ controller, onClose }: Props) => {
               <input
                 type="checkbox"
                 className="checkbox"
-                disabled={isRunning}
+                disabled={!isRunning}
                 {...form.register("use_unique_id")}
               />
               Use unique ID for calibration (not recommended - only for complex
-              use cases)
+              use cases).
             </label>
+            {form.watch("use_unique_id") && (
+              <div role="alert" className="alert alert-warning alert-soft mt-3">
+                <span className="text-xs">
+                  When unique ID calibration is enabled you have to ensure all
+                  identical connected devices are also configured using unique
+                  ID. Otherwise, your device may not be using the expected
+                  configuration.
+                </span>
+              </div>
+            )}
           </fieldset>
         </div>
       </div>

@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.15.0
+- Add option to calibrate using the unique device ID instead of the standard device ID (useful for arduino's and other similar devices)
+
 ## v1.14.3
 - Add notice about Cab Debugger functionality
 
