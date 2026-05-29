@@ -63,6 +63,7 @@ func (a *App) GetControllerConfiguration(unique_id controller_mgr.DeviceUniqueID
 		interop_calibration := Interop_ControllerCalibration{
 			Name:     sdl_mapping.Name,
 			DeviceID: sdl_mapping.UsbID,
+			UniqueID: sdl_mapping.UniqueID,
 			Controls: []Interop_ControllerCalibration_Control{},
 		}
 		controller.Controls().ForEach(func(c controller_mgr.IControllerManager_Controller_Control, key string) bool {
@@ -103,6 +104,9 @@ func (a *App) GetControllerConfiguration(unique_id controller_mgr.DeviceUniqueID
 			return true
 		})
 		return &Interop_ControllerConfiguration{
+			Name:        controller.Name,
+			DeviceID:    controller.Device().DeviceID(),
+			UniqueID:    controller.Device().UniqueID(),
 			SDLMapping:  sdl_mapping,
 			Calibration: interop_calibration,
 		}

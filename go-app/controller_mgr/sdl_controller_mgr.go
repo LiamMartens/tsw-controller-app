@@ -54,6 +54,8 @@ type SDL_ControllerManager_Config struct {
 	SDLMappingsByName      *map_utils.LockMap[string, config.Config_Controller_SDLMap]
 	SDLMappingsByDeviceID  *map_utils.LockMap[string, config.Config_Controller_SDLMap]
 	CalibrationsByDeviceID *map_utils.LockMap[string, config.Config_Controller_Calibration]
+	SDLMappingsByUniqueID  *map_utils.LockMap[string, config.Config_Controller_SDLMap]
+	CalibrationsByUniqueID *map_utils.LockMap[string, config.Config_Controller_Calibration]
 }
 
 type SDLControllerManager struct {
@@ -323,6 +325,8 @@ func NewSDLControllerManager(sdlmgr *sdl_mgr.SDLMgr) *SDLControllerManager {
 			SDLMappingsByName:      map_utils.NewLockMap[string, config.Config_Controller_SDLMap](),
 			SDLMappingsByDeviceID:  map_utils.NewLockMap[string, config.Config_Controller_SDLMap](),
 			CalibrationsByDeviceID: map_utils.NewLockMap[string, config.Config_Controller_Calibration](),
+			SDLMappingsByUniqueID:  map_utils.NewLockMap[string, config.Config_Controller_SDLMap](),
+			CalibrationsByUniqueID: map_utils.NewLockMap[string, config.Config_Controller_Calibration](),
 		},
 		ConfiguredControllers:   map_utils.NewLockMap[DeviceUniqueID, SDL_ControllerManager_ConfiguredController](),
 		UnconfiguredControllers: map_utils.NewLockMap[DeviceUniqueID, SDL_ControllerManager_UnconfiguredController](),
@@ -331,6 +335,16 @@ func NewSDLControllerManager(sdlmgr *sdl_mgr.SDLMgr) *SDLControllerManager {
 		changeEventChannels:       pubsub_utils.NewPubSubSlice[ControllerManager_Control_ChangeEvent](),
 		joyDevicesUpdatedChannels: pubsub_utils.NewPubSubSlice[ControllerManager_Control_DevicesUpdated](),
 	}
+}
+
+func (mgr *SDLControllerManager) shouldApplyJoystickSDLMap(joystick *sdl_mgr.SDLMgr_Joystick, sdl_map *config.Config_Controller_SDLMap) bool {
+	if sdl_map.UniqueID != "" {
+		/* only check DeviceID() to UsbID if there is no unique ID in the SDL map */
+		return joystick.DeviceID() == sdl_map.UsbID
+	}
+
+	/* otherwise we only check the UniqueID */
+	return joystick.UniqueID() == sdl_map.UniqueID
 }
 
 func (mgr *SDLControllerManager) IsConfigured(deviceid string) bool {
@@ -422,15 +436,25 @@ func (mgr *SDLControllerManager) ConfigureJoystick(joystick *sdl_mgr.SDLMgr_Joys
 }
 
 func (mgr *SDLControllerManager) RegisterConfig(sdl_map config.Config_Controller_SDLMap, calibration config.Config_Controller_Calibration) {
+	/*
+	 * sdl_map and calibration are supposed to match the device
+	 */
+
 	mgr.config.SDLMappingsByName.Set(sdl_map.Name, sdl_map)
 	mgr.config.SDLMappingsByDeviceID.Set(sdl_map.UsbID, sdl_map)
 	mgr.config.CalibrationsByDeviceID.Set(calibration.UsbID, calibration)
+	if sdl_map.UniqueID != "" {
+		mgr.config.SDLMappingsByUniqueID.Set(sdl_map.UniqueID, sdl_map)
+	}
+	if calibration.UniqueID != "" {
+		mgr.config.CalibrationsByUniqueID.Set(sdl_map.UniqueID, calibration)
+	}
 
 	didConfigureJoystick := false
 
 	/* configure unconfigured controller */
 	mgr.UnconfiguredControllers.Mutate(func(unconfigured SDL_ControllerManager_UnconfiguredController, unique_id DeviceUniqueID) map_utils.LockMapMutateAction[DeviceUniqueID, SDL_ControllerManager_UnconfiguredController] {
-		if unconfigured.Joystick.DeviceID() == sdl_map.UsbID {
+		if mgr.shouldApplyJoystickSDLMap(unconfigured.Joystick, &sdl_map) {
 			configured_controller := mgr.ConfigureJoystick(unconfigured.Joystick, sdl_map, calibration)
 			mgr.ConfiguredControllers.Set(unique_id, configured_controller)
 			didConfigureJoystick = true
@@ -446,7 +470,7 @@ func (mgr *SDLControllerManager) RegisterConfig(sdl_map config.Config_Controller
 
 	/* replace configured controller */
 	mgr.ConfiguredControllers.Mutate(func(configured SDL_ControllerManager_ConfiguredController, unique_id DeviceUniqueID) map_utils.LockMapMutateAction[DeviceUniqueID, SDL_ControllerManager_ConfiguredController] {
-		if configured.Joystick.DeviceID() == sdl_map.UsbID {
+		if mgr.shouldApplyJoystickSDLMap(configured.Joystick, &sdl_map) {
 			configured_controller := mgr.ConfigureJoystick(configured.Joystick, sdl_map, calibration)
 			didConfigureJoystick = true
 			return map_utils.LockMapMutateAction[DeviceUniqueID, SDL_ControllerManager_ConfiguredController]{

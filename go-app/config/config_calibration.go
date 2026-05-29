@@ -30,8 +30,10 @@ type Config_Controller_CalibrationData struct {
 
 type Config_Controller_Calibration struct {
 	/* the USBID here is equivalent to the DeviceID - which for SDL devices is always the VID:PID combination */
-	UsbID string                              `json:"usb_id" validate:"required" example:"{0xVENDOR_ID}:{0xPRODUCT_ID}"`
-	Data  []Config_Controller_CalibrationData `json:"data" validate:"required"`
+	UsbID string `json:"usb_id" validate:"required" example:"{0xVENDOR_ID}:{0xPRODUCT_ID}"`
+	/* the unique ID can be provided to override the default calibration map for a device based on their reported UniqueID */
+	UniqueID string                              `json:"unique_id,omitempty"`
+	Data     []Config_Controller_CalibrationData `json:"data" validate:"required"`
 }
 
 type NormalizedValue struct {
@@ -117,4 +119,20 @@ func (calibration *Config_Controller_CalibrationData) NormalizeRawValue(raw_valu
 	abs_value := math.Abs(math_utils.Clamp((value-idle_range[1])/(calibration.Max-idle_range[1]), 0.0, 1.0))
 	normal := NormalizedValue{Value: ease_func(abs_value), IsWithinDeadzone: false}
 	return normal
+}
+
+func (c *Config_Controller_Calibration) GetUsbID() string {
+	return c.UsbID
+}
+
+func (c *Config_Controller_Calibration) GetUniqueID() string {
+	return c.UniqueID
+}
+
+func (c *Config_Controller_Calibration) Matches(config DeviceConfiguration) bool {
+	unique_id := c.GetUniqueID()
+	if unique_id != "" {
+		return unique_id == config.GetUniqueID()
+	}
+	return c.GetUsbID() == config.GetUsbID()
 }

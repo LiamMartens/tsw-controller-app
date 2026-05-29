@@ -17,8 +17,10 @@ type Config_Controller_SDLMap_Control struct {
 type Config_Controller_SDLMap struct {
 	Name string `json:"name" example:"Thrustmaster Quadrant" validate:"required"`
 	/* the USBID here is equivalent to the DeviceID - which for SDL devices is always the VID:PID combination */
-	UsbID string                             `json:"usb_id" example:"{0xVENDOR_ID}:{0xPRODUCT_ID}" validate:"required"`
-	Data  []Config_Controller_SDLMap_Control `json:"data" validate:"required"`
+	UsbID string `json:"usb_id" example:"{0xVENDOR_ID}:{0xPRODUCT_ID}" validate:"required"`
+	/* the unique ID can be provided to override the default calibration map for a device based on their reported UniqueID */
+	UniqueID string                             `json:"unique_id,omitempty"`
+	Data     []Config_Controller_SDLMap_Control `json:"data" validate:"required"`
 }
 
 func ControllerSDLMapFromJSON(json_str string) (*Config_Controller_SDLMap, error) {
@@ -33,6 +35,22 @@ func ControllerSDLMapFromJSON(json_str string) (*Config_Controller_SDLMap, error
 	}
 
 	return &c, nil
+}
+
+func (c *Config_Controller_SDLMap) GetUsbID() string {
+	return c.UsbID
+}
+
+func (c *Config_Controller_SDLMap) GetUniqueID() string {
+	return c.UniqueID
+}
+
+func (c *Config_Controller_SDLMap) Matches(config DeviceConfiguration) bool {
+	unique_id := c.GetUniqueID()
+	if unique_id != "" {
+		return unique_id == config.GetUniqueID()
+	}
+	return c.GetUsbID() == config.GetUsbID()
 }
 
 func (c *Config_Controller_SDLMap) FindByKindAndIndex(kind sdl_mgr.SDLMgr_Control_Kind, index int) (Config_Controller_SDLMap_Control, error) {

@@ -199,7 +199,7 @@ func (a *App) LoadConfiguration() {
 		for _, sdl_mapping := range sdl_mappings {
 			var calibration *config.Config_Controller_Calibration
 			for _, c := range calibrations {
-				if c.UsbID == sdl_mapping.UsbID {
+				if c.Matches(&sdl_mapping) {
 					calibration = &c
 					break
 				}
@@ -239,13 +239,15 @@ func (a *App) GetLatestReleaseVersion() string {
 
 func (a *App) SaveCalibration(data Interop_ControllerCalibration) error {
 	sdl_mapping := config.Config_Controller_SDLMap{
-		Name:  data.Name,
-		UsbID: data.DeviceID,
-		Data:  []config.Config_Controller_SDLMap_Control{},
+		Name:     data.Name,
+		UsbID:    data.DeviceID,
+		UniqueID: data.UniqueID,
+		Data:     []config.Config_Controller_SDLMap_Control{},
 	}
 	calibration := config.Config_Controller_Calibration{
-		UsbID: data.DeviceID,
-		Data:  []config.Config_Controller_CalibrationData{},
+		UsbID:    data.DeviceID,
+		UniqueID: data.UniqueID,
+		Data:     []config.Config_Controller_CalibrationData{},
 	}
 	for _, control := range data.Controls {
 		if control.Name != "" {
