@@ -199,7 +199,7 @@ func (a *App) LoadConfiguration() {
 		for _, sdl_mapping := range sdl_mappings {
 			var calibration *config.Config_Controller_Calibration
 			for _, c := range calibrations {
-				if c.Matches(&sdl_mapping) {
+				if sdl_mapping.Matches(&c) {
 					calibration = &c
 					break
 				}
