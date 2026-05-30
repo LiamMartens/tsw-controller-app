@@ -112,10 +112,11 @@ func (c *SocketConnection) Stop() error {
 
 func (c *SocketConnection) Start() error {
 	/* try to bind each port in the range; if successfull return nil */
+	var err error
 	for port := SOCKET_CONNECTION_PORT_RANGE_START; port <= SOCKET_CONNECTION_PORT_RANGE_END; port++ {
 		c.Server.Addr = fmt.Sprintf("0.0.0.0:%d", port)
 		logger.Logger.Debug("[SocketConnection::start] Starting direct control server", "addr", c.Server.Addr)
-		err := c.Server.ListenAndServe()
+		err = c.Server.ListenAndServe()
 		if err == http.ErrServerClosed {
 			/*
 				server closed is the only acceptable error because this is a graceful shutdown;
@@ -123,9 +124,9 @@ func (c *SocketConnection) Start() error {
 			*/
 			return nil
 		}
-		logger.Logger.Error("[SocketConnection::start] could not start direct control server", "addr", c.Server.Addr)
+		logger.Logger.Error("[SocketConnection::start] could not start direct control server", "addr", c.Server.Addr, "error", err)
 	}
-	return fmt.Errorf("exhausted all port options")
+	return fmt.Errorf("exhausted all port options: %w", err)
 }
 
 func (c *SocketConnection) Send(m TSWConnector_Message) error {

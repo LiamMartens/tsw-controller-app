@@ -95,6 +95,7 @@ func main() {
 								"version":             VERSION,
 								"message":             msg.Message,
 								"platform":            runtime.GOOS,
+								"session_id":          app.session_id,
 							}
 							go ax.IngestEvents(context.Background(), AXIOM_DATASET, []axiom.Event{event_to_send})
 						}

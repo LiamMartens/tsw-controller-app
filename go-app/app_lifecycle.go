@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"time"
 	"tsw_controller_app/action_sequencer"
 	"tsw_controller_app/cabdebugger"
 	"tsw_controller_app/config"
@@ -107,8 +108,18 @@ func (a *App) startupRun() {
 	}()
 
 	go func() {
-		if err := a.connector.Start(); err != nil {
-			logger.Logger.Error("could not start direct control server", "error", err)
+		for {
+			if err := a.connector.Start(); err != nil {
+				logger.Logger.Error("[app] could not start direct control server", "error", err)
+			}
+
+			/* if app context has been canceled -> return */
+			if a.ctx.Err() != nil {
+				return
+			}
+
+			/* otherwise wait and restart connector */
+			time.Sleep(3 * time.Second)
 		}
 	}()
 

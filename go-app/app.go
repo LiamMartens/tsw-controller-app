@@ -25,6 +25,7 @@ import (
 	"tsw_controller_app/tswapi"
 	"tsw_controller_app/tswconnector"
 
+	"github.com/google/uuid"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -114,6 +115,7 @@ type AppConfig struct {
 
 type App struct {
 	ctx                        context.Context
+	session_id                 string
 	config                     AppConfig
 	program_config             *config.Config_ProgramConfig
 	config_loader              *config_loader.ConfigLoader
@@ -145,6 +147,7 @@ func NewApp(
 	}
 
 	return &App{
+		session_id:     uuid.NewString(),
 		config:         appconfig,
 		program_config: program_config,
 		config_loader:  config_loader.New(),
