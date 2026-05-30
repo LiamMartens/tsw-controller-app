@@ -10,7 +10,6 @@ import (
 	"tsw_controller_app/pubsub_utils"
 	"tsw_controller_app/sdl_mgr"
 
-	"github.com/goforj/godump"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -461,8 +460,6 @@ func (mgr *SDLControllerManager) RegisterConfig(sdl_map config.Config_Controller
 	/* configure unconfigured controller */
 	mgr.UnconfiguredControllers.Mutate(func(unconfigured SDL_ControllerManager_UnconfiguredController, unique_id DeviceUniqueID) map_utils.LockMapMutateAction[DeviceUniqueID, SDL_ControllerManager_UnconfiguredController] {
 		if mgr.shouldApplyJoystickSDLMap(unconfigured.Joystick, &sdl_map) {
-			godump.Dump(sdl_map)
-
 			configured_controller := mgr.ConfigureJoystick(unconfigured.Joystick, sdl_map, calibration)
 			mgr.ConfiguredControllers.Set(unique_id, configured_controller)
 			didConfigureJoystick = true
