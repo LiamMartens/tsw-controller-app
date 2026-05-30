@@ -97,7 +97,7 @@ func (ctrl *SDL_ControllerManager_Controller_JoyControl) reset() {
 		button_value := int(ctrl.device.InternalJoystick.Button(ctrl.sdlMapping.Index))
 		ctrl.UpdateValue(float64(int(button_value)), true)
 	case sdl_mgr.SDLMgr_Control_Kind_Hat:
-		hat_value := int(ctrl.device.InternalJoystick.Hat(ctrl.sdlMapping.Index))
+		hat_value := int(ctrl.device.InternalJoystick.Hat(sdl.JoystickHat(ctrl.sdlMapping.Index)))
 		ctrl.UpdateValue(float64(int(hat_value)), true)
 	}
 }
@@ -396,7 +396,7 @@ func (mgr *SDLControllerManager) ConfigureJoystick(joystick *sdl_mgr.SDLMgr_Joys
 		case sdl_mgr.SDLMgr_Control_Kind_Button:
 			current_raw_value = float64(joystick.InternalJoystick.Button(control.Index))
 		case sdl_mgr.SDLMgr_Control_Kind_Hat:
-			current_raw_value = float64(joystick.InternalJoystick.Hat(control.Index))
+			current_raw_value = float64(joystick.InternalJoystick.Hat(sdl.JoystickHat(control.Index)))
 		}
 		current_normal_value := calibration_data.NormalizeRawValue(current_raw_value).Value
 

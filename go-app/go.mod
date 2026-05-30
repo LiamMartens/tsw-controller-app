@@ -11,7 +11,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/stretchr/testify v1.11.1
-	github.com/veandco/go-sdl2 v0.4.40
+	github.com/veandco/go-sdl2 v0.5.0-alpha.7.0.20250220045537-7f43f67a3a12
 	github.com/wailsapp/wails/v2 v2.11.0
 	golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90
 )

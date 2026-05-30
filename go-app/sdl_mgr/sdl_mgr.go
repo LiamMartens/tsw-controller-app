@@ -240,8 +240,14 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan sdl.Event, context.Ca
 }
 
 func (joystick *SDLMgr_Joystick) UniqueID() string {
-	device_guid := sdl.JoystickGetGUIDString(joystick.InternalJoystick.GUID())
-	unique_id := fmt.Sprintf("usb_id=%s,guid=%s", joystick.DeviceID(), device_guid)
+	serial := joystick.InternalJoystick.Serial()
+	unique_id := fmt.Sprintf("usb_id=%s", joystick.DeviceID())
+	if serial != "" {
+		unique_id += fmt.Sprintf("serial=%s", serial)
+	} else {
+		unique_id += fmt.Sprintf("instance_id=%d", joystick.InstanceID)
+	}
+
 	hash := sha1.Sum([]byte(unique_id))
 	return fmt.Sprintf("%x", hash)
 }
