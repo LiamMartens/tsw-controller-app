@@ -21,6 +21,7 @@ export type CalibrationStateControl = {
 export type CalibrationState = {
   name: string;
   controls: CalibrationStateControl[];
+  use_unique_id: boolean;
 };
 
 export type UseCalibrationFormType = ReturnType<typeof useCalibrationForm>;
@@ -66,10 +67,10 @@ export const useCalibrationForm = (defaultValues: CalibrationState) => {
       const controlState: CalibrationStateControl =
         existingIndex === -1
           ? {
-            ...EMPTY_CONTROL_STATE,
-            kind: data.Kind as Kind,
-            index: data.Index,
-          }
+              ...EMPTY_CONTROL_STATE,
+              kind: data.Kind as Kind,
+              index: data.Index,
+            }
           : { ...controls[existingIndex] };
 
       if (!controlState.override) {

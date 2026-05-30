@@ -62,10 +62,14 @@ type Interop_ControllerCalibration_Control struct {
 type Interop_ControllerCalibration struct {
 	Name     string
 	DeviceID string
+	UniqueID string
 	Controls []Interop_ControllerCalibration_Control
 }
 
 type Interop_ControllerConfiguration struct {
+	Name        string
+	DeviceID    string
+	UniqueID    string
 	Calibration Interop_ControllerCalibration
 	SDLMapping  config.Config_Controller_SDLMap
 }

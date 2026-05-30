@@ -168,9 +168,11 @@ export function MainTabControllerProfileSelector({
 
       {!controller.IsConfigured && (
         <div className="alert alert-warning alert-soft p-2">
-          This controller has not been configured yet. You can download a
-          profile which has the "Fully Configured" tag or manually configure the
-          controller in the "Calibration" tab.
+          <span className="text-xs">
+            This controller has not been configured yet. You can download a
+            profile which has the "Fully Configured" tag or manually configure
+            the controller in the "Calibration" tab.
+          </span>
         </div>
       )}
     </fieldset>

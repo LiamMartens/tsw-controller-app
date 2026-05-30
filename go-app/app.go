@@ -25,6 +25,7 @@ import (
 	"tsw_controller_app/tswapi"
 	"tsw_controller_app/tswconnector"
 
+	"github.com/google/uuid"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -114,6 +115,7 @@ type AppConfig struct {
 
 type App struct {
 	ctx                        context.Context
+	session_id                 string
 	config                     AppConfig
 	program_config             *config.Config_ProgramConfig
 	config_loader              *config_loader.ConfigLoader
@@ -145,6 +147,7 @@ func NewApp(
 	}
 
 	return &App{
+		session_id:     uuid.NewString(),
 		config:         appconfig,
 		program_config: program_config,
 		config_loader:  config_loader.New(),
@@ -199,7 +202,7 @@ func (a *App) LoadConfiguration() {
 		for _, sdl_mapping := range sdl_mappings {
 			var calibration *config.Config_Controller_Calibration
 			for _, c := range calibrations {
-				if c.UsbID == sdl_mapping.UsbID {
+				if sdl_mapping.Matches(&c) {
 					calibration = &c
 					break
 				}
@@ -239,13 +242,15 @@ func (a *App) GetLatestReleaseVersion() string {
 
 func (a *App) SaveCalibration(data Interop_ControllerCalibration) error {
 	sdl_mapping := config.Config_Controller_SDLMap{
-		Name:  data.Name,
-		UsbID: data.DeviceID,
-		Data:  []config.Config_Controller_SDLMap_Control{},
+		Name:     data.Name,
+		UsbID:    data.DeviceID,
+		UniqueID: data.UniqueID,
+		Data:     []config.Config_Controller_SDLMap_Control{},
 	}
 	calibration := config.Config_Controller_Calibration{
-		UsbID: data.DeviceID,
-		Data:  []config.Config_Controller_CalibrationData{},
+		UsbID:    data.DeviceID,
+		UniqueID: data.UniqueID,
+		Data:     []config.Config_Controller_CalibrationData{},
 	}
 	for _, control := range data.Controls {
 		if control.Name != "" {

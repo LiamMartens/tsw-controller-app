@@ -27,7 +27,9 @@ export const CalibrationModalForm = ({ controller, onClose }: Props) => {
     mutate: updateControllerConfiguration,
   } = useControllerConfiguration(controller);
   const form = useCalibrationForm({
-    name: controllerConfiguration?.Calibration.Name ?? "",
+    name: controllerConfiguration?.SDLMapping.name ?? "",
+    /* enable the toggle if the SDL map has unique_id defined */
+    use_unique_id: !!controllerConfiguration?.SDLMapping.unique_id,
     controls: (controllerConfiguration?.Calibration.Controls ?? [])
       .map(
         (control): CalibrationStateControl => ({
@@ -76,6 +78,10 @@ export const CalibrationModalForm = ({ controller, onClose }: Props) => {
         const data = new main.Interop_ControllerCalibration();
         data.Name = values.name;
         data.DeviceID = controller.DeviceID;
+        if (values.use_unique_id) {
+          /* send unique ID if enabled */
+          data.UniqueID = controller.UniqueID;
+        }
         data.Controls = values.controls
           .filter((c) => !!c.name)
           .map((control) => {
@@ -152,6 +158,31 @@ export const CalibrationModalForm = ({ controller, onClose }: Props) => {
               />
             </div>
           ))}
+        </div>
+        <div>
+          <fieldset className="fieldset bg-base-100 border-base-300 rounded-box w-full border p-4">
+            <legend className="fieldset-legend">Options</legend>
+            <label className="label whitespace-normal">
+              <input
+                type="checkbox"
+                className="checkbox"
+                disabled={!isRunning}
+                {...form.register("use_unique_id")}
+              />
+              Use unique ID for calibration (not recommended - only for complex
+              use cases).
+            </label>
+            {form.watch("use_unique_id") && (
+              <div role="alert" className="alert alert-warning alert-soft mt-3">
+                <span className="text-xs">
+                  When unique ID calibration is enabled you have to ensure all
+                  identical connected devices are also configured using unique
+                  ID. Otherwise, your device may not be using the expected
+                  configuration.
+                </span>
+              </div>
+            )}
+          </fieldset>
         </div>
       </div>
       <div className="modal-action sticky bottom-0 bg-base-100">

@@ -33,6 +33,7 @@ export namespace config {
 	export class Config_Controller_SDLMap {
 	    name: string;
 	    usb_id: string;
+	    unique_id?: string;
 	    data: Config_Controller_SDLMap_Control[];
 	
 	    static createFrom(source: any = {}) {
@@ -43,6 +44,7 @@ export namespace config {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.name = source["name"];
 	        this.usb_id = source["usb_id"];
+	        this.unique_id = source["unique_id"];
 	        this.data = this.convertValues(source["data"], Config_Controller_SDLMap_Control);
 	    }
 	
@@ -189,6 +191,7 @@ export namespace main {
 	export class Interop_ControllerCalibration {
 	    Name: string;
 	    DeviceID: string;
+	    UniqueID: string;
 	    Controls: Interop_ControllerCalibration_Control[];
 	
 	    static createFrom(source: any = {}) {
@@ -199,6 +202,7 @@ export namespace main {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.Name = source["Name"];
 	        this.DeviceID = source["DeviceID"];
+	        this.UniqueID = source["UniqueID"];
 	        this.Controls = this.convertValues(source["Controls"], Interop_ControllerCalibration_Control);
 	    }
 	
@@ -222,6 +226,9 @@ export namespace main {
 	}
 	
 	export class Interop_ControllerConfiguration {
+	    Name: string;
+	    DeviceID: string;
+	    UniqueID: string;
 	    Calibration: Interop_ControllerCalibration;
 	    SDLMapping: config.Config_Controller_SDLMap;
 	
@@ -231,6 +238,9 @@ export namespace main {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Name = source["Name"];
+	        this.DeviceID = source["DeviceID"];
+	        this.UniqueID = source["UniqueID"];
 	        this.Calibration = this.convertValues(source["Calibration"], Interop_ControllerCalibration);
 	        this.SDLMapping = this.convertValues(source["SDLMapping"], config.Config_Controller_SDLMap);
 	    }
