@@ -490,7 +490,6 @@ func (mgr *SDLControllerManager) RegisterConfig(sdl_map config.Config_Controller
 }
 
 func (mgr *SDLControllerManager) Handler_JoyDeviceAdded(event *sdl.JoyDeviceAddedEvent) error {
-	/* for joy device added -> Which is the index; this differs from other SDL events */
 	joystick, err := mgr.SDL.GetJoystickByInstanceID(event.Which)
 	if err != nil {
 		return err
