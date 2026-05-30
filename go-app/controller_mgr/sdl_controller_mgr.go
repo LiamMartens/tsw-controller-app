@@ -10,6 +10,7 @@ import (
 	"tsw_controller_app/pubsub_utils"
 	"tsw_controller_app/sdl_mgr"
 
+	"github.com/goforj/godump"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -51,7 +52,6 @@ type SDL_ControllerManager_UnconfiguredController struct {
 }
 
 type SDL_ControllerManager_Config struct {
-	SDLMappingsByName      *map_utils.LockMap[string, config.Config_Controller_SDLMap]
 	SDLMappingsByDeviceID  *map_utils.LockMap[string, config.Config_Controller_SDLMap]
 	CalibrationsByDeviceID *map_utils.LockMap[string, config.Config_Controller_Calibration]
 	SDLMappingsByUniqueID  *map_utils.LockMap[string, config.Config_Controller_SDLMap]
@@ -322,7 +322,6 @@ func NewSDLControllerManager(sdlmgr *sdl_mgr.SDLMgr) *SDLControllerManager {
 	return &SDLControllerManager{
 		SDL: sdlmgr,
 		config: SDL_ControllerManager_Config{
-			SDLMappingsByName:      map_utils.NewLockMap[string, config.Config_Controller_SDLMap](),
 			SDLMappingsByDeviceID:  map_utils.NewLockMap[string, config.Config_Controller_SDLMap](),
 			CalibrationsByDeviceID: map_utils.NewLockMap[string, config.Config_Controller_Calibration](),
 			SDLMappingsByUniqueID:  map_utils.NewLockMap[string, config.Config_Controller_SDLMap](),
@@ -440,13 +439,15 @@ func (mgr *SDLControllerManager) RegisterConfig(sdl_map config.Config_Controller
 	 * sdl_map and calibration are supposed to match the device
 	 */
 
-	mgr.config.SDLMappingsByName.Set(sdl_map.Name, sdl_map)
-	mgr.config.SDLMappingsByDeviceID.Set(sdl_map.UsbID, sdl_map)
-	mgr.config.CalibrationsByDeviceID.Set(calibration.UsbID, calibration)
-	if sdl_map.UniqueID != "" {
+	if sdl_map.UniqueID == "" {
+		mgr.config.SDLMappingsByDeviceID.Set(sdl_map.UsbID, sdl_map)
+	} else {
 		mgr.config.SDLMappingsByUniqueID.Set(sdl_map.UniqueID, sdl_map)
 	}
-	if calibration.UniqueID != "" {
+
+	if calibration.UniqueID == "" {
+		mgr.config.CalibrationsByDeviceID.Set(calibration.UsbID, calibration)
+	} else {
 		mgr.config.CalibrationsByUniqueID.Set(calibration.UniqueID, calibration)
 	}
 
@@ -455,6 +456,8 @@ func (mgr *SDLControllerManager) RegisterConfig(sdl_map config.Config_Controller
 	/* configure unconfigured controller */
 	mgr.UnconfiguredControllers.Mutate(func(unconfigured SDL_ControllerManager_UnconfiguredController, unique_id DeviceUniqueID) map_utils.LockMapMutateAction[DeviceUniqueID, SDL_ControllerManager_UnconfiguredController] {
 		if mgr.shouldApplyJoystickSDLMap(unconfigured.Joystick, &sdl_map) {
+			godump.Dump(sdl_map)
+
 			configured_controller := mgr.ConfigureJoystick(unconfigured.Joystick, sdl_map, calibration)
 			mgr.ConfiguredControllers.Set(unique_id, configured_controller)
 			didConfigureJoystick = true

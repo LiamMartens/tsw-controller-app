@@ -9,7 +9,6 @@ import (
 	"tsw_controller_app/chan_utils"
 	"tsw_controller_app/logger"
 
-	"github.com/goforj/godump"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -246,15 +245,15 @@ func (joystick *SDLMgr_Joystick) UniqueID() string {
 	device_serial := joystick.InternalJoystick.Serial()
 	device_path := joystick.InternalJoystick.Path()
 	if device_serial != "" {
-		unique_id += fmt.Sprintf(",serial=%s", device_serial)
+		unique_id = fmt.Sprintf("%s,serial=%s", unique_id, device_serial)
 	} else if device_path != "" {
-		unique_id += fmt.Sprintf(",path=%s", device_path)
+		unique_id = fmt.Sprintf("%s,path=%s", unique_id, device_path)
 	} else {
-		unique_id += fmt.Sprintf(",instance_id=%d", joystick.InstanceID)
+		unique_id = fmt.Sprintf("%s,instance_id=%d", unique_id, joystick.InstanceID)
 	}
-	godump.Dump(unique_id)
 
 	hash := sha1.Sum([]byte(unique_id))
+
 	return fmt.Sprintf("%x", hash)
 }
 
