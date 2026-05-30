@@ -3,7 +3,7 @@
 
 ## v1.15.1
 - Upgrade go-sdl
-- Swap GUID to Serial if available
+- Harden device unique ID to not rely on GUID
 
 ## v1.15.0
 - Add option to calibrate using the unique device ID instead of the standard device ID (useful for arduino's and other similar devices)
