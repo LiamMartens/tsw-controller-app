@@ -74,7 +74,11 @@ func (c *SocketConnection) WebsocketHandler(w http.ResponseWriter, r *http.Reque
 	for {
 		msg_type, msg, err := conn.ReadMessage()
 		if err != nil {
-			logger.Logger.Error("[ProfileRunner::WebsocketHandler] message read error", "error", err)
+			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseAbnormalClosure) {
+				logger.Logger.Debug("[ProfileRunner::WebsocketHandler] client disconnected", "error", err)
+			} else {
+				logger.Logger.Error("[ProfileRunner::WebsocketHandler] message read error", "error", err)
+			}
 			return
 		}
 
