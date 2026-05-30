@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@json-editor/json-editor": "^2.16.0",
-    "next": "16.2.4",
+    "next": "^16.2.6",
     "react": "19.2.5",
     "react-dom": "19.2.5",
     "react-error-boundary": "^6.1.1",
@@ -29,7 +29,7 @@
     "daisyui": "^5.5.19",
     "oxfmt": "^0.45.0",
     "oxlint": "^1.60.0",
-    "postcss": "^8.5.10",
+    "postcss": "^8.5.15",
     "tailwindcss": "^4.2.2",
     "typescript": "^5"
   }
