@@ -243,9 +243,12 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan sdl.Event, context.Ca
 func (joystick *SDLMgr_Joystick) UniqueID() string {
 	unique_id := fmt.Sprintf("usb_id=%s", joystick.DeviceID())
 
-	serial := joystick.InternalJoystick.Serial()
-	if serial != "" {
-		unique_id += fmt.Sprintf(",serial=%s", serial)
+	device_serial := joystick.InternalJoystick.Serial()
+	device_path := joystick.InternalJoystick.Path()
+	if device_serial != "" {
+		unique_id += fmt.Sprintf(",serial=%s", device_serial)
+	} else if device_path != "" {
+		unique_id += fmt.Sprintf(",path=%s", device_path)
 	} else {
 		unique_id += fmt.Sprintf(",instance_id=%d", joystick.InstanceID)
 	}
