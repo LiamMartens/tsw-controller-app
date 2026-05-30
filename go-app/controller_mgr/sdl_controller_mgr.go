@@ -513,6 +513,7 @@ func (mgr *SDLControllerManager) Handler_JoyDeviceAdded(event *sdl.JoyDeviceAdde
 			SDLMapping:  nil,
 			Calibration: nil,
 		}
+
 		if has_unique_sdl_map {
 			unconfigured_controller.SDLMapping = &unique_sdl_map
 		} else if has_device_sdl_map {
