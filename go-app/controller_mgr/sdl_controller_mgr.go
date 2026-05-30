@@ -42,6 +42,9 @@ type SDL_ControllerManager_ConfiguredController struct {
 	Joystick        *sdl_mgr.SDLMgr_Joystick
 	controls        *map_utils.LockMap[string, IControllerManager_Controller_Control]
 	virtualControls *map_utils.LockMap[string, IControllerManager_Controller_Control]
+	/* this just stores the raw SDL mapping and calibration used */
+	SDLMapping  *config.Config_Controller_SDLMap
+	Calibration *config.Config_Controller_Calibration
 }
 
 type SDL_ControllerManager_UnconfiguredController struct {
@@ -369,6 +372,8 @@ func (mgr *SDLControllerManager) ConfigureJoystick(joystick *sdl_mgr.SDLMgr_Joys
 		Joystick:        joystick,
 		controls:        map_utils.NewLockMap[string, IControllerManager_Controller_Control](),
 		virtualControls: map_utils.NewLockMap[string, IControllerManager_Controller_Control](),
+		SDLMapping:      &sdl_map,
+		Calibration:     &calibration,
 	}
 	for _, control := range sdl_map.Data {
 		var calibration_data config.Config_Controller_CalibrationData = config.Config_Controller_CalibrationData{

@@ -244,6 +244,7 @@ func (joystick *SDLMgr_Joystick) UniqueID() string {
 
 	device_serial := joystick.InternalJoystick.Serial()
 	device_path := joystick.InternalJoystick.Path()
+	joystick.InternalJoystick.GUID()
 	if device_serial != "" {
 		unique_id = fmt.Sprintf("%s,serial=%s", unique_id, device_serial)
 	} else if device_path != "" {

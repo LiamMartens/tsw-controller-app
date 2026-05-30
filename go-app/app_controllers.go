@@ -59,11 +59,10 @@ func (a *App) GetControllers() []Interop_GenericController {
 func (a *App) GetControllerConfiguration(unique_id controller_mgr.DeviceUniqueID) *Interop_ControllerConfiguration {
 	if controller, has_controller := a.sdl_controller_manager.ConfiguredControllers.Get(unique_id); has_controller {
 		// /* when configured the SDL map and calibration always exist */
-		sdl_mapping, _ := controller.Manager.Config().SDLMappingsByDeviceID.Get(controller.Joystick.DeviceID())
 		interop_calibration := Interop_ControllerCalibration{
-			Name:     sdl_mapping.Name,
-			DeviceID: sdl_mapping.UsbID,
-			UniqueID: sdl_mapping.UniqueID,
+			Name:     controller.SDLMapping.Name,
+			DeviceID: controller.SDLMapping.UsbID,
+			UniqueID: controller.SDLMapping.UniqueID,
 			Controls: []Interop_ControllerCalibration_Control{},
 		}
 		controller.Controls().ForEach(func(c controller_mgr.IControllerManager_Controller_Control, key string) bool {
@@ -107,7 +106,7 @@ func (a *App) GetControllerConfiguration(unique_id controller_mgr.DeviceUniqueID
 			Name:        controller.Name,
 			DeviceID:    controller.Device().DeviceID(),
 			UniqueID:    controller.Device().UniqueID(),
-			SDLMapping:  sdl_mapping,
+			SDLMapping:  *controller.SDLMapping,
 			Calibration: interop_calibration,
 		}
 	}
