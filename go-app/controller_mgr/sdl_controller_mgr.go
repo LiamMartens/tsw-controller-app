@@ -338,7 +338,7 @@ func NewSDLControllerManager(sdlmgr *sdl_mgr.SDLMgr) *SDLControllerManager {
 }
 
 func (mgr *SDLControllerManager) shouldApplyJoystickSDLMap(joystick *sdl_mgr.SDLMgr_Joystick, sdl_map *config.Config_Controller_SDLMap) bool {
-	if sdl_map.UniqueID != "" {
+	if sdl_map.UniqueID == "" {
 		/* only check DeviceID() to UsbID if there is no unique ID in the SDL map */
 		return joystick.DeviceID() == sdl_map.UsbID
 	}
@@ -447,7 +447,7 @@ func (mgr *SDLControllerManager) RegisterConfig(sdl_map config.Config_Controller
 		mgr.config.SDLMappingsByUniqueID.Set(sdl_map.UniqueID, sdl_map)
 	}
 	if calibration.UniqueID != "" {
-		mgr.config.CalibrationsByUniqueID.Set(sdl_map.UniqueID, calibration)
+		mgr.config.CalibrationsByUniqueID.Set(calibration.UniqueID, calibration)
 	}
 
 	didConfigureJoystick := false
@@ -495,10 +495,16 @@ func (mgr *SDLControllerManager) Handler_JoyDeviceAdded(event *sdl.JoyDeviceAdde
 		return err
 	}
 
-	sdl_map, has_sdl_map := mgr.config.SDLMappingsByDeviceID.Get(joystick.DeviceID())
-	calibration, has_calibration := mgr.config.CalibrationsByDeviceID.Get(joystick.DeviceID())
-	if has_sdl_map && has_calibration {
-		configured_controller := mgr.ConfigureJoystick(joystick, sdl_map, calibration)
+	unique_sdl_map, has_unique_sdl_map := mgr.config.SDLMappingsByUniqueID.Get(joystick.UniqueID())
+	unique_calibration, has_unique_calibration := mgr.config.CalibrationsByUniqueID.Get(joystick.UniqueID())
+	device_sdl_map, has_device_sdl_map := mgr.config.SDLMappingsByDeviceID.Get(joystick.DeviceID())
+	device_calibration, has_device_calibration := mgr.config.CalibrationsByDeviceID.Get(joystick.DeviceID())
+	if has_unique_sdl_map && has_unique_calibration {
+		configured_controller := mgr.ConfigureJoystick(joystick, unique_sdl_map, unique_calibration)
+		mgr.ConfiguredControllers.Set(joystick.UniqueID(), configured_controller)
+		mgr.joyDevicesUpdatedChannels.EmitTimeout(time.Second, ControllerManager_Control_DevicesUpdated{})
+	} else if has_device_sdl_map && has_device_calibration {
+		configured_controller := mgr.ConfigureJoystick(joystick, device_sdl_map, device_calibration)
 		mgr.ConfiguredControllers.Set(joystick.UniqueID(), configured_controller)
 		mgr.joyDevicesUpdatedChannels.EmitTimeout(time.Second, ControllerManager_Control_DevicesUpdated{})
 	} else {
@@ -507,12 +513,18 @@ func (mgr *SDLControllerManager) Handler_JoyDeviceAdded(event *sdl.JoyDeviceAdde
 			SDLMapping:  nil,
 			Calibration: nil,
 		}
-		if has_sdl_map {
-			unconfigured_controller.SDLMapping = &sdl_map
+		if has_unique_sdl_map {
+			unconfigured_controller.SDLMapping = &unique_sdl_map
+		} else if has_device_sdl_map {
+			unconfigured_controller.SDLMapping = &device_sdl_map
 		}
-		if has_calibration {
-			unconfigured_controller.Calibration = &calibration
+
+		if has_unique_calibration {
+			unconfigured_controller.Calibration = &unique_calibration
+		} else if has_device_calibration {
+			unconfigured_controller.Calibration = &device_calibration
 		}
+
 		mgr.UnconfiguredControllers.Set(joystick.UniqueID(), unconfigured_controller)
 		mgr.joyDevicesUpdatedChannels.EmitTimeout(time.Second, ControllerManager_Control_DevicesUpdated{})
 	}
