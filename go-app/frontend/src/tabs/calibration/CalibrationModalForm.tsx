@@ -170,7 +170,7 @@ export const CalibrationModalForm = ({ controller, onClose }: Props) => {
                 {...form.register("use_unique_id")}
               />
               Use unique ID for calibration (not recommended - only for complex
-              use cases).
+              use cases - identifier may not be stable).
             </label>
             {form.watch("use_unique_id") && (
               <div role="alert" className="alert alert-warning alert-soft mt-3">
