@@ -93,13 +93,24 @@ func (mgr *SDLMgr) registerJoyDeviceFromSDLJoystick(sdl_joystick *sdl.Joystick) 
 }
 
 func (mgr *SDLMgr) joyDeviceAdded(event *sdl.JoyDeviceAddedEvent) (*SDLMgr_Joystick, error) {
+	mgr.joydevices_mutex.Lock()
+
 	/* for joy device added -> Which is the index; this differs from other SDL events */
 	joy_index := int(event.Which)
+	instance_id := sdl.JoystickGetDeviceInstanceID(joy_index)
+
+	if joydevice, already_registered := mgr.joydevices[instance_id]; already_registered {
+		defer mgr.joydevices_mutex.Unlock()
+		return joydevice, nil
+	}
+
 	joystick := sdl.JoystickOpen(joy_index)
 	if joystick == nil {
+		defer mgr.joydevices_mutex.Unlock()
 		return nil, fmt.Errorf("could not open joystick for use: %w", sdl.GetError())
 	}
 
+	mgr.joydevices_mutex.Unlock()
 	return mgr.registerJoyDeviceFromSDLJoystick(joystick)
 }
 
@@ -187,17 +198,6 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan sdl.Event, context.Ca
 					mgr.joyDeviceRemoved(removed_event)
 					chan_utils.SendTimeout[sdl.Event](event_channel, time.Second, removed_event)
 				case *sdl.JoyButtonEvent:
-					joystick := sdl.JoystickFromInstanceID(e.Which)
-					if joystick == nil {
-						logger.Logger.Error("[SDLMgr] could not get joystick from instance ID", "instance", e.Which)
-						continue
-					}
-
-					if _, err := mgr.registerJoyDeviceFromSDLJoystick(joystick); err != nil {
-						logger.Logger.Error("[SDLMgr] could not register joystick")
-						continue
-					}
-
 					chan_utils.SendTimeout[sdl.Event](event_channel, time.Second, &sdl.JoyButtonEvent{
 						Type:      e.Type,
 						Timestamp: e.Timestamp,
@@ -206,17 +206,6 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan sdl.Event, context.Ca
 						State:     e.State,
 					})
 				case *sdl.JoyHatEvent:
-					joystick := sdl.JoystickFromInstanceID(e.Which)
-					if joystick == nil {
-						logger.Logger.Error("[SDLMgr] could not get joystick from instance ID", "instance", e.Which)
-						continue
-					}
-
-					if _, err := mgr.registerJoyDeviceFromSDLJoystick(joystick); err != nil {
-						logger.Logger.Error("[SDLMgr] could not register joystick")
-						continue
-					}
-
 					chan_utils.SendTimeout[sdl.Event](event_channel, time.Second, &sdl.JoyHatEvent{
 						Type:      e.Type,
 						Timestamp: e.Timestamp,
