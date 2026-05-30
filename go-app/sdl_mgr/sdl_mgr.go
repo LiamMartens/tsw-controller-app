@@ -9,6 +9,7 @@ import (
 	"tsw_controller_app/chan_utils"
 	"tsw_controller_app/logger"
 
+	"github.com/goforj/godump"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -176,7 +177,7 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan sdl.Event, context.Ca
 
 			if event := sdl.WaitEventTimeout(SDL_RATE); event != nil {
 				switch e := event.(type) {
-				case *sdl.JoyDeviceAddedEvent:
+				case sdl.JoyDeviceAddedEvent:
 					if joystick, err := mgr.joyDeviceAdded(&sdl.JoyDeviceAddedEvent{
 						Type:      e.Type,
 						Timestamp: e.Timestamp,
@@ -189,7 +190,7 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan sdl.Event, context.Ca
 							Which: joystick.InstanceID,
 						})
 					}
-				case *sdl.JoyDeviceRemovedEvent:
+				case sdl.JoyDeviceRemovedEvent:
 					removed_event := &sdl.JoyDeviceRemovedEvent{
 						Type:      e.Type,
 						Timestamp: e.Timestamp,
@@ -197,7 +198,7 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan sdl.Event, context.Ca
 					}
 					mgr.joyDeviceRemoved(removed_event)
 					chan_utils.SendTimeout[sdl.Event](event_channel, time.Second, removed_event)
-				case *sdl.JoyButtonEvent:
+				case sdl.JoyButtonEvent:
 					chan_utils.SendTimeout[sdl.Event](event_channel, time.Second, &sdl.JoyButtonEvent{
 						Type:      e.Type,
 						Timestamp: e.Timestamp,
@@ -205,7 +206,7 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan sdl.Event, context.Ca
 						Button:    e.Button,
 						State:     e.State,
 					})
-				case *sdl.JoyHatEvent:
+				case sdl.JoyHatEvent:
 					chan_utils.SendTimeout[sdl.Event](event_channel, time.Second, &sdl.JoyHatEvent{
 						Type:      e.Type,
 						Timestamp: e.Timestamp,
@@ -213,7 +214,7 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan sdl.Event, context.Ca
 						Hat:       e.Hat,
 						Value:     e.Value,
 					})
-				case *sdl.JoyAxisEvent:
+				case sdl.JoyAxisEvent:
 					joystick := sdl.JoystickFromInstanceID(e.Which)
 					if joystick == nil {
 						logger.Logger.Error("[SDLMgr] could not get joystick from instance ID", "instance", e.Which)
@@ -240,13 +241,15 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan sdl.Event, context.Ca
 }
 
 func (joystick *SDLMgr_Joystick) UniqueID() string {
-	serial := joystick.InternalJoystick.Serial()
 	unique_id := fmt.Sprintf("usb_id=%s", joystick.DeviceID())
+
+	serial := joystick.InternalJoystick.Serial()
 	if serial != "" {
-		unique_id += fmt.Sprintf("serial=%s", serial)
+		unique_id += fmt.Sprintf(",serial=%s", serial)
 	} else {
-		unique_id += fmt.Sprintf("instance_id=%d", joystick.InstanceID)
+		unique_id += fmt.Sprintf(",instance_id=%d", joystick.InstanceID)
 	}
+	godump.Dump(unique_id)
 
 	hash := sha1.Sum([]byte(unique_id))
 	return fmt.Sprintf("%x", hash)
