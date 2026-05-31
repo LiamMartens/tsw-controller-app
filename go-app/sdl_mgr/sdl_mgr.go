@@ -17,7 +17,6 @@ type SDLMgr_Control_Kind = string
 type SDLMgr_Guid_Str = string
 
 const SDL_BUFFER_SIZE = 32
-const SDL_RATE = 16
 
 const (
 	SDLMgr_Control_Kind_Button SDLMgr_Control_Kind = "button"
