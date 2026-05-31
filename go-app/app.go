@@ -115,7 +115,6 @@ type AppConfig struct {
 
 type App struct {
 	ctx                        context.Context
-	sdllib                     sdl_mgr.SDL_Library
 	session_id                 string
 	config                     AppConfig
 	program_config             *config.Config_ProgramConfig

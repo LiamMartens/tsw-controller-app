@@ -15,7 +15,6 @@ import (
 	"tsw_controller_app/tswapi"
 	"tsw_controller_app/tswconnector"
 
-	"github.com/Zyko0/go-sdl3/bin/binsdl"
 	"github.com/fsnotify/fsnotify"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -224,14 +223,10 @@ func (a *App) startupRun() {
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	a.sdllib = binsdl.Load()
-	a.sdl_manager.PanicInit()
 	a.startupInitialize()
 	a.startupLoad()
 	a.startupRun()
 }
 
 func (a *App) shutdown(ctx context.Context) {
-	a.sdl_manager.Quit()
-	defer a.sdllib.Unload()
 }

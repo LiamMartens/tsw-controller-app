@@ -4,11 +4,13 @@ import (
 	"context"
 	"crypto/sha1"
 	"fmt"
+	"runtime"
 	"sync"
 	"time"
 	"tsw_controller_app/chan_utils"
 	"tsw_controller_app/logger"
 
+	"github.com/Zyko0/go-sdl3/bin/binsdl"
 	"github.com/Zyko0/go-sdl3/sdl"
 )
 
@@ -132,6 +134,12 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan SDL_Event, context.Ca
 	event_channel := make(chan SDL_Event, SDL_BUFFER_SIZE)
 
 	go func() {
+		runtime.LockOSThread()
+		defer runtime.UnlockOSThread()
+
+		defer binsdl.Load().Unload()
+		mgr.PanicInit()
+
 		for {
 			/* stop if context has been cancelled */
 			if ctx_with_cancel.Err() != nil {
