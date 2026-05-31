@@ -177,18 +177,31 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan sdl.Event, context.Ca
 			if event := sdl.WaitEventTimeout(SDL_RATE); event != nil {
 				switch e := event.(type) {
 				case sdl.JoyDeviceAddedEvent:
-					if joystick, err := mgr.joyDeviceAdded(&sdl.JoyDeviceAddedEvent{
+					joystick, err := mgr.joyDeviceAdded(&sdl.JoyDeviceAddedEvent{
 						Type:      e.Type,
 						Timestamp: e.Timestamp,
 						Which:     e.Which,
-					}); err == nil {
-						chan_utils.SendTimeout[sdl.Event](event_channel, time.Second, &sdl.JoyDeviceAddedEvent{
-							Type:      e.Type,
-							Timestamp: e.Timestamp,
-							/* switching to instance ID once we're out of the SDL internals */
-							Which: joystick.InstanceID,
-						})
+					})
+					if err != nil {
+						logger.Logger.Error("[SDLMgr] could not open joydevice", "error", err)
+						continue
 					}
+
+					logger.Logger.Info(
+						"[SDLMgr] registered joy device",
+						"name", joystick.Name(),
+						"device_id", joystick.DeviceID(),
+						"product_version", joystick.InternalJoystick.ProductVersion(),
+						"firmware_version", joystick.InternalJoystick.FirmwareVersion(),
+						"serial", joystick.InternalJoystick.Serial(),
+						"path", joystick.InternalJoystick.Path(),
+					)
+					chan_utils.SendTimeout[sdl.Event](event_channel, time.Second, &sdl.JoyDeviceAddedEvent{
+						Type:      e.Type,
+						Timestamp: e.Timestamp,
+						/* switching to instance ID once we're out of the SDL internals */
+						Which: joystick.InstanceID,
+					})
 				case sdl.JoyDeviceRemovedEvent:
 					removed_event := &sdl.JoyDeviceRemovedEvent{
 						Type:      e.Type,
