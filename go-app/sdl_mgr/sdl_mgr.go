@@ -195,6 +195,7 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan sdl.Event, context.Ca
 						"firmware_version", joystick.InternalJoystick.FirmwareVersion(),
 						"serial", joystick.InternalJoystick.Serial(),
 						"path", joystick.InternalJoystick.Path(),
+						"guid", sdl.JoystickGetGUIDString(joystick.InternalJoystick.GUID()),
 					)
 					chan_utils.SendTimeout[sdl.Event](event_channel, time.Second, &sdl.JoyDeviceAddedEvent{
 						Type:      e.Type,
