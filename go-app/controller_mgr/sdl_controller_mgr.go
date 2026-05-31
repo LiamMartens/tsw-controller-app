@@ -703,7 +703,7 @@ func (mgr *SDLControllerManager) Attach(ctx context.Context) context.CancelFunc 
 		for {
 			select {
 			case event := <-events_channel:
-				logger.Logger.Debug("[ControllerManager.Attach] Received SDL2 event", "event", event)
+				logger.Logger.Debug("[ControllerManager.Attach] Received SDL event", "event", event)
 				switch e := event.(type) {
 				case *sdl_mgr.SDL_JoyDeviceAddedEvent:
 					mgr.Handler_JoyDeviceAdded(e)

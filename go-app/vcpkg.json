@@ -2,7 +2,5 @@
   "name": "tsw-controller-app",
   "version-string": "1.0.0",
   "builtin-baseline": "2e6fcc44573d091af0321f99c89b212997a76f1f",
-  "dependencies": [
-    "sdl2"
-  ]
+  "dependencies": []
 }

@@ -48,7 +48,8 @@ You can also manually install if you alread have your own UE4SS installed and wa
 You can also manually install the Train Simulator Classic mod. To do so you will need to download the respective binary for you platform as well as the TSC mod and manually place the mod files in the game directory.
 
 **Note linux users**  
-SDL2 and Webkit2 4.1 are required for this app to work and will need to be installed.  
+SDL and Webkit2 4.1 are required for this app to work and will need to be installed.  
+> From version 1.16.x and up SDL3 is bundled with the binary and does not need to be manually installed anymore
 
 **For Arch users**
 On Arch based systems it is recommended to use SDL3 in favor of SDL2 (see [this article](https://wiki.archlinux.org/title/SDL)). You will have to get both the SDL3 and SDL2-compat packages.
@@ -77,4 +78,4 @@ If you feel like contributing I will happily accept contributions! Some useful c
 [Profile Examples](./shared-profiles)  
 [Forum Discussion](https://forums.dovetailgames.com/threads/i-created-a-mod-software-to-directly-control-in-game-trains-using-a-joystick-no-raildriver.90609/#post-999423)  
 [Reddit Discussion](https://www.reddit.com/r/trainsimworld/comments/1jqt103/i_created_a_modsoftware_to_directly_control_in/)  
-[TrainSimCommunity Post](https://www.trainsimcommunity.com/mods/c3-train-sim-world/c75-utilities/i6396-custom-controller-mapper-control-train-sim-world-with-any-joystick-or-analog-controller-no-rail-driver-required)  
+[TrainSimCommunity Post](https://www.trainsimcommunity.com/mods/c3-train-sim-world/c75-utilities/i6396-custom-controller-mapper-control-train-sim-world-with-any-joystick-or-analog-controller-no-rail-driver-required)
