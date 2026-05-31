@@ -138,6 +138,13 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan SDL_Event, context.Ca
 		defer runtime.UnlockOSThread()
 
 		defer binsdl.Load().Unload()
+
+		sdl.SetHint(sdl.HINT_JOYSTICK_HIDAPI, "1")
+		sdl.SetHint(sdl.HINT_JOYSTICK_RAWINPUT, "1")
+		sdl.SetHint(sdl.HINT_XINPUT_ENABLED, "0")
+		sdl.SetHint(sdl.HINT_JOYSTICK_WGI, "0")
+		sdl.SetHint(sdl.HINT_HIDAPI_ENUMERATE_ONLY_CONTROLLERS, "0")
+
 		mgr.PanicInit()
 
 		for {
