@@ -101,8 +101,8 @@ func (mgr *SDLMgr) PanicInit() bool {
 		sdl.SetJoystickEventsEnabled(true)
 		sdl.SetHint(sdl.HINT_JOYSTICK_HIDAPI, "1")
 		sdl.SetHint(sdl.HINT_JOYSTICK_RAWINPUT, "1")
+		sdl.SetHint(sdl.HINT_JOYSTICK_WGI, "1")
 		sdl.SetHint(sdl.HINT_XINPUT_ENABLED, "0")
-		sdl.SetHint(sdl.HINT_JOYSTICK_WGI, "0")
 		sdl.SetHint(sdl.HINT_HIDAPI_ENUMERATE_ONLY_CONTROLLERS, "0")
 		if err := sdl.Init(sdl.INIT_GAMEPAD | sdl.INIT_JOYSTICK | sdl.INIT_EVENTS); err != nil {
 			panic(err)
