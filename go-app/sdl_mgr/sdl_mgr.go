@@ -139,8 +139,8 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan SDL_Event, context.Ca
 				return
 			}
 
-			var event *sdl.Event
-			if has_event := sdl.WaitEventTimeout(event, SDL_RATE); has_event && event != nil {
+			var event sdl.Event
+			if sdl.PollEvent(&event) {
 				switch event.Type {
 				case sdl.EVENT_JOYSTICK_ADDED:
 					e := event.JoyDeviceEvent()

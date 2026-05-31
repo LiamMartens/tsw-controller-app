@@ -115,6 +115,7 @@ type AppConfig struct {
 
 type App struct {
 	ctx                        context.Context
+	sdllib                     sdl_mgr.SDL_Library
 	session_id                 string
 	config                     AppConfig
 	program_config             *config.Config_ProgramConfig
@@ -139,7 +140,6 @@ func NewApp(
 	appconfig AppConfig,
 ) *App {
 	sdl_manager := sdl_mgr.New()
-	sdl_manager.PanicInit()
 
 	program_config := config.LoadProgramConfigFromFile(filepath.Join(appconfig.GlobalConfigDir, "program.json"))
 	if program_config.TSWAPIKeyLocation == "" {
