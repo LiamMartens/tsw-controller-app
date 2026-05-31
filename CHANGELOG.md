@@ -1,9 +1,8 @@
 
 # CHANGELOG
 
-## v1.15.1
-- Upgrade go-sdl
-- Harden device unique ID to not rely on GUID
+## v1.16.0
+- Upgrade to embedded SDL3
 
 ## v1.15.0
 - Add option to calibrate using the unique device ID instead of the standard device ID (useful for arduino's and other similar devices)

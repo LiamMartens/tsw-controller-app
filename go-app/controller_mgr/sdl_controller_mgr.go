@@ -9,8 +9,6 @@ import (
 	"tsw_controller_app/math_utils"
 	"tsw_controller_app/pubsub_utils"
 	"tsw_controller_app/sdl_mgr"
-
-	"github.com/veandco/go-sdl2/sdl"
 )
 
 const DEFAULT_CHANNEL_BUFFER_SIZE = 50
@@ -93,14 +91,14 @@ func (state *ControllerManager_Controller_ControlState) updateDirection() {
 func (ctrl *SDL_ControllerManager_Controller_JoyControl) reset() {
 	switch ctrl.sdlMapping.Kind {
 	case sdl_mgr.SDLMgr_Control_Kind_Axis:
-		axis_value := ctrl.device.InternalJoystick.Axis(ctrl.sdlMapping.Index)
+		axis_value, _ := ctrl.device.InternalJoystick.Axis(int32(ctrl.sdlMapping.Index))
 		ctrl.UpdateValue(float64(axis_value), true)
 	case sdl_mgr.SDLMgr_Control_Kind_Button:
-		button_value := int(ctrl.device.InternalJoystick.Button(ctrl.sdlMapping.Index))
-		ctrl.UpdateValue(float64(int(button_value)), true)
+		button_value := ctrl.device.InternalJoystick.Button(int32(ctrl.sdlMapping.Index))
+		ctrl.UpdateValue(math_utils.BoolAsFloat(button_value), true)
 	case sdl_mgr.SDLMgr_Control_Kind_Hat:
-		hat_value := int(ctrl.device.InternalJoystick.Hat(sdl.JoystickHat(ctrl.sdlMapping.Index)))
-		ctrl.UpdateValue(float64(int(hat_value)), true)
+		hat_value := ctrl.device.InternalJoystick.Hat(int32(ctrl.sdlMapping.Index))
+		ctrl.UpdateValue(float64(hat_value), true)
 	}
 }
 
@@ -180,18 +178,15 @@ func (ctrl *SDL_ControllerManager_Controller_JoyControl) Calibration() config.Co
 	return ctrl.calibration
 }
 
-func (ctrl *SDL_ControllerManager_Controller_JoyControl) ProcessEvent(event sdl.Event) {
+func (ctrl *SDL_ControllerManager_Controller_JoyControl) ProcessEvent(event sdl_mgr.SDL_Event) {
 	switch e := event.(type) {
-	case *sdl.JoyAxisEvent:
+	case *sdl_mgr.SDL_JoyAxisEvent:
 		ctrl.UpdateValue(float64(e.Value), false)
-	case *sdl.JoyButtonEvent:
-		switch e.State {
-		case sdl.PRESSED:
-			ctrl.UpdateValue(1.0, false)
-		case sdl.RELEASED:
-			ctrl.UpdateValue(0.0, false)
-		}
-	case *sdl.JoyHatEvent:
+	case *sdl_mgr.SDL_JoyButtonDownEvent:
+		ctrl.UpdateValue(math_utils.BoolAsFloat(e.Down), false)
+	case *sdl_mgr.SDL_JoyButtonUpEvent:
+		ctrl.UpdateValue(math_utils.BoolAsFloat(e.Down), false)
+	case *sdl_mgr.SDL_JoyHatEvent:
 		ctrl.UpdateValue(float64(e.Value), false)
 	}
 }
@@ -287,9 +282,9 @@ func (controller *SDL_ControllerManager_ConfiguredController) RegisterVirtualCon
 	})
 }
 
-func (controller *SDL_ControllerManager_ConfiguredController) ProcessEvent(event sdl.Event) {
+func (controller *SDL_ControllerManager_ConfiguredController) ProcessEvent(event sdl_mgr.SDL_Event) {
 	switch e := event.(type) {
-	case *sdl.JoyAxisEvent:
+	case *sdl_mgr.SDL_JoyAxisEvent:
 		controller.controls.ForEach(func(maybe_axis IControllerManager_Controller_Control, _ string) bool {
 			if axis, ok := maybe_axis.(*SDL_ControllerManager_Controller_JoyControl); ok {
 				if axis.sdlMapping.Kind == sdl_mgr.SDLMgr_Control_Kind_Axis && axis.sdlMapping.Index == int(e.Axis) {
@@ -299,18 +294,27 @@ func (controller *SDL_ControllerManager_ConfiguredController) ProcessEvent(event
 
 			return true
 		})
-	case *sdl.JoyButtonEvent:
-		controller.controls.ForEach(func(maybe_axis IControllerManager_Controller_Control, _ string) bool {
-			if axis, ok := maybe_axis.(*SDL_ControllerManager_Controller_JoyControl); ok {
+	case *sdl_mgr.SDL_JoyButtonDownEvent:
+		controller.controls.ForEach(func(maybe_button IControllerManager_Controller_Control, _ string) bool {
+			if axis, ok := maybe_button.(*SDL_ControllerManager_Controller_JoyControl); ok {
 				if axis.sdlMapping.Kind == sdl_mgr.SDLMgr_Control_Kind_Button && axis.sdlMapping.Index == int(e.Button) {
 					axis.ProcessEvent(event)
 				}
 			}
 			return true
 		})
-	case *sdl.JoyHatEvent:
-		controller.controls.ForEach(func(maybe_axis IControllerManager_Controller_Control, _ string) bool {
-			if axis, ok := maybe_axis.(*SDL_ControllerManager_Controller_JoyControl); ok {
+	case *sdl_mgr.SDL_JoyButtonUpEvent:
+		controller.controls.ForEach(func(maybe_button IControllerManager_Controller_Control, _ string) bool {
+			if axis, ok := maybe_button.(*SDL_ControllerManager_Controller_JoyControl); ok {
+				if axis.sdlMapping.Kind == sdl_mgr.SDLMgr_Control_Kind_Button && axis.sdlMapping.Index == int(e.Button) {
+					axis.ProcessEvent(event)
+				}
+			}
+			return true
+		})
+	case *sdl_mgr.SDL_JoyHatEvent:
+		controller.controls.ForEach(func(maybe_hat IControllerManager_Controller_Control, _ string) bool {
+			if axis, ok := maybe_hat.(*SDL_ControllerManager_Controller_JoyControl); ok {
 				if axis.sdlMapping.Kind == sdl_mgr.SDLMgr_Control_Kind_Hat && axis.sdlMapping.Index == int(e.Hat) {
 					axis.ProcessEvent(event)
 				}
@@ -395,11 +399,14 @@ func (mgr *SDLControllerManager) ConfigureJoystick(joystick *sdl_mgr.SDLMgr_Joys
 		current_raw_value := idle_value
 		switch control.Kind {
 		case sdl_mgr.SDLMgr_Control_Kind_Axis:
-			current_raw_value = float64(joystick.InternalJoystick.Axis(control.Index))
+			int_current_raw_value, _ := joystick.InternalJoystick.Axis(int32(control.Index))
+			current_raw_value = float64(int_current_raw_value)
 		case sdl_mgr.SDLMgr_Control_Kind_Button:
-			current_raw_value = float64(joystick.InternalJoystick.Button(control.Index))
+			bool_current_raw_value := joystick.InternalJoystick.Button(int32(control.Index))
+			current_raw_value = math_utils.BoolAsFloat(bool_current_raw_value)
 		case sdl_mgr.SDLMgr_Control_Kind_Hat:
-			current_raw_value = float64(joystick.InternalJoystick.Hat(sdl.JoystickHat(control.Index)))
+			uint_current_raw_value := joystick.InternalJoystick.Hat(int32(control.Index))
+			current_raw_value = float64(uint_current_raw_value)
 		}
 		current_normal_value := calibration_data.NormalizeRawValue(current_raw_value).Value
 
@@ -494,7 +501,7 @@ func (mgr *SDLControllerManager) RegisterConfig(sdl_map config.Config_Controller
 	}
 }
 
-func (mgr *SDLControllerManager) Handler_JoyDeviceAdded(event *sdl.JoyDeviceAddedEvent) error {
+func (mgr *SDLControllerManager) Handler_JoyDeviceAdded(event *sdl_mgr.SDL_JoyDeviceAddedEvent) error {
 	joystick, err := mgr.SDL.GetJoystickByInstanceID(event.Which)
 	if err != nil {
 		return err
@@ -538,7 +545,7 @@ func (mgr *SDLControllerManager) Handler_JoyDeviceAdded(event *sdl.JoyDeviceAdde
 	return nil
 }
 
-func (mgr *SDLControllerManager) Handler_JoyDeviceRemoved(event *sdl.JoyDeviceRemovedEvent) error {
+func (mgr *SDLControllerManager) Handler_JoyDeviceRemoved(event *sdl_mgr.SDL_JoyDeviceRemovedEvent) error {
 	mgr.ConfiguredControllers.Mutate(func(configured_controller SDL_ControllerManager_ConfiguredController, unique_id DeviceUniqueID) map_utils.LockMapMutateAction[DeviceUniqueID, SDL_ControllerManager_ConfiguredController] {
 		if configured_controller.Joystick.InstanceID == event.Which {
 			logger.Logger.Debug("[ControllerManager:Handler_JoyDeviceRemoved] Removing joy device", "name", configured_controller.Joystick.Name)
@@ -574,7 +581,7 @@ func (mgr *SDLControllerManager) Handler_JoyDeviceRemoved(event *sdl.JoyDeviceRe
 	return nil
 }
 
-func (mgr *SDLControllerManager) Handler_JoyAxisEvent(event *sdl.JoyAxisEvent) error {
+func (mgr *SDLControllerManager) Handler_JoyAxisEvent(event *sdl_mgr.SDL_JoyAxisEvent) error {
 	joystick, err := mgr.SDL.GetJoystickByInstanceID(event.Which)
 	if err != nil {
 		logger.Logger.Error("[ControllerManager::Handler_JoyAxisEvent] could not get joystick", "error", err)
@@ -601,7 +608,7 @@ func (mgr *SDLControllerManager) Handler_JoyAxisEvent(event *sdl.JoyAxisEvent) e
 	return nil
 }
 
-func (mgr *SDLControllerManager) Handler_JoyButtonEvent(event *sdl.JoyButtonEvent) error {
+func (mgr *SDLControllerManager) Handler_JoyButtonDownEvent(event *sdl_mgr.SDL_JoyButtonDownEvent) error {
 	joystick, err := mgr.SDL.GetJoystickByInstanceID(event.Which)
 	if err != nil {
 		logger.Logger.Error("[ControllerManager::Handler_JoyButtonEvent] could not get joystick", "error", err)
@@ -616,7 +623,7 @@ func (mgr *SDLControllerManager) Handler_JoyButtonEvent(event *sdl.JoyButtonEven
 		},
 		timestamp: int(event.GetTimestamp()),
 		button:    int(event.Button),
-		value:     float64(event.State),
+		value:     math_utils.BoolAsFloat(event.Down),
 	})
 
 	/* send for processing if configured */
@@ -631,7 +638,36 @@ func (mgr *SDLControllerManager) Handler_JoyButtonEvent(event *sdl.JoyButtonEven
 	return nil
 }
 
-func (mgr *SDLControllerManager) Handler_JoyHatEvent(event *sdl.JoyHatEvent) error {
+func (mgr *SDLControllerManager) Handler_JoyButtonUpEvent(event *sdl_mgr.SDL_JoyButtonUpEvent) error {
+	joystick, err := mgr.SDL.GetJoystickByInstanceID(event.Which)
+	if err != nil {
+		logger.Logger.Error("[ControllerManager::Handler_JoyButtonEvent] could not get joystick", "error", err)
+		return err
+	}
+
+	/* only send if the channel is being read */
+	mgr.rawEventChannels.EmitTimeout(time.Second, &ControllerManager_RawEvent_Button{
+		device: &ControllerManager_RawEvent_Device{
+			UniqueID: joystick.UniqueID(),
+			DeviceID: joystick.DeviceID(),
+		},
+		timestamp: int(event.GetTimestamp()),
+		button:    int(event.Button),
+		value:     math_utils.BoolAsFloat(event.Down),
+	})
+
+	/* send for processing if configured */
+	configured, is_configured := mgr.ConfiguredControllers.Get(joystick.UniqueID())
+	if is_configured {
+		logger.Logger.Debug("[ControllerManager::Handler_JoyButtonEvent] processing button event", "event", event)
+		configured.ProcessEvent(event)
+	} else {
+		logger.Logger.Debug("[ControllerManager::Handler_JoyButtonEvent] skipping processing because of unconfigured controller", "event", event)
+	}
+
+	return nil
+}
+func (mgr *SDLControllerManager) Handler_JoyHatEvent(event *sdl_mgr.SDL_JoyHatEvent) error {
 	joystick, err := mgr.SDL.GetJoystickByInstanceID(event.Which)
 	if err != nil {
 		logger.Logger.Error("[ControllerManager::Handler_JoyHatEvent] could not get joystick", "error", err)
@@ -669,17 +705,19 @@ func (mgr *SDLControllerManager) Attach(ctx context.Context) context.CancelFunc 
 			case event := <-events_channel:
 				logger.Logger.Debug("[ControllerManager.Attach] Received SDL2 event", "event", event)
 				switch e := event.(type) {
-				case *sdl.JoyDeviceAddedEvent:
+				case *sdl_mgr.SDL_JoyDeviceAddedEvent:
 					mgr.Handler_JoyDeviceAdded(e)
-				case *sdl.JoyDeviceRemovedEvent:
+				case *sdl_mgr.SDL_JoyDeviceRemovedEvent:
 					mgr.Handler_JoyDeviceRemoved(e)
-				case *sdl.JoyAxisEvent:
+				case *sdl_mgr.SDL_JoyAxisEvent:
 					mgr.Handler_JoyAxisEvent(e)
-				case *sdl.JoyButtonEvent:
-					mgr.Handler_JoyButtonEvent(e)
-				case *sdl.JoyHatEvent:
+				case *sdl_mgr.SDL_JoyButtonDownEvent:
+					mgr.Handler_JoyButtonDownEvent(e)
+				case *sdl_mgr.SDL_JoyButtonUpEvent:
+					mgr.Handler_JoyButtonUpEvent(e)
+				case *sdl_mgr.SDL_JoyHatEvent:
 					mgr.Handler_JoyHatEvent(e)
-				case *sdl.QuitEvent:
+				case *sdl_mgr.SDL_QuitEvent:
 					cancel()
 				}
 			case <-ctx_with_cancel.Done():

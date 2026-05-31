@@ -12,6 +12,7 @@ import (
 	"tsw_controller_app/config_loader"
 	"tsw_controller_app/logger"
 
+	"github.com/Zyko0/go-sdl3/bin/binsdl"
 	"github.com/axiomhq/axiom-go/axiom"
 	"github.com/axiomhq/axiom-go/axiom/ingest"
 	"github.com/wailsapp/wails/v2"
@@ -31,6 +32,8 @@ var AXIOM_DATASET = "app_logs"
 var assets embed.FS
 
 func main() {
+	defer binsdl.Load().Unload()
+
 	arg_proxy := flag.String("proxy", "", "Enter the proxy address")
 	flag.Parse()
 
