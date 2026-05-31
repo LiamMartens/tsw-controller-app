@@ -4,12 +4,14 @@ import (
 	"context"
 	"crypto/sha1"
 	"fmt"
+	"runtime"
 	"sync"
 	"time"
 	"tsw_controller_app/chan_utils"
 	"tsw_controller_app/logger"
 
-	"github.com/veandco/go-sdl2/sdl"
+	"github.com/Zyko0/go-sdl3/bin/binsdl"
+	"github.com/Zyko0/go-sdl3/sdl"
 )
 
 /* the SDL control kind like Button, Hat, Axis */
@@ -17,7 +19,6 @@ type SDLMgr_Control_Kind = string
 type SDLMgr_Guid_Str = string
 
 const SDL_BUFFER_SIZE = 32
-const SDL_RATE = 16
 
 const (
 	SDLMgr_Control_Kind_Button SDLMgr_Control_Kind = "button"
@@ -51,70 +52,35 @@ func New() *SDLMgr {
 	}
 }
 
-func (mgr *SDLMgr) findJoystickIndexFromInstanceID(instance_id sdl.JoystickID) int {
-	for num := range sdl.NumJoysticks() {
-		if sdl.JoystickGetDeviceInstanceID(num) == instance_id {
-			return num
-		}
-	}
-
-	return -1
-}
-
-func (mgr *SDLMgr) registerJoyDeviceFromSDLJoystick(sdl_joystick *sdl.Joystick) (*SDLMgr_Joystick, error) {
+func (mgr *SDLMgr) joyDeviceAdded(event *SDL_JoyDeviceAddedEvent) (*SDLMgr_Joystick, error) {
 	mgr.joydevices_mutex.Lock()
 	defer mgr.joydevices_mutex.Unlock()
 
-	instance_id := sdl_joystick.InstanceID()
-	/* skip if already registered */
-	if joydevice, already_registered := mgr.joydevices[instance_id]; already_registered {
+	if joydevice, already_registered := mgr.joydevices[event.Which]; already_registered {
 		return joydevice, nil
 	}
 
-	/* if not registered; find index and register device */
-	joy_index := mgr.findJoystickIndexFromInstanceID(instance_id)
-	if joy_index == -1 {
-		return nil, fmt.Errorf("could not find joystick index")
+	sdl_joystick, err := event.Which.OpenJoystick()
+	if err != nil {
+		return nil, fmt.Errorf("could not open joystick for use: %w", err)
 	}
 
-	name := sdl.JoystickNameForIndex(joy_index)
-	usb_vendor := sdl.JoystickGetDeviceVendor(joy_index)
-	usb_product := sdl.JoystickGetDeviceProduct(joy_index)
+	name, _ := sdl_joystick.Name()
+	usb_vendor := sdl_joystick.Vendor()
+	usb_product := sdl_joystick.Product()
 	joystick := SDLMgr_Joystick{
-		InstanceID:       instance_id,
+		InstanceID:       event.Which,
 		name:             name,
-		vendorID:         usb_vendor,
-		productID:        usb_product,
+		vendorID:         int(usb_vendor),
+		productID:        int(usb_product),
 		InternalJoystick: sdl_joystick,
 	}
 
-	mgr.joydevices[instance_id] = &joystick
+	mgr.joydevices[event.Which] = &joystick
 	return &joystick, nil
 }
 
-func (mgr *SDLMgr) joyDeviceAdded(event *sdl.JoyDeviceAddedEvent) (*SDLMgr_Joystick, error) {
-	mgr.joydevices_mutex.Lock()
-
-	/* for joy device added -> Which is the index; this differs from other SDL events */
-	joy_index := int(event.Which)
-	instance_id := sdl.JoystickGetDeviceInstanceID(joy_index)
-
-	if joydevice, already_registered := mgr.joydevices[instance_id]; already_registered {
-		defer mgr.joydevices_mutex.Unlock()
-		return joydevice, nil
-	}
-
-	joystick := sdl.JoystickOpen(joy_index)
-	if joystick == nil {
-		defer mgr.joydevices_mutex.Unlock()
-		return nil, fmt.Errorf("could not open joystick for use: %w", sdl.GetError())
-	}
-
-	mgr.joydevices_mutex.Unlock()
-	return mgr.registerJoyDeviceFromSDLJoystick(joystick)
-}
-
-func (mgr *SDLMgr) joyDeviceRemoved(event *sdl.JoyDeviceRemovedEvent) {
+func (mgr *SDLMgr) joyDeviceRemoved(event *SDL_JoyDeviceRemovedEvent) {
 	mgr.joydevices_mutex.Lock()
 	defer mgr.joydevices_mutex.Unlock()
 	if joystick, has_device := mgr.joydevices[event.Which]; has_device {
@@ -132,8 +98,13 @@ func (mgr *SDLMgr) PanicInit() bool {
 		init_ts := time.Now()
 
 		/* try to initialize if not already initialized */
-		sdl.JoystickEventState(1)
-		if err := sdl.Init(sdl.INIT_GAMECONTROLLER | sdl.INIT_JOYSTICK | sdl.INIT_EVENTS); err != nil {
+		sdl.SetJoystickEventsEnabled(true)
+		sdl.SetHint(sdl.HINT_JOYSTICK_HIDAPI, "1")
+		sdl.SetHint(sdl.HINT_JOYSTICK_RAWINPUT, "1")
+		sdl.SetHint(sdl.HINT_JOYSTICK_WGI, "1")
+		sdl.SetHint(sdl.HINT_XINPUT_ENABLED, "0")
+		sdl.SetHint(sdl.HINT_HIDAPI_ENUMERATE_ONLY_CONTROLLERS, "0")
+		if err := sdl.Init(sdl.INIT_GAMEPAD | sdl.INIT_JOYSTICK | sdl.INIT_EVENTS); err != nil {
 			panic(err)
 		}
 
@@ -163,74 +134,94 @@ Starts polling for events within a go-routine every 60ms
 Can be cancelled using the context
 Returns a channel to listen to events
 */
-func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan sdl.Event, context.CancelFunc) {
+func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan SDL_Event, context.CancelFunc) {
 	ctx_with_cancel, cancel := context.WithCancel(ctx)
-	event_channel := make(chan sdl.Event, SDL_BUFFER_SIZE)
+	event_channel := make(chan SDL_Event, SDL_BUFFER_SIZE)
 
 	go func() {
+		runtime.LockOSThread()
+		defer runtime.UnlockOSThread()
+
+		defer binsdl.Load().Unload()
+		mgr.PanicInit()
+
 		for {
 			/* stop if context has been cancelled */
 			if ctx_with_cancel.Err() != nil {
 				return
 			}
 
-			if event := sdl.WaitEventTimeout(SDL_RATE); event != nil {
-				switch e := event.(type) {
-				case *sdl.JoyDeviceAddedEvent:
-					if joystick, err := mgr.joyDeviceAdded(&sdl.JoyDeviceAddedEvent{
-						Type:      e.Type,
+			var event sdl.Event
+			if sdl.PollEvent(&event) {
+				switch event.Type {
+				case sdl.EVENT_JOYSTICK_ADDED:
+					e := event.JoyDeviceEvent()
+					added_event := &SDL_JoyDeviceAddedEvent{
 						Timestamp: e.Timestamp,
 						Which:     e.Which,
-					}); err == nil {
-						chan_utils.SendTimeout[sdl.Event](event_channel, time.Second, &sdl.JoyDeviceAddedEvent{
-							Type:      e.Type,
-							Timestamp: e.Timestamp,
-							/* switching to instance ID once we're out of the SDL internals */
-							Which: joystick.InstanceID,
-						})
 					}
-				case *sdl.JoyDeviceRemovedEvent:
-					removed_event := &sdl.JoyDeviceRemovedEvent{
-						Type:      e.Type,
+
+					joystick, err := mgr.joyDeviceAdded(added_event)
+					if err != nil {
+						logger.Logger.Error("[SDLMgr] could not open joydevice", "error", err)
+						continue
+					}
+
+					device_path, _ := joystick.InternalJoystick.Path()
+					logger.Logger.Info(
+						"[SDLMgr] registered joy device",
+						"name", joystick.Name(),
+						"device_id", joystick.DeviceID(),
+						"product_version", joystick.InternalJoystick.ProductVersion(),
+						"firmware_version", joystick.InternalJoystick.FirmwareVersion(),
+						"serial", joystick.InternalJoystick.Serial(),
+						"path", device_path,
+					)
+					chan_utils.SendTimeout[SDL_Event](event_channel, time.Second, added_event)
+				case sdl.EVENT_JOYSTICK_REMOVED:
+					e := event.JoyDeviceEvent()
+					removed_event := &SDL_JoyDeviceRemovedEvent{
 						Timestamp: e.Timestamp,
 						Which:     e.Which,
 					}
 					mgr.joyDeviceRemoved(removed_event)
-					chan_utils.SendTimeout[sdl.Event](event_channel, time.Second, removed_event)
-				case *sdl.JoyButtonEvent:
-					chan_utils.SendTimeout[sdl.Event](event_channel, time.Second, &sdl.JoyButtonEvent{
-						Type:      e.Type,
+					chan_utils.SendTimeout[SDL_Event](event_channel, time.Second, removed_event)
+				case sdl.EVENT_JOYSTICK_BUTTON_DOWN:
+					e := event.JoyButtonEvent()
+					chan_utils.SendTimeout[SDL_Event](event_channel, time.Second, &SDL_JoyButtonDownEvent{
 						Timestamp: e.Timestamp,
 						Which:     e.Which,
 						Button:    e.Button,
-						State:     e.State,
+						Down:      e.Down,
 					})
-				case *sdl.JoyHatEvent:
-					chan_utils.SendTimeout[sdl.Event](event_channel, time.Second, &sdl.JoyHatEvent{
-						Type:      e.Type,
+				case sdl.EVENT_JOYSTICK_BUTTON_UP:
+					e := event.JoyButtonEvent()
+					chan_utils.SendTimeout[SDL_Event](event_channel, time.Second, &SDL_JoyButtonUpEvent{
+						Timestamp: e.Timestamp,
+						Which:     e.Which,
+						Button:    e.Button,
+						Down:      e.Down,
+					})
+				case sdl.EVENT_JOYSTICK_HAT_MOTION:
+					e := event.JoyHatEvent()
+					chan_utils.SendTimeout[SDL_Event](event_channel, time.Second, &SDL_JoyHatEvent{
 						Timestamp: e.Timestamp,
 						Which:     e.Which,
 						Hat:       e.Hat,
 						Value:     e.Value,
 					})
-				case *sdl.JoyAxisEvent:
-					joystick := sdl.JoystickFromInstanceID(e.Which)
-					if joystick == nil {
-						logger.Logger.Error("[SDLMgr] could not get joystick from instance ID", "instance", e.Which)
-						continue
-					}
-
-					if _, err := mgr.registerJoyDeviceFromSDLJoystick(joystick); err != nil {
-						logger.Logger.Error("[SDLMgr] could not register joystick")
-						continue
-					}
-
-					chan_utils.SendTimeout[sdl.Event](event_channel, time.Second, &sdl.JoyAxisEvent{
-						Type:      e.Type,
+				case sdl.EVENT_JOYSTICK_AXIS_MOTION:
+					e := event.JoyAxisEvent()
+					chan_utils.SendTimeout[SDL_Event](event_channel, time.Second, &SDL_JoyAxisEvent{
 						Timestamp: e.Timestamp,
 						Which:     e.Which,
 						Axis:      e.Axis,
 						Value:     e.Value,
+					})
+				case sdl.EVENT_QUIT:
+					e := event.QuitEvent()
+					chan_utils.SendTimeout[SDL_Event](event_channel, time.Second, &SDL_QuitEvent{
+						Timestamp: e.Timestamp,
 					})
 				}
 			}
@@ -240,9 +231,25 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan sdl.Event, context.Ca
 }
 
 func (joystick *SDLMgr_Joystick) UniqueID() string {
-	device_guid := sdl.JoystickGetGUIDString(joystick.InternalJoystick.GUID())
-	unique_id := fmt.Sprintf("usb_id=%s,guid=%s", joystick.DeviceID(), device_guid)
+	product_version := joystick.InternalJoystick.ProductVersion()
+	device_serial := joystick.InternalJoystick.Serial()
+	unique_id := fmt.Sprintf("usb_id=%s,version=%d,serial=%s", joystick.DeviceID(), product_version, device_serial)
+
+	/*
+		add device path or instance ID if serial wasn't available; from a session perspective this is
+		the most unique ID we have even though it may not be very stable across sessions
+	*/
+	if device_serial == "" {
+		device_path, _ := joystick.InternalJoystick.Path()
+		if device_path != "" {
+			unique_id = fmt.Sprintf("%s,device_path=%s", unique_id, device_path)
+		} else {
+			unique_id = fmt.Sprintf("%s,instance_id=%d", unique_id, joystick.InstanceID)
+		}
+	}
+
 	hash := sha1.Sum([]byte(unique_id))
+
 	return fmt.Sprintf("%x", hash)
 }
 

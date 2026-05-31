@@ -139,7 +139,6 @@ func NewApp(
 	appconfig AppConfig,
 ) *App {
 	sdl_manager := sdl_mgr.New()
-	sdl_manager.PanicInit()
 
 	program_config := config.LoadProgramConfigFromFile(filepath.Join(appconfig.GlobalConfigDir, "program.json"))
 	if program_config.TSWAPIKeyLocation == "" {
@@ -208,7 +207,7 @@ func (a *App) LoadConfiguration() {
 				}
 			}
 			if calibration != nil {
-				logger.Logger.Debug("[App] registering SDL map and calibration for controller", "name", sdl_mapping.Name, "usb_id", sdl_mapping.UsbID)
+				logger.Logger.Debug("[App] registering SDL map and calibration for controller", "name", sdl_mapping.Name, "usb_id", sdl_mapping.UsbID, "unique_id", sdl_mapping.UniqueID)
 				a.sdl_controller_manager.RegisterConfig(sdl_mapping, *calibration)
 			}
 		}

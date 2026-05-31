@@ -3,6 +3,7 @@ module tsw_controller_app
 go 1.25.8
 
 require (
+	github.com/Zyko0/go-sdl3 v0.1.1
 	github.com/axiomhq/axiom-go v0.31.1
 	github.com/creasty/go-easing v0.0.0-20161107103139-0cfd96d3a544
 	github.com/fsnotify/fsnotify v1.9.0
@@ -11,12 +12,12 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/stretchr/testify v1.11.1
-	github.com/veandco/go-sdl2 v0.4.40
 	github.com/wailsapp/wails/v2 v2.11.0
 	golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90
 )
 
 require (
+	github.com/Zyko0/purego-gen v0.0.0-20250727121216-3bcd331a1e0c // indirect
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
