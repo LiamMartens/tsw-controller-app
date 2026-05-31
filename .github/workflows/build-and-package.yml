@@ -11,11 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install SDL2 libraries
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libsdl2-dev libsdl2-2.0-0
-
       - name: Install Dependencies
         run: |
           sudo apt-get install -y libx11-dev xorg-dev libxtst-dev xsel xclip libpng++-dev xcb libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev libxkbcommon-x11-dev libxkbcommon-dev libgtk-3-dev libwebkit2gtk-4.1-dev
@@ -252,15 +247,6 @@ jobs:
           .\vcpkg\bootstrap-vcpkg.bat
         shell: pwsh
 
-      - name: Download SDL2 DLL
-        shell: pwsh
-        run: |
-          $url = "https://github.com/libsdl-org/SDL/releases/download/release-2.32.6/SDL2-2.32.6-win32-x64.zip"
-          $zipPath = "$PWD/go-app/SDL2.zip"
-          $extractPath = "$PWD/go-app"
-          Invoke-WebRequest -Uri $url -OutFile $zipPath
-          Expand-Archive -Path $zipPath -DestinationPath $extractPath -Force
-
       - name: Install vcpkg dependencies
         run: |
           cd go-app
@@ -299,7 +285,6 @@ jobs:
       - run: |
           New-Item -ItemType Directory -Path "tswcontrollerapp_windows"
           Copy-Item -Path "go-app/build/bin/tsw-controller-app.exe" -Destination "tswcontrollerapp_windows/tsw-controller-app.exe"
-          Copy-Item -Path "go-app/SDL2.dll" -Destination "tswcontrollerapp_windows/SDL2.dll"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -328,11 +313,6 @@ jobs:
     needs: [build__mod_assets, build__tscmod_assets]
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install SDL2 libraries
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libsdl2-dev libsdl2-2.0-0
 
       - name: Install Dependencies
         run: |
@@ -384,7 +364,7 @@ jobs:
           Section: utils
           Priority: optional
           Architecture: amd64
-          Depends: libwebkit2gtk-4.1-0, libgtk-3-0, libsdl2-2.0-0
+          Depends: libwebkit2gtk-4.1-0, libgtk-3-0
           Maintainer: L Martens <hi@liahmartens.com>
           Description: TSW Controller App
           EOF
@@ -401,11 +381,6 @@ jobs:
     needs: [build__mod_assets, build__tscmod_assets]
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install SDL2 using Homebrew
-        run: |
-          brew update
-          brew install sdl2
 
       - name: Setup Go 1.25.8
         uses: actions/setup-go@v5
@@ -439,8 +414,6 @@ jobs:
           chmod +x build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
           otool -L build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
           mkdir -p build/bin/tsw-controller-app.app/Contents/Frameworks
-          cp /opt/homebrew/lib/libSDL2-2.0.0.dylib build/bin/tsw-controller-app.app/Contents/Frameworks/libSDL2-2.0.0.dylib
-          install_name_tool -change /opt/homebrew/opt/sdl2/lib/libSDL2-2.0.0.dylib @executable_path/../Frameworks/libSDL2-2.0.0.dylib build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
           install_name_tool -add_rpath @executable_path/../Frameworks build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
           codesign --force --deep --sign - build/bin/tsw-controller-app.app
           otool -L build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
