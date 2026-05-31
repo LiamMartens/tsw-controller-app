@@ -99,6 +99,11 @@ func (mgr *SDLMgr) PanicInit() bool {
 
 		/* try to initialize if not already initialized */
 		sdl.SetJoystickEventsEnabled(true)
+		sdl.SetHint(sdl.HINT_JOYSTICK_HIDAPI, "1")
+		sdl.SetHint(sdl.HINT_JOYSTICK_RAWINPUT, "1")
+		sdl.SetHint(sdl.HINT_XINPUT_ENABLED, "0")
+		sdl.SetHint(sdl.HINT_JOYSTICK_WGI, "0")
+		sdl.SetHint(sdl.HINT_HIDAPI_ENUMERATE_ONLY_CONTROLLERS, "0")
 		if err := sdl.Init(sdl.INIT_GAMEPAD | sdl.INIT_JOYSTICK | sdl.INIT_EVENTS); err != nil {
 			panic(err)
 		}
@@ -138,13 +143,6 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan SDL_Event, context.Ca
 		defer runtime.UnlockOSThread()
 
 		defer binsdl.Load().Unload()
-
-		sdl.SetHint(sdl.HINT_JOYSTICK_HIDAPI, "1")
-		sdl.SetHint(sdl.HINT_JOYSTICK_RAWINPUT, "1")
-		sdl.SetHint(sdl.HINT_XINPUT_ENABLED, "0")
-		sdl.SetHint(sdl.HINT_JOYSTICK_WGI, "0")
-		sdl.SetHint(sdl.HINT_HIDAPI_ENUMERATE_ONLY_CONTROLLERS, "0")
-
 		mgr.PanicInit()
 
 		for {
@@ -235,7 +233,7 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan SDL_Event, context.Ca
 func (joystick *SDLMgr_Joystick) UniqueID() string {
 	product_version := joystick.InternalJoystick.ProductVersion()
 	device_serial := joystick.InternalJoystick.Serial()
-	unique_id := fmt.Sprintf("usb_id=%s,version=%d,serial=%d", joystick.DeviceID(), product_version, device_serial)
+	unique_id := fmt.Sprintf("usb_id=%s,version=%d,serial=%s", joystick.DeviceID(), product_version, device_serial)
 
 	/*
 		add device path or instance ID if serial wasn't available; from a session perspective this is
@@ -244,7 +242,7 @@ func (joystick *SDLMgr_Joystick) UniqueID() string {
 	if device_serial == "" {
 		device_path, _ := joystick.InternalJoystick.Path()
 		if device_path != "" {
-			unique_id = fmt.Sprintf("%s,device_path=%d", unique_id, device_path)
+			unique_id = fmt.Sprintf("%s,device_path=%s", unique_id, device_path)
 		} else {
 			unique_id = fmt.Sprintf("%s,instance_id=%d", unique_id, joystick.InstanceID)
 		}
