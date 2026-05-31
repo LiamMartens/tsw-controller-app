@@ -162,6 +162,7 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan SDL_Event, context.Ca
 						continue
 					}
 
+					device_path, _ := joystick.InternalJoystick.Path()
 					logger.Logger.Info(
 						"[SDLMgr] registered joy device",
 						"name", joystick.Name(),
@@ -169,6 +170,7 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan SDL_Event, context.Ca
 						"product_version", joystick.InternalJoystick.ProductVersion(),
 						"firmware_version", joystick.InternalJoystick.FirmwareVersion(),
 						"serial", joystick.InternalJoystick.Serial(),
+						"path", device_path,
 					)
 					chan_utils.SendTimeout[SDL_Event](event_channel, time.Second, added_event)
 				case sdl.EVENT_JOYSTICK_REMOVED:
@@ -224,13 +226,21 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan SDL_Event, context.Ca
 }
 
 func (joystick *SDLMgr_Joystick) UniqueID() string {
-	unique_id := fmt.Sprintf("usb_id=%s", joystick.DeviceID())
-
+	product_version := joystick.InternalJoystick.ProductVersion()
 	device_serial := joystick.InternalJoystick.Serial()
-	if device_serial != "" {
-		unique_id = fmt.Sprintf("%s,serial=%s", unique_id, device_serial)
-	} else {
-		unique_id = fmt.Sprintf("%s,instance_id=%d", unique_id, joystick.InstanceID)
+	unique_id := fmt.Sprintf("usb_id=%s,version=%d,serial=%d", joystick.DeviceID(), product_version, device_serial)
+
+	/*
+		add device path or instance ID if serial wasn't available; from a session perspective this is
+		the most unique ID we have even though it may not be very stable across sessions
+	*/
+	if device_serial == "" {
+		device_path, _ := joystick.InternalJoystick.Path()
+		if device_path != "" {
+			unique_id = fmt.Sprintf("%s,device_path=%d", unique_id, device_path)
+		} else {
+			unique_id = fmt.Sprintf("%s,instance_id=%d", unique_id, joystick.InstanceID)
+		}
 	}
 
 	hash := sha1.Sum([]byte(unique_id))
