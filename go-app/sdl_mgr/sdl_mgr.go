@@ -12,6 +12,7 @@ import (
 
 	"github.com/Zyko0/go-sdl3/bin/binsdl"
 	"github.com/Zyko0/go-sdl3/sdl"
+	"rafaelmartins.com/p/usbhid"
 )
 
 /* the SDL control kind like Button, Hat, Axis */
@@ -31,8 +32,10 @@ type SDLMgr_Joystick struct {
 	name       string
 	vendorID   int
 	productID  int
+	devicePath string
 
 	InternalJoystick *sdl.Joystick
+	HIDDevice        *usbhid.Device
 }
 
 type SDLMgr struct {
@@ -52,6 +55,19 @@ func New() *SDLMgr {
 	}
 }
 
+func (mgr *SDLMgr) hidDeviceFromPath(path string) (*usbhid.Device, error) {
+	devices, err := usbhid.Enumerate(func(d *usbhid.Device) bool {
+		return d.Path() == path
+	})
+	if err != nil {
+		return nil, fmt.Errorf("could not find HID device from path due to an error: %s: %w", path, err)
+	}
+	if len(devices) == 0 {
+		return nil, fmt.Errorf("could not find HID device from path: %s", path)
+	}
+	return devices[0], nil
+}
+
 func (mgr *SDLMgr) joyDeviceAdded(event *SDL_JoyDeviceAddedEvent) (*SDLMgr_Joystick, error) {
 	mgr.joydevices_mutex.Lock()
 	defer mgr.joydevices_mutex.Unlock()
@@ -68,12 +84,23 @@ func (mgr *SDLMgr) joyDeviceAdded(event *SDL_JoyDeviceAddedEvent) (*SDLMgr_Joyst
 	name, _ := sdl_joystick.Name()
 	usb_vendor := sdl_joystick.Vendor()
 	usb_product := sdl_joystick.Product()
+	device_path, _ := sdl_joystick.Path()
+	var hid_device *usbhid.Device
+	if device_path != "" {
+		hid_device, err = mgr.hidDeviceFromPath(device_path)
+		if err != nil {
+			logger.Logger.Info("[SDLMgr] could not match HID device from path", "error", err)
+		}
+	}
+
 	joystick := SDLMgr_Joystick{
 		InstanceID:       event.Which,
 		name:             name,
 		vendorID:         int(usb_vendor),
 		productID:        int(usb_product),
+		devicePath:       device_path,
 		InternalJoystick: sdl_joystick,
+		HIDDevice:        hid_device,
 	}
 
 	mgr.joydevices[event.Which] = &joystick
@@ -166,16 +193,13 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan SDL_Event, context.Ca
 						logger.Logger.Error("[SDLMgr] could not open joydevice", "error", err)
 						continue
 					}
-
-					device_path, _ := joystick.InternalJoystick.Path()
 					logger.Logger.Info(
 						"[SDLMgr] registered joy device",
 						"name", joystick.Name(),
 						"device_id", joystick.DeviceID(),
-						"product_version", joystick.InternalJoystick.ProductVersion(),
-						"firmware_version", joystick.InternalJoystick.FirmwareVersion(),
-						"serial", joystick.InternalJoystick.Serial(),
-						"path", device_path,
+						"product_version", joystick.version(),
+						"serial", joystick.serial(),
+						"path", joystick.path(),
 					)
 					chan_utils.SendTimeout[SDL_Event](event_channel, time.Second, added_event)
 				case sdl.EVENT_JOYSTICK_REMOVED:
@@ -230,9 +254,30 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan SDL_Event, context.Ca
 	return event_channel, cancel
 }
 
-func (joystick *SDLMgr_Joystick) UniqueID() string {
+func (joystick *SDLMgr_Joystick) version() uint16 {
 	product_version := joystick.InternalJoystick.ProductVersion()
+	if product_version == 0 && joystick.HIDDevice != nil {
+		product_version = joystick.HIDDevice.Version()
+	}
+	return product_version
+}
+
+func (joystick *SDLMgr_Joystick) serial() string {
 	device_serial := joystick.InternalJoystick.Serial()
+	if device_serial == "" && joystick.HIDDevice != nil {
+		device_serial = joystick.HIDDevice.SerialNumber()
+	}
+	return device_serial
+}
+
+func (joystick *SDLMgr_Joystick) path() string {
+	device_path, _ := joystick.InternalJoystick.Path()
+	return device_path
+}
+
+func (joystick *SDLMgr_Joystick) UniqueID() string {
+	product_version := joystick.version()
+	device_serial := joystick.serial()
 	unique_id := fmt.Sprintf("usb_id=%s,version=%d,serial=%s", joystick.DeviceID(), product_version, device_serial)
 
 	/*
@@ -240,7 +285,7 @@ func (joystick *SDLMgr_Joystick) UniqueID() string {
 		the most unique ID we have even though it may not be very stable across sessions
 	*/
 	if device_serial == "" {
-		device_path, _ := joystick.InternalJoystick.Path()
+		device_path := joystick.path()
 		if device_path != "" {
 			unique_id = fmt.Sprintf("%s,device_path=%s", unique_id, device_path)
 		} else {

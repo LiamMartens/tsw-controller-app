@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.16.1
+- Use HID path matching to optionally find serial
+
 ## v1.16.0
 - Upgrade to embedded SDL3
 
