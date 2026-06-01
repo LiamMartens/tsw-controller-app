@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 	"tsw_controller_app/chan_utils"
@@ -56,8 +57,9 @@ func New() *SDLMgr {
 }
 
 func (mgr *SDLMgr) hidDeviceFromPath(path string) (*usbhid.Device, error) {
+	path_lower := strings.ToLower(path)
 	devices, err := usbhid.Enumerate(func(d *usbhid.Device) bool {
-		return d.Path() == path
+		return strings.ToLower(d.Path()) == path_lower
 	})
 	if err != nil {
 		return nil, fmt.Errorf("could not find HID device from path due to an error: %s: %w", path, err)
