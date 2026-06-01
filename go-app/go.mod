@@ -14,6 +14,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/wailsapp/wails/v2 v2.11.0
 	golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90
+	rafaelmartins.com/p/usbhid v0.0.0-20260426183642-562a11a30ff5
 )
 
 require (

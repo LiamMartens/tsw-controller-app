@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 	"tsw_controller_app/chan_utils"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/Zyko0/go-sdl3/bin/binsdl"
 	"github.com/Zyko0/go-sdl3/sdl"
+	"rafaelmartins.com/p/usbhid"
 )
 
 /* the SDL control kind like Button, Hat, Axis */
@@ -31,8 +33,10 @@ type SDLMgr_Joystick struct {
 	name       string
 	vendorID   int
 	productID  int
+	devicePath string
 
 	InternalJoystick *sdl.Joystick
+	HIDDevice        *usbhid.Device
 }
 
 type SDLMgr struct {
@@ -52,6 +56,20 @@ func New() *SDLMgr {
 	}
 }
 
+func (mgr *SDLMgr) hidDeviceFromPath(path string) (*usbhid.Device, error) {
+	path_lower := strings.ToLower(path)
+	devices, err := usbhid.Enumerate(func(d *usbhid.Device) bool {
+		return strings.ToLower(d.Path()) == path_lower
+	})
+	if err != nil {
+		return nil, fmt.Errorf("could not find HID device from path due to an error: %s: %w", path, err)
+	}
+	if len(devices) == 0 {
+		return nil, fmt.Errorf("could not find HID device from path: %s", path)
+	}
+	return devices[0], nil
+}
+
 func (mgr *SDLMgr) joyDeviceAdded(event *SDL_JoyDeviceAddedEvent) (*SDLMgr_Joystick, error) {
 	mgr.joydevices_mutex.Lock()
 	defer mgr.joydevices_mutex.Unlock()
@@ -68,12 +86,23 @@ func (mgr *SDLMgr) joyDeviceAdded(event *SDL_JoyDeviceAddedEvent) (*SDLMgr_Joyst
 	name, _ := sdl_joystick.Name()
 	usb_vendor := sdl_joystick.Vendor()
 	usb_product := sdl_joystick.Product()
+	device_path, _ := sdl_joystick.Path()
+	var hid_device *usbhid.Device
+	if device_path != "" {
+		hid_device, err = mgr.hidDeviceFromPath(device_path)
+		if err != nil {
+			logger.Logger.Info("[SDLMgr] could not match HID device from path", "error", err)
+		}
+	}
+
 	joystick := SDLMgr_Joystick{
 		InstanceID:       event.Which,
 		name:             name,
 		vendorID:         int(usb_vendor),
 		productID:        int(usb_product),
+		devicePath:       device_path,
 		InternalJoystick: sdl_joystick,
+		HIDDevice:        hid_device,
 	}
 
 	mgr.joydevices[event.Which] = &joystick
@@ -166,16 +195,13 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan SDL_Event, context.Ca
 						logger.Logger.Error("[SDLMgr] could not open joydevice", "error", err)
 						continue
 					}
-
-					device_path, _ := joystick.InternalJoystick.Path()
 					logger.Logger.Info(
 						"[SDLMgr] registered joy device",
 						"name", joystick.Name(),
 						"device_id", joystick.DeviceID(),
-						"product_version", joystick.InternalJoystick.ProductVersion(),
-						"firmware_version", joystick.InternalJoystick.FirmwareVersion(),
-						"serial", joystick.InternalJoystick.Serial(),
-						"path", device_path,
+						"product_version", joystick.version(),
+						"serial", joystick.serial(),
+						"path", joystick.path(),
 					)
 					chan_utils.SendTimeout[SDL_Event](event_channel, time.Second, added_event)
 				case sdl.EVENT_JOYSTICK_REMOVED:
@@ -230,22 +256,42 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan SDL_Event, context.Ca
 	return event_channel, cancel
 }
 
-func (joystick *SDLMgr_Joystick) UniqueID() string {
+func (joystick *SDLMgr_Joystick) version() uint16 {
 	product_version := joystick.InternalJoystick.ProductVersion()
+	if product_version == 0 && joystick.HIDDevice != nil {
+		product_version = joystick.HIDDevice.Version()
+	}
+	return product_version
+}
+
+func (joystick *SDLMgr_Joystick) serial() string {
 	device_serial := joystick.InternalJoystick.Serial()
-	unique_id := fmt.Sprintf("usb_id=%s,version=%d,serial=%s", joystick.DeviceID(), product_version, device_serial)
+	if device_serial == "" && joystick.HIDDevice != nil {
+		device_serial = joystick.HIDDevice.SerialNumber()
+	}
+	return device_serial
+}
+
+func (joystick *SDLMgr_Joystick) path() string {
+	device_path, _ := joystick.InternalJoystick.Path()
+	return device_path
+}
+
+func (joystick *SDLMgr_Joystick) UniqueID() string {
+	product_version := joystick.version()
+	device_serial := joystick.serial()
+	device_path := joystick.path()
+	unique_id := fmt.Sprintf(
+		"usb_id=%s,version=%d,serial=%s,device_path=%s",
+		joystick.DeviceID(), product_version, device_serial, device_path,
+	)
 
 	/*
-		add device path or instance ID if serial wasn't available; from a session perspective this is
+		add instance ID if device path wasn't available; from a session perspective this is
 		the most unique ID we have even though it may not be very stable across sessions
 	*/
-	if device_serial == "" {
-		device_path, _ := joystick.InternalJoystick.Path()
-		if device_path != "" {
-			unique_id = fmt.Sprintf("%s,device_path=%s", unique_id, device_path)
-		} else {
-			unique_id = fmt.Sprintf("%s,instance_id=%d", unique_id, joystick.InstanceID)
-		}
+	if device_path == "" {
+		unique_id = fmt.Sprintf("%s,instance_id=%d", unique_id, joystick.InstanceID)
 	}
 
 	hash := sha1.Sum([]byte(unique_id))
