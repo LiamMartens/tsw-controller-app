@@ -155,12 +155,20 @@ jobs:
       - name: Copy custom mod
         run: |
           Copy-Item -Path "tsw-controller-mod/ue4ss-mod" -Destination "RE-UE4SS/cppmods/TSWControllerMod" -Recurse -Force
+          Copy-Item -Path "running-train-controller-mod/ue4ss-mod" -Destination "RE-UE4SS/cppmods/RunningTrainControllerMod" -Recurse -Force
+
           Copy-Item -Path "socketconnectionlib/tsw_controller_mod_socket_connection.h" -Destination "RE-UE4SS/cppmods/TSWControllerMod/include/tsw_controller_mod_socket_connection.h" -Force
           Copy-Item -Path "socketconnectionlib/target/release/tsw_controller_mod_socket_connection.dll" -Destination "RE-UE4SS/cppmods/TSWControllerMod/lib/tsw_controller_mod_socket_connection.dll" -Force
           Copy-Item -Path "socketconnectionlib/target/release/tsw_controller_mod_socket_connection.dll.lib" -Destination "RE-UE4SS/cppmods/TSWControllerMod/lib/tsw_controller_mod_socket_connection.lib" -Force
+
+          Copy-Item -Path "socketconnectionlib/tsw_controller_mod_socket_connection.h" -Destination "RE-UE4SS/cppmods/RunningTrainControllerMod/include/tsw_controller_mod_socket_connection.h" -Force
+          Copy-Item -Path "socketconnectionlib/target/release/tsw_controller_mod_socket_connection.dll" -Destination "RE-UE4SS/cppmods/RunningTrainControllerMod/lib/tsw_controller_mod_socket_connection.dll" -Force
+          Copy-Item -Path "socketconnectionlib/target/release/tsw_controller_mod_socket_connection.dll.lib" -Destination "RE-UE4SS/cppmods/RunningTrainControllerMod/lib/tsw_controller_mod_socket_connection.lib" -Force
+
           @"
           includes("KismetDebuggerMod")
           includes("TSWControllerMod")
+          includes("RunningTrainControllerMod")
           "@ | Out-File -FilePath "RE-UE4SS/cppmods/xmake.lua" -Encoding utf8
           @"
           set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -195,326 +203,331 @@ jobs:
           name: tswcontrollermod
           path: RE-UE4SS/build_cmake_Game__Shipping__Win64/Game__Shipping__Win64/bin/TSWControllerMod.dll
 
-  build__mod_assets:
-    runs-on: ubuntu-22.04
-    needs: [build__socketconnectionlib, build__ue4ssmod]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v7
-        name: Download previously built artifacts
-
-      - run: |
-          mkdir mod_assets
-          install -D ue4ssproxy/dwmapi.dll mod_assets/dwmapi.dll
-          install -D ue4ssdll/UE4SS.dll mod_assets/ue4ss_tsw_controller_mod/UE4SS.dll
-          install -D socketconnectionlib/target/release/tsw_controller_mod_socket_connection.dll mod_assets/ue4ss_tsw_controller_mod/Mods/TSWControllerMod/dlls/tsw_controller_mod_socket_connection.dll
-          install -D tswcontrollermod/TSWControllerMod.dll mod_assets/ue4ss_tsw_controller_mod/Mods/TSWControllerMod/dlls/main.dll
-          install -D go-app/embed/mod_assets/ue4ss_tsw_controller_mod/UE4SS-settings.ini mod_assets/ue4ss_tsw_controller_mod/UE4SS-settings.ini
-          touch mod_assets/ue4ss_tsw_controller_mod/Mods/TSWControllerMod/enabled.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: mod_assets
-          path: mod_assets
+          name: runningtraincontrollermod
+          path: RE-UE4SS/build_cmake_Game__Shipping__Win64/Game__Shipping__Win64/bin/RunningTrainControllerMod.dll
 
-  build__tscmod_assets:
-    runs-on: ubuntu-22.04
-    needs: [build__tscmod]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v7
-        name: Download previously built artifacts
-        with:
-          name: tscmod
-          path: tscmod
-      - run: find .
-      - run: |
-          mkdir tsc_mod_assets
-          install -D tscmod/tscmod.dll tsc_mod_assets/plugins/tscmod.dll
-          install -D tsc-controller-mod/proxy/d3d9.dll tsc_mod_assets/d3d9.dll
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tsc_mod_assets
-          path: tsc_mod_assets
+  # build__mod_assets:
+  #   runs-on: ubuntu-22.04
+  #   needs: [build__socketconnectionlib, build__ue4ssmod]
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/download-artifact@v7
+  #       name: Download previously built artifacts
 
-  build__goapp__windows:
-    runs-on: windows-2022
-    needs: [build__mod_assets, build__tscmod_assets]
-    steps:
-      - uses: actions/checkout@v4
+  #     - run: |
+  #         mkdir mod_assets
+  #         install -D ue4ssproxy/dwmapi.dll mod_assets/dwmapi.dll
+  #         install -D ue4ssdll/UE4SS.dll mod_assets/ue4ss_tsw_controller_mod/UE4SS.dll
+  #         install -D socketconnectionlib/target/release/tsw_controller_mod_socket_connection.dll mod_assets/ue4ss_tsw_controller_mod/Mods/TSWControllerMod/dlls/tsw_controller_mod_socket_connection.dll
+  #         install -D tswcontrollermod/TSWControllerMod.dll mod_assets/ue4ss_tsw_controller_mod/Mods/TSWControllerMod/dlls/main.dll
+  #         install -D go-app/embed/mod_assets/ue4ss_tsw_controller_mod/UE4SS-settings.ini mod_assets/ue4ss_tsw_controller_mod/UE4SS-settings.ini
+  #         touch mod_assets/ue4ss_tsw_controller_mod/Mods/TSWControllerMod/enabled.txt
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: mod_assets
+  #         path: mod_assets
 
-      - name: Install vcpkg
-        run: |
-          git clone https://github.com/microsoft/vcpkg.git
-          .\vcpkg\bootstrap-vcpkg.bat
-        shell: pwsh
+  # build__tscmod_assets:
+  #   runs-on: ubuntu-22.04
+  #   needs: [build__tscmod]
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/download-artifact@v7
+  #       name: Download previously built artifacts
+  #       with:
+  #         name: tscmod
+  #         path: tscmod
+  #     - run: find .
+  #     - run: |
+  #         mkdir tsc_mod_assets
+  #         install -D tscmod/tscmod.dll tsc_mod_assets/plugins/tscmod.dll
+  #         install -D tsc-controller-mod/proxy/d3d9.dll tsc_mod_assets/d3d9.dll
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: tsc_mod_assets
+  #         path: tsc_mod_assets
 
-      - name: Install vcpkg dependencies
-        run: |
-          cd go-app
-          ..\vcpkg\vcpkg install
-        shell: pwsh
+  # build__goapp__windows:
+  #   runs-on: windows-2022
+  #   needs: [build__mod_assets, build__tscmod_assets]
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Setup Go 1.25.8
-        uses: actions/setup-go@v5
-        with:
-          go-version: 1.25.8
+  #     - name: Install vcpkg
+  #       run: |
+  #         git clone https://github.com/microsoft/vcpkg.git
+  #         .\vcpkg\bootstrap-vcpkg.bat
+  #       shell: pwsh
 
-      - name: Install wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.11
+  #     - name: Install vcpkg dependencies
+  #       run: |
+  #         cd go-app
+  #         ..\vcpkg\vcpkg install
+  #       shell: pwsh
 
-      - uses: actions/download-artifact@v7
-        name: Download mod_assets artifact
-        with:
-          name: mod_assets
-          path: mod_assets
+  #     - name: Setup Go 1.25.8
+  #       uses: actions/setup-go@v5
+  #       with:
+  #         go-version: 1.25.8
 
-      - uses: actions/download-artifact@v7
-        name: Download tsc_mod_assets artifact
-        with:
-          name: tsc_mod_assets
-          path: tsc_mod_assets
+  #     - name: Install wails
+  #       run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.11
 
-      - run: Copy-Item -Path mod_assets -Destination go-app/embed -Recurse -Force
-      - run: Copy-Item -Path tsc_mod_assets -Destination go-app/embed -Recurse -Force
-      - run: Get-ChildItem -File -Recurse -Path "go-app/embed/mod_assets"
-      - run: |
-          $env:VERSION=(Get-Content -Path RELEASE_VERSION -First 1)
-          cd go-app
-           ./windows_build.ps1
-        env:
-          AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
-      - run: |
-          New-Item -ItemType Directory -Path "tswcontrollerapp_windows"
-          Copy-Item -Path "go-app/build/bin/tsw-controller-app.exe" -Destination "tswcontrollerapp_windows/tsw-controller-app.exe"
+  #     - uses: actions/download-artifact@v7
+  #       name: Download mod_assets artifact
+  #       with:
+  #         name: mod_assets
+  #         path: mod_assets
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tswcontrollerapp_windows
-          path: |
-            tswcontrollerapp_windows/*
+  #     - uses: actions/download-artifact@v7
+  #       name: Download tsc_mod_assets artifact
+  #       with:
+  #         name: tsc_mod_assets
+  #         path: tsc_mod_assets
 
-      - name: Install Inno Setup
-        run: |
-          choco install innosetup --no-progress --yes
+  #     - run: Copy-Item -Path mod_assets -Destination go-app/embed -Recurse -Force
+  #     - run: Copy-Item -Path tsc_mod_assets -Destination go-app/embed -Recurse -Force
+  #     - run: Get-ChildItem -File -Recurse -Path "go-app/embed/mod_assets"
+  #     - run: |
+  #         $env:VERSION=(Get-Content -Path RELEASE_VERSION -First 1)
+  #         cd go-app
+  #          ./windows_build.ps1
+  #       env:
+  #         AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
+  #     - run: |
+  #         New-Item -ItemType Directory -Path "tswcontrollerapp_windows"
+  #         Copy-Item -Path "go-app/build/bin/tsw-controller-app.exe" -Destination "tswcontrollerapp_windows/tsw-controller-app.exe"
 
-      - name: Compile installer
-        run: |
-          $env:VERSION=(Get-Content RELEASE_VERSION)[0]
-          cd go-app
-          iscc windows_inno_setup.iss
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: tswcontrollerapp_windows
+  #         path: |
+  #           tswcontrollerapp_windows/*
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tswcontrollerapp_windows_installer
-          path: |
-            go-app/Output/tswcontrollerapp-setup.exe
+  #     - name: Install Inno Setup
+  #       run: |
+  #         choco install innosetup --no-progress --yes
 
-  build__goapp__linux:
-    runs-on: ubuntu-22.04
-    needs: [build__mod_assets, build__tscmod_assets]
-    steps:
-      - uses: actions/checkout@v4
+  #     - name: Compile installer
+  #       run: |
+  #         $env:VERSION=(Get-Content RELEASE_VERSION)[0]
+  #         cd go-app
+  #         iscc windows_inno_setup.iss
 
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libx11-dev xorg-dev libxtst-dev xsel xclip libpng++-dev xcb libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev libxkbcommon-x11-dev libxkbcommon-dev libgtk-3-dev libwebkit2gtk-4.1-dev
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: tswcontrollerapp_windows_installer
+  #         path: |
+  #           go-app/Output/tswcontrollerapp-setup.exe
 
-      - name: Setup Go 1.25.8
-        uses: actions/setup-go@v5
-        with:
-          go-version: 1.25.8
+  # build__goapp__linux:
+  #   runs-on: ubuntu-22.04
+  #   needs: [build__mod_assets, build__tscmod_assets]
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Install wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.11
+  #     - name: Install Dependencies
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install -y libx11-dev xorg-dev libxtst-dev xsel xclip libpng++-dev xcb libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev libxkbcommon-x11-dev libxkbcommon-dev libgtk-3-dev libwebkit2gtk-4.1-dev
 
-      - uses: actions/download-artifact@v7
-        name: Download mod_assets artifact
-        with:
-          name: mod_assets
-          path: mod_assets
+  #     - name: Setup Go 1.25.8
+  #       uses: actions/setup-go@v5
+  #       with:
+  #         go-version: 1.25.8
 
-      - uses: actions/download-artifact@v7
-        name: Download tsc_mod_assets artifact
-        with:
-          name: tsc_mod_assets
-          path: tsc_mod_assets
+  #     - name: Install wails
+  #       run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.11
 
-      - run: cp -r mod_assets go-app/embed; cp -r tsc_mod_assets go-app/embed;
-      - run: |
-          VERSION=$(head -n 1 RELEASE_VERSION)
-          cd go-app
-          wails build -tags webkit2_41 -ldflags="-X 'main.VERSION=$VERSION' -X 'main.AXIOM_TOKEN=$AXIOM_TOKEN'"
-        env:
-          AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
+  #     - uses: actions/download-artifact@v7
+  #       name: Download mod_assets artifact
+  #       with:
+  #         name: mod_assets
+  #         path: mod_assets
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tswcontrollerapp_linux
-          path: |
-            go-app/build/bin/tsw-controller-app
+  #     - uses: actions/download-artifact@v7
+  #       name: Download tsc_mod_assets artifact
+  #       with:
+  #         name: tsc_mod_assets
+  #         path: tsc_mod_assets
 
-      - run: |
-          VERSION=$(head -n 1 RELEASE_VERSION)
-          mkdir tswcontrollerapp_debian_amd64
-          mkdir -p tswcontrollerapp_debian_amd64/DEBIAN
-          mkdir -p tswcontrollerapp_debian_amd64/usr/local/bin
-          cp go-app/build/bin/tsw-controller-app tswcontrollerapp_debian_amd64/usr/local/bin/
-          cat <<EOF > tswcontrollerapp_debian_amd64/DEBIAN/control
-          Package: tswcontrollerapp
-          Version: ${VERSION}
-          Section: utils
-          Priority: optional
-          Architecture: amd64
-          Depends: libwebkit2gtk-4.1-0, libgtk-3-0
-          Maintainer: L Martens <hi@liahmartens.com>
-          Description: TSW Controller App
-          EOF
-          dpkg-deb --build tswcontrollerapp_debian_amd64
+  #     - run: cp -r mod_assets go-app/embed; cp -r tsc_mod_assets go-app/embed;
+  #     - run: |
+  #         VERSION=$(head -n 1 RELEASE_VERSION)
+  #         cd go-app
+  #         wails build -tags webkit2_41 -ldflags="-X 'main.VERSION=$VERSION' -X 'main.AXIOM_TOKEN=$AXIOM_TOKEN'"
+  #       env:
+  #         AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tswcontrollerapp_linux_debian
-          path: |
-            tswcontrollerapp_debian_amd64.deb
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: tswcontrollerapp_linux
+  #         path: |
+  #           go-app/build/bin/tsw-controller-app
 
-  build__goapp__macos:
-    runs-on: macos-latest
-    needs: [build__mod_assets, build__tscmod_assets]
-    steps:
-      - uses: actions/checkout@v4
+  #     - run: |
+  #         VERSION=$(head -n 1 RELEASE_VERSION)
+  #         mkdir tswcontrollerapp_debian_amd64
+  #         mkdir -p tswcontrollerapp_debian_amd64/DEBIAN
+  #         mkdir -p tswcontrollerapp_debian_amd64/usr/local/bin
+  #         cp go-app/build/bin/tsw-controller-app tswcontrollerapp_debian_amd64/usr/local/bin/
+  #         cat <<EOF > tswcontrollerapp_debian_amd64/DEBIAN/control
+  #         Package: tswcontrollerapp
+  #         Version: ${VERSION}
+  #         Section: utils
+  #         Priority: optional
+  #         Architecture: amd64
+  #         Depends: libwebkit2gtk-4.1-0, libgtk-3-0
+  #         Maintainer: L Martens <hi@liahmartens.com>
+  #         Description: TSW Controller App
+  #         EOF
+  #         dpkg-deb --build tswcontrollerapp_debian_amd64
 
-      - name: Setup Go 1.25.8
-        uses: actions/setup-go@v5
-        with:
-          go-version: 1.25.8
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: tswcontrollerapp_linux_debian
+  #         path: |
+  #           tswcontrollerapp_debian_amd64.deb
 
-      - name: Install wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.11
+  # build__goapp__macos:
+  #   runs-on: macos-latest
+  #   needs: [build__mod_assets, build__tscmod_assets]
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v7
-        name: Download mod_assets artifact
-        with:
-          name: mod_assets
-          path: mod_assets
+  #     - name: Setup Go 1.25.8
+  #       uses: actions/setup-go@v5
+  #       with:
+  #         go-version: 1.25.8
 
-      - uses: actions/download-artifact@v7
-        name: Download tsc_mod_assets artifact
-        with:
-          name: tsc_mod_assets
-          path: tsc_mod_assets
+  #     - name: Install wails
+  #       run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.11
 
-      - run: cp -r mod_assets go-app/embed; cp -r tsc_mod_assets go-app/embed
-      - run: |
-          VERSION=$(head -n 1 RELEASE_VERSION)
-          cd go-app
-          wails build -ldflags="-X 'main.VERSION=$VERSION' -X 'main.AXIOM_TOKEN=$AXIOM_TOKEN'"
-        env:
-          AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
-      - run: |
-          cd go-app
-          chmod +x build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
-          otool -L build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
-          mkdir -p build/bin/tsw-controller-app.app/Contents/Frameworks
-          install_name_tool -add_rpath @executable_path/../Frameworks build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
-          codesign --force --deep --sign - build/bin/tsw-controller-app.app
-          otool -L build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tswcontrollerapp_macos
-          path: |
-            go-app/build/bin
-  build__virtual_controller_app:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  #     - uses: actions/download-artifact@v7
+  #       name: Download mod_assets artifact
+  #       with:
+  #         name: mod_assets
+  #         path: mod_assets
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
+  #     - uses: actions/download-artifact@v7
+  #       name: Download tsc_mod_assets artifact
+  #       with:
+  #         name: tsc_mod_assets
+  #         path: tsc_mod_assets
 
-      - working-directory: virtual-controller
-        run: |
-          node ./bin/apply-release-version.mjs
+  #     - run: cp -r mod_assets go-app/embed; cp -r tsc_mod_assets go-app/embed
+  #     - run: |
+  #         VERSION=$(head -n 1 RELEASE_VERSION)
+  #         cd go-app
+  #         wails build -ldflags="-X 'main.VERSION=$VERSION' -X 'main.AXIOM_TOKEN=$AXIOM_TOKEN'"
+  #       env:
+  #         AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
+  #     - run: |
+  #         cd go-app
+  #         chmod +x build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
+  #         otool -L build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
+  #         mkdir -p build/bin/tsw-controller-app.app/Contents/Frameworks
+  #         install_name_tool -add_rpath @executable_path/../Frameworks build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
+  #         codesign --force --deep --sign - build/bin/tsw-controller-app.app
+  #         otool -L build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: tswcontrollerapp_macos
+  #         path: |
+  #           go-app/build/bin
+  # build__virtual_controller_app:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - working-directory: virtual-controller
-        run: |
-          npm ci
-          npm run build
-          npm run cap:sync
+  #     - uses: actions/setup-node@v6
+  #       with:
+  #         node-version: 22
 
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
+  #     - working-directory: virtual-controller
+  #       run: |
+  #         node ./bin/apply-release-version.mjs
 
-      - id: versioning
-        name: Get version code and name
-        run: |
-          export RELEASE_VERSION=$(cat ./RELEASE_VERSION)
-          export RELEASE_VERSION_MAJOR=$(echo $RELEASE_VERSION | cut -d. -f1)
-          export RELEASE_VERSION_MINOR=$(echo $RELEASE_VERSION | cut -d. -f2)
-          export RELEASE_VERSION_PATCH=$(echo $RELEASE_VERSION | cut -d. -f3)
-          echo VERSION_NAME=$RELEASE_VERSION >> "$GITHUB_OUTPUT"
-          echo VERSION_CODE=$((RELEASE_VERSION_MAJOR*1000000 + RELEASE_VERSION_MINOR*1000 + RELEASE_VERSION_PATCH)) >> "$GITHUB_OUTPUT"
+  #     - working-directory: virtual-controller
+  #       run: |
+  #         npm ci
+  #         npm run build
+  #         npm run cap:sync
 
-      - name: Build and Sign APK
-        run: |
-          cd virtual-controller/android
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > app/release.keystore
-          ./gradlew assembleRelease
-          find app/build/outputs/apk/release
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          ANDROID_RELEASE_VERSION_CODE: ${{ steps.versioning.outputs.VERSION_CODE }}
-          ANDROID_RELEASE_VERSION_NAME: ${{ steps.versioning.outputs.VERSION_NAME }}
+  #     - name: Set up JDK
+  #       uses: actions/setup-java@v4
+  #       with:
+  #         distribution: temurin
+  #         java-version: 21
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: tswvirtualcontrollerapp_android
-          path: virtual-controller/android/app/build/outputs/apk/release/app-release.apk
+  #     - id: versioning
+  #       name: Get version code and name
+  #       run: |
+  #         export RELEASE_VERSION=$(cat ./RELEASE_VERSION)
+  #         export RELEASE_VERSION_MAJOR=$(echo $RELEASE_VERSION | cut -d. -f1)
+  #         export RELEASE_VERSION_MINOR=$(echo $RELEASE_VERSION | cut -d. -f2)
+  #         export RELEASE_VERSION_PATCH=$(echo $RELEASE_VERSION | cut -d. -f3)
+  #         echo VERSION_NAME=$RELEASE_VERSION >> "$GITHUB_OUTPUT"
+  #         echo VERSION_CODE=$((RELEASE_VERSION_MAJOR*1000000 + RELEASE_VERSION_MINOR*1000 + RELEASE_VERSION_PATCH)) >> "$GITHUB_OUTPUT"
 
-  prerelease:
-    runs-on: ubuntu-latest
-    needs:
-      [
-        build__goapp__linux,
-        build__goapp__windows,
-        build__goapp__macos,
-        build__virtual_controller_app,
-      ]
-    steps:
-      - uses: actions/download-artifact@v7
-        name: Download all artifacts
+  #     - name: Build and Sign APK
+  #       run: |
+  #         cd virtual-controller/android
+  #         echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > app/release.keystore
+  #         ./gradlew assembleRelease
+  #         find app/build/outputs/apk/release
+  #       env:
+  #         ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+  #         ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+  #         ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+  #         ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+  #         ANDROID_RELEASE_VERSION_CODE: ${{ steps.versioning.outputs.VERSION_CODE }}
+  #         ANDROID_RELEASE_VERSION_NAME: ${{ steps.versioning.outputs.VERSION_NAME }}
 
-      - name: debug
-        run: |
-          find .
+  #     - name: Upload APK
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: tswvirtualcontrollerapp_android
+  #         path: virtual-controller/android/app/build/outputs/apk/release/app-release.apk
 
-      - name: Collect all release assets
-        run: |
-          mkdir release_assets
+  # prerelease:
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #     [
+  #       build__goapp__linux,
+  #       build__goapp__windows,
+  #       build__goapp__macos,
+  #       build__virtual_controller_app,
+  #     ]
+  #   steps:
+  #     - uses: actions/download-artifact@v7
+  #       name: Download all artifacts
 
-          cp -r tswcontrollerapp_windows release_assets/tswcontrollerapp_win64_binary
-          cp tswcontrollerapp_windows_installer/tswcontrollerapp-setup.exe release_assets/tswcontrollerapp_win64_setup.exe
+  #     - name: debug
+  #       run: |
+  #         find .
 
-          cp tswcontrollerapp_linux/tsw-controller-app release_assets/tswcontrollerapp_linux_amd64_binary
-          cp tswcontrollerapp_linux_debian/tswcontrollerapp_debian_amd64.deb release_assets/tswcontrollerapp_debian_amd64.deb
+  #     - name: Collect all release assets
+  #       run: |
+  #         mkdir release_assets
 
-          mkdir -p release_assets/tswcontrollerapp_macos
-          cp -r tswcontrollerapp_macos/tsw-controller-app.app release_assets/tswcontrollerapp_macos/tsw-controller-app.app
+  #         cp -r tswcontrollerapp_windows release_assets/tswcontrollerapp_win64_binary
+  #         cp tswcontrollerapp_windows_installer/tswcontrollerapp-setup.exe release_assets/tswcontrollerapp_win64_setup.exe
 
-          mkdir -p release_assets/tswvirtualcontrollerapp_android
-          cp tswvirtualcontrollerapp_android/app-release.apk release_assets/tswvirtualcontrollerapp_android/tswvirtualcontrollerapp_android.apk
+  #         cp tswcontrollerapp_linux/tsw-controller-app release_assets/tswcontrollerapp_linux_amd64_binary
+  #         cp tswcontrollerapp_linux_debian/tswcontrollerapp_debian_amd64.deb release_assets/tswcontrollerapp_debian_amd64.deb
 
-          cp -r mod_assets release_assets/manual_ue4ss_mod_installation
+  #         mkdir -p release_assets/tswcontrollerapp_macos
+  #         cp -r tswcontrollerapp_macos/tsw-controller-app.app release_assets/tswcontrollerapp_macos/tsw-controller-app.app
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release_assets
-          path: release_assets
+  #         mkdir -p release_assets/tswvirtualcontrollerapp_android
+  #         cp tswvirtualcontrollerapp_android/app-release.apk release_assets/tswvirtualcontrollerapp_android/tswvirtualcontrollerapp_android.apk
+
+  #         cp -r mod_assets release_assets/manual_ue4ss_mod_installation
+
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: release_assets
+  #         path: release_assets
