@@ -49,20 +49,20 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            tsw-controller-mod/socket-connection-lib/target
-          key: ${{ runner.os }}_socketconnectionlib_cargo_${{ hashFiles('tsw-controller-mod/socket-connection-lib/Cargo.lock') }}
+            socket-connection-lib/target
+          key: ${{ runner.os }}_socketconnectionlib_cargo_${{ hashFiles('socket-connection-lib/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}_socketconnectionlib_cargo_
       - run: |
-          cd ./tsw-controller-mod/socket-connection-lib
+          cd ./socket-connection-lib
           cargo build --release
       - uses: actions/upload-artifact@v4
         with:
           name: socketconnectionlib
           path: |
-            tsw-controller-mod/socket-connection-lib/target/release/*.dll
-            tsw-controller-mod/socket-connection-lib/target/release/*.lib
-            tsw-controller-mod/socket-connection-lib/*.h
+            socket-connection-lib/target/release/*.dll
+            socket-connection-lib/target/release/*.lib
+            socket-connection-lib/*.h
 
   build__tscmod:
     runs-on: windows-2022
