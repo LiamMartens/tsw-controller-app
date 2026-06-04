@@ -175,6 +175,7 @@ jobs:
           add_subdirectory("KismetDebuggerMod")
           add_subdirectory("EventViewerMod")
           add_subdirectory("TSWControllerMod")
+          add_subdirectory("RunningTrainControllerMod")
           get_property(TARGETS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY BUILDSYSTEM_TARGETS)
           foreach(target ${TARGETS})
               set_target_properties(${target} PROPERTIES FOLDER "mods")
