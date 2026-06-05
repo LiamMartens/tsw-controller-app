@@ -15,7 +15,7 @@ import {
   SaveControlMapping,
 } from "../../../../wailsjs/go/main/App";
 
-const FORM_ID = "CabDebuggerMapControlSaveModal";
+const FORM_ID = "CabDebuggerProfileAssignmentSaveModal";
 
 type Props = {
   openState: ProfileSchema["controls"][number] | null;
@@ -32,7 +32,7 @@ const formSchema = z.object({
 
 export class ProfileSavedModalCloseReason implements ModalCloseReason {}
 
-const CabDebuggerMapControlSaveModalContent = ({
+const CabDebuggerProfileAssignmentSaveModalContent = ({
   openState: controlMapping,
   onClose,
 }: ContentProps) => {
@@ -138,14 +138,14 @@ const CabDebuggerMapControlSaveModalContent = ({
   );
 };
 
-export const CabDebuggerMapControlSaveModal = ({
+export const CabDebuggerProfileAssignmentSaveModal = ({
   openState,
   onClose,
 }: Props) => {
   return (
     <Modal
       openState={openState ?? false}
-      Component={CabDebuggerMapControlSaveModalContent}
+      Component={CabDebuggerProfileAssignmentSaveModalContent}
       onClose={onClose}
     />
   );
