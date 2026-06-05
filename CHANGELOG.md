@@ -2,7 +2,7 @@
 # CHANGELOG
 
 ## v1.17.0
-- Add support for Running Train
+- Add support for Running Train (beta)
 - Add simple map keybinding form
 
 ## v1.16.1
