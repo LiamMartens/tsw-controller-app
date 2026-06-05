@@ -13,6 +13,7 @@ import {
   OpenNewProfileBuilderForDeviceID,
   InstallTrainSimClassicMod,
   InstallWondersOfSodorMod,
+  InstallRunningTrainMod,
   SaveProfileForSharing,
   SaveProfileForSharingWithControllerInformation,
   ImportProfile,
@@ -152,6 +153,12 @@ export const MainTab = ({ onOpenCabDebuggerTab }: Props) => {
       .catch((err) => alert(String(err), "error"));
   };
 
+  const handleInstallRunningTrainMod = () => {
+    InstallRunningTrainMod()
+      .then(() => refetchLastInstalledModVersion(version))
+      .catch((err) => alert(String(err), "error"));
+  };
+
   const handleImportProfile = () => {
     ImportProfile()
       .then(() => LoadConfiguration())
@@ -267,7 +274,12 @@ export const MainTab = ({ onOpenCabDebuggerTab }: Props) => {
             </li>
             <li>
               <button onClick={handleInstallWondorsOfSodorMod}>
-                Install Wonders of Sodor
+                Install Wonders of Sodor mod
+              </button>
+            </li>
+            <li>
+              <button onClick={handleInstallRunningTrainMod}>
+                Install Running Train mod (beta)
               </button>
             </li>
           </ul>

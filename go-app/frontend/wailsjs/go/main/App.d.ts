@@ -38,6 +38,8 @@ export function ImportProfile():Promise<void>;
 
 export function ImportSharedProfile(arg1:main.Interop_SharedProfile):Promise<void>;
 
+export function InstallRunningTrainMod():Promise<void>;
+
 export function InstallTrainSimClassicMod():Promise<void>;
 
 export function InstallTrainSimWorldMod():Promise<void>;

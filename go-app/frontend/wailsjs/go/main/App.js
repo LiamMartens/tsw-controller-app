@@ -74,6 +74,10 @@ export function ImportSharedProfile(arg1) {
   return window['go']['main']['App']['ImportSharedProfile'](arg1);
 }
 
+export function InstallRunningTrainMod() {
+  return window['go']['main']['App']['InstallRunningTrainMod']();
+}
+
 export function InstallTrainSimClassicMod() {
   return window['go']['main']['App']['InstallTrainSimClassicMod']();
 }

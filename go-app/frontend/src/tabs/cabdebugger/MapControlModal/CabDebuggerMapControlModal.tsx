@@ -11,9 +11,9 @@ import {
   ProfileSchema,
 } from "../../../profile-schema/schema";
 import {
-  CabDebuggerMapControlSaveModal,
+  CabDebuggerProfileAssignmentSaveModal,
   ProfileSavedModalCloseReason,
-} from "./CabDebuggerMapControlSaveModal";
+} from "../ProfileAssignmentSaveModal/CabDebuggerProfileAssignmentSaveModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { mapControlFormSchema, MapControlFormValues } from "./mapControlForm";
 import { CabDebuggerMapControlModalContent_SimpleButtonOrSwitchConfiguration } from "./CabDebuggerMapControlModalContent_SimpleButtonOrSwitchConfiguration";
@@ -186,7 +186,7 @@ const CabDebuggerMapControlModalContent = ({
           </button>
         </div>
       </div>
-      <CabDebuggerMapControlSaveModal
+      <CabDebuggerProfileAssignmentSaveModal
         openState={saveProfileOpenState}
         onClose={handleCloseSaveModal}
       />

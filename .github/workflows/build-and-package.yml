@@ -49,20 +49,20 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            tsw-controller-mod/socket-connection-lib/target
-          key: ${{ runner.os }}_socketconnectionlib_cargo_${{ hashFiles('tsw-controller-mod/socket-connection-lib/Cargo.lock') }}
+            socket-connection-lib/target
+          key: ${{ runner.os }}_socketconnectionlib_cargo_${{ hashFiles('socket-connection-lib/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}_socketconnectionlib_cargo_
       - run: |
-          cd ./tsw-controller-mod/socket-connection-lib
+          cd ./socket-connection-lib
           cargo build --release
       - uses: actions/upload-artifact@v4
         with:
           name: socketconnectionlib
           path: |
-            tsw-controller-mod/socket-connection-lib/target/release/*.dll
-            tsw-controller-mod/socket-connection-lib/target/release/*.lib
-            tsw-controller-mod/socket-connection-lib/*.h
+            socket-connection-lib/target/release/*.dll
+            socket-connection-lib/target/release/*.lib
+            socket-connection-lib/*.h
 
   build__tscmod:
     runs-on: windows-2022
@@ -155,18 +155,27 @@ jobs:
       - name: Copy custom mod
         run: |
           Copy-Item -Path "tsw-controller-mod/ue4ss-mod" -Destination "RE-UE4SS/cppmods/TSWControllerMod" -Recurse -Force
+          Copy-Item -Path "running-train-controller-mod/ue4ss-mod" -Destination "RE-UE4SS/cppmods/RunningTrainControllerMod" -Recurse -Force
+
           Copy-Item -Path "socketconnectionlib/tsw_controller_mod_socket_connection.h" -Destination "RE-UE4SS/cppmods/TSWControllerMod/include/tsw_controller_mod_socket_connection.h" -Force
           Copy-Item -Path "socketconnectionlib/target/release/tsw_controller_mod_socket_connection.dll" -Destination "RE-UE4SS/cppmods/TSWControllerMod/lib/tsw_controller_mod_socket_connection.dll" -Force
           Copy-Item -Path "socketconnectionlib/target/release/tsw_controller_mod_socket_connection.dll.lib" -Destination "RE-UE4SS/cppmods/TSWControllerMod/lib/tsw_controller_mod_socket_connection.lib" -Force
+
+          Copy-Item -Path "socketconnectionlib/tsw_controller_mod_socket_connection.h" -Destination "RE-UE4SS/cppmods/RunningTrainControllerMod/include/tsw_controller_mod_socket_connection.h" -Force
+          Copy-Item -Path "socketconnectionlib/target/release/tsw_controller_mod_socket_connection.dll" -Destination "RE-UE4SS/cppmods/RunningTrainControllerMod/lib/tsw_controller_mod_socket_connection.dll" -Force
+          Copy-Item -Path "socketconnectionlib/target/release/tsw_controller_mod_socket_connection.dll.lib" -Destination "RE-UE4SS/cppmods/RunningTrainControllerMod/lib/tsw_controller_mod_socket_connection.lib" -Force
+
           @"
           includes("KismetDebuggerMod")
           includes("TSWControllerMod")
+          includes("RunningTrainControllerMod")
           "@ | Out-File -FilePath "RE-UE4SS/cppmods/xmake.lua" -Encoding utf8
           @"
           set_property(GLOBAL PROPERTY USE_FOLDERS ON)
           add_subdirectory("KismetDebuggerMod")
           add_subdirectory("EventViewerMod")
           add_subdirectory("TSWControllerMod")
+          add_subdirectory("RunningTrainControllerMod")
           get_property(TARGETS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY BUILDSYSTEM_TARGETS)
           foreach(target ${TARGETS})
               set_target_properties(${target} PROPERTIES FOLDER "mods")
@@ -194,6 +203,11 @@ jobs:
         with:
           name: tswcontrollermod
           path: RE-UE4SS/build_cmake_Game__Shipping__Win64/Game__Shipping__Win64/bin/TSWControllerMod.dll
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: runningtraincontrollermod
+          path: RE-UE4SS/build_cmake_Game__Shipping__Win64/Game__Shipping__Win64/bin/RunningTrainControllerMod.dll
 
   build__mod_assets:
     runs-on: ubuntu-22.04
@@ -236,9 +250,31 @@ jobs:
           name: tsc_mod_assets
           path: tsc_mod_assets
 
+  build__running_train_mod_assets:
+    runs-on: ubuntu-22.04
+    needs: [build__socketconnectionlib, build__ue4ssmod]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v7
+        name: Download previously built artifacts
+
+      - run: |
+          mkdir running_train_mod_assets
+          install -D ue4ssproxy/dwmapi.dll running_train_mod_assets/dwmapi.dll
+          install -D ue4ssdll/UE4SS.dll running_train_mod_assets/ue4ss_tsw_controller_mod/UE4SS.dll
+          install -D socketconnectionlib/target/release/tsw_controller_mod_socket_connection.dll running_train_mod_assets/ue4ss_tsw_controller_mod/Mods/RunningTrainControllerMod/dlls/tsw_controller_mod_socket_connection.dll
+          install -D runningtraincontrollermod/RunningTrainControllerMod.dll running_train_mod_assets/ue4ss_tsw_controller_mod/Mods/RunningTrainControllerMod/dlls/main.dll
+          install -D go-app/embed/running_train_mod_assets/ue4ss_tsw_controller_mod/UE4SS-settings.ini running_train_mod_assets/ue4ss_tsw_controller_mod/UE4SS-settings.ini
+          touch running_train_mod_assets/ue4ss_tsw_controller_mod/Mods/RunningTrainControllerMod/enabled.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: running_train_mod_assets
+          path: running_train_mod_assets
+
   build__goapp__windows:
     runs-on: windows-2022
-    needs: [build__mod_assets, build__tscmod_assets]
+    needs:
+      [build__mod_assets, build__tscmod_assets, build__running_train_mod_assets]
     steps:
       - uses: actions/checkout@v4
 
@@ -274,8 +310,15 @@ jobs:
           name: tsc_mod_assets
           path: tsc_mod_assets
 
+      - uses: actions/download-artifact@v7
+        name: Download running_train_mod_assets artifact
+        with:
+          name: running_train_mod_assets
+          path: running_train_mod_assets
+
       - run: Copy-Item -Path mod_assets -Destination go-app/embed -Recurse -Force
       - run: Copy-Item -Path tsc_mod_assets -Destination go-app/embed -Recurse -Force
+      - run: Copy-Item -Path running_train_mod_assets -Destination go-app/embed -Recurse -Force
       - run: Get-ChildItem -File -Recurse -Path "go-app/embed/mod_assets"
       - run: |
           $env:VERSION=(Get-Content -Path RELEASE_VERSION -First 1)
@@ -311,7 +354,8 @@ jobs:
 
   build__goapp__linux:
     runs-on: ubuntu-22.04
-    needs: [build__mod_assets, build__tscmod_assets]
+    needs:
+      [build__mod_assets, build__tscmod_assets, build__running_train_mod_assets]
     steps:
       - uses: actions/checkout@v4
 
@@ -340,7 +384,13 @@ jobs:
           name: tsc_mod_assets
           path: tsc_mod_assets
 
-      - run: cp -r mod_assets go-app/embed; cp -r tsc_mod_assets go-app/embed;
+      - uses: actions/download-artifact@v7
+        name: Download running_train_mod_assets artifact
+        with:
+          name: running_train_mod_assets
+          path: running_train_mod_assets
+
+      - run: cp -r mod_assets go-app/embed; cp -r tsc_mod_assets go-app/embed; cp -r running_train_mod_assets go-app/embed;
       - run: |
           VERSION=$(head -n 1 RELEASE_VERSION)
           cd go-app
@@ -380,7 +430,8 @@ jobs:
 
   build__goapp__macos:
     runs-on: macos-latest
-    needs: [build__mod_assets, build__tscmod_assets]
+    needs:
+      [build__mod_assets, build__tscmod_assets, build__running_train_mod_assets]
     steps:
       - uses: actions/checkout@v4
 
@@ -404,7 +455,13 @@ jobs:
           name: tsc_mod_assets
           path: tsc_mod_assets
 
-      - run: cp -r mod_assets go-app/embed; cp -r tsc_mod_assets go-app/embed
+      - uses: actions/download-artifact@v7
+        name: Download running_train_mod_assets artifact
+        with:
+          name: running_train_mod_assets
+          path: running_train_mod_assets
+
+      - run: cp -r mod_assets go-app/embed; cp -r tsc_mod_assets go-app/embed; cp -r running_train_mod_assets go-app/embed
       - run: |
           VERSION=$(head -n 1 RELEASE_VERSION)
           cd go-app
