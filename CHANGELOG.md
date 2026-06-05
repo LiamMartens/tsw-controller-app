@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.17.0
+- Add support for Running Train
+
 ## v1.16.1
 - Use HID path matching to optionally find serial
 
