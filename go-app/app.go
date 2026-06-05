@@ -35,6 +35,9 @@ var embed_mod_assets_fs embed.FS
 //go:embed embed/tsc_mod_assets/*
 var embed_tsc_mod_assets_fs embed.FS
 
+//go:embed embed/running_train_mod_assets/*
+var embed_running_train_mod_assets_fs embed.FS
+
 //go:embed embed/config/*
 var embed_config_fs embed.FS
 
