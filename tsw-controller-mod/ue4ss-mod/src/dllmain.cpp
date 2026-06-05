@@ -563,7 +563,7 @@ class TSWControllerMod : public RC::CppUserModBase
     TSWControllerMod() : CppUserModBase()
     {
         ModName = STR("TSWControllerMod");
-        ModVersion = STR("1.10.1");
+        ModVersion = STR("1.17.0");
         ModDescription = STR("TSW Controller Utility Helper");
         ModAuthors = STR("Liah Martens");
 

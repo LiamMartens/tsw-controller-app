@@ -218,7 +218,7 @@ class RunningTrainControllerMod : public RC::CppUserModBase
 
             if (control_pair.first == CONTROL_NAME_THROTTLE)
             {
-                target_value = RunningTrainControllerMod::TRAIN_STATE->Throttle + target_value;
+                if (should_be_relative) { target_value = RunningTrainControllerMod::TRAIN_STATE->Throttle + target_value; }
                 RunningTrainControllerMod::set_int_value_from_property(actor, STR("CP_Throttle"), target_value);
                 RunningTrainControllerMod::set_int_value_from_property(base_train, STR("P_Throttle"), target_value);
                 RunningTrainControllerMod::set_int_value_from_property(base_train, STR("Reg_Throttle"), target_value);
@@ -226,14 +226,14 @@ class RunningTrainControllerMod : public RC::CppUserModBase
 
             if (control_pair.first == CONTROL_NAME_REVERSER)
             {
-                target_value = RunningTrainControllerMod::TRAIN_STATE->Reverser + target_value;
+                if (should_be_relative) { target_value = RunningTrainControllerMod::TRAIN_STATE->Reverser + target_value; }
                 RunningTrainControllerMod::set_int_value_from_property(actor, STR("CR_Reverser"), target_value);
                 RunningTrainControllerMod::set_int_value_from_property(base_train, STR("P_Reverser"), target_value);
             }
 
             if (control_pair.first == CONTROL_NAME_BRAKE)
             {
-                target_value = RunningTrainControllerMod::TRAIN_STATE->Brake + target_value;
+                if (should_be_relative) { target_value = RunningTrainControllerMod::TRAIN_STATE->Brake + target_value; }
                 RunningTrainControllerMod::set_int_value_from_property(actor, STR("CB Brake"), target_value);
                 RunningTrainControllerMod::set_int_value_from_property(base_train, STR("P_Brake"), target_value);
                 RunningTrainControllerMod::set_int_value_from_property(base_train, STR("Reg_Brake"), target_value);
@@ -286,7 +286,7 @@ class RunningTrainControllerMod : public RC::CppUserModBase
     RunningTrainControllerMod() : CppUserModBase()
     {
         ModName = STR("RunningTrainControllerMod");
-        ModVersion = STR("1.10.1");
+        ModVersion = STR("1.17.0");
         ModDescription = STR("TSW Controller Utility Helper");
         ModAuthors = STR("Liah Martens");
 
