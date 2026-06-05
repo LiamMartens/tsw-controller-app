@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.17.1
+- Update UE4SS to latest experimental
+
 ## v1.17.0
 - Add support for Running Train (beta)
 - Add simple map keybinding form
