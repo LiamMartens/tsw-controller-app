@@ -279,7 +279,7 @@ export const MainTab = ({ onOpenCabDebuggerTab }: Props) => {
             </li>
             <li>
               <button onClick={handleInstallRunningTrainMod}>
-                Install Running Train mod
+                Install Running Train mod (beta)
               </button>
             </li>
           </ul>
