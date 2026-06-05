@@ -1,6 +1,6 @@
 # TSW Controller App
 
-This program allows you to use any joystick to directly control the Train Sim World (5/6) or Train Simulator Classic game. This is NOT a raildriver compatibility layer, rather it interfaces directly with the game.
+This program allows you to use any joystick to directly control various train simulator games with any controller (Train Sim World 5/6, Train Simulator Classic, Wonders of Sodor, Running Train). This is NOT a raildriver compatibility layer, rather it interfaces directly with the game.
 
 ## Feature Highlights
 ### Controller Specific Profile Selection
@@ -35,6 +35,7 @@ You can find some demos below:
 - [Birmingham Cross-City Demo](https://f001.backblazeb2.com/file/tsw-controller-app-demos/birmingham-cross-city.mp4)
 - [Class 101 Demo](https://f001.backblazeb2.com/file/tsw-controller-app-demos/class101.mp4)
 - [LIRR Demo](https://f001.backblazeb2.com/file/tsw-controller-app-demos/lirr.mp4)
+- [Running Train Demo (beta)](https://f001.backblazeb2.com/file/tsw-controller-app-demos/runningtrain/running-train-demo.mp4)
 
 ## Installation
 
