@@ -5,23 +5,15 @@
     { "path": "ue4ss_tsw_controller_mod/UE4SS.dll", "action": "copy" },
     { "path": "ue4ss_tsw_controller_mod/UE4SS-settings.ini", "action": "copy" },
     {
-      "path": "ue4ss_tsw_controller_mod/Mods/UE4SS_Signatures/FName_Constructor.lua",
+      "path": "ue4ss_tsw_controller_mod/Mods/TSWControllerMod/enabled.txt",
       "action": "copy"
     },
     {
-      "path": "ue4ss_tsw_controller_mod/Mods/UE4SS_Signatures/StaticConstructObject.lua",
+      "path": "ue4ss_tsw_controller_mod/Mods/TSWControllerMod/dlls/main.dll",
       "action": "copy"
     },
     {
-      "path": "ue4ss_tsw_controller_mod/Mods/RunningTrainControllerMod/enabled.txt",
-      "action": "copy"
-    },
-    {
-      "path": "ue4ss_tsw_controller_mod/Mods/RunningTrainControllerMod/dlls/main.dll",
-      "action": "copy"
-    },
-    {
-      "path": "ue4ss_tsw_controller_mod/Mods/RunningTrainControllerMod/dlls/tsw_controller_mod_socket_connection.dll",
+      "path": "ue4ss_tsw_controller_mod/Mods/TSWControllerMod/dlls/tsw_controller_mod_socket_connection.dll",
       "action": "copy"
     }
   ]
