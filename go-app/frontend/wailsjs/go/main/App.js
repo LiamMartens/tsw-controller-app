@@ -118,8 +118,8 @@ export function SaveCalibration(arg1) {
   return window['go']['main']['App']['SaveCalibration'](arg1);
 }
 
-export function SaveControlMapping(arg1) {
-  return window['go']['main']['App']['SaveControlMapping'](arg1);
+export function SaveControlMapping(arg1, arg2) {
+  return window['go']['main']['App']['SaveControlMapping'](arg1, arg2);
 }
 
 export function SaveLogs(arg1) {

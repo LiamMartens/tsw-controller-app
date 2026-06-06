@@ -60,7 +60,7 @@ export function ResetCabControlState():Promise<void>;
 
 export function SaveCalibration(arg1:main.Interop_ControllerCalibration):Promise<void>;
 
-export function SaveControlMapping(arg1:main.Interop_SaveControlMapping):Promise<void>;
+export function SaveControlMapping(arg1:main.Interop_SaveControlMapping,arg2:main.Interop_SaveControlMapping_Options):Promise<void>;
 
 export function SaveLogs(arg1:Array<string>):Promise<void>;
 

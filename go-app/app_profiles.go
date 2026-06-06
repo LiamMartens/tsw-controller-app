@@ -301,6 +301,7 @@ Saves a profile control mapping;
 */
 func (a *App) SaveControlMapping(
 	mapping Interop_SaveControlMapping,
+	options Interop_SaveControlMapping_Options,
 ) error {
 	profile, err := config.ControllerProfileFromJSON(mapping.ProfileJSON, config.Config_Controller_Profile_Metadata{
 		Path: mapping.ExistingPath,
@@ -321,21 +322,31 @@ func (a *App) SaveControlMapping(
 		return true
 	})
 
-	did_merge_with_existing_control := false
 	for _, control := range profile.Controls {
+		existing_control_index := -1
 		for index, existing_control := range merged_profile.Controls {
 			if control.Name == existing_control.Name {
-				assignments := existing_control.GetAssignments()
-				assignments = append(assignments, control.GetAssignments()...)
-				existing_control.Assignment = nil
-				existing_control.Assignments = &assignments
-				merged_profile.Controls[index] = existing_control
-				did_merge_with_existing_control = true
+				existing_control_index = index
 			}
 		}
-		if !did_merge_with_existing_control {
-			merged_profile.Controls = append(merged_profile.Controls, control)
+
+		if existing_control_index == -1 {
+			existing_control_index = len(merged_profile.Controls)
+			merged_profile.Controls = append(merged_profile.Controls, config.Config_Controller_Profile_Control{
+				Name: control.Name,
+			})
 		}
+
+		/* clear assignments if requested */
+		if options.ReplaceExistingAssignments {
+			merged_profile.Controls[existing_control_index].Assignment = nil
+			merged_profile.Controls[existing_control_index].Assignments = &[]config.Config_Controller_Profile_Control_Assignment{}
+		}
+
+		assignments := merged_profile.Controls[existing_control_index].GetAssignments()
+		assignments = append(assignments, control.GetAssignments()...)
+		merged_profile.Controls[existing_control_index].Assignment = nil
+		merged_profile.Controls[existing_control_index].Assignments = &assignments
 	}
 
 	/* check if path is set; if not generate filename for saving */

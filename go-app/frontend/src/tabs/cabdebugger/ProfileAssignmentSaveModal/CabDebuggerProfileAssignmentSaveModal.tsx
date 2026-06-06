@@ -28,6 +28,9 @@ type FormValues = z.infer<typeof formSchema>;
 const formSchema = z.object({
   profile: z.string(),
   name: z.string().min(1, "Name is required"),
+  options: z.object({
+    replaceExistingAssignments: z.boolean(),
+  }),
 });
 
 export class ProfileSavedModalCloseReason implements ModalCloseReason {}
@@ -43,6 +46,9 @@ const CabDebuggerProfileAssignmentSaveModalContent = ({
     defaultValues: {
       profile: "",
       name: "",
+      options: {
+        replaceExistingAssignments: false,
+      },
     },
   });
 
@@ -67,10 +73,15 @@ const CabDebuggerProfileAssignmentSaveModalContent = ({
         name: values.name,
         controls: [controlMapping],
       });
-      await SaveControlMapping({
-        ProfileJSON: jsonStr,
-        ExistingPath: selectedProfile?.Metadata.Path ?? "",
-      });
+      await SaveControlMapping(
+        {
+          ProfileJSON: jsonStr,
+          ExistingPath: selectedProfile?.Metadata.Path ?? "",
+        },
+        {
+          ReplaceExistingAssignments: values.options.replaceExistingAssignments,
+        },
+      );
       await LoadConfiguration();
       onClose(new ProfileSavedModalCloseReason());
     } catch (err) {
@@ -119,6 +130,17 @@ const CabDebuggerProfileAssignmentSaveModalContent = ({
               {form.formState.errors.name.message}
             </span>
           )}
+        </fieldset>
+        <fieldset className="fieldset bg-base-100 border-base-300 rounded-box w-full border p-4">
+          <legend className="fieldset-legend">Options</legend>
+          <label className="label">
+            <input
+              type="checkbox"
+              className="checkbox"
+              {...form.register("options.replaceExistingAssignments")}
+            />
+            Replace existing assignments for the same binding
+          </label>
         </fieldset>
       </form>
       <div className="flex gap-2 justify-end">

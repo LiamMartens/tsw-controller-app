@@ -26,8 +26,6 @@ import {
 } from "../../../../wailsjs/go/main/App";
 import { EventsOn } from "../../../../wailsjs/runtime/runtime";
 import { events } from "../../../events";
-// import { CabDebuggerMapControlModalContent_SimpleButtonOrSwitchConfiguration } from "./CabDebuggerMapControlModalContent_SimpleButtonOrSwitchConfiguration";
-// import { CabDebuggerMapControlModalContent_MultiSwitchOrLeverConfiguration } from "./CabDebuggerMapControlModalContent_MultiSwitchOrLeverConfiguration";
 
 const FORM_ID = "CabDebuggerMapKeybindingForm";
 
