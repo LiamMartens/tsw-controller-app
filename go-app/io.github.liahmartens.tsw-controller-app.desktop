@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=TSW Controller Utility
+Comment=Configure and manage TSW controller profiles
+Exec=tsw-controller-app
+Icon=io.github.liahmartens.tsw-controller-app
+Type=Application
+Categories=Game;
+Terminal=false

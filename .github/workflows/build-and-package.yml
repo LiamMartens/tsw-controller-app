@@ -363,6 +363,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libx11-dev xorg-dev libxtst-dev xsel xclip libpng++-dev xcb libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev libxkbcommon-x11-dev libxkbcommon-dev libgtk-3-dev libwebkit2gtk-4.1-dev
+          sudo apt-get install -y flatpak flatpak-builder
 
       - name: Setup Go 1.25.8
         uses: actions/setup-go@v5
@@ -404,7 +405,8 @@ jobs:
           path: |
             go-app/build/bin/tsw-controller-app
 
-      - run: |
+      - name: Package Deb
+        run: |
           VERSION=$(head -n 1 RELEASE_VERSION)
           mkdir tswcontrollerapp_debian_amd64
           mkdir -p tswcontrollerapp_debian_amd64/DEBIAN
@@ -422,11 +424,24 @@ jobs:
           EOF
           dpkg-deb --build tswcontrollerapp_debian_amd64
 
+      - name: Build Flatpak
+        working-directory: go-app
+        run: |
+          flatpak-builder --force-clean --repo=flatpak-repo build-dir io.github.liahmartens.tsw-controller-app.yml
+          flatpak build-export export build-dir
+          flatpak build-bundle export "io.github.liahmartens.tsw-controller-app.flatpak" "io.github.liahmartens.tsw-controller-app" "io.github.liahmartens.tsw-controller-app"
+
       - uses: actions/upload-artifact@v4
         with:
           name: tswcontrollerapp_linux_debian
           path: |
             tswcontrollerapp_debian_amd64.deb
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tswcontrollerapp_linux_flatpak
+          path: |
+            go-app/io.github.liahmartens.tsw-controller-app.flatpak
 
   build__goapp__macos:
     runs-on: macos-latest
@@ -470,8 +485,8 @@ jobs:
           AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
       - run: |
           cd go-app
-          chmod +x build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
           otool -L build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
+          chmod +x build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
           mkdir -p build/bin/tsw-controller-app.app/Contents/Frameworks
           install_name_tool -add_rpath @executable_path/../Frameworks build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
           codesign --force --deep --sign - build/bin/tsw-controller-app.app
@@ -543,6 +558,7 @@ jobs:
         build__goapp__linux,
         build__goapp__windows,
         build__goapp__macos,
+        build__goapp__flatpak,
         build__virtual_controller_app,
       ]
     steps:
@@ -569,7 +585,7 @@ jobs:
           mkdir -p release_assets/tswvirtualcontrollerapp_android
           cp tswvirtualcontrollerapp_android/app-release.apk release_assets/tswvirtualcontrollerapp_android/tswvirtualcontrollerapp_android.apk
 
-          cp -r mod_assets release_assets/manual_ue4ss_mod_installation
+          cp tswcontrollerapp_flatpak/io.github.liahmartens.tsw-controller-app.flatpak release_assets/tswcontrollerapp_flatpak/io.github.liahmartens.tsw-controller-app.flatpak
 
       - uses: actions/upload-artifact@v4
         with:

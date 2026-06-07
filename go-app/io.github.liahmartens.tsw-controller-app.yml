@@ -1,0 +1,20 @@
+app-id: io.github.liahmartens.tsw-controller-app
+runtime: org.freedesktop.Platform
+runtime-version: "24.08"
+sdk: org.freedesktop.Sdk
+command: tsw-controller-app
+
+modules:
+  - name: tsw-controller-app
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 tsw-controller-app /app/bin/tsw-controller-app
+      - install -Dm644 io.github.liahmartens.tsw-controller-app.desktop /app/share/applications/io.github.liahmartens.tsw-controller-app.desktop
+      - install -Dm644 io.github.liahmartens.tsw-controller-app.png /app/share/icons/hicolor/512x512/apps/io.github.liahmartens.tsw-controller-app.png
+    sources:
+      - type: file
+        path: tsw-controller-app
+      - type: file
+        path: io.github.liahmartens.tsw-controller-app.desktop
+      - type: file
+        path: io.github.liahmartens.tsw-controller-app.png
