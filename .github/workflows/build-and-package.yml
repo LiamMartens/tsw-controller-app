@@ -558,7 +558,6 @@ jobs:
         build__goapp__linux,
         build__goapp__windows,
         build__goapp__macos,
-        build__goapp__flatpak,
         build__virtual_controller_app,
       ]
     steps:
@@ -578,14 +577,13 @@ jobs:
 
           cp tswcontrollerapp_linux/tsw-controller-app release_assets/tswcontrollerapp_linux_amd64_binary
           cp tswcontrollerapp_linux_debian/tswcontrollerapp_debian_amd64.deb release_assets/tswcontrollerapp_debian_amd64.deb
+          cp tswcontrollerapp_linux_flatpak/io.github.liahmartens.tsw-controller-app.flatpak release_assets/tswcontrollerapp_linux_flatpak/io.github.liahmartens.tsw-controller-app.flatpak
 
           mkdir -p release_assets/tswcontrollerapp_macos
           cp -r tswcontrollerapp_macos/tsw-controller-app.app release_assets/tswcontrollerapp_macos/tsw-controller-app.app
 
           mkdir -p release_assets/tswvirtualcontrollerapp_android
           cp tswvirtualcontrollerapp_android/app-release.apk release_assets/tswvirtualcontrollerapp_android/tswvirtualcontrollerapp_android.apk
-
-          cp tswcontrollerapp_flatpak/io.github.liahmartens.tsw-controller-app.flatpak release_assets/tswcontrollerapp_flatpak/io.github.liahmartens.tsw-controller-app.flatpak
 
       - uses: actions/upload-artifact@v4
         with:
