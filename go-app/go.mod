@@ -5,6 +5,7 @@ go 1.25.8
 require (
 	github.com/Zyko0/go-sdl3 v0.1.1
 	github.com/axiomhq/axiom-go v0.31.1
+	github.com/bearsh/hid v1.6.0
 	github.com/creasty/go-easing v0.0.0-20161107103139-0cfd96d3a544
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/go-playground/validator/v10 v10.30.1

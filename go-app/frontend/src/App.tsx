@@ -49,7 +49,7 @@ const App = () => {
         <input
           type="radio"
           className="tab"
-          aria-label="Cab Debugger"
+          aria-label="Debugger & Mapper"
           value="cab_debugger"
           {...tabsForm.register("tab", { value: "cab_debugger" })}
         />
