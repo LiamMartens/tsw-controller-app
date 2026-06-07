@@ -448,9 +448,6 @@ jobs:
     needs: [build__goapp__linux]
     steps:
       - uses: actions/checkout@v4
-      - run:
-          flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-          flatpak install -y org.freedesktop.Sdk/x86_64/24.08 org.freedesktop.Platform/x86_64/24.08
 
       - uses: actions/download-artifact@v4
         with:
