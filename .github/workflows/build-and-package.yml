@@ -461,8 +461,7 @@ jobs:
         with:
           bundle: io.github.liahmartens.tsw-controller-app.flatpak
           manifest-path: go-app/io.github.liahmartens.tsw-controller-app.yml
-          cache-key: flatpak-builder-${{ matrix.arch }}-${{ github.sha }}
-          arch: ${{ matrix.arch }}
+          cache-key: tswcontrollerapp-flatpak-builder-${{ github.sha }}
 
       - uses: actions/upload-artifact@v4
         with:
