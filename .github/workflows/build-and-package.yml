@@ -462,6 +462,7 @@ jobs:
           bundle: io.github.liahmartens.tsw-controller-app.flatpak
           manifest-path: go-app/io.github.liahmartens.tsw-controller-app.yml
           cache-key: tswcontrollerapp-flatpak-builder-${{ github.sha }}
+          upload-artifact: false
 
       - uses: actions/upload-artifact@v4
         with:
@@ -612,7 +613,7 @@ jobs:
 
           cp tswcontrollerapp_linux/tsw-controller-app release_assets/tswcontrollerapp_linux_amd64_binary
           cp tswcontrollerapp_linux_debian/tswcontrollerapp_debian_amd64.deb release_assets/tswcontrollerapp_debian_amd64.deb
-          cp tswcontrollerapp_linux_flatpak/io.github.liahmartens.tsw-controller-app.flatpak release_assets/tswcontrollerapp_linux_flatpak/io.github.liahmartens.tsw-controller-app.flatpak
+          cp tswcontrollerapp_linux_flatpak/io.github.liahmartens.tsw-controller-app.flatpak release_assets/io.github.liahmartens.tsw-controller-app.flatpak
 
           mkdir -p release_assets/tswcontrollerapp_macos
           cp -r tswcontrollerapp_macos/tsw-controller-app.app release_assets/tswcontrollerapp_macos/tsw-controller-app.app
