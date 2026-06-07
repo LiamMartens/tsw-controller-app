@@ -454,6 +454,9 @@ jobs:
           name: tswcontrollerapp_linux
           path: tswcontrollerapp_linux
 
+      - run: |
+          cp tswcontrollerapp_linux/tsw-controller-app ./go-app/tsw-controller-app
+
       - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: io.github.liahmartens.tsw-controller-app.flatpak
