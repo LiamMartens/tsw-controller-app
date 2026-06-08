@@ -478,9 +478,9 @@ jobs:
 
       - name: Sign flatpak repo
         run: |
-          GPG_KEY_ID=$(gpg --with-colons --list-secret-keys | awk -F: -v fp="$FLATPAK_GPG_FINGERPRINT" '/^fpr:/ {fpr=$10} /^sec:/ && fpr ~ fp {print $5; exit}' | sed 's/.*/\U&/')
-          flatpak create-repo --sign="$GPG_KEY_ID" repo repo-signed
+          flatpak create-repo --sign="$FLATPAK_GPG_KEY_ID" repo repo-signed
         env:
+          FLATPAK_GPG_KEY_ID: ${{ secrets.FLATPAK_GPG_KEY_ID }}
           FLATPAK_GPG_FINGERPRINT: ${{ secrets.FLATPAK_GPG_FINGERPRINT }}
 
       - name: Generate flatpakrepo bundle
