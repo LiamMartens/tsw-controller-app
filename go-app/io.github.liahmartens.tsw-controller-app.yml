@@ -6,6 +6,7 @@ command: tsw-controller-app
 
 modules:
   - name: tsw-controller-app
+    version: "VERSION_PLACEHOLDER"
     buildsystem: simple
     build-commands:
       - install -Dm755 tsw-controller-app /app/bin/tsw-controller-app

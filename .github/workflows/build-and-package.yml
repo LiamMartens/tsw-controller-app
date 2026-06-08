@@ -456,6 +456,8 @@ jobs:
 
       - run: |
           cp tswcontrollerapp_linux/tsw-controller-app ./go-app/tsw-controller-app
+          VERSION=$(head -n 1 RELEASE_VERSION)
+          sed -i "s/VERSION_PLACEHOLDER/$VERSION/" go-app/io.github.liahmartens.tsw-controller-app.yml
 
       - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
@@ -463,6 +465,23 @@ jobs:
           manifest-path: go-app/io.github.liahmartens.tsw-controller-app.yml
           cache-key: tswcontrollerapp-flatpak-builder-${{ github.sha }}
           upload-artifact: false
+
+      - name: Import GPG key for signing
+        run: |
+          echo "$FLATPAK_GPG_KEY" | base64 --decode | gpg --import
+          gpg --list-secret-keys --keyid-format long
+        env:
+          FLATPAK_GPG_KEY: ${{ secrets.FLATPAK_GPG_KEY }}
+
+      - name: Sign flatpak repo
+        run: |
+          GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format long | grep sec | head -n1 | sed 's/.*\/\(.*\) .*/\1/')
+          flatpak create-repo --sign="$GPG_KEY_ID" repo repo-signed
+
+      - name: Generate flatpakrepo bundle
+        run: |
+          VERSION=$(head -n 1 RELEASE_VERSION)
+          flatpak create-flatpakrepo repo-signed io.github.liahmartens.tsw-controller-app.flatpak repo-signed/io.github.liahmartens.tsw-controller-app.$VERSION.flatpakrepo
 
       - uses: actions/upload-artifact@v4
         with:
@@ -475,6 +494,22 @@ jobs:
           name: tswcontrollerapp_linux_flatpak_repo
           path: |
             repo
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tswcontrollerapp_linux_flatpak_repo_signed
+          path: |
+            repo-signed
+
+      - name: Push Flatpak repo to gh-pages branch
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./repo-signed
+          keep_files: true
+          user_name: "GitHub Actions"
+          user_email: "actions@github.com"
 
   build__goapp__macos:
     runs-on: macos-latest
