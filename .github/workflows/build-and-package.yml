@@ -468,20 +468,26 @@ jobs:
 
       - name: Import GPG key for signing
         run: |
-          echo "$FLATPAK_GPG_KEY" | base64 --decode | gpg --import
+          echo "$FLATPAK_GPG_KEY" | base64 --decode | gpg --batch --yes --passphrase "$FLATPAK_GPG_PASSPHRASE" --import
+          echo "$FLATPAK_GPG_PUBLIC_KEY" | base64 --decode > public-key.gpg
           gpg --list-secret-keys --keyid-format long
         env:
           FLATPAK_GPG_KEY: ${{ secrets.FLATPAK_GPG_KEY }}
+          FLATPAK_GPG_PASSPHRASE: ${{ secrets.FLATPAK_GPG_PASSPHRASE }}
+          FLATPAK_GPG_PUBLIC_KEY: ${{ secrets.FLATPAK_GPG_PUBLIC_KEY }}
 
       - name: Sign flatpak repo
         run: |
-          GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format long | grep sec | head -n1 | sed 's/.*\/\(.*\) .*/\1/')
+          GPG_KEY_ID=$(gpg --with-colons --list-secret-keys | awk -F: -v fp="$FLATPAK_GPG_FINGERPRINT" '/^fpr:/ {fpr=$10} /^sec:/ && fpr ~ fp {print $5; exit}' | sed 's/.*/\U&/')
           flatpak create-repo --sign="$GPG_KEY_ID" repo repo-signed
+        env:
+          FLATPAK_GPG_FINGERPRINT: ${{ secrets.FLATPAK_GPG_FINGERPRINT }}
 
       - name: Generate flatpakrepo bundle
         run: |
           VERSION=$(head -n 1 RELEASE_VERSION)
           flatpak create-flatpakrepo repo-signed io.github.liahmartens.tsw-controller-app.flatpak repo-signed/io.github.liahmartens.tsw-controller-app.$VERSION.flatpakrepo
+          cp public-key.gpg repo-signed/
 
       - uses: actions/upload-artifact@v4
         with:
@@ -501,8 +507,19 @@ jobs:
           path: |
             repo-signed
 
+  publish-flatpak-repo:
+    runs-on: ubuntu-22.04
+    needs: [build__goapp__linux__flatpak]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: tswcontrollerapp_linux_flatpak_repo_signed
+          path: repo-signed
+
       - name: Push Flatpak repo to gh-pages branch
-        if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
