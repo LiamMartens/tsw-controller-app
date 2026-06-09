@@ -472,17 +472,34 @@ jobs:
           echo "$FLATPAK_GPG_PUBLIC_KEY" | base64 --decode > public-key.gpg
           gpg --list-secret-keys --keyid-format long
           mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
           echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
+          echo "batch" >> ~/.gnupg/gpg.conf
+          echo "no-tty" >> ~/.gnupg/gpg.conf
           gpgconf --kill gpg-agent
+          gpgconf --launch gpg-agent
         env:
           FLATPAK_GPG_KEY: ${{ secrets.FLATPAK_GPG_KEY }}
           FLATPAK_GPG_PASSPHRASE: ${{ secrets.FLATPAK_GPG_PASSPHRASE }}
           FLATPAK_GPG_PUBLIC_KEY: ${{ secrets.FLATPAK_GPG_PUBLIC_KEY }}
 
+      - name: Trust GPG key
+        run: |
+          echo -e "5\ny\n" | gpg --command-fd 0 --status-fd 2 --edit-key "$FLATPAK_GPG_KEY_ID" trust
+        env:
+          FLATPAK_GPG_KEY_ID: ${{ secrets.FLATPAK_GPG_KEY_ID }}
+
+      - name: Debug GPG signing
+        run: |
+          echo "test" | gpg --batch --yes --passphrase "$FLATPAK_GPG_PASSPHRASE" --clearsign
+        env:
+          FLATPAK_GPG_PASSPHRASE: ${{ secrets.FLATPAK_GPG_PASSPHRASE }}
+
       - name: Sign flatpak repo
         run: |
           cp -r repo repo-signed
+          export GPG_TTY=$(tty)
           flatpak build-update-repo --gpg-sign="$FLATPAK_GPG_KEY_ID" --no-update-appstream repo-signed
         env:
           FLATPAK_GPG_KEY_ID: ${{ secrets.FLATPAK_GPG_KEY_ID }}

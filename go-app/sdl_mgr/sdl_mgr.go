@@ -14,6 +14,7 @@ import (
 	"github.com/Zyko0/go-sdl3/bin/binsdl"
 	"github.com/Zyko0/go-sdl3/sdl"
 	"github.com/bearsh/hid"
+	"github.com/goforj/godump"
 	usbhid "rafaelmartins.com/p/usbhid"
 )
 
@@ -103,48 +104,58 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 		}
 	}
 
-	go_serial_devices := []*usbhid.Device{}
+	go_serial_devices_by_path := map[string]*usbhid.Device{}
 	for _, go_dev := range go_devices {
 		if strings.ToLower(go_dev.SerialNumber()) == serial_lower {
-			go_serial_devices = append(go_serial_devices, go_dev)
+			go_serial_devices_by_path[go_dev.Path()] = go_dev
 		}
 	}
-	if len(go_serial_devices) == 1 {
-		return &SDLMgr_HIDDevice{Go_Backend_Device: go_serial_devices[0]}, nil
+	if len(go_serial_devices_by_path) == 1 {
+		for _, device := range go_serial_devices_by_path {
+			return &SDLMgr_HIDDevice{Go_Backend_Device: device}, nil
+		}
 	}
 
-	native_serial_devices := []*hid.DeviceInfo{}
+	native_serial_devices_by_path := map[string]*hid.DeviceInfo{}
 	for ix := range native_devices {
 		native_device := &native_devices[ix]
+
 		if strings.ToLower(native_device.Serial) == serial_lower {
-			native_serial_devices = append(native_serial_devices, native_device)
+			native_serial_devices_by_path[native_device.Path] = native_device
 		}
 	}
-	if len(native_serial_devices) == 1 {
-		return &SDLMgr_HIDDevice{Native_Backend_Device: native_serial_devices[0]}, nil
+	if len(native_serial_devices_by_path) == 1 {
+		for _, device := range native_serial_devices_by_path {
+			return &SDLMgr_HIDDevice{Native_Backend_Device: device}, nil
+		}
 	}
 
-	go_deviceid_devices := []*usbhid.Device{}
+	go_deviceid_devices_by_path := map[string]*usbhid.Device{}
 	for _, go_dev := range go_devices {
 		go_dev_device_id := strings.ToLower(fmt.Sprintf("%04X:%04X", go_dev.VendorId(), go_dev.ProductId()))
 		if go_dev_device_id == device_id_lower {
-			go_deviceid_devices = append(go_deviceid_devices, go_dev)
+			go_deviceid_devices_by_path[go_dev.Path()] = go_dev
 		}
 	}
-	if len(go_deviceid_devices) == 1 {
-		return &SDLMgr_HIDDevice{Go_Backend_Device: go_deviceid_devices[0]}, nil
+	if len(go_deviceid_devices_by_path) == 1 {
+		for _, device := range go_deviceid_devices_by_path {
+			return &SDLMgr_HIDDevice{Go_Backend_Device: device}, nil
+		}
 	}
 
-	native_deviceid_devices := []*hid.DeviceInfo{}
+	native_deviceid_devices_by_path := map[string]*hid.DeviceInfo{}
 	for ix := range native_devices {
 		native_device := &native_devices[ix]
 		native_device_id := strings.ToLower(fmt.Sprintf("%04X:%04X", native_device.VendorID, native_device.ProductID))
 		if native_device_id == device_id_lower {
-			native_deviceid_devices = append(native_deviceid_devices, native_device)
+			native_deviceid_devices_by_path[native_device.Path] = native_device
 		}
 	}
-	if len(native_deviceid_devices) == 1 {
-		return &SDLMgr_HIDDevice{Native_Backend_Device: native_deviceid_devices[0]}, nil
+	godump.Dump(native_deviceid_devices_by_path)
+	if len(native_deviceid_devices_by_path) == 1 {
+		for _, device := range native_deviceid_devices_by_path {
+			return &SDLMgr_HIDDevice{Native_Backend_Device: device}, nil
+		}
 	}
 
 	return nil, fmt.Errorf("could not match HID device")
