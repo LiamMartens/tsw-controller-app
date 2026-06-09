@@ -483,7 +483,7 @@ jobs:
       - name: Sign flatpak repo
         run: |
           cp -r repo repo-signed
-          flatpak build-update-repo --gpg-sign="$FLATPAK_GPG_KEY_ID" --disable-appstream-import repo-signed
+          flatpak build-update-repo --gpg-sign="$FLATPAK_GPG_KEY_ID" --no-update-appstream repo-signed
         env:
           FLATPAK_GPG_KEY_ID: ${{ secrets.FLATPAK_GPG_KEY_ID }}
 
