@@ -14,9 +14,9 @@
       "id": "MasterController",
       "deadzone": 257,
       "invert": true,
-      "min": -26358,
-      "max": -634,
-      "idle": -26358,
+      "min": -31260,
+      "max": 32439,
+      "idle": -31260,
       "easing_curve": [0, 0, 1, 1],
       "thresholds": [
         {
