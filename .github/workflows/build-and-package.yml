@@ -471,6 +471,9 @@ jobs:
           echo "$FLATPAK_GPG_KEY" | base64 --decode | gpg --batch --yes --passphrase "$FLATPAK_GPG_PASSPHRASE" --import
           echo "$FLATPAK_GPG_PUBLIC_KEY" | base64 --decode > public-key.gpg
           gpg --list-secret-keys --keyid-format long
+          mkdir -p ~/.gnupg
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          gpgconf --kill gpg-agent
         env:
           FLATPAK_GPG_KEY: ${{ secrets.FLATPAK_GPG_KEY }}
           FLATPAK_GPG_PASSPHRASE: ${{ secrets.FLATPAK_GPG_PASSPHRASE }}
@@ -479,7 +482,7 @@ jobs:
       - name: Sign flatpak repo
         run: |
           cp -r repo repo-signed
-          flatpak build-update-repo --gpg-sign="$FLATPAK_GPG_KEY_ID" repo-signed
+          flatpak build-update-repo --gpg-sign="$FLATPAK_GPG_KEY_ID" --pinentry-mode=loopback --disable-appstream-import repo-signed
         env:
           FLATPAK_GPG_KEY_ID: ${{ secrets.FLATPAK_GPG_KEY_ID }}
 
