@@ -478,10 +478,10 @@ jobs:
 
       - name: Sign flatpak repo
         run: |
-          flatpak create-repo --sign="$FLATPAK_GPG_KEY_ID" repo repo-signed
+          cp -r repo repo-signed
+          flatpak build-update-repo --gpg-sign="$FLATPAK_GPG_KEY_ID" repo-signed
         env:
           FLATPAK_GPG_KEY_ID: ${{ secrets.FLATPAK_GPG_KEY_ID }}
-          FLATPAK_GPG_FINGERPRINT: ${{ secrets.FLATPAK_GPG_FINGERPRINT }}
 
       - name: Generate flatpakrepo bundle
         run: |
