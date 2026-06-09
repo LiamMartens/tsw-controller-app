@@ -473,6 +473,7 @@ jobs:
           gpg --list-secret-keys --keyid-format long
           mkdir -p ~/.gnupg
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
           gpgconf --kill gpg-agent
         env:
           FLATPAK_GPG_KEY: ${{ secrets.FLATPAK_GPG_KEY }}
@@ -482,7 +483,7 @@ jobs:
       - name: Sign flatpak repo
         run: |
           cp -r repo repo-signed
-          flatpak build-update-repo --gpg-sign="$FLATPAK_GPG_KEY_ID" --pinentry-mode=loopback --disable-appstream-import repo-signed
+          flatpak build-update-repo --gpg-sign="$FLATPAK_GPG_KEY_ID" --disable-appstream-import repo-signed
         env:
           FLATPAK_GPG_KEY_ID: ${{ secrets.FLATPAK_GPG_KEY_ID }}
 
