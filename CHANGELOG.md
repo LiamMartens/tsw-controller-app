@@ -4,6 +4,8 @@
 ## v1.17.1
 - Update UE4SS to latest experimental
 - Update mapping save profile modal with option to replace all assignments
+- Updated default calibration values for InfiniteRailtech
+- Update HID matching
 
 ## v1.17.0
 - Add support for Running Train (beta)
