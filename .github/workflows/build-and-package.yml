@@ -488,8 +488,7 @@ jobs:
 
       - name: Generate flatpakrepo bundle
         run: |
-          VERSION=$(head -n 1 RELEASE_VERSION)
-          flatpak create-flatpakrepo repo-signed io.github.liahmartens.tsw-controller-app.flatpak repo-signed/io.github.liahmartens.tsw-controller-app.$VERSION.flatpakrepo
+          flatpak create-flatpakrepo repo-signed io.github.liahmartens.tsw-controller-app.flatpak repo-signed/io.github.liahmartens.tsw-controller-app.flatpakrepo
           cp public-key.gpg repo-signed/
 
       - uses: actions/upload-artifact@v4
@@ -510,7 +509,7 @@ jobs:
           path: |
             repo-signed
 
-  publish-flatpak-repo:
+  publish__flatpakrepo:
     runs-on: ubuntu-22.04
     needs: [build__goapp__linux__flatpak]
     if: github.ref == 'refs/heads/main'
