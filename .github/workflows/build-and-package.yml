@@ -504,9 +504,15 @@ jobs:
         env:
           FLATPAK_GPG_KEY_ID: ${{ secrets.FLATPAK_GPG_KEY_ID }}
 
-      - name: Generate flatpakrepo bundle
+      - name: Generate flatpakrepo
         run: |
-          flatpak create-flatpakrepo repo-signed io.github.liahmartens.tsw-controller-app.flatpak repo-signed/io.github.liahmartens.tsw-controller-app.flatpakrepo
+          GPG_KEY=$(base64 --wrap=0 public-key.gpg)
+          cat > repo-signed/io.github.liahmartens.tsw-controller-app.flatpakrepo <<EOF
+          [Flatpak Repo]
+          Title=TSW Controller App
+          Url=https://liahmartens.github.io/tsw-controller-mapper/flatpak
+          GPGKey=$GPG_KEY
+          EOF
           cp public-key.gpg repo-signed/
 
       - uses: actions/upload-artifact@v4
@@ -544,6 +550,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./repo-signed
+          destination_dir: flatpak
           keep_files: true
           user_name: "GitHub Actions"
           user_email: "actions@github.com"
