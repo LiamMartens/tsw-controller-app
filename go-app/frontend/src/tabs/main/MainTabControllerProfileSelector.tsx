@@ -80,12 +80,16 @@ export function MainTabControllerProfileSelector({
 
   return (
     <fieldset className="fieldset w-full">
-      <label
-        htmlFor={`controller_${controller.UniqueID}`}
-        className="fieldset-legend"
-      >
-        {controller.Name} ({controller.DeviceID})
-      </label>
+      <div className="flex flex-col gap-0">
+        <label
+          htmlFor={`controller_${controller.UniqueID}`}
+          className="fieldset-legend pb-1"
+        >
+          {controller.Name} ({controller.DeviceID})
+        </label>
+
+        <p className="label">Unique ID: {controller.UniqueID}</p>
+      </div>
 
       <div className="flex flex-row gap-2 items-center">
         <Controller
