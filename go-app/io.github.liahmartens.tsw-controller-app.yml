@@ -9,7 +9,7 @@ finish-args:
   - "--share=ipc"
   - "--socket=wayland"
   - "--socket=fallback-x11"
-  - "--device=dri"
+  - "--device=all"
   - "--share=network"
   - "--filesystem=home"
   - "--talk-name=org.freedesktop.Notifications"
