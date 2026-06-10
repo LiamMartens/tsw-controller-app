@@ -2,8 +2,6 @@ app-id: io.github.liahmartens.tsw-controller-app
 runtime: org.gnome.Platform
 runtime-version: "50"
 sdk: org.gnome.Sdk
-sdk-extensions:
-  - org.freedesktop.Sdk.Extension.golang
 command: tsw-controller-app
 finish-args:
   - "--share=ipc"
