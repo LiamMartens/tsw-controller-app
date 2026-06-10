@@ -463,7 +463,7 @@ jobs:
         with:
           bundle: io.github.liahmartens.tsw-controller-app.flatpak
           manifest-path: go-app/io.github.liahmartens.tsw-controller-app.yml
-          default-branch: main
+          branch: main
           cache-key: tswcontrollerapp-flatpak-builder-${{ github.sha }}
           upload-artifact: false
 

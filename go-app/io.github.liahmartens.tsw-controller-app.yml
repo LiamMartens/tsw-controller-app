@@ -2,7 +2,17 @@ app-id: io.github.liahmartens.tsw-controller-app
 runtime: org.gnome.Platform
 runtime-version: "50"
 sdk: org.gnome.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.golang
 command: tsw-controller-app
+finish-args:
+  - "--share=ipc"
+  - "--socket=wayland"
+  - "--socket=fallback-x11"
+  - "--device=dri"
+  - "--share=network"
+  - "--filesystem=home"
+  - "--talk-name=org.freedesktop.Notifications"
 
 modules:
   - name: tsw-controller-app
