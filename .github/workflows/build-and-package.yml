@@ -537,7 +537,7 @@ jobs:
   publish__flatpakrepo:
     runs-on: ubuntu-22.04
     needs: [build__goapp__linux__flatpak]
-    if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
 
