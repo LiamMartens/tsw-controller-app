@@ -9,7 +9,8 @@ finish-args:
   - "--socket=fallback-x11"
   - "--device=all"
   - "--share=network"
-  - "--filesystem=home"
+  - "--filesystem=host"
+  - "--usb=all"
   - "--talk-name=org.freedesktop.Notifications"
 
 modules:
