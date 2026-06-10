@@ -514,7 +514,27 @@ jobs:
           Url=https://liahmartens.github.io/tsw-controller-mapper/flatpak
           GPGKey=$GPG_KEY
           EOF
-          cp public-key.gpg repo-signed/
+
+      - name: Generate flatpakref
+        run: |
+          GPG_KEY=$(base64 --wrap=0 public-key.gpg)
+          cat > repo-signed/io.github.liahmartens.tsw-controller-app.flatpakref <<EOF
+          [Flatpak Ref]
+          Title=TSW Controller App
+          Name=io.github.liahmartens.tsw-controller-app
+          Runtime=org.gnome.Platform
+          RuntimeVersion=50
+          Sdk=org.gnome.Sdk
+          SdkVersion=50
+          ApplicationId=io.github.liahmartens.tsw-controller-app
+          Branch=main
+          Url=https://liahmartens.github.io/tsw-controller-app/flatpak/io.github.liahmartens.tsw-controller-app.flatpakrepo
+          IsUser=true
+          GPGKey=$GPG_KEY
+          EOF
+
+      - name: Copy GPG into repo-signed
+        run: cp public-key.gpg repo-signed/
 
       - uses: actions/upload-artifact@v4
         with:

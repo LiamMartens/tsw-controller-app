@@ -57,11 +57,20 @@ You can find some demos below:
 
 ## Installation
 
-### Automatic installation
+### Automatic Installation
 
 To install the mod and program just head to the [releases page](https://github.com/LiamMartens/tsw-controller-app/releases) and download the latest installer for your platform. Once you launch the app you will just need to use the "Install mod" action to install the latest mod into Train Sim World or Train Simulator Classic game.
 
-### Manual installation (TSW/Running Train/Wonders of Sodor)
+## Flatpak Installation
+You can install the app by installing it from the flatpakref file:
+
+```
+wget https://liahmartens.github.io/tsw-controller-app/flatpak/io.github.liahmartens.tsw-controller-app.flatpakref
+flatpak install --from io.github.liahmartens.tsw-controller-app.flatpakref
+rm io.github.liahmartens.tsw-controller-app.flatpakref
+```
+
+### Manual Installation (TSW/Running Train/Wonders of Sodor)
 
 You can also manually install if you alread have your own UE4SS installed and want to use your existing installation. To do so you will need to download the respective binary for you platform as well as the UE4SS mod and manually place the mod files into the UE4SS directory.
 
