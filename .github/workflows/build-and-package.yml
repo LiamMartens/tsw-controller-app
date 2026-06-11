@@ -477,19 +477,17 @@ jobs:
 
       - name: Generate flatpakrepo
         run: |
-          GPGKEY=$(echo "$FLATPAK_GPG_PUBLIC_KEY" | base64 --decode)
           cat > repo/io.github.liahmartens.tsw-controller-app.flatpakrepo <<EOF
           [Flatpak Repo]
           Title=TSW Controller App
           Url=https://liahmartens.github.io/tsw-controller-mapper/flatpak
-          GPGKey=$GPGKEY
+          GPGKey=$FLATPAK_GPG_PUBLIC_KEY
           EOF
         env:
           FLATPAK_GPG_PUBLIC_KEY: ${{ secrets.FLATPAK_GPG_PUBLIC_KEY }}
 
       - name: Generate flatpakref
         run: |
-          GPGKEY=$(echo "$FLATPAK_GPG_PUBLIC_KEY" | base64 --decode)
           cat > repo/io.github.liahmartens.tsw-controller-app.flatpakref <<EOF
           [Flatpak Ref]
           Title=TSW Controller App
@@ -499,7 +497,7 @@ jobs:
           RuntimeRepo=https://liahmartens.github.io/tsw-controller-app/flatpak/io.github.liahmartens.tsw-controller-app.flatpakrepo
           Homepage=https://tsw-controller-app.vercel.app
           IsRuntime=false
-          GPGKey=$GPGKEY
+          GPGKey=$FLATPAK_GPG_PUBLIC_KEY
           EOF
         env:
           FLATPAK_GPG_PUBLIC_KEY: ${{ secrets.FLATPAK_GPG_PUBLIC_KEY }}
