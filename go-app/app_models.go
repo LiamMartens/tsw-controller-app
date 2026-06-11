@@ -110,3 +110,7 @@ type Interop_SaveControlMapping struct {
 	ProfileJSON  string
 	ExistingPath string
 }
+
+type Interop_SaveControlMapping_Options struct {
+	ReplaceExistingAssignments bool
+}

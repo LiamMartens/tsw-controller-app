@@ -13,7 +13,9 @@ import (
 
 	"github.com/Zyko0/go-sdl3/bin/binsdl"
 	"github.com/Zyko0/go-sdl3/sdl"
-	"rafaelmartins.com/p/usbhid"
+	"github.com/bearsh/hid"
+	"github.com/goforj/godump"
+	usbhid "rafaelmartins.com/p/usbhid"
 )
 
 /* the SDL control kind like Button, Hat, Axis */
@@ -28,6 +30,11 @@ const (
 	SDLMgr_Control_Kind_Axis   SDLMgr_Control_Kind = "axis"
 )
 
+type SDLMgr_HIDDevice struct {
+	Go_Backend_Device     *usbhid.Device
+	Native_Backend_Device *hid.DeviceInfo
+}
+
 type SDLMgr_Joystick struct {
 	InstanceID sdl.JoystickID
 	name       string
@@ -36,7 +43,7 @@ type SDLMgr_Joystick struct {
 	devicePath string
 
 	InternalJoystick *sdl.Joystick
-	HIDDevice        *usbhid.Device
+	HIDDevice        *SDLMgr_HIDDevice
 }
 
 type SDLMgr struct {
@@ -45,6 +52,26 @@ type SDLMgr struct {
 
 	joydevices_mutex sync.Mutex
 	joydevices       map[sdl.JoystickID]*SDLMgr_Joystick
+}
+
+func (hd *SDLMgr_HIDDevice) Version() uint16 {
+	if hd.Go_Backend_Device != nil {
+		return hd.Go_Backend_Device.Version()
+	}
+	if hd.Native_Backend_Device != nil {
+		return hd.Native_Backend_Device.Release
+	}
+	return 0
+}
+
+func (hd *SDLMgr_HIDDevice) Serial() string {
+	if hd.Go_Backend_Device != nil {
+		return hd.Go_Backend_Device.SerialNumber()
+	}
+	if hd.Native_Backend_Device != nil {
+		return hd.Native_Backend_Device.Serial
+	}
+	return ""
 }
 
 func New() *SDLMgr {
@@ -56,18 +83,82 @@ func New() *SDLMgr {
 	}
 }
 
-func (mgr *SDLMgr) hidDeviceFromPath(path string) (*usbhid.Device, error) {
-	path_lower := strings.ToLower(path)
-	devices, err := usbhid.Enumerate(func(d *usbhid.Device) bool {
-		return strings.ToLower(d.Path()) == path_lower
-	})
-	if err != nil {
-		return nil, fmt.Errorf("could not find HID device from path due to an error: %s: %w", path, err)
+func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HIDDevice, error) {
+	path_lower := strings.ToLower(joysyick.path())
+	serial_lower := strings.ToLower(joysyick.serial())
+	device_id_lower := strings.ToLower(joysyick.DeviceID())
+
+	native_devices := hid.Enumerate(0, 0)
+	go_devices, _ := usbhid.Enumerate(nil)
+
+	for _, go_dev := range go_devices {
+		if strings.ToLower(go_dev.Path()) == path_lower {
+			return &SDLMgr_HIDDevice{Go_Backend_Device: go_dev}, nil
+		}
 	}
-	if len(devices) == 0 {
-		return nil, fmt.Errorf("could not find HID device from path: %s", path)
+
+	for ix := range native_devices {
+		native_device := &native_devices[ix]
+		if strings.ToLower(native_device.Path) == path_lower {
+			return &SDLMgr_HIDDevice{Native_Backend_Device: native_device}, nil
+		}
 	}
-	return devices[0], nil
+
+	go_serial_devices_by_path := map[string]*usbhid.Device{}
+	for _, go_dev := range go_devices {
+		if strings.ToLower(go_dev.SerialNumber()) == serial_lower {
+			go_serial_devices_by_path[go_dev.Path()] = go_dev
+		}
+	}
+	if len(go_serial_devices_by_path) == 1 {
+		for _, device := range go_serial_devices_by_path {
+			return &SDLMgr_HIDDevice{Go_Backend_Device: device}, nil
+		}
+	}
+
+	native_serial_devices_by_path := map[string]*hid.DeviceInfo{}
+	for ix := range native_devices {
+		native_device := &native_devices[ix]
+
+		if strings.ToLower(native_device.Serial) == serial_lower {
+			native_serial_devices_by_path[native_device.Path] = native_device
+		}
+	}
+	if len(native_serial_devices_by_path) == 1 {
+		for _, device := range native_serial_devices_by_path {
+			return &SDLMgr_HIDDevice{Native_Backend_Device: device}, nil
+		}
+	}
+
+	go_deviceid_devices_by_path := map[string]*usbhid.Device{}
+	for _, go_dev := range go_devices {
+		go_dev_device_id := strings.ToLower(fmt.Sprintf("%04X:%04X", go_dev.VendorId(), go_dev.ProductId()))
+		if go_dev_device_id == device_id_lower {
+			go_deviceid_devices_by_path[go_dev.Path()] = go_dev
+		}
+	}
+	if len(go_deviceid_devices_by_path) == 1 {
+		for _, device := range go_deviceid_devices_by_path {
+			return &SDLMgr_HIDDevice{Go_Backend_Device: device}, nil
+		}
+	}
+
+	native_deviceid_devices_by_path := map[string]*hid.DeviceInfo{}
+	for ix := range native_devices {
+		native_device := &native_devices[ix]
+		native_device_id := strings.ToLower(fmt.Sprintf("%04X:%04X", native_device.VendorID, native_device.ProductID))
+		if native_device_id == device_id_lower {
+			native_deviceid_devices_by_path[native_device.Path] = native_device
+		}
+	}
+	godump.Dump(native_deviceid_devices_by_path)
+	if len(native_deviceid_devices_by_path) == 1 {
+		for _, device := range native_deviceid_devices_by_path {
+			return &SDLMgr_HIDDevice{Native_Backend_Device: device}, nil
+		}
+	}
+
+	return nil, fmt.Errorf("could not match HID device")
 }
 
 func (mgr *SDLMgr) joyDeviceAdded(event *SDL_JoyDeviceAddedEvent) (*SDLMgr_Joystick, error) {
@@ -87,13 +178,6 @@ func (mgr *SDLMgr) joyDeviceAdded(event *SDL_JoyDeviceAddedEvent) (*SDLMgr_Joyst
 	usb_vendor := sdl_joystick.Vendor()
 	usb_product := sdl_joystick.Product()
 	device_path, _ := sdl_joystick.Path()
-	var hid_device *usbhid.Device
-	if device_path != "" {
-		hid_device, err = mgr.hidDeviceFromPath(device_path)
-		if err != nil {
-			logger.Logger.Info("[SDLMgr] could not match HID device from path", "error", err)
-		}
-	}
 
 	joystick := SDLMgr_Joystick{
 		InstanceID:       event.Which,
@@ -102,7 +186,14 @@ func (mgr *SDLMgr) joyDeviceAdded(event *SDL_JoyDeviceAddedEvent) (*SDLMgr_Joyst
 		productID:        int(usb_product),
 		devicePath:       device_path,
 		InternalJoystick: sdl_joystick,
-		HIDDevice:        hid_device,
+		HIDDevice:        nil,
+	}
+
+	hid_device, err := mgr.hidDeviceFromJoystick(&joystick)
+	if err != nil {
+		logger.Logger.Info("[SDLMgr] could not match HID device", "error", err)
+	} else {
+		joystick.HIDDevice = hid_device
 	}
 
 	mgr.joydevices[event.Which] = &joystick
@@ -202,6 +293,7 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan SDL_Event, context.Ca
 						"product_version", joystick.version(),
 						"serial", joystick.serial(),
 						"path", joystick.path(),
+						"hid_match", joystick.HIDDevice != nil,
 					)
 					chan_utils.SendTimeout[SDL_Event](event_channel, time.Second, added_event)
 				case sdl.EVENT_JOYSTICK_REMOVED:
@@ -267,7 +359,7 @@ func (joystick *SDLMgr_Joystick) version() uint16 {
 func (joystick *SDLMgr_Joystick) serial() string {
 	device_serial := joystick.InternalJoystick.Serial()
 	if device_serial == "" && joystick.HIDDevice != nil {
-		device_serial = joystick.HIDDevice.SerialNumber()
+		device_serial = joystick.HIDDevice.Serial()
 	}
 	return device_serial
 }

@@ -6,6 +6,8 @@ github.com/Zyko0/purego-gen v0.0.0-20250727121216-3bcd331a1e0c h1:3z1BdpfvUbaP7o
 github.com/Zyko0/purego-gen v0.0.0-20250727121216-3bcd331a1e0c/go.mod h1:xpUxPkAb7v0Ffn/NGp1XpD+tZly4dpSPI7DTAFT37es=
 github.com/axiomhq/axiom-go v0.31.1 h1:m83XUNJvr3MnPIDNOc47h8T++ypU86wJwynzGAYuLoM=
 github.com/axiomhq/axiom-go v0.31.1/go.mod h1:lNYNhl1kvXZjgizX3J3AYVdZp5xwciGvpa4PCOWsViw=
+github.com/bearsh/hid v1.6.0 h1:eOBSuF2pg+SCytKGuGjOzZx73xQ72gevJ5IlFvzgfGE=
+github.com/bearsh/hid v1.6.0/go.mod h1:7JhM3r/tm4ALu4WWFqshda+Q6aIcnGRpUR08sx/dHdc=
 github.com/bep/debounce v1.2.1 h1:v67fRdBA9UQu2NhLFXrSg0Brw7CexQekrBwDMM8bzeY=
 github.com/bep/debounce v1.2.1/go.mod h1:H8yggRPQKLUhUoqrJC1bO2xNya7vanpDl7xR3ISbCJ0=
 github.com/cenkalti/backoff/v4 v4.3.0 h1:MyRJ/UdXutAwSAT+s3wNd7MfTIcy71VQueUuFK343L8=
@@ -50,6 +52,8 @@ github.com/go-vgo/robotgo v1.0.1 h1:4dS+dXSMPRt+VmvG4QZPlH9BNG9Jfywq4q0YjSiFN0A=
 github.com/go-vgo/robotgo v1.0.1/go.mod h1:NcSL/tqNqkpWJ3rmT6YSDUVhQKZwyRsaanDMO4qkT5I=
 github.com/godbus/dbus/v5 v5.2.2 h1:TUR3TgtSVDmjiXOgAAyaZbYmIeP3DPkld3jgKGV8mXQ=
 github.com/godbus/dbus/v5 v5.2.2/go.mod h1:3AAv2+hPq5rdnr5txxxRwiGjPXamgoIHgz9FPBfOp3c=
+github.com/goforj/godump v1.9.1 h1:9OGpb978Ytz3B59d5Yi2PzRYYLid6UkmhYDIDNiF15Y=
+github.com/goforj/godump v1.9.1/go.mod h1:JsuL6AEZfKIU+iR5ewL6iQ2fIuhvLtPmJDH47M9Ptrc=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
 github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=

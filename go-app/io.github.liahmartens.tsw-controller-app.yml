@@ -1,0 +1,30 @@
+app-id: io.github.liahmartens.tsw-controller-app
+runtime: org.gnome.Platform
+runtime-version: "50"
+sdk: org.gnome.Sdk
+command: tsw-controller-app
+finish-args:
+  - "--share=ipc"
+  - "--socket=wayland"
+  - "--socket=fallback-x11"
+  - "--device=all"
+  - "--share=network"
+  - "--filesystem=host"
+  - "--usb=all"
+  - "--talk-name=org.freedesktop.Notifications"
+
+modules:
+  - name: tsw-controller-app
+    version: "VERSION_PLACEHOLDER"
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 tsw-controller-app /app/bin/tsw-controller-app
+      - install -Dm644 io.github.liahmartens.tsw-controller-app.desktop /app/share/applications/io.github.liahmartens.tsw-controller-app.desktop
+      - install -Dm644 io.github.liahmartens.tsw-controller-app.png /app/share/icons/hicolor/512x512/apps/io.github.liahmartens.tsw-controller-app.png
+    sources:
+      - type: file
+        path: tsw-controller-app
+      - type: file
+        path: io.github.liahmartens.tsw-controller-app.desktop
+      - type: file
+        path: io.github.liahmartens.tsw-controller-app.png

@@ -380,6 +380,18 @@ export namespace main {
 	        this.ExistingPath = source["ExistingPath"];
 	    }
 	}
+	export class Interop_SaveControlMapping_Options {
+	    ReplaceExistingAssignments: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Interop_SaveControlMapping_Options(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ReplaceExistingAssignments = source["ReplaceExistingAssignments"];
+	    }
+	}
 	export class Interop_SelectedProfileInfo {
 	    Id: string;
 	    Name: string;

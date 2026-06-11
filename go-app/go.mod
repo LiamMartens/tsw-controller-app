@@ -5,10 +5,12 @@ go 1.25.8
 require (
 	github.com/Zyko0/go-sdl3 v0.1.1
 	github.com/axiomhq/axiom-go v0.31.1
+	github.com/bearsh/hid v1.6.0
 	github.com/creasty/go-easing v0.0.0-20161107103139-0cfd96d3a544
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/go-vgo/robotgo v1.0.1
+	github.com/goforj/godump v1.9.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/stretchr/testify v1.11.1

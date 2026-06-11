@@ -14,7 +14,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libx11-dev xorg-dev libxtst-dev xsel xclip libpng++-dev xcb libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev libxkbcommon-x11-dev libxkbcommon-dev libgtk-3-dev libwebkit2gtk-4.1-dev
+          sudo apt-get install -y libx11-dev xorg-dev libxtst-dev xsel xclip libpng++-dev xcb libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev libxkbcommon-x11-dev libxkbcommon-dev libgtk-3-dev libwebkit2gtk-4.1-dev libudev-dev
 
       - name: Setup Go 1.25.8
         uses: actions/setup-go@v5
@@ -362,7 +362,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libx11-dev xorg-dev libxtst-dev xsel xclip libpng++-dev xcb libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev libxkbcommon-x11-dev libxkbcommon-dev libgtk-3-dev libwebkit2gtk-4.1-dev
+          sudo apt-get install -y libx11-dev xorg-dev libxtst-dev xsel xclip libpng++-dev xcb libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev libxkbcommon-x11-dev libxkbcommon-dev libgtk-3-dev libwebkit2gtk-4.1-dev libudev-dev
 
       - name: Setup Go 1.25.8
         uses: actions/setup-go@v5
@@ -404,12 +404,23 @@ jobs:
           path: |
             go-app/build/bin/tsw-controller-app
 
-      - run: |
+  build__goapp__linux__debian:
+    runs-on: ubuntu-22.04
+    needs: [build__goapp__linux]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: tswcontrollerapp_linux
+          path: tswcontrollerapp_linux
+
+      - name: Package Deb
+        run: |
           VERSION=$(head -n 1 RELEASE_VERSION)
           mkdir tswcontrollerapp_debian_amd64
           mkdir -p tswcontrollerapp_debian_amd64/DEBIAN
           mkdir -p tswcontrollerapp_debian_amd64/usr/local/bin
-          cp go-app/build/bin/tsw-controller-app tswcontrollerapp_debian_amd64/usr/local/bin/
+          cp tswcontrollerapp_linux/tsw-controller-app tswcontrollerapp_debian_amd64/usr/local/bin/
           cat <<EOF > tswcontrollerapp_debian_amd64/DEBIAN/control
           Package: tswcontrollerapp
           Version: ${VERSION}
@@ -427,6 +438,108 @@ jobs:
           name: tswcontrollerapp_linux_debian
           path: |
             tswcontrollerapp_debian_amd64.deb
+
+  build__goapp__linux__flatpak:
+    name: "Flatpak"
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-48
+      options: --privileged
+    needs: [build__goapp__linux]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: tswcontrollerapp_linux
+          path: tswcontrollerapp_linux
+
+      - run: |
+          cp tswcontrollerapp_linux/tsw-controller-app ./go-app/tsw-controller-app
+          VERSION=$(head -n 1 RELEASE_VERSION)
+          sed -i "s/VERSION_PLACEHOLDER/$VERSION/" go-app/io.github.liahmartens.tsw-controller-app.yml
+
+      - name: Setup GPG for Signing
+        id: gpg-import
+        uses: crazy-max/ghaction-import-gpg@v7
+        with:
+          gpg_private_key: ${{ secrets.FLATPAK_GPG_KEY }}
+          passphrase: ${{ secrets.FLATPAK_GPG_PASSPHRASE }}
+
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: io.github.liahmartens.tsw-controller-app.flatpak
+          manifest-path: go-app/io.github.liahmartens.tsw-controller-app.yml
+          branch: main
+          cache-key: tswcontrollerapp-flatpak-builder-${{ github.sha }}
+          upload-artifact: false
+          gpg-sign: ${{ steps.gpg-import.outputs.keyid }}
+
+      - name: Generate flatpakrepo
+        run: |
+          cat > repo/io.github.liahmartens.tsw-controller-app.flatpakrepo <<EOF
+          [Flatpak Repo]
+          Title=TSW Controller App
+          Url=https://liahmartens.github.io/tsw-controller-mapper/flatpak
+          GPGKey=$FLATPAK_GPG_PUBLIC_KEY
+          EOF
+        env:
+          FLATPAK_GPG_PUBLIC_KEY: ${{ secrets.FLATPAK_GPG_PUBLIC_KEY }}
+
+      - name: Generate flatpakref
+        run: |
+          cat > repo/io.github.liahmartens.tsw-controller-app.flatpakref <<EOF
+          [Flatpak Ref]
+          Title=TSW Controller App
+          Name=io.github.liahmartens.tsw-controller-app
+          Branch=main
+          Url=https://liahmartens.github.io/tsw-controller-app/flatpak
+          RuntimeRepo=https://liahmartens.github.io/tsw-controller-app/flatpak/io.github.liahmartens.tsw-controller-app.flatpakrepo
+          Homepage=https://tsw-controller-app.vercel.app
+          IsRuntime=false
+          GPGKey=$FLATPAK_GPG_PUBLIC_KEY
+          EOF
+        env:
+          FLATPAK_GPG_PUBLIC_KEY: ${{ secrets.FLATPAK_GPG_PUBLIC_KEY }}
+
+      - name: Copy GPG into repo
+        run: echo "$FLATPAK_GPG_PUBLIC_KEY" | base64 --decode > repo/public-key.gpg
+        env:
+          FLATPAK_GPG_PUBLIC_KEY: ${{ secrets.FLATPAK_GPG_PUBLIC_KEY }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tswcontrollerapp_linux_flatpak
+          path: |
+            io.github.liahmartens.tsw-controller-app.flatpak
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tswcontrollerapp_linux_flatpak_repo
+          path: |
+            repo
+
+  publish__flatpakrepo:
+    runs-on: ubuntu-22.04
+    needs: [build__goapp__linux__flatpak]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: tswcontrollerapp_linux_flatpak_repo
+          path: repo
+
+      - name: Push Flatpak repo to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./repo
+          destination_dir: flatpak
+          keep_files: true
+          user_name: "GitHub Actions"
+          user_email: "actions@github.com"
 
   build__goapp__macos:
     runs-on: macos-latest
@@ -470,8 +583,8 @@ jobs:
           AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
       - run: |
           cd go-app
-          chmod +x build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
           otool -L build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
+          chmod +x build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
           mkdir -p build/bin/tsw-controller-app.app/Contents/Frameworks
           install_name_tool -add_rpath @executable_path/../Frameworks build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
           codesign --force --deep --sign - build/bin/tsw-controller-app.app
@@ -481,8 +594,9 @@ jobs:
           name: tswcontrollerapp_macos
           path: |
             go-app/build/bin
+
   build__virtual_controller_app:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -537,10 +651,12 @@ jobs:
           path: virtual-controller/android/app/build/outputs/apk/release/app-release.apk
 
   prerelease:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs:
       [
         build__goapp__linux,
+        build__goapp__linux__debian,
+        build__goapp__linux__flatpak,
         build__goapp__windows,
         build__goapp__macos,
         build__virtual_controller_app,
@@ -562,14 +678,13 @@ jobs:
 
           cp tswcontrollerapp_linux/tsw-controller-app release_assets/tswcontrollerapp_linux_amd64_binary
           cp tswcontrollerapp_linux_debian/tswcontrollerapp_debian_amd64.deb release_assets/tswcontrollerapp_debian_amd64.deb
+          cp tswcontrollerapp_linux_flatpak/io.github.liahmartens.tsw-controller-app.flatpak release_assets/io.github.liahmartens.tsw-controller-app.flatpak
 
           mkdir -p release_assets/tswcontrollerapp_macos
           cp -r tswcontrollerapp_macos/tsw-controller-app.app release_assets/tswcontrollerapp_macos/tsw-controller-app.app
 
           mkdir -p release_assets/tswvirtualcontrollerapp_android
           cp tswvirtualcontrollerapp_android/app-release.apk release_assets/tswvirtualcontrollerapp_android/tswvirtualcontrollerapp_android.apk
-
-          cp -r mod_assets release_assets/manual_ue4ss_mod_installation
 
       - uses: actions/upload-artifact@v4
         with:
