@@ -459,6 +459,13 @@ jobs:
           VERSION=$(head -n 1 RELEASE_VERSION)
           sed -i "s/VERSION_PLACEHOLDER/$VERSION/" go-app/io.github.liahmartens.tsw-controller-app.yml
 
+      - name: Setup GPG for Signing
+        id: gpg-import
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.FLATPAK_GPG_KEY }}
+          passphrase: ${{ secrets.FLATPAK_GPG_PASSPHRASE }}
+
       - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: io.github.liahmartens.tsw-controller-app.flatpak
@@ -466,75 +473,41 @@ jobs:
           branch: main
           cache-key: tswcontrollerapp-flatpak-builder-${{ github.sha }}
           upload-artifact: false
-
-      - name: Import GPG key for signing
-        run: |
-          echo "$FLATPAK_GPG_KEY" | base64 --decode | gpg --batch --yes --passphrase "$FLATPAK_GPG_PASSPHRASE" --import
-          echo "$FLATPAK_GPG_PUBLIC_KEY" | base64 --decode > public-key.gpg
-          gpg --list-secret-keys --keyid-format long
-          mkdir -p ~/.gnupg
-          chmod 700 ~/.gnupg
-          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
-          echo "batch" >> ~/.gnupg/gpg.conf
-          echo "no-tty" >> ~/.gnupg/gpg.conf
-          gpgconf --kill gpg-agent
-          gpgconf --launch gpg-agent
-        env:
-          FLATPAK_GPG_KEY: ${{ secrets.FLATPAK_GPG_KEY }}
-          FLATPAK_GPG_PASSPHRASE: ${{ secrets.FLATPAK_GPG_PASSPHRASE }}
-          FLATPAK_GPG_PUBLIC_KEY: ${{ secrets.FLATPAK_GPG_PUBLIC_KEY }}
-
-      - name: Trust GPG key
-        run: |
-          echo -e "5\ny\n" | gpg --command-fd 0 --status-fd 2 --edit-key "$FLATPAK_GPG_KEY_ID" trust
-        env:
-          FLATPAK_GPG_KEY_ID: ${{ secrets.FLATPAK_GPG_KEY_ID }}
-
-      - name: Debug GPG signing
-        run: |
-          echo "test" | gpg --batch --yes --passphrase "$FLATPAK_GPG_PASSPHRASE" --clearsign
-        env:
-          FLATPAK_GPG_PASSPHRASE: ${{ secrets.FLATPAK_GPG_PASSPHRASE }}
-
-      - name: Sign flatpak repo
-        run: |
-          cp -r repo repo-signed
-          export GPG_TTY=$(tty)
-          flatpak build-update-repo --gpg-sign="$FLATPAK_GPG_KEY_ID" --default-branch=main --no-update-appstream repo-signed
+          gpg-sign: ${{ env.FLATPAK_GPG_KEY_ID }}
         env:
           FLATPAK_GPG_KEY_ID: ${{ secrets.FLATPAK_GPG_KEY_ID }}
 
       - name: Generate flatpakrepo
         run: |
-          GPG_KEY=$(base64 --wrap=0 public-key.gpg)
           cat > repo-signed/io.github.liahmartens.tsw-controller-app.flatpakrepo <<EOF
           [Flatpak Repo]
           Title=TSW Controller App
           Url=https://liahmartens.github.io/tsw-controller-mapper/flatpak
-          GPGKey=$GPG_KEY
+          GPGKey=$FLATPAK_GPG_PUBLIC_KEY
           EOF
+        env:
+          FLATPAK_GPG_PUBLIC_KEY: ${{ secrets.FLATPAK_GPG_PUBLIC_KEY }}
 
       - name: Generate flatpakref
         run: |
-          GPG_KEY=$(base64 --wrap=0 public-key.gpg)
           cat > repo-signed/io.github.liahmartens.tsw-controller-app.flatpakref <<EOF
           [Flatpak Ref]
           Title=TSW Controller App
           Name=io.github.liahmartens.tsw-controller-app
-          Runtime=org.gnome.Platform
-          RuntimeVersion=50
-          Sdk=org.gnome.Sdk
-          SdkVersion=50
-          ApplicationId=io.github.liahmartens.tsw-controller-app
           Branch=main
-          Url=https://liahmartens.github.io/tsw-controller-app/flatpak/io.github.liahmartens.tsw-controller-app.flatpakrepo
-          IsUser=true
-          GPGKey=$GPG_KEY
+          Url=https://liahmartens.github.io/tsw-controller-app/flatpak
+          RuntimeRepo=https://liahmartens.github.io/tsw-controller-app/flatpak/io.github.liahmartens.tsw-controller-app.flatpakrepo
+          Homepage=https://tsw-controller-app.vercel.app
+          IsRuntime=false
+          GPGKey=$FLATPAK_GPG_PUBLIC_KEY
           EOF
+        env:
+          FLATPAK_GPG_PUBLIC_KEY: ${{ secrets.FLATPAK_GPG_PUBLIC_KEY }}
 
-      - name: Copy GPG into repo-signed
-        run: cp public-key.gpg repo-signed/
+      - name: Copy GPG into repo
+        run: echo "$FLATPAK_GPG_PUBLIC_KEY" | base64 --decode > repo/public-key.gpg
+        env:
+          FLATPAK_GPG_PUBLIC_KEY: ${{ secrets.FLATPAK_GPG_PUBLIC_KEY }}
 
       - uses: actions/upload-artifact@v4
         with:
@@ -548,12 +521,6 @@ jobs:
           path: |
             repo
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tswcontrollerapp_linux_flatpak_repo_signed
-          path: |
-            repo-signed
-
   publish__flatpakrepo:
     runs-on: ubuntu-22.04
     needs: [build__goapp__linux__flatpak]
@@ -563,14 +530,14 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: tswcontrollerapp_linux_flatpak_repo_signed
-          path: repo-signed
+          name: tswcontrollerapp_linux_flatpak_repo
+          path: repo
 
       - name: Push Flatpak repo to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./repo-signed
+          publish_dir: ./repo
           destination_dir: flatpak
           keep_files: true
           user_name: "GitHub Actions"
