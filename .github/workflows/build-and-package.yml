@@ -461,7 +461,7 @@ jobs:
 
       - name: Setup GPG for Signing
         id: gpg-import
-        uses: crazy-max/ghaction-import-gpg@v6
+        uses: crazy-max/ghaction-import-gpg@v7
         with:
           gpg_private_key: ${{ secrets.FLATPAK_GPG_KEY }}
           passphrase: ${{ secrets.FLATPAK_GPG_PASSPHRASE }}
@@ -473,24 +473,24 @@ jobs:
           branch: main
           cache-key: tswcontrollerapp-flatpak-builder-${{ github.sha }}
           upload-artifact: false
-          gpg-sign: ${{ env.FLATPAK_GPG_KEY_ID }}
-        env:
-          FLATPAK_GPG_KEY_ID: ${{ secrets.FLATPAK_GPG_KEY_ID }}
+          gpg-sign: ${{ steps.gpg-import.outputs.keyid }}
 
       - name: Generate flatpakrepo
         run: |
-          cat > repo-signed/io.github.liahmartens.tsw-controller-app.flatpakrepo <<EOF
+          GPGKEY=$(echo "$FLATPAK_GPG_PUBLIC_KEY" | base64 --decode)
+          cat > repo/io.github.liahmartens.tsw-controller-app.flatpakrepo <<EOF
           [Flatpak Repo]
           Title=TSW Controller App
           Url=https://liahmartens.github.io/tsw-controller-mapper/flatpak
-          GPGKey=$FLATPAK_GPG_PUBLIC_KEY
+          GPGKey=$GPGKEY
           EOF
         env:
           FLATPAK_GPG_PUBLIC_KEY: ${{ secrets.FLATPAK_GPG_PUBLIC_KEY }}
 
       - name: Generate flatpakref
         run: |
-          cat > repo-signed/io.github.liahmartens.tsw-controller-app.flatpakref <<EOF
+          GPGKEY=$(echo "$FLATPAK_GPG_PUBLIC_KEY" | base64 --decode)
+          cat > repo/io.github.liahmartens.tsw-controller-app.flatpakref <<EOF
           [Flatpak Ref]
           Title=TSW Controller App
           Name=io.github.liahmartens.tsw-controller-app
@@ -499,7 +499,7 @@ jobs:
           RuntimeRepo=https://liahmartens.github.io/tsw-controller-app/flatpak/io.github.liahmartens.tsw-controller-app.flatpakrepo
           Homepage=https://tsw-controller-app.vercel.app
           IsRuntime=false
-          GPGKey=$FLATPAK_GPG_PUBLIC_KEY
+          GPGKey=$GPGKEY
           EOF
         env:
           FLATPAK_GPG_PUBLIC_KEY: ${{ secrets.FLATPAK_GPG_PUBLIC_KEY }}
