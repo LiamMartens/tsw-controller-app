@@ -585,12 +585,11 @@ jobs:
           AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
       - run: |
           cd go-app
-          otool -L build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
-          chmod +x build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
           mkdir -p build/bin/tsw-controller-app.app/Contents/Frameworks
           install_name_tool -add_rpath @executable_path/../Frameworks build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
           codesign --force --deep --sign - build/bin/tsw-controller-app.app
           otool -L build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
+          chmod +x build/bin/tsw-controller-app.app/Contents/MacOS/tsw-controller-app
       - uses: actions/upload-artifact@v4
         with:
           name: tswcontrollerapp_macos
