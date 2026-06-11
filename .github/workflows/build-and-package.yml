@@ -395,7 +395,6 @@ jobs:
           VERSION=$(head -n 1 RELEASE_VERSION)
           cd go-app
           wails build -tags webkit2_41 -ldflags="-X 'main.VERSION=$VERSION' -X 'main.AXIOM_TOKEN=$AXIOM_TOKEN'"
-          chmod +x go-app/build/bin/tsw-controller-app
         env:
           AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
 
