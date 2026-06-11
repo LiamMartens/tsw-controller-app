@@ -395,6 +395,7 @@ jobs:
           VERSION=$(head -n 1 RELEASE_VERSION)
           cd go-app
           wails build -tags webkit2_41 -ldflags="-X 'main.VERSION=$VERSION' -X 'main.AXIOM_TOKEN=$AXIOM_TOKEN'"
+          chmod +x go-app/build/bin/tsw-controller-app
         env:
           AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
 
@@ -421,6 +422,7 @@ jobs:
           mkdir -p tswcontrollerapp_debian_amd64/DEBIAN
           mkdir -p tswcontrollerapp_debian_amd64/usr/local/bin
           cp tswcontrollerapp_linux/tsw-controller-app tswcontrollerapp_debian_amd64/usr/local/bin/
+          chmod +x tswcontrollerapp_debian_amd64/usr/local/bin/tsw-controller-app
           cat <<EOF > tswcontrollerapp_debian_amd64/DEBIAN/control
           Package: tswcontrollerapp
           Version: ${VERSION}
@@ -455,9 +457,10 @@ jobs:
           path: tswcontrollerapp_linux
 
       - run: |
-          cp tswcontrollerapp_linux/tsw-controller-app ./go-app/tsw-controller-app
           VERSION=$(head -n 1 RELEASE_VERSION)
           sed -i "s/VERSION_PLACEHOLDER/$VERSION/" go-app/io.github.liahmartens.tsw-controller-app.yml
+          cp tswcontrollerapp_linux/tsw-controller-app ./go-app/tsw-controller-app
+          chmod +x ./go-app/tsw-controller-app
 
       - name: Setup GPG for Signing
         id: gpg-import
