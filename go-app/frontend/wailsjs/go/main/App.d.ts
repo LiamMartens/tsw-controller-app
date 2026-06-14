@@ -20,6 +20,8 @@ export function GetLastInstalledModVersion():Promise<string>;
 
 export function GetLatestReleaseVersion():Promise<string>;
 
+export function GetPlatform():Promise<string>;
+
 export function GetPreferredControlMode():Promise<string>;
 
 export function GetProfiles():Promise<Array<main.Interop_Profile>>;
@@ -43,6 +45,8 @@ export function InstallRunningTrainMod():Promise<void>;
 export function InstallTrainSimClassicMod():Promise<void>;
 
 export function InstallTrainSimWorldMod():Promise<void>;
+
+export function InstallUdevRules():Promise<void>;
 
 export function InstallWondersOfSodorMod():Promise<void>;
 

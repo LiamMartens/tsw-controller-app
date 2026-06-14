@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	goruntime "runtime"
 	"strings"
 	"time"
 	"tsw_controller_app/action_sequencer"
@@ -155,6 +156,10 @@ func NewApp(
 		config_loader:  config_loader.New(),
 		sdl_manager:    sdl_manager,
 	}
+}
+
+func (a *App) GetPlatform() string {
+	return goruntime.GOOS
 }
 
 func (a *App) GetVersion() string {

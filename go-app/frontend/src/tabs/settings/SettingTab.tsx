@@ -1,19 +1,19 @@
+import { useEffect, useMemo, useState } from "react";
 import { DeepPartial, useForm } from "react-hook-form";
 import {
-  GetPreferredControlMode,
-  GetTSWAPIKeyLocation,
   SetPreferredControlMode,
   SetTSWAPIKeyLocation,
-  GetAlwaysOnTop,
   SetAlwaysOnTop,
-  GetTheme,
   SetTheme,
   SelectCommAPIKeyFile,
+  InstallUdevRules,
 } from "../../../wailsjs/go/main/App";
 import { alert } from "../../utils/alert";
-import { BrowserOpenURL } from "../../../wailsjs/runtime/runtime";
+import { BrowserOpenURL, Environment } from "../../../wailsjs/runtime/runtime";
 import { updateTheme } from "../../utils/updateTheme";
-import { useSettings } from "../../swr";
+import { useControllers, useEnvironment, useSettings } from "../../swr";
+
+const RAW_HID_PROMPT_DEVICES = ["1209:"];
 
 type FormValues = {
   tswApiKeyLocation: string;
@@ -23,11 +23,23 @@ type FormValues = {
 };
 
 export const SettingsTab = () => {
+  const { data: environment } = useEnvironment();
   const { data: currentSettings, mutate: mutateSettings } = useSettings();
+  const { data: controllers } = useControllers();
+
   const { register, formState, reset, setValue, handleSubmit } =
     useForm<FormValues>({
       defaultValues: currentSettings,
     });
+
+  const shouldShowUdevInstallPrompt = useMemo(
+    () =>
+      environment.platform === "linux" &&
+      controllers.some((c) =>
+        RAW_HID_PROMPT_DEVICES.some((d) => c.DeviceID.startsWith(d)),
+      ),
+    [environment, controllers],
+  );
 
   const handleSelectCommAPIKey = () => {
     SelectCommAPIKeyFile()
@@ -41,6 +53,18 @@ export const SettingsTab = () => {
     BrowserOpenURL(
       "https://forums.dovetailgames.com/threads/train-sim-world-api-support.94488/",
     );
+  };
+
+  const handleInstallUdevRules = async () => {
+    try {
+      await InstallUdevRules();
+      alert(
+        "udev rules installed — your controller should now work without root.",
+        "success",
+      );
+    } catch (err) {
+      alert(String(err), "error");
+    }
   };
 
   const handleSubmitSuccess = async (values: FormValues) => {
@@ -143,6 +167,26 @@ export const SettingsTab = () => {
           </label>
         </div>
       </fieldset>
+
+      {shouldShowUdevInstallPrompt && (
+        <div role="alert" className="alert">
+          <div>
+            <p className="text-sm opacity-70 mt-1">
+              For full access to the InfiniteRailtech or other custom devices
+              you may need to install a udev rule for raw HID device access.
+              This requires elevated priviliges.
+            </p>
+            <button
+              className="btn btn-primary btn-xs mt-2"
+              type="button"
+              onClick={handleInstallUdevRules}
+            >
+              Install udev rules
+            </button>
+          </div>
+        </div>
+      )}
+
       <div role="alert" className="alert">
         <span>
           <strong>TSW API Notice</strong>
