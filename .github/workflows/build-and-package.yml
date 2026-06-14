@@ -22,7 +22,7 @@ jobs:
           go-version: 1.25.8
 
       - name: Install wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.11
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.12
 
       - working-directory: ./go-app
         run: wails build -tags webkit2_41; go test -coverprofile=coverage.out ./...
@@ -296,7 +296,7 @@ jobs:
           go-version: 1.25.8
 
       - name: Install wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.11
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.12
 
       - uses: actions/download-artifact@v7
         name: Download mod_assets artifact
@@ -370,7 +370,7 @@ jobs:
           go-version: 1.25.8
 
       - name: Install wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.11
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.12
 
       - uses: actions/download-artifact@v7
         name: Download mod_assets artifact
@@ -556,7 +556,7 @@ jobs:
           go-version: 1.25.8
 
       - name: Install wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.11
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.12
 
       - uses: actions/download-artifact@v7
         name: Download mod_assets artifact
