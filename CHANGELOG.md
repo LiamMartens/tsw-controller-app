@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.17.2
+- Add WEBKIT_DISABLE_DMABUF_RENDERER on Wayland
+
 ## v1.17.1
 - Update UE4SS to latest experimental
 - Update mapping save profile modal with option to replace all assignments
