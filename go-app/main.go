@@ -30,12 +30,14 @@ var AXIOM_DATASET = "app_logs"
 //go:embed all:frontend/dist
 var assets embed.FS
 
-func main() {
-	arg_proxy := flag.String("proxy", "", "Enter the proxy address")
-	flag.Parse()
+func isWayland() bool {
+	if wayland, _ := os.LookupEnv("WAYLAND_DISPLAY"); wayland != "" {
+		return true
+	}
+	return false
+}
 
-	logger.Logger.Debug("[main] version", "version", VERSION)
-
+func initConfigDirs() (string, string) {
 	config_dir, err := os.UserConfigDir()
 	if err != nil {
 		logger.Logger.Error("[main] could not determine user configuration directory", "error", err)
@@ -58,6 +60,53 @@ func main() {
 		os.MkdirAll(filepath.Join(global_config_dir, subpath), 0o755)
 	}
 
+	return global_config_dir, local_config_dir
+}
+
+func initAxiom(session_id string) {
+	if AXIOM_TOKEN == "" || AXIOM_ORG_ID == "" {
+		return
+	}
+
+	ax, err := axiom.NewClient(axiom.SetPersonalTokenConfig(AXIOM_TOKEN, AXIOM_ORG_ID))
+	if err != nil {
+		logger.Logger.Error("could not instantiate logging client", "error", err)
+	} else {
+		go func() {
+			ctx := context.Background()
+			logchan, unsubscribe := logger.Logger.Listen()
+			defer unsubscribe()
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case msg := <-logchan:
+					if msg.LogLevel == "info" || msg.LogLevel == "error" {
+						event_to_send := axiom.Event{
+							ingest.TimestampField: time.Now(),
+							"version":             VERSION,
+							"message":             msg.Message,
+							"platform":            runtime.GOOS,
+							"session_id":          session_id,
+						}
+						go ax.IngestEvents(context.Background(), AXIOM_DATASET, []axiom.Event{event_to_send})
+					}
+				}
+			}
+		}()
+	}
+}
+
+func main() {
+	if isWayland() {
+		os.Setenv("WEBKIT_DISABLE_DMABUF_RENDERER", "1")
+	}
+
+	arg_proxy := flag.String("proxy", "", "Enter the proxy address")
+	flag.Parse()
+
+	logger.Logger.Debug("[main] version", "version", VERSION)
+
 	mode := AppConfig_Mode_Default
 	var proxy_settings *AppConfig_ProxySettings
 	if arg_proxy != nil && *arg_proxy != "" {
@@ -68,44 +117,17 @@ func main() {
 		}
 	}
 
+	global_config_dir, local_config_dir := initConfigDirs()
+
 	app := NewApp(AppConfig{
 		GlobalConfigDir: global_config_dir,
 		LocalConfigDir:  local_config_dir,
 		Mode:            mode,
 		ProxySettings:   proxy_settings,
 	})
+	initAxiom(app.session_id)
 
-	if AXIOM_TOKEN != "" && AXIOM_ORG_ID != "" {
-		ax, err := axiom.NewClient(axiom.SetPersonalTokenConfig(AXIOM_TOKEN, AXIOM_ORG_ID))
-		if err != nil {
-			logger.Logger.Error("could not instantiate logging client", "error", err)
-		} else {
-			go func() {
-				ctx := context.Background()
-				logchan, unsubscribe := logger.Logger.Listen()
-				defer unsubscribe()
-				for {
-					select {
-					case <-ctx.Done():
-						return
-					case msg := <-logchan:
-						if msg.LogLevel == "info" || msg.LogLevel == "error" {
-							event_to_send := axiom.Event{
-								ingest.TimestampField: time.Now(),
-								"version":             VERSION,
-								"message":             msg.Message,
-								"platform":            runtime.GOOS,
-								"session_id":          app.session_id,
-							}
-							go ax.IngestEvents(context.Background(), AXIOM_DATASET, []axiom.Event{event_to_send})
-						}
-					}
-				}
-			}()
-		}
-	}
-
-	err = wails.Run(&options.App{
+	err := wails.Run(&options.App{
 		Title:  "TSW Controller Utility",
 		Width:  600,
 		Height: 600,
