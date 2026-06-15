@@ -3,6 +3,8 @@
 
 ## v1.17.2
 - Add WEBKIT_DISABLE_DMABUF_RENDERER on Wayland
+- Add udev installer for linux
+- Update wails to 2.21
 
 ## v1.17.1
 - Update UE4SS to latest experimental
