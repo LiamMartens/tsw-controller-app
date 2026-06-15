@@ -38,6 +38,10 @@ export function GetLatestReleaseVersion() {
   return window['go']['main']['App']['GetLatestReleaseVersion']();
 }
 
+export function GetPlatform() {
+  return window['go']['main']['App']['GetPlatform']();
+}
+
 export function GetPreferredControlMode() {
   return window['go']['main']['App']['GetPreferredControlMode']();
 }
@@ -84,6 +88,10 @@ export function InstallTrainSimClassicMod() {
 
 export function InstallTrainSimWorldMod() {
   return window['go']['main']['App']['InstallTrainSimWorldMod']();
+}
+
+export function InstallUdevRules() {
+  return window['go']['main']['App']['InstallUdevRules']();
 }
 
 export function InstallWondersOfSodorMod() {

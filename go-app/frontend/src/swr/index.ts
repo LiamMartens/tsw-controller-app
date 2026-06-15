@@ -1,3 +1,4 @@
+export * from "./useEnvironment";
 export * from "./useSettings";
 export * from "./useVersion";
 export * from "./useLatestReleaseVersion";
