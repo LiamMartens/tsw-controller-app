@@ -420,7 +420,9 @@ jobs:
           mkdir tswcontrollerapp_debian_amd64
           mkdir -p tswcontrollerapp_debian_amd64/DEBIAN
           mkdir -p tswcontrollerapp_debian_amd64/usr/local/bin
-          cp tswcontrollerapp_linux/tsw-controller-app tswcontrollerapp_debian_amd64/usr/local/bin/
+          install -Dm644 go-app/io.github.liahmartens.tsw-controller-app.desktop tswcontrollerapp_debian_amd64/usr/share/applications/io.github.liahmartens.tsw-controller-app.desktop
+          install -Dm644 go-app/io.github.liahmartens.tsw-controller-app.png tswcontrollerapp_debian_amd64/usr/share/icons/hicolor/512x512/apps/io.github.liahmartens.tsw-controller-app.png
+          install -Dm755 tswcontrollerapp_linux/tsw-controller-app tswcontrollerapp_debian_amd64/usr/local/bin/tsw-controller-app
           chmod +x tswcontrollerapp_debian_amd64/usr/local/bin/tsw-controller-app
           cat <<EOF > tswcontrollerapp_debian_amd64/DEBIAN/control
           Package: tswcontrollerapp
