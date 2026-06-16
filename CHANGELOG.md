@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.17.4
+- Rotate internal logs
+
 ## v1.17.3
 - Updated icons
 
