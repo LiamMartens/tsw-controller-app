@@ -1,5 +1,5 @@
 {
-  "$schema": "https://wails.io/schemas/config.v2.json",
+  "$schema": "./wails.schema.json",
   "name": "tsw-controller-app",
   "outputfilename": "tsw-controller-app",
   "frontend:install": "npm install",
@@ -8,6 +8,6 @@
   "frontend:dev:serverUrl": "auto",
   "author": {
     "name": "Liam Martens",
-    "email": "hi@liammartens.com"
+    "email": "hi@liahmartens.com"
   }
 }

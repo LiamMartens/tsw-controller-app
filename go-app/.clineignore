@@ -3,13 +3,16 @@ node_modules/
 **/node_modules/
 
 # Build outputs
-/build/
-/dist/
-/.next/
-/out/
+build/
+dist/
+.next/
+out/
+
+# Include icon
+!build/appicon.png
 
 # Testing artifacts
-/coverage/
+coverage/
 
 # Environment variables
 .env
