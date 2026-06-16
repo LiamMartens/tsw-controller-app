@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.17.3
+- Added desktop entry for debian install
+
 ## v1.17.2
 - Add WEBKIT_DISABLE_DMABUF_RENDERER on Wayland
 - Add udev installer for linux
