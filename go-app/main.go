@@ -18,6 +18,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/linux"
+	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
 )
 
@@ -139,6 +140,13 @@ func main() {
 		OnShutdown:       app.shutdown,
 		Bind: []interface{}{
 			app,
+		},
+		Mac: &mac.Options{
+			TitleBar: mac.TitleBarDefault(),
+			About: &mac.AboutInfo{
+				Title:   "TSW Controller App",
+				Message: "(c) 2026",
+			},
 		},
 		Windows: &windows.Options{
 			WebviewGpuIsDisabled: false,
