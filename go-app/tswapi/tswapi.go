@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand"
 	"net"
 	"net/http"
 	"net/url"
@@ -96,6 +97,9 @@ func (c *TSWAPI) executeTswApiRequest(req *http.Request) (map[string]any, error)
 
 			if try_count < 3 {
 				try_count++
+				backoff_base := 100 * time.Millisecond
+				backoff_jitter := time.Duration(rand.Float64() * 500 * float64(time.Millisecond))
+				time.Sleep(backoff_base + backoff_jitter)
 				continue
 			}
 
