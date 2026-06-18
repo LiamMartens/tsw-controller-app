@@ -351,7 +351,8 @@ func (c *TSWAPI) Enabled() bool {
 
 func NewTSWAPI(config TSWAPIConfig) *TSWAPI {
 	transport := &http.Transport{
-		DisableKeepAlives: true,
+		MaxIdleConns:    10,
+		IdleConnTimeout: 10 * time.Second,
 	}
 	conn := TSWAPI{
 		transport:  transport,
