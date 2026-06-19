@@ -1,6 +1,10 @@
 
 # CHANGELOG
 
+## v1.18.0
+- Jitter and backoff API retries
+- Add control pinning to debugger
+
 ## v1.17.4
 - Rotate internal logs
 

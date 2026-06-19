@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useForm } from "react-hook-form";
 import { useCabControlState } from "../../swr";
 import { CabDebuggerTabControl } from "./CabDebuggerTabControl";
@@ -7,10 +13,17 @@ import { CabDebuggerMapControlModal } from "./MapControlModal/CabDebuggerMapCont
 import { CabDebuggerMapKeybindingModal } from "./MapKeybindingModal/CabDebuggerMapKeybindingModal";
 import { TiCog } from "react-icons/ti";
 
+const pinnedDebuggerControlsRef: MutableRefObject<Set<string>> = {
+  current: new Set(),
+};
+
 export const CabDebuggerTab = () => {
   const { register, watch } = useForm<{ query: string }>({
     defaultValues: { query: "" },
   });
+  const [pinnedControls, setPinnedControls] = useState(
+    pinnedDebuggerControlsRef.current,
+  );
   const { data: cabControlState, mutate: refetchCabControlState } =
     useCabControlState();
   const [mapControlModalOpenState, setMapControlModalOpenState] =
@@ -18,23 +31,46 @@ export const CabDebuggerTab = () => {
   const [mapKeybindingModalOpen, setMapKeybindingModalOpen] = useState(false);
 
   const query = watch("query");
-  const sortedControls = useMemo(
-    () =>
-      cabControlState?.Controls.filter((c) =>
-        [c.Identifier, c.PropertyName].some((t) =>
-          t.toLowerCase().includes(query.toLowerCase()),
-        ),
-      ).sort((a, b) =>
-        `${a.PropertyName}_${a.Identifier}`.localeCompare(
-          `${b.PropertyName}_${b.Identifier}`,
-        ),
-      ),
-    [cabControlState?.Controls, query],
-  );
+  const filteredAndSortedControls = useMemo(() => {
+    if (!cabControlState?.Controls.length) return [];
+
+    type ControlType = (typeof cabControlState)["Controls"][number];
+    const sanitizedQuery = query.trim().toLowerCase();
+    const filterFunc = (c: ControlType) =>
+      [c.Identifier, c.PropertyName].some((t) =>
+        t.toLowerCase().includes(sanitizedQuery),
+      );
+
+    const filtered = sanitizedQuery.length
+      ? cabControlState.Controls.filter(filterFunc)
+      : cabControlState.Controls;
+
+    const sorted = filtered.sort((a, b) => {
+      const isAPinned = pinnedControls.has(a.PropertyName);
+      const isBPinned = pinnedControls.has(b.PropertyName);
+      if (isAPinned && !isBPinned) return -1;
+      if (isBPinned && !isAPinned) return 1;
+      return `${a.PropertyName}_${a.Identifier}`.localeCompare(
+        `${b.PropertyName}_${b.Identifier}`,
+      );
+    });
+
+    return sorted;
+  }, [cabControlState?.Controls, query, pinnedControls]);
 
   const handleOpenMapControlModal = useCallback(
     (controlState: main.Interop_Cab_ControlState_Control) => {
       setMapControlModalOpenState(controlState);
+    },
+    [],
+  );
+
+  const handleTogglePinControl = useCallback(
+    (controlState: main.Interop_Cab_ControlState_Control) => {
+      setPinnedControls((pinned) => {
+        pinned.add(controlState.PropertyName);
+        return new Set(pinned);
+      });
     },
     [],
   );
@@ -46,6 +82,10 @@ export const CabDebuggerTab = () => {
   const handleCloseMapKeybindingModal = useCallback(() => {
     setMapKeybindingModalOpen(false);
   }, []);
+
+  useEffect(() => {
+    pinnedDebuggerControlsRef.current = pinnedControls;
+  }, [pinnedControls]);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
@@ -98,11 +138,13 @@ export const CabDebuggerTab = () => {
       )}
 
       <ul className="list bg-base-100 rounded-box shadow-md">
-        {sortedControls?.map((controlState) => (
+        {filteredAndSortedControls?.map((controlState) => (
           <CabDebuggerTabControl
             key={controlState.PropertyName}
+            isPinned={pinnedControls.has(controlState.PropertyName)}
             controlState={controlState}
             onMapControl={handleOpenMapControlModal}
+            onTogglePinControl={handleTogglePinControl}
           />
         ))}
       </ul>

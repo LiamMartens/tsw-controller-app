@@ -1,18 +1,27 @@
 import { useCallback } from "react";
 import { main } from "../../../wailsjs/go/models";
-import { TiCog } from "react-icons/ti";
+import { TiCog, TiPin } from "react-icons/ti";
+import clsx from "clsx";
 
 type Props = {
+  isPinned: boolean;
   controlState: main.Interop_Cab_ControlState_Control;
   onMapControl: (controlState: main.Interop_Cab_ControlState_Control) => void;
+  onTogglePinControl: (control: main.Interop_Cab_ControlState_Control) => void;
 };
 
 export const CabDebuggerTabControl = ({
+  isPinned,
   controlState,
   onMapControl,
+  onTogglePinControl,
 }: Props) => {
   const handleMapControl = useCallback(() => {
     onMapControl(controlState);
+  }, [controlState, onMapControl]);
+
+  const handleTogglePin = useCallback(() => {
+    onTogglePinControl(controlState);
   }, [controlState, onMapControl]);
 
   return (
@@ -37,6 +46,13 @@ export const CabDebuggerTabControl = ({
           </div>
         </div>
         <div>
+          <button
+            role="button"
+            className={clsx("btn btn-xs py-4 px-2", isPinned && "btn-primary")}
+            onClick={handleTogglePin}
+          >
+            <TiPin size={20} />
+          </button>
           <div className="dropdown dropdown-bottom dropdown-end">
             <div tabIndex={0} role="button" className="btn btn-xs py-4 px-2">
               <TiCog size={20} />
