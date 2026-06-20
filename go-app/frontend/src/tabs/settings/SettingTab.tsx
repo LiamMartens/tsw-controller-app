@@ -13,8 +13,6 @@ import { BrowserOpenURL, Environment } from "../../../wailsjs/runtime/runtime";
 import { updateTheme } from "../../utils/updateTheme";
 import { useControllers, useEnvironment, useSettings } from "../../swr";
 
-const RAW_HID_PROMPT_DEVICES = ["1209:", "04D8:"];
-
 type FormValues = {
   tswApiKeyLocation: string;
   preferredControlMode: "direct_control" | "sync_control" | "api_control";
@@ -164,25 +162,6 @@ export const SettingsTab = () => {
         </div>
       </fieldset>
 
-      {shouldShowUdevInstallPrompt && (
-        <div role="alert" className="alert">
-          <div>
-            <p className="text-sm opacity-70 mt-1">
-              Some custom or complex controllers may require udev rules to be
-              installed on linux to grant full HID device access. This requires
-              elevated priviliges to install.
-            </p>
-            <button
-              className="btn btn-primary btn-xs mt-2"
-              type="button"
-              onClick={handleInstallUdevRules}
-            >
-              Install udev rules
-            </button>
-          </div>
-        </div>
-      )}
-
       <div role="alert" className="alert">
         <span>
           <strong>TSW API Notice</strong>
@@ -195,6 +174,27 @@ export const SettingsTab = () => {
           .
         </span>
       </div>
+
+      {shouldShowUdevInstallPrompt && (
+        <div role="alert" className="alert">
+          <div>
+            <p className="mt-1">
+              Some custom or complex controllers may require udev rules to be
+              installed on linux to grant full HID device access. This requires
+              elevated priviliges to install. (this may not be required for your
+              set-up - currently this is only required for HID report control)
+            </p>
+            <button
+              className="btn btn-primary btn-xs mt-3"
+              type="button"
+              onClick={handleInstallUdevRules}
+            >
+              Install udev rules
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex justify-end">
         <button
           type="submit"

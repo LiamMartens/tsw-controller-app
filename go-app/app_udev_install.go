@@ -20,7 +20,8 @@ func (a *App) InstallUdevRules() error {
 	/* potentially add vendor ID/product ID/serial */
 	udev_rule_content := `# TSW Controller Utility — HID device access
 SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="5389", MODE="0660", GROUP="input"
-SUBSYSTEM=="hidraw", ATTRS{idVendor}=="04D8", ATTRS{idProduct}=="E43B", MODE="0660", GROUP="input"`
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="04D8", ATTRS{idProduct}=="E43B", MODE="0660", GROUP="input"
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="044F", ATTRS{idProduct}=="040A", MODE="0660", GROUP="input"`
 
 	tmp_dir := os.TempDir()
 	tmp_file, err := os.CreateTemp(tmp_dir, "tsw-udev-rule-*.rules")
