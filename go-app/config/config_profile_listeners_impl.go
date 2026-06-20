@@ -52,3 +52,10 @@ func (condition *Config_Controller_Profile_Listener_Action_Condition) Matches(va
 
 	return false
 }
+
+func (action *Config_Controller_Profile_Listener_Action) GetConditions() []Config_Controller_Profile_Listener_Action_Condition {
+	if action.HIDReport != nil {
+		return action.HIDReport.Conditions
+	}
+	return nil
+}
