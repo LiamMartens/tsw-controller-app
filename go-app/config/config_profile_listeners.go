@@ -11,14 +11,24 @@ type Config_Controller_Profile_Listener_SharedAction struct {
 
 type Config_Controller_Profile_Listener_Action_HIDOutputReport struct {
 	Config_Controller_Profile_Listener_SharedAction
-	Type      string `json:"type" validate:"required,eq=hid_output_report"`
+	Type         string `json:"type" validate:"required,eq=hid_output_report"`
+	ReportID     uint8  `json:"report_id" validate:"required"`
+	ReportLength uint8  `json:"report_length" validate:"required"` /* report length in bytes */
+	Mask         uint64 `json:"mask" validate:"required"`
+	Operation    string `json:"operation" validate:"required,oneof=and or"`
+}
+
+type Config_Controller_Profile_Listener_Action_HIDFeatureReport struct {
+	Config_Controller_Profile_Listener_SharedAction
+	Type      string `json:"type" validate:"required,eq=hid_feature_report"`
 	ReportID  uint8  `json:"report_id" validate:"required"`
 	Mask      uint64 `json:"mask" validate:"required"`
 	Operation string `json:"operation" validate:"required,oneof=and or"`
 }
 
 type Config_Controller_Profile_Listener_Action struct {
-	HIDReport *Config_Controller_Profile_Listener_Action_HIDOutputReport `json:"-"`
+	HIDOutputReport  *Config_Controller_Profile_Listener_Action_HIDOutputReport  `json:"-"`
+	HIDFeatureReport *Config_Controller_Profile_Listener_Action_HIDFeatureReport `json:"-"`
 }
 
 type Config_Controller_Profile_Listener_Type_APIValue struct {

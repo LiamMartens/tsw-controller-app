@@ -26,7 +26,17 @@ func (c *Config_Controller_Profile_Listener_Action) UnmarshalJSON(data []byte) e
 		if err := v.Struct(hr); err != nil {
 			return err
 		}
-		c.HIDReport = &hr
+		c.HIDOutputReport = &hr
+		return nil
+	case "hid_feature_report":
+		var hr Config_Controller_Profile_Listener_Action_HIDFeatureReport
+		if err := json.Unmarshal(data, &hr); err != nil {
+			return err
+		}
+		if err := v.Struct(hr); err != nil {
+			return err
+		}
+		c.HIDFeatureReport = &hr
 		return nil
 	}
 
@@ -34,8 +44,11 @@ func (c *Config_Controller_Profile_Listener_Action) UnmarshalJSON(data []byte) e
 }
 
 func (c Config_Controller_Profile_Listener_Action) MarshalJSON() ([]byte, error) {
-	if c.HIDReport != nil {
-		return json.Marshal(c.HIDReport)
+	if c.HIDOutputReport != nil {
+		return json.Marshal(c.HIDOutputReport)
+	}
+	if c.HIDFeatureReport != nil {
+		return json.Marshal(c.HIDFeatureReport)
 	}
 	return nil, fmt.Errorf("unable to marshal action; no valid action type found")
 }

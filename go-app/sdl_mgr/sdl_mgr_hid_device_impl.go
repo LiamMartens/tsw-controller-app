@@ -86,6 +86,49 @@ func (hd *SDLMgr_HIDDevice) Close() error {
 	return fmt.Errorf("no device available")
 }
 
+func (hd *SDLMgr_HIDDevice) GetOutputReport(id byte, length uint8) ([]byte, error) {
+	hd.outputReportsState.Lock.Lock()
+	defer hd.outputReportsState.Lock.Unlock()
+
+	if err := hd.Open(); err != nil {
+		return nil, err
+	}
+
+	if report, has_report := hd.outputReportsState.State[id]; has_report {
+		return report, nil
+	}
+
+	empty_report := make([]byte, length)
+	hd.outputReportsState.State[id] = empty_report
+	return hd.outputReportsState.State[id], nil
+}
+
+func (hd *SDLMgr_HIDDevice) SetOutputReport(id byte, data []byte) error {
+	hd.outputReportsState.Lock.Lock()
+	defer hd.outputReportsState.Lock.Unlock()
+
+	if err := hd.Open(); err != nil {
+		return err
+	}
+
+	if hd.Go_Backend_Device != nil {
+		if err := hd.Go_Backend_Device.SetOutputReport(id, data); err != nil {
+			return err
+		}
+		hd.outputReportsState.State[id] = data
+	}
+
+	if hd.Native_Backend_Device != nil {
+		payload := append([]byte{id}, data...)
+		if _, err := hd.Native_Backend_Device.Device.Write(payload); err != nil {
+			return err
+		}
+		hd.outputReportsState.State[id] = data
+	}
+
+	return fmt.Errorf("no valid device backend to set output report to")
+}
+
 func (hd *SDLMgr_HIDDevice) ReadFeatureReport(id byte) ([]byte, error) {
 	if err := hd.Open(); err != nil {
 		return nil, err
