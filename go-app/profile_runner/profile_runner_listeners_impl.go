@@ -1,6 +1,7 @@
 package profile_runner
 
 import (
+	"encoding/binary"
 	"strings"
 	"tsw_controller_app/config"
 	"tsw_controller_app/controller_mgr"
@@ -16,6 +17,34 @@ func (p *ProfileRunner) executeProfileListenerAction(
 		sdl_device, is_sdl_device := device.(*sdl_mgr.SDLMgr_Joystick)
 		/* hid reports are only supported in sdl devices which have an associated HID device */
 		if !is_sdl_device || sdl_device.HIDDevice == nil {
+			logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] unable to execute hid_report action on non SDL or non HID device")
+			return
+		}
+
+		report, err := sdl_device.HIDDevice.ReadFeatureReport(byte(action.HIDReport.ReportID))
+		if err != nil {
+			logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] could not read feature report", "id", action.HIDReport.ReportID, "error", err)
+			return
+		}
+
+		mask := make([]byte, 8)
+		/*
+		 * Little-endian: least significant byte goes first (index 0), most significant byte goes last (index 7)
+		 * This means the mask is applied per byte and any more significant bytes are thrown away - this makes it easy
+		 * to create a feature report mask even if the feature report only returns a singular byte
+		 */
+		binary.LittleEndian.PutUint64(mask, action.HIDReport.Mask)
+		for ix := range report {
+			if action.HIDReport.Operation == "and" {
+				report[ix] = report[ix] & mask[ix]
+			} else if action.HIDReport.Operation == "or" {
+				report[ix] = report[ix] | mask[ix]
+			}
+		}
+
+		err = sdl_device.HIDDevice.SendFeatureReport(byte(action.HIDReport.ReportID), report)
+		if err != nil {
+			logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] could not send feature report", "id", action.HIDReport.ReportID, "error", err)
 			return
 		}
 	}

@@ -54,26 +54,6 @@ type SDLMgr struct {
 	joydevices       map[sdl.JoystickID]*SDLMgr_Joystick
 }
 
-func (hd *SDLMgr_HIDDevice) Version() uint16 {
-	if hd.Go_Backend_Device != nil {
-		return hd.Go_Backend_Device.Version()
-	}
-	if hd.Native_Backend_Device != nil {
-		return hd.Native_Backend_Device.Release
-	}
-	return 0
-}
-
-func (hd *SDLMgr_HIDDevice) Serial() string {
-	if hd.Go_Backend_Device != nil {
-		return hd.Go_Backend_Device.SerialNumber()
-	}
-	if hd.Native_Backend_Device != nil {
-		return hd.Native_Backend_Device.Serial
-	}
-	return ""
-}
-
 func New() *SDLMgr {
 	return &SDLMgr{
 		Initialized:      false,

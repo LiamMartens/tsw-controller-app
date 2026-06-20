@@ -19,9 +19,14 @@ func (a *App) InstallUdevRules() error {
 	udev_rule_path := "/etc/udev/rules.d/99-tsw-controller-udev.rules"
 	/* potentially add vendor ID/product ID/serial */
 	udev_rule_content := `# TSW Controller Utility — HID device access
-SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="5389", MODE="0660", GROUP="input"
-SUBSYSTEM=="hidraw", ATTRS{idVendor}=="04D8", ATTRS{idProduct}=="E43B", MODE="0660", GROUP="input"
-SUBSYSTEM=="hidraw", ATTRS{idVendor}=="044F", ATTRS{idProduct}=="040A", MODE="0660", GROUP="input"`
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="5389", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="5389", TAG+="uaccess"
+
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="e43b", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="e43b", TAG+="uaccess"
+
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="044f", ATTRS{idProduct}=="040a", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="044f", ATTRS{idProduct}=="040a", TAG+="uaccess"`
 
 	tmp_dir := os.TempDir()
 	tmp_file, err := os.CreateTemp(tmp_dir, "tsw-udev-rule-*.rules")
