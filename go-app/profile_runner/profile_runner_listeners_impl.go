@@ -17,7 +17,7 @@ func (p *ProfileRunner) executeProfileListenerAction(
 		sdl_device, is_sdl_device := device.(*sdl_mgr.SDLMgr_Joystick)
 		/* hid reports are only supported in sdl devices which have an associated HID device */
 		if !is_sdl_device || sdl_device.HIDDevice == nil {
-			logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] unable to execute hid_report action on non SDL or non HID device")
+			logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] unable to execute hid_output_report action on non SDL or non HID device")
 			return
 		}
 

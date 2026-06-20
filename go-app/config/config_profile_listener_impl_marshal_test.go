@@ -8,7 +8,7 @@ import (
 )
 
 func TestAction_UnmarshalJSON_HIDReport(t *testing.T) {
-	input := `{"type":"hid_report","report_id":1,"mask":255,"conditions":[{"operator":"eq","value":1.0}]}`
+	input := `{"type":"hid_output_report","report_id":1,"mask":255,"operation":"or","conditions":[{"operator":"eq","value":1.0}]}`
 	var a Config_Controller_Profile_Listener_Action
 	err := json.Unmarshal([]byte(input), &a)
 	assert.NoError(t, err)
@@ -16,7 +16,7 @@ func TestAction_UnmarshalJSON_HIDReport(t *testing.T) {
 	assert.Equal(t, "eq", a.HIDReport.Conditions[0].Operator)
 	assert.Equal(t, 1.0, a.HIDReport.Conditions[0].Value)
 	assert.Equal(t, uint8(1), a.HIDReport.ReportID)
-	assert.Equal(t, uint8(255), a.HIDReport.Mask)
+	assert.Equal(t, uint64(255), a.HIDReport.Mask)
 }
 
 func TestAction_UnmarshalJSON_InvalidType(t *testing.T) {
@@ -29,15 +29,16 @@ func TestAction_UnmarshalJSON_InvalidType(t *testing.T) {
 
 func TestAction_MarshalJSON_HIDReport(t *testing.T) {
 	a := Config_Controller_Profile_Listener_Action{
-		HIDReport: &Config_Controller_Profile_Listener_Action_HIDReport{
-			Type: "hid_report",
+		HIDReport: &Config_Controller_Profile_Listener_Action_HIDOutputReport{
+			Type: "hid_output_report",
 			Config_Controller_Profile_Listener_SharedAction: Config_Controller_Profile_Listener_SharedAction{
 				Conditions: []Config_Controller_Profile_Listener_Action_Condition{
 					{Operator: "gt", Value: 0.75},
 				},
 			},
-			ReportID: 42,
-			Mask:     128,
+			ReportID:  42,
+			Mask:      128,
+			Operation: "or",
 		},
 	}
 	data, err := json.Marshal(a)
@@ -58,7 +59,7 @@ func TestAction_MarshalJSON_NoType(t *testing.T) {
 }
 
 func TestListener_UnmarshalJSON_APIValue(t *testing.T) {
-	input := `{"type":"api_value","path":"/api/status","values_key":"Status","actions":[{"type":"hid_report","report_id":1,"mask":255,"conditions":[{"operator":"eq","value":1.0}]}]}`
+	input := `{"type":"api_value","path":"/api/status","values_key":"Status","actions":[{"type":"hid_output_report","report_id":1,"mask":255,"operation":"or","conditions":[{"operator":"eq","value":1.0}]}]}`
 	var l Config_Controller_Profile_Listener
 	err := json.Unmarshal([]byte(input), &l)
 	assert.NoError(t, err)
@@ -71,7 +72,7 @@ func TestListener_UnmarshalJSON_APIValue(t *testing.T) {
 	assert.Equal(t, "eq", l.API.Actions[0].HIDReport.Conditions[0].Operator)
 	assert.Equal(t, 1.0, l.API.Actions[0].HIDReport.Conditions[0].Value)
 	assert.Equal(t, uint8(1), l.API.Actions[0].HIDReport.ReportID)
-	assert.Equal(t, uint8(255), l.API.Actions[0].HIDReport.Mask)
+	assert.Equal(t, uint64(255), l.API.Actions[0].HIDReport.Mask)
 }
 
 func TestListener_UnmarshalJSON_InvalidType(t *testing.T) {
@@ -90,15 +91,16 @@ func TestListener_MarshalJSON_APIValue(t *testing.T) {
 			ValuesKey: "items",
 			Actions: []Config_Controller_Profile_Listener_Action{
 				{
-					HIDReport: &Config_Controller_Profile_Listener_Action_HIDReport{
-						Type: "hid_report",
+					HIDReport: &Config_Controller_Profile_Listener_Action_HIDOutputReport{
+						Type: "hid_output_report",
 						Config_Controller_Profile_Listener_SharedAction: Config_Controller_Profile_Listener_SharedAction{
 							Conditions: []Config_Controller_Profile_Listener_Action_Condition{
 								{Operator: "eq", Value: 1.0},
 							},
 						},
-						ReportID: 1,
-						Mask:     255,
+						ReportID:  1,
+						Mask:      255,
+						Operation: "or",
 					},
 				},
 			},

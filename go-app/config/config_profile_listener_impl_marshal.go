@@ -18,8 +18,8 @@ func (c *Config_Controller_Profile_Listener_Action) UnmarshalJSON(data []byte) e
 	}
 
 	switch peek.Type {
-	case "hid_report":
-		var hr Config_Controller_Profile_Listener_Action_HIDReport
+	case "hid_output_report":
+		var hr Config_Controller_Profile_Listener_Action_HIDOutputReport
 		if err := json.Unmarshal(data, &hr); err != nil {
 			return err
 		}
