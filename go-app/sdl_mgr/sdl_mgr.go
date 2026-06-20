@@ -30,9 +30,15 @@ const (
 	SDLMgr_Control_Kind_Axis   SDLMgr_Control_Kind = "axis"
 )
 
+type SDLMgr_HIDDevice_Native struct {
+	Lock       sync.Mutex
+	DeviceInfo hid.DeviceInfo
+	Device     *hid.Device
+}
+
 type SDLMgr_HIDDevice struct {
 	Go_Backend_Device     *usbhid.Device
-	Native_Backend_Device *hid.DeviceInfo
+	Native_Backend_Device *SDLMgr_HIDDevice_Native
 }
 
 type SDLMgr_Joystick struct {
@@ -80,7 +86,7 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 	for ix := range native_devices {
 		native_device := &native_devices[ix]
 		if strings.ToLower(native_device.Path) == path_lower {
-			return &SDLMgr_HIDDevice{Native_Backend_Device: native_device}, nil
+			return &SDLMgr_HIDDevice{Native_Backend_Device: &SDLMgr_HIDDevice_Native{Lock: sync.Mutex{}, DeviceInfo: *native_device}}, nil
 		}
 	}
 
@@ -105,8 +111,8 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 		}
 	}
 	if len(native_serial_devices_by_path) == 1 {
-		for _, device := range native_serial_devices_by_path {
-			return &SDLMgr_HIDDevice{Native_Backend_Device: device}, nil
+		for _, native_device := range native_serial_devices_by_path {
+			return &SDLMgr_HIDDevice{Native_Backend_Device: &SDLMgr_HIDDevice_Native{Lock: sync.Mutex{}, DeviceInfo: *native_device}}, nil
 		}
 	}
 
@@ -133,8 +139,10 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 	}
 	godump.Dump(native_deviceid_devices_by_path)
 	if len(native_deviceid_devices_by_path) == 1 {
-		for _, device := range native_deviceid_devices_by_path {
-			return &SDLMgr_HIDDevice{Native_Backend_Device: device}, nil
+		for _, native_device := range native_deviceid_devices_by_path {
+			return &SDLMgr_HIDDevice{
+				Native_Backend_Device: &SDLMgr_HIDDevice_Native{Lock: sync.Mutex{}, DeviceInfo: *native_device},
+			}, nil
 		}
 	}
 
@@ -185,6 +193,10 @@ func (mgr *SDLMgr) joyDeviceRemoved(event *SDL_JoyDeviceRemovedEvent) {
 	defer mgr.joydevices_mutex.Unlock()
 	if joystick, has_device := mgr.joydevices[event.Which]; has_device {
 		joystick.InternalJoystick.Close()
+		if joystick.HIDDevice != nil {
+			/* always try to close */
+			joystick.HIDDevice.Close()
+		}
 		delete(mgr.joydevices, event.Which)
 	}
 }
