@@ -16,6 +16,9 @@ func (d *SDLMgr_HIDDevice_Native) IsOpen() bool {
 func (d *SDLMgr_HIDDevice_Native) Open() error {
 	d.Lock.Lock()
 	defer d.Lock.Unlock()
+	if d.Device != nil {
+		return nil
+	}
 	device, err := d.DeviceInfo.Open()
 	if err != nil {
 		return err
