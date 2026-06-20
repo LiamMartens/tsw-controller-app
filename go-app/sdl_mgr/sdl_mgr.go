@@ -36,6 +36,15 @@ type SDLMgr_HIDDevice_Native struct {
 	Device     *hid.Device
 }
 
+type ISDLMgr_HIDDevice interface {
+	Version() uint16
+	Serial() string
+	Open() error
+	Close() error
+	ReadFeatureReport(id byte) ([]byte, error)
+	SendFeatureReport(id byte, data []byte) error
+}
+
 type SDLMgr_HIDDevice struct {
 	Go_Backend_Device     *usbhid.Device
 	Native_Backend_Device *SDLMgr_HIDDevice_Native
@@ -49,7 +58,7 @@ type SDLMgr_Joystick struct {
 	devicePath string
 
 	InternalJoystick *sdl.Joystick
-	HIDDevice        *SDLMgr_HIDDevice
+	HIDDevice        ISDLMgr_HIDDevice
 }
 
 type SDLMgr struct {

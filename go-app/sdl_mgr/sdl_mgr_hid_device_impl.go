@@ -7,6 +7,8 @@ import (
 	usbhid "rafaelmartins.com/p/usbhid"
 )
 
+var _ ISDLMgr_HIDDevice = &SDLMgr_HIDDevice{}
+
 func (d *SDLMgr_HIDDevice_Native) IsOpen() bool {
 	d.Lock.Lock()
 	defer d.Lock.Unlock()
