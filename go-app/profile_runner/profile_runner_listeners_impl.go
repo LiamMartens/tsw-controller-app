@@ -5,12 +5,20 @@ import (
 	"tsw_controller_app/config"
 	"tsw_controller_app/controller_mgr"
 	"tsw_controller_app/logger"
-
-	"github.com/goforj/godump"
+	"tsw_controller_app/sdl_mgr"
 )
 
-func (p *ProfileRunner) executeProfileListenerAction(action config.Config_Controller_Profile_Listener_Action) {
-	godump.Dump("executing listener action", action)
+func (p *ProfileRunner) executeProfileListenerAction(
+	device controller_mgr.IControllerManager_Device,
+	action config.Config_Controller_Profile_Listener_Action,
+) {
+	if action.HIDReport != nil {
+		sdl_device, is_sdl_device := device.(*sdl_mgr.SDLMgr_Joystick)
+		/* hid reports are only supported in sdl devices which have an associated HID device */
+		if !is_sdl_device || sdl_device.HIDDevice == nil {
+			return
+		}
+	}
 }
 
 func (p *ProfileRunner) processActiveProfileApiListeners() {
@@ -46,7 +54,7 @@ func (p *ProfileRunner) processActiveProfileApiListeners() {
 					}
 
 					/* if all conditions passed - execute action (might need to deduplicate actions?) */
-					go p.executeProfileListenerAction(action)
+					go p.executeProfileListenerAction(controller.Device(), action)
 				}
 			}
 		}
@@ -89,7 +97,7 @@ func (p *ProfileRunner) processActiveProfileControlListeners(change_event contro
 				}
 
 				/* if all conditions passed - execute action (might need to deduplicate actions?) */
-				go p.executeProfileListenerAction(action)
+				go p.executeProfileListenerAction(change_event.Device, action)
 			}
 		}
 	}
