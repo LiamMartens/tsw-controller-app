@@ -7,8 +7,9 @@ type Config_Controller_Profile_Listener_SharedAction struct {
 
 type Config_Controller_Profile_Listener_Action_HIDReport struct {
 	Config_Controller_Profile_Listener_SharedAction
-	ReportID uint8 `json:"report_id" validate:"required"`
-	Mask     uint8 `json:"mask" validate:"required"`
+	Type     string `json:"type" validate:"required,eq=hid_report"`
+	ReportID uint8  `json:"report_id" validate:"required"`
+	Mask     uint8  `json:"mask" validate:"required"`
 }
 
 type Config_Controller_Profile_Listener_Action struct {
