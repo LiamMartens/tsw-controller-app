@@ -27,6 +27,13 @@ type Config_Controller_Profile_Listener_Type_APIValue struct {
 	Actions   []Config_Controller_Profile_Listener_Action `json:"actions" validate:"required"`
 }
 
+type Config_Controller_Profile_Listener_Type_ControlValue struct {
+	Type    string                                      `json:"type" validate:"required,eq=control_value"`
+	Name    string                                      `json:"name" validate:"required"`
+	Actions []Config_Controller_Profile_Listener_Action `json:"actions" validate:"required"`
+}
+
 type Config_Controller_Profile_Listener struct {
-	API *Config_Controller_Profile_Listener_Type_APIValue `json:"-"`
+	API     *Config_Controller_Profile_Listener_Type_APIValue     `json:"-"`
+	Control *Config_Controller_Profile_Listener_Type_ControlValue `json:"-"`
 }
