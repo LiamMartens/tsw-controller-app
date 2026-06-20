@@ -3,14 +3,17 @@ package profile_runner
 import (
 	"context"
 	"sync"
+	"time"
 	"tsw_controller_app/action_sequencer"
 	"tsw_controller_app/cabdebugger"
 	"tsw_controller_app/config"
 	"tsw_controller_app/controller_mgr"
 	"tsw_controller_app/map_utils"
+	"tsw_controller_app/tswapi"
 )
 
-func New(
+func NewProfileRunner(
+	api tswapi.ITSWAPI,
 	action_sequencer *action_sequencer.ActionSequencer,
 	sdl_controller_manager *controller_mgr.SDLControllerManager,
 	virtual_controller_manager *controller_mgr.VirtualControllerManager,
@@ -20,6 +23,7 @@ func New(
 	cab_debugger *cabdebugger.CabDebugger,
 ) *ProfileRunner {
 	return &ProfileRunner{
+		API:                      api,
 		ActionSequencer:          action_sequencer,
 		SDLControllerManager:     sdl_controller_manager,
 		VirtualControllerManager: virtual_controller_manager,
@@ -46,10 +50,25 @@ func (p *ProfileRunner) SetPreferredControlMode(mode config.PreferredControlMode
 func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 	/*
 		the runner handles a few different things:
-		1.Listen to the controller manager and send the appropriate values to the sequencer or direct controller
+		1. Listen to the controller manager and send the appropriate values to the sequencer or direct controller
 		2. Listen to the sync controller and sequence the appropriate actions to reach the target value
+		3. Trigger any listener actions as necessary
 	*/
 	context_with_cancel, cancel := context.WithCancel(ctx)
+
+	go func() {
+		ticker := time.NewTicker(333 * time.Millisecond)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-context_with_cancel.Done():
+				return
+			case <-ticker.C:
+				go p.processActiveProfileApiListeners()
+			}
+		}
+	}()
 
 	/* normal action sequencing */
 	go func() {
@@ -64,8 +83,10 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 				return
 			case change_event := <-virtual_channel:
 				p.processControllerChangeEvent(change_event)
+				go p.processActiveProfileControlListeners(change_event)
 			case change_event := <-sdl_channel:
 				p.processControllerChangeEvent(change_event)
+				go p.processActiveProfileControlListeners(change_event)
 			}
 		}
 	}()

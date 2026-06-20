@@ -58,13 +58,14 @@ func TestAction_MarshalJSON_NoType(t *testing.T) {
 }
 
 func TestListener_UnmarshalJSON_APIValue(t *testing.T) {
-	input := `{"type":"api_value","path":"/api/status","actions":[{"type":"hid_report","report_id":1,"mask":255,"conditions":[{"operator":"eq","value":1.0}]}]}`
+	input := `{"type":"api_value","path":"/api/status","values_key":"Status","actions":[{"type":"hid_report","report_id":1,"mask":255,"conditions":[{"operator":"eq","value":1.0}]}]}`
 	var l Config_Controller_Profile_Listener
 	err := json.Unmarshal([]byte(input), &l)
 	assert.NoError(t, err)
 	assert.NotNil(t, l.API)
 	assert.Equal(t, "api_value", l.API.Type)
 	assert.Equal(t, "/api/status", l.API.Path)
+	assert.Equal(t, "Status", l.API.ValuesKey)
 	assert.Equal(t, 1, len(l.API.Actions))
 	assert.NotNil(t, l.API.Actions[0].HIDReport)
 	assert.Equal(t, "eq", l.API.Actions[0].HIDReport.Conditions[0].Operator)

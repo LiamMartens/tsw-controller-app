@@ -7,6 +7,7 @@ import (
 	"tsw_controller_app/config"
 	"tsw_controller_app/controller_mgr"
 	"tsw_controller_app/map_utils"
+	"tsw_controller_app/tswapi"
 )
 
 type ProfileRunner_AssignmentScore = int
@@ -51,6 +52,7 @@ type ProfileRunnerAssignmentCall struct {
 }
 
 type ProfileRunner struct {
+	API                               tswapi.ITSWAPI
 	ActionSequencer                   *action_sequencer.ActionSequencer
 	SDLControllerManager              *controller_mgr.SDLControllerManager
 	VirtualControllerManager          *controller_mgr.VirtualControllerManager

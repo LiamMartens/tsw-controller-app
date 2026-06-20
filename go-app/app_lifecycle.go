@@ -43,7 +43,8 @@ func (a *App) startupInitialize() {
 	api_controller := profile_runner.NewAPIController(tsw_api)
 	direct_controller := profile_runner.NewDirectController(connector)
 	sync_controller := profile_runner.NewSyncController(connector)
-	profile_runner := profile_runner.New(
+	profile_runner := profile_runner.NewProfileRunner(
+		tsw_api,
 		action_sequencer,
 		sdl_controller_manager,
 		virtual_controller_manager,

@@ -19,7 +19,7 @@ func (p *ProfileRunner) processControllerChangeEvent(change_event controller_mgr
 	}
 
 	control_name := change_event.ControlName
-	device_id := change_event.Device.DeviceID
+	device_id := change_event.Device.DeviceID()
 	defined_thresholds := map[string]float64{}
 
 	if selected_profile.Profile.Controller != nil && selected_profile.Profile.Controller.Mapping != nil {

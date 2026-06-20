@@ -110,16 +110,16 @@ func (a *App) SubscribeChangeEvent() error {
 				return
 			case event := <-sdl_channel:
 				change_event := Interop_ChangeEvent{
-					UniqueID:    event.Device.UniqueID,
-					DeviceID:    event.Device.DeviceID,
+					UniqueID:    event.Device.UniqueID(),
+					DeviceID:    event.Device.DeviceID(),
 					ControlName: event.ControlName,
 					Value:       event.ControlState.NormalizedValues.Value,
 				}
 				go runtime.EventsEmit(a.ctx, AppEventType_ChangeEvent, change_event)
 			case event := <-virt_channel:
 				change_event := Interop_ChangeEvent{
-					UniqueID:    event.Device.UniqueID,
-					DeviceID:    event.Device.DeviceID,
+					UniqueID:    event.Device.UniqueID(),
+					DeviceID:    event.Device.DeviceID(),
 					ControlName: event.ControlName,
 					Value:       event.ControlState.NormalizedValues.Value,
 				}

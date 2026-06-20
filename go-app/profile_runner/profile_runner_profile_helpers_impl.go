@@ -7,8 +7,8 @@ import (
 	"tsw_controller_app/controller_mgr"
 )
 
-func (p *ProfileRunner) getSelectedProfileForDevice(device *controller_mgr.ControllerManager_ChangeEvent_Device) (ProfileRunnerSettings_SelectedProfile, bool) {
-	selected_profile, has_selected_profile := p.Settings.GetSelectedProfiles().Get(device.UniqueID)
+func (p *ProfileRunner) getSelectedProfileForDevice(device controller_mgr.IControllerManager_Device) (ProfileRunnerSettings_SelectedProfile, bool) {
+	selected_profile, has_selected_profile := p.Settings.GetSelectedProfiles().Get(device.UniqueID())
 
 	/* try auto-selection */
 	current_rail_class := p.CabDebugger.State.DrivableActorName
@@ -18,7 +18,7 @@ func (p *ProfileRunner) getSelectedProfileForDevice(device *controller_mgr.Contr
 		p.Profiles.ForEach(func(profile config.Config_Controller_Profile, id string) bool {
 			if (profile.AutoSelect == nil || !*profile.AutoSelect) ||
 				profile.RailClassInformation == nil ||
-				(profile.Controller != nil && *profile.Controller.UsbID != device.DeviceID) {
+				(profile.Controller != nil && *profile.Controller.UsbID != device.DeviceID()) {
 				/* skip if not-autoselect, rail class information is missing or the controller doesn't match */
 				return true
 			}
@@ -31,7 +31,7 @@ func (p *ProfileRunner) getSelectedProfileForDevice(device *controller_mgr.Contr
 
 			for _, rc_info := range *profile.RailClassInformation {
 				if rc_info.ClassName == current_rail_class {
-					is_controller_match := profile.Controller != nil && *profile.Controller.UsbID == device.DeviceID
+					is_controller_match := profile.Controller != nil && *profile.Controller.UsbID == device.DeviceID()
 					if is_controller_match {
 						scored_profiles = append(scored_profiles, ProfileRunner_ScoredProfileEntry{Id: id, Score: 20 * score_factor})
 					} else {

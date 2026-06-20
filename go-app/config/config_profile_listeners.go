@@ -1,8 +1,8 @@
 package config
 
 type Config_Controller_Profile_Listener_Action_Condition struct {
-	Operator string  `json:"operator" validate:"required,oneof=eq gt lt gte lte"`
-	Value    float64 `json:"value" validate:"required"`
+	Operator string `json:"operator" validate:"required,oneof=eq gt lt gte lte"`
+	Value    any    `json:"value" validate:"required"`
 }
 
 type Config_Controller_Profile_Listener_SharedAction struct {
@@ -23,7 +23,7 @@ type Config_Controller_Profile_Listener_Action struct {
 type Config_Controller_Profile_Listener_Type_APIValue struct {
 	Type      string                                      `json:"type" validate:"required,eq=api_value"`
 	Path      string                                      `json:"path" validate:"required"`
-	ValuesKey string                                      `json:"values_key,omitempty"`
+	ValuesKey string                                      `json:"values_key" validate:"required"`
 	Actions   []Config_Controller_Profile_Listener_Action `json:"actions" validate:"required"`
 }
 

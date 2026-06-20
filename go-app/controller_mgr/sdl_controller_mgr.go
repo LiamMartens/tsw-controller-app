@@ -151,10 +151,7 @@ func (ctrl *SDL_ControllerManager_Controller_JoyControl) UpdateValue(value float
 	}
 
 	ctrl.manager.changeEventChannels.EmitTimeout(time.Second, ControllerManager_Control_ChangeEvent{
-		Device: &ControllerManager_ChangeEvent_Device{
-			UniqueID: ctrl.device.UniqueID(),
-			DeviceID: ctrl.device.DeviceID(),
-		},
+		Device:       ctrl.device,
 		Controller:   ctrl.controller,
 		Control:      ctrl,
 		ControlName:  ctrl.name,
@@ -234,10 +231,7 @@ func (ctrl *SDL_ControllerManager_Controller_VirtualControl) UpdateValue(value f
 	}
 
 	ctrl.manager.changeEventChannels.EmitTimeout(time.Second, ControllerManager_Control_ChangeEvent{
-		Device: &ControllerManager_ChangeEvent_Device{
-			UniqueID: ctrl.device.UniqueID(),
-			DeviceID: ctrl.device.DeviceID(),
-		},
+		Device:       ctrl.device,
 		Controller:   ctrl.controller,
 		Control:      ctrl,
 		ControlName:  ctrl.name,

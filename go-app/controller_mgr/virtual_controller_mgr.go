@@ -112,10 +112,7 @@ func (ctrl *VirtualControllerManager_Controller_Control) UpdateValue(value float
 	}
 
 	ctrl.manager.changeEventChannels.EmitTimeout(time.Second, ControllerManager_Control_ChangeEvent{
-		Device: &ControllerManager_ChangeEvent_Device{
-			UniqueID: ctrl.device.UniqueID(),
-			DeviceID: ctrl.device.DeviceID(),
-		},
+		Device:       ctrl.device,
 		Controller:   ctrl.controller,
 		Control:      ctrl,
 		ControlName:  ctrl.name,
