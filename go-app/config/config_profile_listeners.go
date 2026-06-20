@@ -1,8 +1,12 @@
 package config
 
-type Config_Controller_Profile_Listener_SharedAction struct {
+type Config_Controller_Profile_Listener_Action_Condition struct {
 	Operator string  `json:"operator" validate:"required,oneof=eq gt lt gte lte"`
 	Value    float64 `json:"value" validate:"required"`
+}
+
+type Config_Controller_Profile_Listener_SharedAction struct {
+	Conditions []Config_Controller_Profile_Listener_Action_Condition `json:"conditions,omitempty"`
 }
 
 type Config_Controller_Profile_Listener_Action_HIDReport struct {
