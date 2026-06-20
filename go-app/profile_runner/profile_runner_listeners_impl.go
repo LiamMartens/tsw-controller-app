@@ -2,6 +2,8 @@ package profile_runner
 
 import (
 	"encoding/binary"
+	"errors"
+	"fmt"
 	"strings"
 	"tsw_controller_app/config"
 	"tsw_controller_app/controller_mgr"
@@ -9,22 +11,26 @@ import (
 	"tsw_controller_app/sdl_mgr"
 )
 
+var ErrNoAction = errors.New("no action defined")
+var ErrNoHIDDevice = errors.New("no hid device")
+var ErrHIDFailure = errors.New("hid failure")
+
 func (p *ProfileRunner) executeProfileListenerAction(
 	device controller_mgr.IControllerManager_Device,
 	action config.Config_Controller_Profile_Listener_Action,
-) {
+) error {
 	if action.HIDReport != nil {
 		sdl_device, is_sdl_device := device.(*sdl_mgr.SDLMgr_Joystick)
 		/* hid reports are only supported in sdl devices which have an associated HID device */
 		if !is_sdl_device || sdl_device.HIDDevice == nil {
 			logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] unable to execute hid_output_report action on non SDL or non HID device")
-			return
+			return fmt.Errorf("unable to execute HID Output Report action due to missing SDL device: %w", ErrNoHIDDevice)
 		}
 
 		report, err := sdl_device.HIDDevice.ReadFeatureReport(byte(action.HIDReport.ReportID))
 		if err != nil {
 			logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] could not read feature report", "id", action.HIDReport.ReportID, "error", err)
-			return
+			return fmt.Errorf("could not read feature report: %w: %w", ErrHIDFailure, err)
 		}
 
 		mask := make([]byte, 8)
@@ -45,9 +51,11 @@ func (p *ProfileRunner) executeProfileListenerAction(
 		err = sdl_device.HIDDevice.SendFeatureReport(byte(action.HIDReport.ReportID), report)
 		if err != nil {
 			logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] could not send feature report", "id", action.HIDReport.ReportID, "error", err)
-			return
+			return fmt.Errorf("could not send feature report: %w: %w", ErrHIDFailure, err)
 		}
 	}
+
+	return fmt.Errorf("no valid action to execute: %w", ErrNoAction)
 }
 
 func (p *ProfileRunner) processActiveProfileApiListeners() {
