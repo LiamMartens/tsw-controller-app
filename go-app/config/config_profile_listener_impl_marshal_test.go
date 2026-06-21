@@ -8,7 +8,7 @@ import (
 )
 
 func TestAction_UnmarshalJSON_HIDOutputReport(t *testing.T) {
-	input := `{"type":"hid_output_report","report_id":1,"mask":[64],"report_length":1,"operation":"or","conditions":[{"operator":"eq","value":1.0}]}`
+	input := `{"type":"hid_output_report","report_id":1,"mask":[64],"operation":"or","conditions":[{"operator":"eq","value":1.0}]}`
 	var a Config_Controller_Profile_Listener_Action
 	err := json.Unmarshal([]byte(input), &a)
 	assert.NoError(t, err)
@@ -36,10 +36,9 @@ func TestAction_MarshalJSON_HIDReport(t *testing.T) {
 					{Operator: "gt", Value: 0.75},
 				},
 			},
-			ReportID:     42,
-			ReportLength: 1,
-			Mask:         []byte{64},
-			Operation:    "or",
+			ReportID:  42,
+			Mask:      []byte{64},
+			Operation: "or",
 		},
 	}
 	data, err := json.Marshal(a)
@@ -60,7 +59,7 @@ func TestAction_MarshalJSON_NoType(t *testing.T) {
 }
 
 func TestListener_UnmarshalJSON_APIValue(t *testing.T) {
-	input := `{"type":"api_value","path":"/api/status","values_key":"Status","actions":[{"type":"hid_output_report","report_id":1,"report_length":1,"mask":[64],"operation":"or","conditions":[{"operator":"eq","value":1.0}]}]}`
+	input := `{"type":"api_value","path":"/api/status","values_key":"Status","actions":[{"type":"hid_output_report","report_id":1,"mask":[64],"operation":"or","conditions":[{"operator":"eq","value":1.0}]}]}`
 	var l Config_Controller_Profile_Listener
 	err := json.Unmarshal([]byte(input), &l)
 	assert.NoError(t, err)
@@ -99,10 +98,9 @@ func TestListener_MarshalJSON_APIValue(t *testing.T) {
 								{Operator: "eq", Value: 1.0},
 							},
 						},
-						ReportID:     1,
-						ReportLength: 1,
-						Mask:         []byte{64},
-						Operation:    "or",
+						ReportID:  1,
+						Mask:      []byte{64},
+						Operation: "or",
 					},
 				},
 			},

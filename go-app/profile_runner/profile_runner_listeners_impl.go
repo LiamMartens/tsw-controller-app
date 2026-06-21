@@ -29,7 +29,7 @@ func (p *ProfileRunner) executeProfileListenerAction(
 			return fmt.Errorf("unable to execute HID Output Report action due to missing SDL device: %w", ErrNoHIDDevice)
 		}
 
-		report, err := sdl_device.HIDDevice.GetOutputReport(byte(action.HIDOutputReport.ReportID), action.HIDOutputReport.ReportLength)
+		report, err := sdl_device.HIDDevice.GetOutputReport(byte(action.HIDOutputReport.ReportID), uint8(len(action.HIDOutputReport.Mask)))
 		if err != nil {
 			logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] could not read output report", "id", action.HIDOutputReport.ReportID, "error", err)
 			return fmt.Errorf("could not read output report: %w: %w", ErrHIDFailure, err)

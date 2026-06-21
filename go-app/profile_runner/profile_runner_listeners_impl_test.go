@@ -20,11 +20,10 @@ func TestExecuteProfileListenerAction_HIDOutputReport_AND(t *testing.T) {
 	mockHID.On("SetOutputReport", uint8(1), []byte{0b00001101}).Return(nil)
 	action := config.Config_Controller_Profile_Listener_Action{
 		HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
-			Type:         "hid_output_report",
-			ReportID:     1,
-			ReportLength: 1,
-			Mask:         []byte{0b00001111},
-			Operation:    "and",
+			Type:      "hid_output_report",
+			ReportID:  1,
+			Mask:      []byte{0b00001111},
+			Operation: "and",
 		},
 	}
 	err := runner.executeProfileListenerAction(sdlDev, action)
@@ -42,11 +41,10 @@ func TestExecuteProfileListenerAction_HIDOutputReport_OR(t *testing.T) {
 	mockHID.On("SetOutputReport", uint8(1), []byte{0b00011111}).Return(nil)
 	action := config.Config_Controller_Profile_Listener_Action{
 		HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
-			Type:         "hid_output_report",
-			ReportID:     1,
-			ReportLength: 1,
-			Mask:         []byte{0b00001111},
-			Operation:    "or",
+			Type:      "hid_output_report",
+			ReportID:  1,
+			Mask:      []byte{0b00001111},
+			Operation: "or",
 		},
 	}
 	err := runner.executeProfileListenerAction(sdlDev, action)
@@ -64,11 +62,10 @@ func TestExecuteProfileListenerAction_HIDOutputReport_AND_MultiByte(t *testing.T
 	mockHID.On("SetOutputReport", uint8(1), []byte{0b00001101, 0b10000000}).Return(nil)
 	action := config.Config_Controller_Profile_Listener_Action{
 		HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
-			Type:         "hid_output_report",
-			ReportID:     1,
-			ReportLength: 2,
-			Mask:         []byte{0b00001111, 0b10000000},
-			Operation:    "and",
+			Type:      "hid_output_report",
+			ReportID:  1,
+			Mask:      []byte{0b00001111, 0b10000000},
+			Operation: "and",
 		},
 	}
 	err := runner.executeProfileListenerAction(sdlDev, action)
