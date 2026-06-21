@@ -15,6 +15,9 @@ var ErrNoAction = errors.New("no action defined")
 var ErrNoHIDDevice = errors.New("no hid device")
 var ErrHIDFailure = errors.New("hid failure")
 
+var ErrInvalidAction = errors.New("invalid action definition")
+var ErrNoListenerValue = errors.New("could not find listener value")
+
 func (p *ProfileRunner) executeProfileListenerAction(
 	device controller_mgr.IControllerManager_Device,
 	action config.Config_Controller_Profile_Listener_Action,
@@ -98,6 +101,81 @@ func (p *ProfileRunner) executeProfileListenerAction(
 	return fmt.Errorf("no valid action to execute: %w", ErrNoAction)
 }
 
+func (p *ProfileRunner) filterMatchingAPIListenerActions(listener *config.Config_Controller_Profile_Listener) ([]config.Config_Controller_Profile_Listener_Action, error) {
+	if listener.API == nil {
+		return nil, fmt.Errorf("listener has invalid action definition: %w", ErrInvalidAction)
+	}
+
+	values, err := p.API.GetByPath(listener.API.Path)
+	if err != nil {
+		logger.Logger.Error("[ProfileRunner::processActiveProfileApiListeners] failed to get value from API path", "path", listener.API.Path, "error", err)
+		return nil, err
+	}
+
+	value, has_value := values[listener.API.ValuesKey]
+	if !has_value {
+		/* can't do anything if there is no value */
+		return nil, fmt.Errorf("could not find listener value: %w", ErrNoListenerValue)
+	}
+
+	matching_actions := []config.Config_Controller_Profile_Listener_Action{}
+action_loop:
+	for _, action := range listener.API.Actions {
+		conditions := action.GetConditions()
+		for _, condition := range conditions {
+			if condition.Matches(value) {
+				/* if any condition does not match skip action */
+				continue action_loop
+			}
+		}
+
+		/* if all conditions passed - execute action (might need to deduplicate actions?) */
+		matching_actions = append(matching_actions, action)
+	}
+
+	return matching_actions, nil
+}
+
+func (p *ProfileRunner) filterMatchingControlListenerActions(
+	listener *config.Config_Controller_Profile_Listener,
+	controller controller_mgr.IControllerManager_Controller,
+) ([]config.Config_Controller_Profile_Listener_Action, error) {
+	if listener.Control == nil {
+		return nil, fmt.Errorf("listener has invalid action definition: %w", ErrInvalidAction)
+	}
+
+	var dependecy_control controller_mgr.IControllerManager_Controller_Control = nil
+	if strings.HasPrefix(listener.Control.Name, "virtual:") {
+		/* virtual controls always exist - they just start at 0 */
+		virtual_control, has_dependency_control := controller.VirtualControls().Get(listener.Control.Name)
+		if !has_dependency_control {
+			controller.RegisterVirtualControl(listener.Control.Name, 0.0)
+			virtual_control, _ = controller.VirtualControls().Get(listener.Control.Name)
+		}
+		dependecy_control = virtual_control
+	} else if joy_control, has_dependency_control := controller.Controls().Get(listener.Control.Name); has_dependency_control {
+		dependecy_control = joy_control
+	}
+	control_value := dependecy_control.GetState().NormalizedValues.Value
+
+	matching_actions := []config.Config_Controller_Profile_Listener_Action{}
+action_loop:
+	for _, action := range listener.API.Actions {
+		conditions := action.GetConditions()
+		for _, condition := range conditions {
+			if condition.Matches(control_value) {
+				/* if any condition does not match skip action */
+				continue action_loop
+			}
+		}
+
+		/* if all conditions passed - execute action (might need to deduplicate actions?) */
+		matching_actions = append(matching_actions, action)
+	}
+
+	return matching_actions, nil
+}
+
 func (p *ProfileRunner) processActiveProfileApiListeners() {
 	p.SDLControllerManager.ConfiguredControllers.ForEach(func(controller controller_mgr.SDL_ControllerManager_ConfiguredController, key controller_mgr.DeviceUniqueID) bool {
 		selected_profile, has_selected_profile := p.getSelectedProfileForDevice(controller.Device())
@@ -107,32 +185,18 @@ func (p *ProfileRunner) processActiveProfileApiListeners() {
 		}
 
 		for _, listener := range selected_profile.Profile.Listeners {
-			if listener.API != nil {
-				values, err := p.API.GetByPath(listener.API.Path)
-				if err != nil {
-					logger.Logger.Error("[ProfileRunner::processActiveProfileApiListeners] failed to get value from API path", "path", listener.API.Path, "error", err)
-					continue
-				}
+			if listener.API == nil {
+				continue
+			}
 
-				value, has_value := values[listener.API.ValuesKey]
-				if !has_value {
-					/* can't do anything if there is no value */
-					continue
-				}
+			actions, err := p.filterMatchingAPIListenerActions(&listener)
+			if err != nil {
+				logger.Logger.Error("[ProfileRunner::processActiveProfileApiListeners] could not filter API listener actions", "error", err)
+				continue
+			}
 
-			action_loop:
-				for _, action := range listener.API.Actions {
-					conditions := action.GetConditions()
-					for _, condition := range conditions {
-						if !condition.Matches(value) {
-							/* if any condition does not match skip action */
-							continue action_loop
-						}
-					}
-
-					/* if all conditions passed - execute action (might need to deduplicate actions?) */
-					go p.executeProfileListenerAction(controller.Device(), action)
-				}
+			for _, action := range actions {
+				go p.executeProfileListenerAction(controller.Device(), action)
 			}
 		}
 
@@ -148,34 +212,18 @@ func (p *ProfileRunner) processActiveProfileControlListeners(change_event contro
 	}
 
 	for _, listener := range selected_profile.Profile.Listeners {
-		if listener.Control != nil {
-			var dependecy_control controller_mgr.IControllerManager_Controller_Control = nil
-			if strings.HasPrefix(listener.Control.Name, "virtual:") {
-				/* virtual controls always exist - they just start at 0 */
-				virtual_control, has_dependency_control := change_event.Controller.VirtualControls().Get(listener.Control.Name)
-				if !has_dependency_control {
-					change_event.Controller.RegisterVirtualControl(listener.Control.Name, 0.0)
-					virtual_control, _ = change_event.Controller.VirtualControls().Get(listener.Control.Name)
-				}
-				dependecy_control = virtual_control
-			} else if joy_control, has_dependency_control := change_event.Controller.Controls().Get(listener.Control.Name); has_dependency_control {
-				dependecy_control = joy_control
-			}
-			control_value := dependecy_control.GetState().NormalizedValues.Value
+		if listener.Control == nil {
+			continue
+		}
 
-		action_loop:
-			for _, action := range listener.Control.Actions {
-				conditions := action.GetConditions()
-				for _, condition := range conditions {
-					if !condition.Matches(control_value) {
-						/* if any condition does not match skip action */
-						continue action_loop
-					}
-				}
+		actions, err := p.filterMatchingControlListenerActions(&listener, change_event.Controller)
+		if err != nil {
+			logger.Logger.Error("[ProfileRunner::processActiveProfileApiListeners] could not filter control listener actions", "error", err)
+			continue
+		}
 
-				/* if all conditions passed - execute action (might need to deduplicate actions?) */
-				go p.executeProfileListenerAction(change_event.Device, action)
-			}
+		for _, action := range actions {
+			go p.executeProfileListenerAction(change_event.Controller.Device(), action)
 		}
 	}
 }
