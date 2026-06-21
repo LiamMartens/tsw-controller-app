@@ -55,8 +55,8 @@ type Config_Controller_Profile_Listener_Type_ControlValue struct {
 /**
  * Listen to the cab state values (CabDebugger)
  */
-type Config_Controller_Profile_Listener_Type_CabState struct {
-	Type    string                                      `json:"type" validate:"required,eq=cab_state"`
+type Config_Controller_Profile_Listener_Type_CabStateValue struct {
+	Type    string                                      `json:"type" validate:"required,eq=cab_state_value"`
 	Name    string                                      `json:"name" validate:"required"`
 	Actions []Config_Controller_Profile_Listener_Action `json:"actions" validate:"required"`
 }
@@ -65,7 +65,7 @@ type Config_Controller_Profile_Listener_Type_CabState struct {
  * Can match either API or Control struct depending on the internal type
  */
 type Config_Controller_Profile_Listener struct {
-	API      *Config_Controller_Profile_Listener_Type_APIValue     `json:"-"`
-	Control  *Config_Controller_Profile_Listener_Type_ControlValue `json:"-"`
-	CabState *Config_Controller_Profile_Listener_Type_CabState     `json:"-"`
+	API      *Config_Controller_Profile_Listener_Type_APIValue      `json:"-"`
+	Control  *Config_Controller_Profile_Listener_Type_ControlValue  `json:"-"`
+	CabState *Config_Controller_Profile_Listener_Type_CabStateValue `json:"-"`
 }

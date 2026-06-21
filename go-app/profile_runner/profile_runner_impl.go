@@ -70,6 +70,20 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 		}
 	}()
 
+	go func() {
+		ticker := time.NewTicker(100 * time.Millisecond)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-context_with_cancel.Done():
+				return
+			case <-ticker.C:
+				go p.processActiveProfileCabStateListeners()
+			}
+		}
+	}()
+
 	/* normal action sequencing */
 	go func() {
 		sdl_channel, sdl_unsubscribe := p.SDLControllerManager.SubscribeChangeEvent()

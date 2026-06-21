@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "title": "Listener Action Condition",
+  "required": ["operator", "value"],
+  "properties": {
+    "operator": {
+      "type": "string",
+      "enum": ["eq", "gt", "lt", "gte", "lte"],
+      "description": "The comparison operator to apply (equal, greater than, less than, greater than or equal, less than or equal)"
+    },
+    "value": {
+      "description": "The value to compare against"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "conditions": {
+      "type": "array",
+      "description": "The conditions that must be met for this action to trigger",
+      "items": {
+        "$ref": "./profile.listener_action_condition.schema.json"
+      }
+    }
+  }
+}

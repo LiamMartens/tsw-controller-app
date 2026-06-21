@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "title": "Control Value Listener",
+  "properties": {
+    "type": {
+      "type": "string",
+      "const": "control_value",
+      "description": "The type of listener - watches a control's value on this profile"
+    },
+    "name": {
+      "type": "string",
+      "description": "The name of the control to watch"
+    },
+    "actions": {
+      "type": "array",
+      "description": "The actions to perform when the control value changes and conditions are met",
+      "items": {
+        "$ref": "./profile.listener_action.schema.json"
+      }
+    }
+  },
+  "required": ["type", "name", "actions"]
+}

@@ -1,8 +1,10 @@
 package profile_runner
 
 import (
+	"sync"
 	"testing"
 
+	"tsw_controller_app/cabdebugger"
 	"tsw_controller_app/config"
 	"tsw_controller_app/controller_mgr"
 	"tsw_controller_app/map_utils"
@@ -297,4 +299,84 @@ func TestFilterMatchingControlListenerActions_ControlValueDoesNotMatch(t *testin
 	assert.Len(t, actions, 0)
 	mockController.AssertExpectations(t)
 	mockControl.AssertExpectations(t)
+}
+
+// --- filterMatchingCabStateistenerActions ---
+
+func TestFilterMatchingCabStateListenerActions_CabStateValueMatches(t *testing.T) {
+	runner := &ProfileRunner{}
+
+	controls := map_utils.NewLockMap[cabdebugger.PropertyName, cabdebugger.CabDebugger_ControlState_Control]()
+	runner.CabDebugger = &cabdebugger.CabDebugger{
+		State: cabdebugger.CabDebugger_ControlState{
+			Mutex:             sync.Mutex{},
+			DrivableActorName: "",
+			Controls:          controls,
+		},
+	}
+	controls.Set("Throttle", cabdebugger.CabDebugger_ControlState_Control{
+		CurrentValue: 0.5,
+	})
+
+	listener := &config.Config_Controller_Profile_Listener{
+		CabState: &config.Config_Controller_Profile_Listener_Type_CabStateValue{
+			Type: "cab_state_value",
+			Name: "Throttle",
+			Actions: []config.Config_Controller_Profile_Listener_Action{
+				{
+					HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
+						Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
+							Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
+								{Operator: "gte", Value: 0.5},
+							},
+						},
+						Type: "hid_output_report",
+					},
+				},
+			},
+		},
+	}
+
+	actions, err := runner.filterMatchingCabStateListenerActions(listener)
+	assert.NoError(t, err)
+	assert.Len(t, actions, 1)
+}
+
+func TestFilterMatchingCabStateListenerActions_CabStateValueDoesNotMatch(t *testing.T) {
+	runner := &ProfileRunner{}
+
+	controls := map_utils.NewLockMap[cabdebugger.PropertyName, cabdebugger.CabDebugger_ControlState_Control]()
+	runner.CabDebugger = &cabdebugger.CabDebugger{
+		State: cabdebugger.CabDebugger_ControlState{
+			Mutex:             sync.Mutex{},
+			DrivableActorName: "",
+			Controls:          controls,
+		},
+	}
+	controls.Set("Throttle", cabdebugger.CabDebugger_ControlState_Control{
+		CurrentValue: 0.4,
+	})
+
+	listener := &config.Config_Controller_Profile_Listener{
+		CabState: &config.Config_Controller_Profile_Listener_Type_CabStateValue{
+			Type: "cab_state_value",
+			Name: "Throttle",
+			Actions: []config.Config_Controller_Profile_Listener_Action{
+				{
+					HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
+						Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
+							Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
+								{Operator: "gte", Value: 0.5},
+							},
+						},
+						Type: "hid_output_report",
+					},
+				},
+			},
+		},
+	}
+
+	actions, err := runner.filterMatchingCabStateListenerActions(listener)
+	assert.NoError(t, err)
+	assert.Len(t, actions, 0)
 }

@@ -161,6 +161,35 @@ action_loop:
 	return matching_actions, nil
 }
 
+func (p *ProfileRunner) filterMatchingCabStateListenerActions(listener *config.Config_Controller_Profile_Listener) ([]config.Config_Controller_Profile_Listener_Action, error) {
+	if listener.CabState == nil {
+		return nil, fmt.Errorf("listener has invalid action definition: %w", ErrInvalidAction)
+	}
+
+	value, has_value := p.CabDebugger.State.Controls.Get(listener.CabState.Name)
+	if !has_value {
+		/* can't do anything if there is no value */
+		return nil, fmt.Errorf("could not find listener value: %w", ErrNoListenerValue)
+	}
+
+	matching_actions := []config.Config_Controller_Profile_Listener_Action{}
+action_loop:
+	for _, action := range listener.CabState.Actions {
+		conditions := action.GetConditions()
+		for _, condition := range conditions {
+			if !condition.Matches(value.CurrentValue) {
+				/* if any condition does not match skip action */
+				continue action_loop
+			}
+		}
+
+		/* if all conditions passed - execute action (might need to deduplicate actions?) */
+		matching_actions = append(matching_actions, action)
+	}
+
+	return matching_actions, nil
+}
+
 func (p *ProfileRunner) processActiveProfileApiListeners() {
 	p.SDLControllerManager.ConfiguredControllers.ForEach(func(controller controller_mgr.SDL_ControllerManager_ConfiguredController, key controller_mgr.DeviceUniqueID) bool {
 		selected_profile, has_selected_profile := p.getSelectedProfileForDevice(controller.Device())
@@ -211,4 +240,32 @@ func (p *ProfileRunner) processActiveProfileControlListeners(change_event contro
 			go p.executeProfileListenerAction(change_event.Controller.Device(), action)
 		}
 	}
+}
+
+func (p *ProfileRunner) processActiveProfileCabStateListeners() {
+	p.SDLControllerManager.ConfiguredControllers.ForEach(func(controller controller_mgr.SDL_ControllerManager_ConfiguredController, key controller_mgr.DeviceUniqueID) bool {
+		selected_profile, has_selected_profile := p.getSelectedProfileForDevice(controller.Device())
+		if !has_selected_profile {
+			/* skip if no profile selected for controller */
+			return true
+		}
+
+		for _, listener := range selected_profile.Profile.Listeners {
+			if listener.CabState == nil {
+				continue
+			}
+
+			actions, err := p.filterMatchingCabStateListenerActions(&listener)
+			if err != nil {
+				logger.Logger.Error("[ProfileRunner::processActiveProfileApiListeners] could not filter Cab State listener actions", "error", err)
+				continue
+			}
+
+			for _, action := range actions {
+				go p.executeProfileListenerAction(controller.Device(), action)
+			}
+		}
+
+		return true
+	})
 }

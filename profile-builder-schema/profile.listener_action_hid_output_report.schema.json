@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "title": "HID Output Report Action",
+  "properties": {
+    "type": {
+      "type": "string",
+      "const": "hid_output_report",
+      "description": "The type of listener action - sends an HID output report to the device"
+    },
+    "report_id": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The report ID to send"
+    },
+    "mask": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 255
+      },
+      "description": "The byte mask to write to the report"
+    },
+    "operation": {
+      "type": "string",
+      "enum": ["and", "or"],
+      "description": "The bitwise operation to apply to the mask"
+    }
+  },
+  "required": ["type", "report_id", "mask", "operation"]
+}

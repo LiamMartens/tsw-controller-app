@@ -119,6 +119,13 @@
           }
         }
       }
+    },
+    "listeners": {
+      "type": "array",
+      "description": "Defines reactive listeners that trigger actions when conditions are met",
+      "items": {
+        "$ref": "./profile.listener.schema.json"
+      }
     }
   },
   "required": ["name", "controls"]
