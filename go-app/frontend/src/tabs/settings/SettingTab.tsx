@@ -189,7 +189,7 @@ export const SettingsTab = () => {
               type="button"
               onClick={handleInstallUdevRules}
             >
-              Install udev rules
+              (Re-)Install udev rules for plugged in controllers
             </button>
           </div>
         </div>
