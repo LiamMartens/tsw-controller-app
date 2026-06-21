@@ -60,6 +60,7 @@ require (
 	github.com/robotn/xgbutil v0.10.0 // indirect
 	github.com/samber/lo v1.53.0 // indirect
 	github.com/shirou/gopsutil/v4 v4.26.2 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/tailscale/win v0.0.0-20250627215312-f4da2b8ee071 // indirect
 	github.com/tklauser/go-sysconf v0.3.16 // indirect
 	github.com/tklauser/numcpus v0.11.0 // indirect

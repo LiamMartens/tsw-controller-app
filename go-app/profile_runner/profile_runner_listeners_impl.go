@@ -29,8 +29,8 @@ func (p *ProfileRunner) executeProfileListenerAction(
 
 		report, err := sdl_device.HIDDevice.GetOutputReport(byte(action.HIDOutputReport.ReportID), action.HIDOutputReport.ReportLength)
 		if err != nil {
-			logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] could not read feature report", "id", action.HIDOutputReport.ReportID, "error", err)
-			return fmt.Errorf("could not read feature report: %w: %w", ErrHIDFailure, err)
+			logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] could not read output report", "id", action.HIDOutputReport.ReportID, "error", err)
+			return fmt.Errorf("could not read output report: %w: %w", ErrHIDFailure, err)
 		}
 
 		mask := make([]byte, 8)
@@ -50,10 +50,14 @@ func (p *ProfileRunner) executeProfileListenerAction(
 
 		err = sdl_device.HIDDevice.SetOutputReport(byte(action.HIDOutputReport.ReportID), report)
 		if err != nil {
-			logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] could not send feature report", "id", action.HIDOutputReport.ReportID, "error", err)
-			return fmt.Errorf("could not send feature report: %w: %w", ErrHIDFailure, err)
+			logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] could not send output report", "id", action.HIDOutputReport.ReportID, "error", err)
+			return fmt.Errorf("could not send output report: %w: %w", ErrHIDFailure, err)
 		}
-	} else if action.HIDFeatureReport != nil {
+
+		return nil
+	}
+
+	if action.HIDFeatureReport != nil {
 		sdl_device, is_sdl_device := device.(*sdl_mgr.SDLMgr_Joystick)
 		/* hid reports are only supported in sdl devices which have an associated HID device */
 		if !is_sdl_device || sdl_device.HIDDevice == nil {
@@ -61,7 +65,7 @@ func (p *ProfileRunner) executeProfileListenerAction(
 			return fmt.Errorf("unable to execute HID Output Report action due to missing SDL device: %w", ErrNoHIDDevice)
 		}
 
-		report, err := sdl_device.HIDDevice.ReadFeatureReport(byte(action.HIDOutputReport.ReportID))
+		report, err := sdl_device.HIDDevice.ReadFeatureReport(byte(action.HIDFeatureReport.ReportID))
 		if err != nil {
 			logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] could not read feature report", "id", action.HIDFeatureReport.ReportID, "error", err)
 			return fmt.Errorf("could not read feature report: %w: %w", ErrHIDFailure, err)
@@ -73,20 +77,22 @@ func (p *ProfileRunner) executeProfileListenerAction(
 		 * This means the mask is applied per byte and any more significant bytes are thrown away - this makes it easy
 		 * to create a feature report mask even if the feature report only returns a singular byte
 		 */
-		binary.LittleEndian.PutUint64(mask, action.HIDOutputReport.Mask)
+		binary.LittleEndian.PutUint64(mask, action.HIDFeatureReport.Mask)
 		for ix := range report {
-			if action.HIDOutputReport.Operation == "and" {
+			if action.HIDFeatureReport.Operation == "and" {
 				report[ix] = report[ix] & mask[ix]
-			} else if action.HIDOutputReport.Operation == "or" {
+			} else if action.HIDFeatureReport.Operation == "or" {
 				report[ix] = report[ix] | mask[ix]
 			}
 		}
 
-		err = sdl_device.HIDDevice.SendFeatureReport(byte(action.HIDOutputReport.ReportID), report)
+		err = sdl_device.HIDDevice.SendFeatureReport(byte(action.HIDFeatureReport.ReportID), report)
 		if err != nil {
 			logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] could not send feature report", "id", action.HIDFeatureReport.ReportID, "error", err)
 			return fmt.Errorf("could not send feature report: %w: %w", ErrHIDFailure, err)
 		}
+
+		return nil
 	}
 
 	return fmt.Errorf("no valid action to execute: %w", ErrNoAction)
