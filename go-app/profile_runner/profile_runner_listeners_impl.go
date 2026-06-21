@@ -123,7 +123,7 @@ action_loop:
 	for _, action := range listener.API.Actions {
 		conditions := action.GetConditions()
 		for _, condition := range conditions {
-			if condition.Matches(value) {
+			if !condition.Matches(value) {
 				/* if any condition does not match skip action */
 				continue action_loop
 			}
@@ -160,10 +160,10 @@ func (p *ProfileRunner) filterMatchingControlListenerActions(
 
 	matching_actions := []config.Config_Controller_Profile_Listener_Action{}
 action_loop:
-	for _, action := range listener.API.Actions {
+	for _, action := range listener.Control.Actions {
 		conditions := action.GetConditions()
 		for _, condition := range conditions {
-			if condition.Matches(control_value) {
+			if !condition.Matches(control_value) {
 				/* if any condition does not match skip action */
 				continue action_loop
 			}
