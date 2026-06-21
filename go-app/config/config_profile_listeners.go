@@ -13,8 +13,8 @@ type Config_Controller_Profile_Listener_Action_HIDOutputReport struct {
 	Config_Controller_Profile_Listener_SharedAction
 	Type         string `json:"type" validate:"required,eq=hid_output_report"`
 	ReportID     uint8  `json:"report_id" validate:"required"`
-	ReportLength uint8  `json:"report_length" validate:"required"` /* report length in bytes */
-	Mask         uint64 `json:"mask" validate:"required"`
+	ReportLength uint8  `json:"report_length" validate:"required,min=1,max=64"` /* report length in bytes */
+	Mask         []byte `json:"mask" validate:"required"`
 	Operation    string `json:"operation" validate:"required,oneof=and or"`
 }
 
@@ -22,7 +22,7 @@ type Config_Controller_Profile_Listener_Action_HIDFeatureReport struct {
 	Config_Controller_Profile_Listener_SharedAction
 	Type      string `json:"type" validate:"required,eq=hid_feature_report"`
 	ReportID  uint8  `json:"report_id" validate:"required"`
-	Mask      uint64 `json:"mask" validate:"required"`
+	Mask      []byte `json:"mask" validate:"required"`
 	Operation string `json:"operation" validate:"required,oneof=and or"`
 }
 

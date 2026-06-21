@@ -23,7 +23,7 @@ func TestExecuteProfileListenerAction_HIDOutputReport_AND(t *testing.T) {
 			Type:         "hid_output_report",
 			ReportID:     1,
 			ReportLength: 1,
-			Mask:         0b00001111,
+			Mask:         []byte{0b00001111},
 			Operation:    "and",
 		},
 	}
@@ -45,7 +45,7 @@ func TestExecuteProfileListenerAction_HIDOutputReport_OR(t *testing.T) {
 			Type:         "hid_output_report",
 			ReportID:     1,
 			ReportLength: 1,
-			Mask:         0b00001111,
+			Mask:         []byte{0b00001111},
 			Operation:    "or",
 		},
 	}
@@ -67,7 +67,7 @@ func TestExecuteProfileListenerAction_HIDOutputReport_AND_MultiByte(t *testing.T
 			Type:         "hid_output_report",
 			ReportID:     1,
 			ReportLength: 2,
-			Mask:         0b10000000_00001111,
+			Mask:         []byte{0b00001111, 0b10000000},
 			Operation:    "and",
 		},
 	}
@@ -88,7 +88,7 @@ func TestExecuteProfileListenerAction_HIDFeatureReport_AND(t *testing.T) {
 		HIDFeatureReport: &config.Config_Controller_Profile_Listener_Action_HIDFeatureReport{
 			Type:      "hid_feature_report",
 			ReportID:  1,
-			Mask:      0b00001111,
+			Mask:      []byte{0b00001111},
 			Operation: "and",
 		},
 	}
@@ -109,7 +109,7 @@ func TestExecuteProfileListenerAction_HIDFeatureReport_OR(t *testing.T) {
 		HIDFeatureReport: &config.Config_Controller_Profile_Listener_Action_HIDFeatureReport{
 			Type:      "hid_feature_report",
 			ReportID:  1,
-			Mask:      0b00001111,
+			Mask:      []byte{0b00001111},
 			Operation: "or",
 		},
 	}
@@ -130,7 +130,7 @@ func TestExecuteProfileListenerAction_HIDFeatureReport_AND_MultiByte(t *testing.
 		HIDFeatureReport: &config.Config_Controller_Profile_Listener_Action_HIDFeatureReport{
 			Type:      "hid_feature_report",
 			ReportID:  1,
-			Mask:      0b10000001_00001111,
+			Mask:      []byte{0b00001111, 0b10000001},
 			Operation: "and",
 		},
 	}

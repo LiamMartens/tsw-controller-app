@@ -1,7 +1,6 @@
 package profile_runner
 
 import (
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"strings"
@@ -36,18 +35,11 @@ func (p *ProfileRunner) executeProfileListenerAction(
 			return fmt.Errorf("could not read output report: %w: %w", ErrHIDFailure, err)
 		}
 
-		mask := make([]byte, 8)
-		/*
-		 * Little-endian: least significant byte goes first (index 0), most significant byte goes last (index 7)
-		 * This means the mask is applied per byte and any more significant bytes are thrown away - this makes it easy
-		 * to create a feature report mask even if the feature report only returns a singular byte
-		 */
-		binary.LittleEndian.PutUint64(mask, action.HIDOutputReport.Mask)
 		for ix := range report {
 			if action.HIDOutputReport.Operation == "and" {
-				report[ix] = report[ix] & mask[ix]
+				report[ix] = report[ix] & action.HIDOutputReport.Mask[ix]
 			} else if action.HIDOutputReport.Operation == "or" {
-				report[ix] = report[ix] | mask[ix]
+				report[ix] = report[ix] | action.HIDOutputReport.Mask[ix]
 			}
 		}
 
@@ -74,18 +66,11 @@ func (p *ProfileRunner) executeProfileListenerAction(
 			return fmt.Errorf("could not read feature report: %w: %w", ErrHIDFailure, err)
 		}
 
-		mask := make([]byte, 8)
-		/*
-		 * Little-endian: least significant byte goes first (index 0), most significant byte goes last (index 7)
-		 * This means the mask is applied per byte and any more significant bytes are thrown away - this makes it easy
-		 * to create a feature report mask even if the feature report only returns a singular byte
-		 */
-		binary.LittleEndian.PutUint64(mask, action.HIDFeatureReport.Mask)
 		for ix := range report {
 			if action.HIDFeatureReport.Operation == "and" {
-				report[ix] = report[ix] & mask[ix]
+				report[ix] = report[ix] & action.HIDFeatureReport.Mask[ix]
 			} else if action.HIDFeatureReport.Operation == "or" {
-				report[ix] = report[ix] | mask[ix]
+				report[ix] = report[ix] | action.HIDFeatureReport.Mask[ix]
 			}
 		}
 

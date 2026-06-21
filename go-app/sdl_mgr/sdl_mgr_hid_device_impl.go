@@ -116,6 +116,7 @@ func (hd *SDLMgr_HIDDevice) SetOutputReport(id byte, data []byte) error {
 			return err
 		}
 		hd.outputReportsState.State[id] = data
+		return nil
 	}
 
 	if hd.Native_Backend_Device != nil {
@@ -124,6 +125,7 @@ func (hd *SDLMgr_HIDDevice) SetOutputReport(id byte, data []byte) error {
 			return err
 		}
 		hd.outputReportsState.State[id] = data
+		return nil
 	}
 
 	return fmt.Errorf("no valid device backend to set output report to")

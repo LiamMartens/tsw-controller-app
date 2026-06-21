@@ -8,7 +8,7 @@ import (
 )
 
 func TestAction_UnmarshalJSON_HIDOutputReport(t *testing.T) {
-	input := `{"type":"hid_output_report","report_id":1,"mask":255,"report_length":1,"operation":"or","conditions":[{"operator":"eq","value":1.0}]}`
+	input := `{"type":"hid_output_report","report_id":1,"mask":[64],"report_length":1,"operation":"or","conditions":[{"operator":"eq","value":1.0}]}`
 	var a Config_Controller_Profile_Listener_Action
 	err := json.Unmarshal([]byte(input), &a)
 	assert.NoError(t, err)
@@ -16,7 +16,7 @@ func TestAction_UnmarshalJSON_HIDOutputReport(t *testing.T) {
 	assert.Equal(t, "eq", a.HIDOutputReport.Conditions[0].Operator)
 	assert.Equal(t, 1.0, a.HIDOutputReport.Conditions[0].Value)
 	assert.Equal(t, uint8(1), a.HIDOutputReport.ReportID)
-	assert.Equal(t, uint64(255), a.HIDOutputReport.Mask)
+	assert.Equal(t, []byte{64}, a.HIDOutputReport.Mask)
 }
 
 func TestAction_UnmarshalJSON_InvalidType(t *testing.T) {
@@ -38,7 +38,7 @@ func TestAction_MarshalJSON_HIDReport(t *testing.T) {
 			},
 			ReportID:     42,
 			ReportLength: 1,
-			Mask:         128,
+			Mask:         []byte{64},
 			Operation:    "or",
 		},
 	}
@@ -60,7 +60,7 @@ func TestAction_MarshalJSON_NoType(t *testing.T) {
 }
 
 func TestListener_UnmarshalJSON_APIValue(t *testing.T) {
-	input := `{"type":"api_value","path":"/api/status","values_key":"Status","actions":[{"type":"hid_output_report","report_id":1,"report_length":1,"mask":255,"operation":"or","conditions":[{"operator":"eq","value":1.0}]}]}`
+	input := `{"type":"api_value","path":"/api/status","values_key":"Status","actions":[{"type":"hid_output_report","report_id":1,"report_length":1,"mask":[64],"operation":"or","conditions":[{"operator":"eq","value":1.0}]}]}`
 	var l Config_Controller_Profile_Listener
 	err := json.Unmarshal([]byte(input), &l)
 	assert.NoError(t, err)
@@ -73,7 +73,7 @@ func TestListener_UnmarshalJSON_APIValue(t *testing.T) {
 	assert.Equal(t, "eq", l.API.Actions[0].HIDOutputReport.Conditions[0].Operator)
 	assert.Equal(t, 1.0, l.API.Actions[0].HIDOutputReport.Conditions[0].Value)
 	assert.Equal(t, uint8(1), l.API.Actions[0].HIDOutputReport.ReportID)
-	assert.Equal(t, uint64(255), l.API.Actions[0].HIDOutputReport.Mask)
+	assert.Equal(t, []byte{64}, l.API.Actions[0].HIDOutputReport.Mask)
 }
 
 func TestListener_UnmarshalJSON_InvalidType(t *testing.T) {
@@ -101,7 +101,7 @@ func TestListener_MarshalJSON_APIValue(t *testing.T) {
 						},
 						ReportID:     1,
 						ReportLength: 1,
-						Mask:         255,
+						Mask:         []byte{64},
 						Operation:    "or",
 					},
 				},
