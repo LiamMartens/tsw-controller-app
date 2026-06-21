@@ -84,6 +84,16 @@ func (c *Config_Controller_Profile_Listener) UnmarshalJSON(data []byte) error {
 		}
 		c.Control = &control
 		return nil
+	case "cab_state":
+		var cabstate Config_Controller_Profile_Listener_Type_CabState
+		if err := json.Unmarshal(data, &cabstate); err != nil {
+			return err
+		}
+		if err := v.Struct(cabstate); err != nil {
+			return err
+		}
+		c.CabState = &cabstate
+		return nil
 	}
 	return fmt.Errorf("invalid listener type (%s)", peek.Type)
 }
@@ -94,6 +104,9 @@ func (c Config_Controller_Profile_Listener) MarshalJSON() ([]byte, error) {
 	}
 	if c.Control != nil {
 		return json.Marshal(c.Control)
+	}
+	if c.CabState != nil {
+		return json.Marshal(c.CabState)
 	}
 	return nil, fmt.Errorf("unable to marshal listener; no valid listener type found")
 }
