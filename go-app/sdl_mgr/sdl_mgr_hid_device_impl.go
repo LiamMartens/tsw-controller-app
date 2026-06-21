@@ -81,7 +81,7 @@ func (hd *SDLMgr_HIDDevice) Close() error {
 		return hd.Go_Backend_Device.Close()
 	}
 	if hd.Native_Backend_Device != nil {
-		return hd.Native_Backend_Device.Open()
+		return hd.Native_Backend_Device.Close()
 	}
 	return fmt.Errorf("no device available")
 }
