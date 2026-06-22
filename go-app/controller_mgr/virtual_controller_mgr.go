@@ -89,6 +89,7 @@ func (c *VirtualControllerManager_Controller_Control) Name() string {
 }
 
 func (ctrl *VirtualControllerManager_Controller_Control) UpdateValue(value float64, is_reset bool) {
+	now := time.Now()
 	if is_reset {
 		ctrl.state.RawValues.PreviousValue = value
 		ctrl.state.RawValues.InitialValue = value
@@ -111,6 +112,7 @@ func (ctrl *VirtualControllerManager_Controller_Control) UpdateValue(value float
 		ctrl.state.updateDirection()
 	}
 
+	ctrl.state.LastUpdatedAt = &now
 	ctrl.manager.changeEventChannels.EmitTimeout(time.Second, ControllerManager_Control_ChangeEvent{
 		Device:       ctrl.device,
 		Controller:   ctrl.controller,

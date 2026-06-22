@@ -2,6 +2,7 @@ package controller_mgr
 
 import (
 	"context"
+	"math"
 	"time"
 	"tsw_controller_app/config"
 	"tsw_controller_app/logger"
@@ -119,6 +120,33 @@ func (ctrl *SDL_ControllerManager_Controller_JoyControl) GetState() ControllerMa
 }
 
 func (ctrl *SDL_ControllerManager_Controller_JoyControl) UpdateValue(value float64, is_reset bool) {
+	now := time.Now()
+	var dur_since_last_update time.Duration = 0
+	if ctrl.state.LastUpdatedAt != nil {
+		dur_since_last_update = now.Sub(*ctrl.state.LastUpdatedAt)
+	}
+
+	normalized_value := ctrl.calibration.NormalizeRawValue(value)
+	var anti_jitter float64 = 0
+	if ctrl.calibration.AntiJitter != nil && *ctrl.calibration.AntiJitter > 0 {
+		anti_jitter = *ctrl.calibration.AntiJitter
+	}
+	normalized_diff := math.Abs(normalized_value.Value - ctrl.state.NormalizedValues.Value)
+	/*
+	 * Apply anti jitter logic if:
+	 * - this is not a reset operation;
+	 * - it has been 1 or more second(s) since the last update was applied (meaning the control should be stable)
+	 * - the diff falls within the anti jitter threshold
+	 *
+	 * This means updates will still be processed if:
+	 * - The last update was very recent, meaning the control is actively moving
+	 * - The diff exceeds the jitter threshold
+	 */
+	if !is_reset && dur_since_last_update >= 1*time.Second && normalized_diff < anti_jitter {
+		/* skip update altogether if within anti jitter boundary */
+		return
+	}
+
 	/* update raw values */
 	if is_reset {
 		ctrl.state.RawValues.PreviousValue = value
@@ -128,9 +156,7 @@ func (ctrl *SDL_ControllerManager_Controller_JoyControl) UpdateValue(value float
 	}
 	ctrl.state.RawValues.Value = value
 
-	/* update normal values */
-	normalized_value := ctrl.calibration.NormalizeRawValue(value)
-	/* only update if value is not within margin error or  if this is a reset value */
+	/* only update if value is not within margin error or if this is a reset value */
 	if is_reset {
 		ctrl.state.NormalizedValues.InitialValue = normalized_value.Value
 		ctrl.state.NormalizedValues.PreviousValue = normalized_value.Value
@@ -150,6 +176,7 @@ func (ctrl *SDL_ControllerManager_Controller_JoyControl) UpdateValue(value float
 		ctrl.state.updateDirection()
 	}
 
+	ctrl.state.LastUpdatedAt = &now
 	ctrl.manager.changeEventChannels.EmitTimeout(time.Second, ControllerManager_Control_ChangeEvent{
 		Device:       ctrl.device,
 		Controller:   ctrl.controller,

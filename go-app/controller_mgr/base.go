@@ -2,6 +2,7 @@ package controller_mgr
 
 import (
 	"context"
+	"time"
 	"tsw_controller_app/map_utils"
 )
 
@@ -52,7 +53,8 @@ type ControllerManager_Controller_ControlStateValues struct {
 }
 
 type ControllerManager_Controller_ControlState struct {
-	Direction ControllerManager_Controller_ControlState_DirectionChangeMarker
+	LastUpdatedAt *time.Time
+	Direction     ControllerManager_Controller_ControlState_DirectionChangeMarker
 	/* the normalized value states are in 0-1 format */
 	NormalizedValues ControllerManager_Controller_ControlStateValues
 	/* the raw values are in their raw value format coming from sdl */

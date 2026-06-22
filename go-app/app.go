@@ -273,6 +273,7 @@ func (a *App) SaveCalibration(data Interop_ControllerCalibration) error {
 					Max:         control.Max,
 					Idle:        &control.Idle,
 					Deadzone:    &control.Deadzone,
+					AntiJitter:  &control.AntiJitter,
 					Invert:      &control.Invert,
 					EasingCurve: &control.EasingCurve,
 					Thresholds:  control.Thresholds,

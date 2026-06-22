@@ -182,6 +182,18 @@ export const CalibrationModalFormControl = (props: Props) => {
                       })}
                     />
                   </label>
+                  <label className="input input-xs w-full">
+                    Anti-Jitter
+                    <input
+                      type="number"
+                      className="grow"
+                      disabled={!field.override}
+                      {...form.register(`controls.${index}.antiJitter`, {
+                        valueAsNumber: true,
+                        required: true,
+                      })}
+                    />
+                  </label>
                 </div>
                 <div className="flex justify-start gap-2 items-center">
                   <div>

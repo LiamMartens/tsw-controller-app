@@ -14,6 +14,7 @@ export type CalibrationStateControl = {
   max: number;
   idle: number;
   deadzone: number;
+  antiJitter: number;
   invert: boolean;
   easingCurve: number[];
   override: boolean;
@@ -27,10 +28,11 @@ export type CalibrationState = {
 export type UseCalibrationFormType = ReturnType<typeof useCalibrationForm>;
 
 const EMPTY_CONTROL_STATE: Omit<CalibrationStateControl, "kind" | "index"> = {
-  deadzone: 0,
-  invert: false,
   name: "",
   value: 0,
+  deadzone: 0,
+  antiJitter: 0,
+  invert: false,
   /* default to MAX_SAFE_INTEGER so any value is < min */
   min: Number.MAX_SAFE_INTEGER,
   idle: Number.MAX_SAFE_INTEGER,
@@ -77,6 +79,7 @@ export const useCalibrationForm = (defaultValues: CalibrationState) => {
         const nextState = {
           value: data.Value,
           deadzone: controlState.deadzone,
+          antiJitter: controlState.antiJitter,
           min: Math.min(
             controlState.min,
             applyDefaultDeadzoneToRawValue(data.Value),
