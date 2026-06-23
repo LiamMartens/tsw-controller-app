@@ -42,7 +42,7 @@ const Alerts = () => {
   }, [dismiss, dismissTimeoutRef]);
 
   return (
-    <div className="fixed bottom-4 w-full grid justify-center pointer-events-none">
+    <div className="fixed bottom-4 w-full grid justify-center pointer-events-none z-50">
       <AnimatePresence mode="sync">
         {current && (
           <motion.div

@@ -13,8 +13,6 @@ import { BrowserOpenURL, Environment } from "../../../wailsjs/runtime/runtime";
 import { updateTheme } from "../../utils/updateTheme";
 import { useControllers, useEnvironment, useSettings } from "../../swr";
 
-const RAW_HID_PROMPT_DEVICES = ["1209:"];
-
 type FormValues = {
   tswApiKeyLocation: string;
   preferredControlMode: "direct_control" | "sync_control" | "api_control";
@@ -33,11 +31,7 @@ export const SettingsTab = () => {
     });
 
   const shouldShowUdevInstallPrompt = useMemo(
-    () =>
-      environment.platform === "linux" &&
-      controllers.some((c) =>
-        RAW_HID_PROMPT_DEVICES.some((d) => c.DeviceID.startsWith(d)),
-      ),
+    () => environment.platform === "linux",
     [environment, controllers],
   );
 
@@ -168,25 +162,6 @@ export const SettingsTab = () => {
         </div>
       </fieldset>
 
-      {shouldShowUdevInstallPrompt && (
-        <div role="alert" className="alert">
-          <div>
-            <p className="text-sm opacity-70 mt-1">
-              For full access to the InfiniteRailtech or other custom devices
-              you may need to install a udev rule for raw HID device access.
-              This requires elevated priviliges.
-            </p>
-            <button
-              className="btn btn-primary btn-xs mt-2"
-              type="button"
-              onClick={handleInstallUdevRules}
-            >
-              Install udev rules
-            </button>
-          </div>
-        </div>
-      )}
-
       <div role="alert" className="alert">
         <span>
           <strong>TSW API Notice</strong>
@@ -199,6 +174,27 @@ export const SettingsTab = () => {
           .
         </span>
       </div>
+
+      {shouldShowUdevInstallPrompt && (
+        <div role="alert" className="alert">
+          <div>
+            <p className="mt-1">
+              Some custom or complex controllers may require udev rules to be
+              installed on linux to grant full HID device access. This requires
+              elevated priviliges to install. (this may not be required for your
+              set-up - currently this is only required for HID report control)
+            </p>
+            <button
+              className="btn btn-primary btn-xs mt-3"
+              type="button"
+              onClick={handleInstallUdevRules}
+            >
+              (Re-)Install rules for plugged in controllers
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex justify-end">
         <button
           type="submit"

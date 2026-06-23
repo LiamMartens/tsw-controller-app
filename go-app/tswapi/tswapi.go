@@ -27,6 +27,7 @@ type ITSWAPI interface {
 	GetSubscription(id int) (map[string]any, error)
 	SetInteracting(control string, value float64) error
 	SetInputValue(control string, value float64) error
+	GetByPath(path string) (map[string]any, error)
 	GetInputValue(control string) (float64, error)
 	GetIsButton(control string) (bool, error)
 	GetActiveCab() (TSWAPIActiveCab, error)
@@ -139,15 +140,23 @@ func (c *TSWAPI) ListCurrentDrivableActor() (TSWAPI_ListResponse, error) {
 	}, nil
 }
 
-func (c *TSWAPI) GetCurrentDrivableActorObjectClass() (string, error) {
-	get_path := "/get/CurrentDrivableActor.ObjectClass"
+func (c *TSWAPI) GetByPath(path string) (map[string]any, error) {
+	get_path := fmt.Sprintf("/get/%s", path)
 	req_url := fmt.Sprintf("%s%s", c.Config.BaseURL, get_path)
 	set_req, _ := http.NewRequest("GET", req_url, nil)
 	data, err := c.executeTswApiRequest(set_req)
 	if err != nil {
-		return "", err
+		return map[string]any{}, err
 	}
 	values := data["Values"].(map[string]any)
+	return values, nil
+}
+
+func (c *TSWAPI) GetCurrentDrivableActorObjectClass() (string, error) {
+	values, err := c.GetByPath("CurrentDrivableActor.ObjectClass")
+	if err != nil {
+		return "", err
+	}
 	return values["ObjectClass"].(string), nil
 }
 
@@ -193,39 +202,28 @@ func (c *TSWAPI) SetInputValue(control string, value float64) error {
 }
 
 func (c *TSWAPI) GetInputValue(control string) (float64, error) {
-	set_path := fmt.Sprintf("/get/CurrentDrivableActor/%s.InputValue", url.PathEscape(control))
-	req_url := fmt.Sprintf("%s%s", c.Config.BaseURL, set_path)
-	set_req, _ := http.NewRequest("GET", req_url, nil)
-	data, err := c.executeTswApiRequest(set_req)
+	values, err := c.GetByPath(fmt.Sprintf("CurrentDrivableActor/%s.InputValue", url.PathEscape(control)))
 	if err != nil {
 		return 0, err
 	}
-	values := data["Values"].(map[string]any)
 	return values["InputValue"].(float64), nil
 }
 
 func (c *TSWAPI) GetIsButton(control string) (bool, error) {
-	set_path := fmt.Sprintf("/get/CurrentDrivableActor/%s.ObjectClass", url.PathEscape(control))
-	req_url := fmt.Sprintf("%s%s", c.Config.BaseURL, set_path)
-	set_req, _ := http.NewRequest("GET", req_url, nil)
-	data, err := c.executeTswApiRequest(set_req)
+	values, err := c.GetByPath(fmt.Sprintf("CurrentDrivableActor/%s.ObjectClass", url.PathEscape(control)))
 	if err != nil {
 		return false, err
 	}
-	values := data["Values"].(map[string]any)
 	return values["ObjectClass"].(string) == "PushButtonComponent", nil
 }
 
 func (c *TSWAPI) GetActiveCab() (TSWAPIActiveCab, error) {
-	req_url := fmt.Sprintf("%s/get/CurrentDrivableActor.Function.IS_GetActiveCab", c.Config.BaseURL)
-	set_req, _ := http.NewRequest("GET", req_url, nil)
-	data, err := c.executeTswApiRequest(set_req)
+	values, err := c.GetByPath("CurrentDrivableActor.Function.IS_GetActiveCab")
 	if err != nil {
 		return TSWAPIActiveCab{}, err
 	}
 
 	active_cab := TSWAPIActiveCab{}
-	values := data["Values"].(map[string]any)
 
 	if bFront, hasValue := values["bFront"]; hasValue {
 		if boolVal, ok := bFront.(bool); ok {

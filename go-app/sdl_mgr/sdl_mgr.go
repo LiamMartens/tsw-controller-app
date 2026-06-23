@@ -30,9 +30,32 @@ const (
 	SDLMgr_Control_Kind_Axis   SDLMgr_Control_Kind = "axis"
 )
 
+type SDLMgr_HIDDevice_Native struct {
+	Lock       sync.Mutex
+	DeviceInfo hid.DeviceInfo
+	Device     *hid.Device
+}
+
+type ISDLMgr_HIDDevice interface {
+	Version() uint16
+	Serial() string
+	Open() error
+	Close() error
+	GetOutputReport(id byte, length uint8) ([]byte, error)
+	SetOutputReport(id byte, data []byte) error
+	ReadFeatureReport(id byte) ([]byte, error)
+	SendFeatureReport(id byte, data []byte) error
+}
+
+type SDLMgr_HIDDevice_OutputReportsState struct {
+	Lock  sync.Mutex
+	State map[byte][]byte
+}
+
 type SDLMgr_HIDDevice struct {
+	outputReportsState    SDLMgr_HIDDevice_OutputReportsState
 	Go_Backend_Device     *usbhid.Device
-	Native_Backend_Device *hid.DeviceInfo
+	Native_Backend_Device *SDLMgr_HIDDevice_Native
 }
 
 type SDLMgr_Joystick struct {
@@ -43,7 +66,7 @@ type SDLMgr_Joystick struct {
 	devicePath string
 
 	InternalJoystick *sdl.Joystick
-	HIDDevice        *SDLMgr_HIDDevice
+	HIDDevice        ISDLMgr_HIDDevice
 }
 
 type SDLMgr struct {
@@ -52,26 +75,6 @@ type SDLMgr struct {
 
 	joydevices_mutex sync.Mutex
 	joydevices       map[sdl.JoystickID]*SDLMgr_Joystick
-}
-
-func (hd *SDLMgr_HIDDevice) Version() uint16 {
-	if hd.Go_Backend_Device != nil {
-		return hd.Go_Backend_Device.Version()
-	}
-	if hd.Native_Backend_Device != nil {
-		return hd.Native_Backend_Device.Release
-	}
-	return 0
-}
-
-func (hd *SDLMgr_HIDDevice) Serial() string {
-	if hd.Go_Backend_Device != nil {
-		return hd.Go_Backend_Device.SerialNumber()
-	}
-	if hd.Native_Backend_Device != nil {
-		return hd.Native_Backend_Device.Serial
-	}
-	return ""
 }
 
 func New() *SDLMgr {
@@ -93,14 +96,29 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 
 	for _, go_dev := range go_devices {
 		if strings.ToLower(go_dev.Path()) == path_lower {
-			return &SDLMgr_HIDDevice{Go_Backend_Device: go_dev}, nil
+			return &SDLMgr_HIDDevice{
+				outputReportsState: SDLMgr_HIDDevice_OutputReportsState{
+					Lock:  sync.Mutex{},
+					State: map[byte][]byte{},
+				},
+				Go_Backend_Device: go_dev,
+			}, nil
 		}
 	}
 
 	for ix := range native_devices {
 		native_device := &native_devices[ix]
 		if strings.ToLower(native_device.Path) == path_lower {
-			return &SDLMgr_HIDDevice{Native_Backend_Device: native_device}, nil
+			return &SDLMgr_HIDDevice{
+				outputReportsState: SDLMgr_HIDDevice_OutputReportsState{
+					Lock:  sync.Mutex{},
+					State: map[byte][]byte{},
+				},
+				Native_Backend_Device: &SDLMgr_HIDDevice_Native{
+					Lock:       sync.Mutex{},
+					DeviceInfo: *native_device,
+				},
+			}, nil
 		}
 	}
 
@@ -112,7 +130,13 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 	}
 	if len(go_serial_devices_by_path) == 1 {
 		for _, device := range go_serial_devices_by_path {
-			return &SDLMgr_HIDDevice{Go_Backend_Device: device}, nil
+			return &SDLMgr_HIDDevice{
+				outputReportsState: SDLMgr_HIDDevice_OutputReportsState{
+					Lock:  sync.Mutex{},
+					State: map[byte][]byte{},
+				},
+				Go_Backend_Device: device,
+			}, nil
 		}
 	}
 
@@ -125,8 +149,17 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 		}
 	}
 	if len(native_serial_devices_by_path) == 1 {
-		for _, device := range native_serial_devices_by_path {
-			return &SDLMgr_HIDDevice{Native_Backend_Device: device}, nil
+		for _, native_device := range native_serial_devices_by_path {
+			return &SDLMgr_HIDDevice{
+				outputReportsState: SDLMgr_HIDDevice_OutputReportsState{
+					Lock:  sync.Mutex{},
+					State: map[byte][]byte{},
+				},
+				Native_Backend_Device: &SDLMgr_HIDDevice_Native{
+					Lock:       sync.Mutex{},
+					DeviceInfo: *native_device,
+				},
+			}, nil
 		}
 	}
 
@@ -139,7 +172,13 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 	}
 	if len(go_deviceid_devices_by_path) == 1 {
 		for _, device := range go_deviceid_devices_by_path {
-			return &SDLMgr_HIDDevice{Go_Backend_Device: device}, nil
+			return &SDLMgr_HIDDevice{
+				outputReportsState: SDLMgr_HIDDevice_OutputReportsState{
+					Lock:  sync.Mutex{},
+					State: map[byte][]byte{},
+				},
+				Go_Backend_Device: device,
+			}, nil
 		}
 	}
 
@@ -153,8 +192,17 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 	}
 	godump.Dump(native_deviceid_devices_by_path)
 	if len(native_deviceid_devices_by_path) == 1 {
-		for _, device := range native_deviceid_devices_by_path {
-			return &SDLMgr_HIDDevice{Native_Backend_Device: device}, nil
+		for _, native_device := range native_deviceid_devices_by_path {
+			return &SDLMgr_HIDDevice{
+				outputReportsState: SDLMgr_HIDDevice_OutputReportsState{
+					Lock:  sync.Mutex{},
+					State: map[byte][]byte{},
+				},
+				Native_Backend_Device: &SDLMgr_HIDDevice_Native{
+					Lock:       sync.Mutex{},
+					DeviceInfo: *native_device,
+				},
+			}, nil
 		}
 	}
 
@@ -205,6 +253,10 @@ func (mgr *SDLMgr) joyDeviceRemoved(event *SDL_JoyDeviceRemovedEvent) {
 	defer mgr.joydevices_mutex.Unlock()
 	if joystick, has_device := mgr.joydevices[event.Which]; has_device {
 		joystick.InternalJoystick.Close()
+		if joystick.HIDDevice != nil {
+			/* always try to close */
+			joystick.HIDDevice.Close()
+		}
 		delete(mgr.joydevices, event.Which)
 	}
 }
@@ -272,7 +324,7 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan SDL_Event, context.Ca
 			}
 
 			var event sdl.Event
-			if sdl.PollEvent(&event) {
+			for sdl.PollEvent(&event) {
 				switch event.Type {
 				case sdl.EVENT_JOYSTICK_ADDED:
 					e := event.JoyDeviceEvent()
@@ -343,6 +395,8 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan SDL_Event, context.Ca
 					})
 				}
 			}
+
+			time.Sleep(time.Millisecond)
 		}
 	}()
 	return event_channel, cancel

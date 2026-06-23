@@ -24,6 +24,7 @@ type Config_Controller_CalibrationData struct {
 	Max          float64    `json:"max" validate:"required"`
 	Idle         *float64   `json:"idle,omitempty"`
 	EasingCurve  *[]float64 `json:"easing_curve,omitempty"`
+	AntiJitter   *float64   `json:"anti_jitter,omitempty"`
 	/* these are named thresholds which can be used in step thresholds and easily remapped */
 	Thresholds []Config_Controller_Calibration_Threshold `json:"thresholds,omitempty"`
 }

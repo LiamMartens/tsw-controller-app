@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "title": "Cab State Value Listener",
+  "properties": {
+    "type": {
+      "type": "string",
+      "const": "cab_state_value",
+      "description": "The type of listener - watches a cab state value"
+    },
+    "name": {
+      "type": "string",
+      "description": "The name of the cab state to watch"
+    },
+    "actions": {
+      "type": "array",
+      "description": "The actions to perform when the cab state value changes and conditions are met",
+      "items": {
+        "$ref": "./profile.listener_action.schema.json"
+      }
+    }
+  },
+  "required": ["type", "name", "actions"]
+}

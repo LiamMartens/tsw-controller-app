@@ -82,6 +82,7 @@ func (a *App) GetControllerConfiguration(unique_id controller_mgr.DeviceUniqueID
 					Max:         calibration_data.Max,
 					Idle:        0,
 					Deadzone:    0,
+					AntiJitter:  0,
 					Invert:      false,
 					EasingCurve: []float64{0.0, 0.0, 1.0, 1.0},
 					Thresholds:  thresholds,
@@ -91,6 +92,9 @@ func (a *App) GetControllerConfiguration(unique_id controller_mgr.DeviceUniqueID
 				}
 				if calibration_data.Deadzone != nil {
 					calibration.Deadzone = *calibration_data.Deadzone
+				}
+				if calibration_data.AntiJitter != nil {
+					calibration.AntiJitter = *calibration_data.AntiJitter
 				}
 				if calibration_data.Invert != nil {
 					calibration.Invert = *calibration_data.Invert

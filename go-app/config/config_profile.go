@@ -210,10 +210,11 @@ type Config_Controller_Profile_RailClassInformationEntry struct {
 }
 
 type Config_Controller_Profile struct {
-	Metadata Config_Controller_Profile_Metadata  `json:"-"`
-	Extends  *string                             `json:"extends,omitempty"`
-	Name     string                              `json:"name" validate:"required"`
-	Controls []Config_Controller_Profile_Control `json:"controls" validate:"required"`
+	Metadata  Config_Controller_Profile_Metadata   `json:"-"`
+	Extends   *string                              `json:"extends,omitempty"`
+	Name      string                               `json:"name" validate:"required"`
+	Controls  []Config_Controller_Profile_Control  `json:"controls" validate:"required"`
+	Listeners []Config_Controller_Profile_Listener `json:"listeners,omitempty"`
 	/* specifies if this profile can be autoselected */
 	AutoSelect *bool `json:"auto_select,omitempty"`
 	/* specifies which controller this profile is for */

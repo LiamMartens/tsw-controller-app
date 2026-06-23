@@ -1,0 +1,16 @@
+{
+  "oneOf": [
+    {
+      "allOf": [
+        { "$ref": "./profile.listener_action_hid_output_report.schema.json" },
+        { "$ref": "./profile.listener_shared_action.schema.json" }
+      ]
+    },
+    {
+      "allOf": [
+        { "$ref": "./profile.listener_action_hid_feature_report.schema.json" },
+        { "$ref": "./profile.listener_shared_action.schema.json" }
+      ]
+    }
+  ]
+}

@@ -54,6 +54,7 @@ type Interop_ControllerCalibration_Control struct {
 	Max         float64
 	Idle        float64
 	Deadzone    float64
+	AntiJitter  float64
 	EasingCurve []float64
 	Invert      bool
 	Thresholds  []config.Config_Controller_Calibration_Threshold

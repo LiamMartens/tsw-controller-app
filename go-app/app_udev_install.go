@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"tsw_controller_app/controller_mgr"
 	"tsw_controller_app/logger"
 )
 
@@ -19,7 +20,38 @@ func (a *App) InstallUdevRules() error {
 	udev_rule_path := "/etc/udev/rules.d/99-tsw-controller-udev.rules"
 	/* potentially add vendor ID/product ID/serial */
 	udev_rule_content := `# TSW Controller Utility — HID device access
-SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="5389", MODE="0660", GROUP="input"`
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="5389", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="5389", TAG+="uaccess"
+
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="e43b", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="e43b", TAG+="uaccess"`
+
+	/* include any controller currently configured or unconfigured */
+	a.sdl_controller_manager.ConfiguredControllers.ForEach(func(c controller_mgr.SDL_ControllerManager_ConfiguredController, key controller_mgr.DeviceUniqueID) bool {
+		udev_rule_content += fmt.Sprintf(`
+
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="%04x", ATTRS{idProduct}=="%04x", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="%04x", ATTRS{idProduct}=="%04x", TAG+="uaccess"`,
+			c.Joystick.InternalJoystick.Vendor(),
+			c.Joystick.InternalJoystick.Product(),
+			c.Joystick.InternalJoystick.Vendor(),
+			c.Joystick.InternalJoystick.Product(),
+		)
+		return true
+	})
+
+	a.sdl_controller_manager.UnconfiguredControllers.ForEach(func(c controller_mgr.SDL_ControllerManager_UnconfiguredController, key controller_mgr.DeviceUniqueID) bool {
+		udev_rule_content += fmt.Sprintf(`
+
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="%04x", ATTRS{idProduct}=="%04x", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="%04x", ATTRS{idProduct}=="%04x", TAG+="uaccess"`,
+			c.Joystick.InternalJoystick.Vendor(),
+			c.Joystick.InternalJoystick.Product(),
+			c.Joystick.InternalJoystick.Vendor(),
+			c.Joystick.InternalJoystick.Product(),
+		)
+		return true
+	})
 
 	tmp_dir := os.TempDir()
 	tmp_file, err := os.CreateTemp(tmp_dir, "tsw-udev-rule-*.rules")

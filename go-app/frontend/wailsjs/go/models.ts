@@ -148,6 +148,7 @@ export namespace main {
 	    Max: number;
 	    Idle: number;
 	    Deadzone: number;
+	    AntiJitter: number;
 	    EasingCurve: number[];
 	    Invert: boolean;
 	    Thresholds: config.Config_Controller_Calibration_Threshold[];
@@ -165,6 +166,7 @@ export namespace main {
 	        this.Max = source["Max"];
 	        this.Idle = source["Idle"];
 	        this.Deadzone = source["Deadzone"];
+	        this.AntiJitter = source["AntiJitter"];
 	        this.EasingCurve = source["EasingCurve"];
 	        this.Invert = source["Invert"];
 	        this.Thresholds = this.convertValues(source["Thresholds"], config.Config_Controller_Calibration_Threshold);

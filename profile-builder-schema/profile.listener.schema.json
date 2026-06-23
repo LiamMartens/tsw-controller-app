@@ -1,0 +1,7 @@
+{
+  "oneOf": [
+    { "$ref": "./profile.listener_type_api_value.schema.json" },
+    { "$ref": "./profile.listener_type_control_value.schema.json" },
+    { "$ref": "./profile.listener_type_cab_state_value.schema.json" }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "title": "API Value Listener",
+  "properties": {
+    "type": {
+      "type": "string",
+      "const": "api_value",
+      "description": "The type of listener - watches a value from the TSW API"
+    },
+    "path": {
+      "type": "string",
+      "description": "The API path to watch for changes"
+    },
+    "values_key": {
+      "type": "string",
+      "description": "The key within the API response to extract the value from"
+    },
+    "actions": {
+      "type": "array",
+      "description": "The actions to perform when the API value changes and conditions are met",
+      "items": {
+        "$ref": "./profile.listener_action.schema.json"
+      }
+    }
+  },
+  "required": ["type", "path", "values_key", "actions"]
+}
