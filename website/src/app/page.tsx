@@ -13,15 +13,15 @@ export default function Home() {
             </h1>
 
             <p className="mt-4 text-base text-pretty text-base-content/80">
-              The best way to control Train Sim World and Train Simulator Classic with any
-              controller or joystick.
+              The best way to control Train Sim World and Train Simulator
+              Classic with any controller or joystick.
             </p>
 
             <div className="mt-4 flex justify-center gap-4 sm:mt-6">
               <a
                 target="_blank"
                 className="btn btn-primary"
-                href="https://github.com/LiamMartens/tsw-controller-app/releases"
+                href="https://github.com/LiahMartens/tsw-controller-app/releases"
               >
                 Download now
               </a>
@@ -29,7 +29,7 @@ export default function Home() {
               <a
                 target="_blank"
                 className="btn btn-outline"
-                href="https://github.com/LiamMartens/tsw-controller-app"
+                href="https://github.com/LiahMartens/tsw-controller-app"
               >
                 Learn More
               </a>
