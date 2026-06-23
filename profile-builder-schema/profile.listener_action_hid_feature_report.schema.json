@@ -4,8 +4,7 @@
   "properties": {
     "type": {
       "type": "string",
-      "const": "hid_feature_report",
-      "description": "The type of listener action - sends an HID feature report to the device"
+      "enum": ["hid_feature_report"]
     },
     "report_id": {
       "type": "integer",

@@ -4,8 +4,7 @@
   "properties": {
     "type": {
       "type": "string",
-      "const": "api_value",
-      "description": "The type of listener - watches a value from the TSW API"
+      "enum": ["api_value"]
     },
     "path": {
       "type": "string",

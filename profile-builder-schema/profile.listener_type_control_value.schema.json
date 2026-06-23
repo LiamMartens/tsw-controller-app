@@ -4,8 +4,7 @@
   "properties": {
     "type": {
       "type": "string",
-      "const": "control_value",
-      "description": "The type of listener - watches a control's value on this profile"
+      "enum": ["control_value"]
     },
     "name": {
       "type": "string",

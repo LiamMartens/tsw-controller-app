@@ -4,8 +4,7 @@
   "properties": {
     "type": {
       "type": "string",
-      "const": "cab_state_value",
-      "description": "The type of listener - watches a cab state value"
+      "enum": ["cab_state_value"]
     },
     "name": {
       "type": "string",
