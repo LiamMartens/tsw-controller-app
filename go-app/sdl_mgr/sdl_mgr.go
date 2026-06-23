@@ -324,7 +324,7 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan SDL_Event, context.Ca
 			}
 
 			var event sdl.Event
-			if sdl.PollEvent(&event) {
+			for sdl.PollEvent(&event) {
 				switch event.Type {
 				case sdl.EVENT_JOYSTICK_ADDED:
 					e := event.JoyDeviceEvent()
@@ -395,6 +395,8 @@ func (mgr *SDLMgr) StartPolling(ctx context.Context) (chan SDL_Event, context.Ca
 					})
 				}
 			}
+
+			time.Sleep(time.Millisecond)
 		}
 	}()
 	return event_channel, cancel
