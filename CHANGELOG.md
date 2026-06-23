@@ -5,6 +5,7 @@
 - Add internal technical support for HID output and feature reports (only for advanced custom controllers - currently largely undocumented)
 - Updated udev rule installer
 - Add anti-jitter option in calibration
+- Reduce CPU polling
 
 ## v1.18.0
 - Jitter and backoff API retries
