@@ -57,6 +57,7 @@ const applyDefaultDeadzoneToRawValue = (value: number) => {
 export const useCalibrationForm = (defaultValues: CalibrationState) => {
   const form = useForm<CalibrationState>({
     defaultValues,
+    mode: "onChange",
   });
 
   useEffect(() => {

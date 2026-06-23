@@ -61,7 +61,7 @@ export function Modal<T>({
       className={clsx("modal modal-s", className)}
       onClose={handleClose}
     >
-      <div className="modal-box w-11/12 max-w-5xl">
+      <div className="modal-box w-11/12 max-w-5xl max-h-[calc(90dvh-6rem)]">
         <ErrorBoundary fallbackRender={ErrorFallback}>
           <Suspense fallback={<SuspenseFallback />}>
             {delayedOpenState.value !== false && (

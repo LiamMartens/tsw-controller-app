@@ -290,6 +290,9 @@ func (a *App) SaveCalibration(data Interop_ControllerCalibration) error {
 	if err != nil {
 		return err
 	}
+	if sdl_mapping_filepath == "" {
+		return fmt.Errorf("no directory selection for SDL mapping")
+	}
 
 	calibration_filepath, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
 		Title:            "Select calibration file save location",
@@ -298,6 +301,9 @@ func (a *App) SaveCalibration(data Interop_ControllerCalibration) error {
 	})
 	if err != nil {
 		return err
+	}
+	if calibration_filepath == "" {
+		return fmt.Errorf("no directory selection for calibration")
 	}
 
 	sdl_mapping_file, err := os.OpenFile(sdl_mapping_filepath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
