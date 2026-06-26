@@ -10,27 +10,27 @@
     "start": "next start"
   },
   "dependencies": {
-    "@json-editor/json-editor": "^2.16.0",
-    "next": "^16.2.6",
-    "react": "19.2.5",
-    "react-dom": "19.2.5",
-    "react-error-boundary": "^6.1.1",
+    "@json-editor/json-editor": "^2.17.1",
+    "next": "^16.2.9",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "react-error-boundary": "^6.1.2",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
-    "swr": "^2.4.1"
+    "swr": "^2.4.2"
   },
   "devDependencies": {
-    "@apidevtools/json-schema-ref-parser": "^15.3.5",
-    "@tailwindcss/postcss": "^4.2.2",
+    "@apidevtools/json-schema-ref-parser": "^15.4.0",
+    "@tailwindcss/postcss": "^4.3.1",
     "@tailwindcss/typography": "^0.5.19",
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "daisyui": "^5.5.19",
     "oxfmt": "^0.45.0",
-    "oxlint": "^1.60.0",
+    "oxlint": "^1.71.0",
     "postcss": "^8.5.15",
-    "tailwindcss": "^4.2.2",
+    "tailwindcss": "^4.3.1",
     "typescript": "^5"
   }
 }
