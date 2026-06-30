@@ -152,7 +152,15 @@ func (hd *SDLMgr_HIDDevice) ReadFeatureReport(id byte, length uint8) ([]byte, er
 		return nil, err
 	}
 
+	if report, has_report := hd.fatureReportsState.State[id]; has_report {
+		return report, nil
+	}
+
 	var read_from_device = func() ([]byte, error) {
+		defer func() {
+			recover()
+		}()
+
 		if hd.Native_Backend_Device != nil {
 			var report []byte = make([]byte, length)
 			if _, err := hd.Native_Backend_Device.Device.GetFeatureReport(report); err != nil {
@@ -173,12 +181,8 @@ func (hd *SDLMgr_HIDDevice) ReadFeatureReport(id byte, length uint8) ([]byte, er
 	}
 
 	report, err := read_from_device()
-	if err != nil {
+	if err != nil || report == nil {
 		logger.Logger.Error("could not read report from device", "error", err)
-		if report, has_report := hd.fatureReportsState.State[id]; has_report {
-			return report, nil
-		}
-
 		empty_report := make([]byte, length)
 		hd.fatureReportsState.State[id] = empty_report
 		return hd.fatureReportsState.State[id], nil
