@@ -43,17 +43,17 @@ type ISDLMgr_HIDDevice interface {
 	Close() error
 	GetOutputReport(id byte, length uint8) ([]byte, error)
 	SetOutputReport(id byte, data []byte) error
-	ReadFeatureReport(id byte) ([]byte, error)
+	ReadFeatureReport(id byte, length uint8) ([]byte, error)
 	SendFeatureReport(id byte, data []byte) error
 }
 
-type SDLMgr_HIDDevice_OutputReportsState struct {
+type SDLMgr_HIDDevice_ReportsState struct {
 	Lock  sync.Mutex
 	State map[byte][]byte
 }
 
 type SDLMgr_HIDDevice struct {
-	outputReportsState    SDLMgr_HIDDevice_OutputReportsState
+	outputReportsState    SDLMgr_HIDDevice_ReportsState
 	Go_Backend_Device     *usbhid.Device
 	Native_Backend_Device *SDLMgr_HIDDevice_Native
 }
@@ -94,10 +94,26 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 	native_devices := hid.Enumerate(0, 0)
 	go_devices, _ := usbhid.Enumerate(nil)
 
+	for ix := range native_devices {
+		native_device := &native_devices[ix]
+		if strings.ToLower(native_device.Path) == path_lower {
+			return &SDLMgr_HIDDevice{
+				outputReportsState: SDLMgr_HIDDevice_ReportsState{
+					Lock:  sync.Mutex{},
+					State: map[byte][]byte{},
+				},
+				Native_Backend_Device: &SDLMgr_HIDDevice_Native{
+					Lock:       sync.Mutex{},
+					DeviceInfo: *native_device,
+				},
+			}, nil
+		}
+	}
+
 	for _, go_dev := range go_devices {
 		if strings.ToLower(go_dev.Path()) == path_lower {
 			return &SDLMgr_HIDDevice{
-				outputReportsState: SDLMgr_HIDDevice_OutputReportsState{
+				outputReportsState: SDLMgr_HIDDevice_ReportsState{
 					Lock:  sync.Mutex{},
 					State: map[byte][]byte{},
 				},
@@ -106,11 +122,18 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 		}
 	}
 
+	native_serial_devices_by_path := map[string]*hid.DeviceInfo{}
 	for ix := range native_devices {
 		native_device := &native_devices[ix]
-		if strings.ToLower(native_device.Path) == path_lower {
+
+		if strings.ToLower(native_device.Serial) == serial_lower {
+			native_serial_devices_by_path[native_device.Path] = native_device
+		}
+	}
+	if len(native_serial_devices_by_path) == 1 {
+		for _, native_device := range native_serial_devices_by_path {
 			return &SDLMgr_HIDDevice{
-				outputReportsState: SDLMgr_HIDDevice_OutputReportsState{
+				outputReportsState: SDLMgr_HIDDevice_ReportsState{
 					Lock:  sync.Mutex{},
 					State: map[byte][]byte{},
 				},
@@ -131,7 +154,7 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 	if len(go_serial_devices_by_path) == 1 {
 		for _, device := range go_serial_devices_by_path {
 			return &SDLMgr_HIDDevice{
-				outputReportsState: SDLMgr_HIDDevice_OutputReportsState{
+				outputReportsState: SDLMgr_HIDDevice_ReportsState{
 					Lock:  sync.Mutex{},
 					State: map[byte][]byte{},
 				},
@@ -140,18 +163,19 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 		}
 	}
 
-	native_serial_devices_by_path := map[string]*hid.DeviceInfo{}
+	native_deviceid_devices_by_path := map[string]*hid.DeviceInfo{}
 	for ix := range native_devices {
 		native_device := &native_devices[ix]
-
-		if strings.ToLower(native_device.Serial) == serial_lower {
-			native_serial_devices_by_path[native_device.Path] = native_device
+		native_device_id := strings.ToLower(fmt.Sprintf("%04X:%04X", native_device.VendorID, native_device.ProductID))
+		if native_device_id == device_id_lower {
+			native_deviceid_devices_by_path[native_device.Path] = native_device
 		}
 	}
-	if len(native_serial_devices_by_path) == 1 {
-		for _, native_device := range native_serial_devices_by_path {
+	godump.Dump(native_deviceid_devices_by_path)
+	if len(native_deviceid_devices_by_path) == 1 {
+		for _, native_device := range native_deviceid_devices_by_path {
 			return &SDLMgr_HIDDevice{
-				outputReportsState: SDLMgr_HIDDevice_OutputReportsState{
+				outputReportsState: SDLMgr_HIDDevice_ReportsState{
 					Lock:  sync.Mutex{},
 					State: map[byte][]byte{},
 				},
@@ -173,35 +197,11 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 	if len(go_deviceid_devices_by_path) == 1 {
 		for _, device := range go_deviceid_devices_by_path {
 			return &SDLMgr_HIDDevice{
-				outputReportsState: SDLMgr_HIDDevice_OutputReportsState{
+				outputReportsState: SDLMgr_HIDDevice_ReportsState{
 					Lock:  sync.Mutex{},
 					State: map[byte][]byte{},
 				},
 				Go_Backend_Device: device,
-			}, nil
-		}
-	}
-
-	native_deviceid_devices_by_path := map[string]*hid.DeviceInfo{}
-	for ix := range native_devices {
-		native_device := &native_devices[ix]
-		native_device_id := strings.ToLower(fmt.Sprintf("%04X:%04X", native_device.VendorID, native_device.ProductID))
-		if native_device_id == device_id_lower {
-			native_deviceid_devices_by_path[native_device.Path] = native_device
-		}
-	}
-	godump.Dump(native_deviceid_devices_by_path)
-	if len(native_deviceid_devices_by_path) == 1 {
-		for _, native_device := range native_deviceid_devices_by_path {
-			return &SDLMgr_HIDDevice{
-				outputReportsState: SDLMgr_HIDDevice_OutputReportsState{
-					Lock:  sync.Mutex{},
-					State: map[byte][]byte{},
-				},
-				Native_Backend_Device: &SDLMgr_HIDDevice_Native{
-					Lock:       sync.Mutex{},
-					DeviceInfo: *native_device,
-				},
 			}, nil
 		}
 	}

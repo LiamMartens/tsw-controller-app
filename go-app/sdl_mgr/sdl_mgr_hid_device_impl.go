@@ -43,26 +43,34 @@ func (d *SDLMgr_HIDDevice_Native) Close() error {
 }
 
 func (hd *SDLMgr_HIDDevice) Version() uint16 {
-	if hd.Go_Backend_Device != nil {
-		return hd.Go_Backend_Device.Version()
-	}
 	if hd.Native_Backend_Device != nil {
 		return hd.Native_Backend_Device.DeviceInfo.Release
+	}
+	if hd.Go_Backend_Device != nil {
+		return hd.Go_Backend_Device.Version()
 	}
 	return 0
 }
 
 func (hd *SDLMgr_HIDDevice) Serial() string {
-	if hd.Go_Backend_Device != nil {
-		return hd.Go_Backend_Device.SerialNumber()
-	}
 	if hd.Native_Backend_Device != nil {
 		return hd.Native_Backend_Device.DeviceInfo.Serial
+	}
+	if hd.Go_Backend_Device != nil {
+		return hd.Go_Backend_Device.SerialNumber()
 	}
 	return ""
 }
 
 func (hd *SDLMgr_HIDDevice) Open() error {
+	if hd.Native_Backend_Device != nil {
+		if hd.Native_Backend_Device.IsOpen() {
+			return nil
+		}
+
+		return hd.Native_Backend_Device.Open()
+	}
+
 	if hd.Go_Backend_Device != nil {
 		if hd.Go_Backend_Device.IsOpen() {
 			return nil
@@ -74,23 +82,19 @@ func (hd *SDLMgr_HIDDevice) Open() error {
 		}
 		return err
 	}
-	if hd.Native_Backend_Device != nil {
-		if hd.Native_Backend_Device.IsOpen() {
-			return nil
-		}
 
-		return hd.Native_Backend_Device.Open()
-	}
 	return fmt.Errorf("no device available")
 }
 
 func (hd *SDLMgr_HIDDevice) Close() error {
-	if hd.Go_Backend_Device != nil {
-		return hd.Go_Backend_Device.Close()
-	}
 	if hd.Native_Backend_Device != nil {
 		return hd.Native_Backend_Device.Close()
 	}
+
+	if hd.Go_Backend_Device != nil {
+		return hd.Go_Backend_Device.Close()
+	}
+
 	return fmt.Errorf("no device available")
 }
 
@@ -119,14 +123,6 @@ func (hd *SDLMgr_HIDDevice) SetOutputReport(id byte, data []byte) error {
 		return err
 	}
 
-	if hd.Go_Backend_Device != nil {
-		if err := hd.Go_Backend_Device.SetOutputReport(id, data); err != nil {
-			return err
-		}
-		hd.outputReportsState.State[id] = data
-		return nil
-	}
-
 	if hd.Native_Backend_Device != nil {
 		payload := append([]byte{id}, data...)
 		if _, err := hd.Native_Backend_Device.Device.Write(payload); err != nil {
@@ -136,12 +132,28 @@ func (hd *SDLMgr_HIDDevice) SetOutputReport(id byte, data []byte) error {
 		return nil
 	}
 
+	if hd.Go_Backend_Device != nil {
+		if err := hd.Go_Backend_Device.SetOutputReport(id, data); err != nil {
+			return err
+		}
+		hd.outputReportsState.State[id] = data
+		return nil
+	}
+
 	return fmt.Errorf("no valid device backend to set output report to")
 }
 
-func (hd *SDLMgr_HIDDevice) ReadFeatureReport(id byte) ([]byte, error) {
+func (hd *SDLMgr_HIDDevice) ReadFeatureReport(id byte, length uint8) ([]byte, error) {
 	if err := hd.Open(); err != nil {
 		return nil, err
+	}
+
+	if hd.Native_Backend_Device != nil {
+		var report []byte = make([]byte, length)
+		if _, err := hd.Native_Backend_Device.Device.GetFeatureReport(report); err != nil {
+			return nil, err
+		}
+		return report[1:], nil
 	}
 
 	if hd.Go_Backend_Device != nil {
@@ -152,14 +164,6 @@ func (hd *SDLMgr_HIDDevice) ReadFeatureReport(id byte) ([]byte, error) {
 		return report, nil
 	}
 
-	if hd.Native_Backend_Device != nil {
-		var report []byte = []byte{id}
-		if _, err := hd.Native_Backend_Device.Device.GetFeatureReport(report); err != nil {
-			return nil, err
-		}
-		return report[1:], nil
-	}
-
 	return nil, fmt.Errorf("no hid device available")
 }
 
@@ -168,18 +172,18 @@ func (hd *SDLMgr_HIDDevice) SendFeatureReport(id byte, data []byte) error {
 		return err
 	}
 
-	if hd.Go_Backend_Device != nil {
-		err := hd.Go_Backend_Device.SetFeatureReport(id, data)
-		if err != nil {
+	if hd.Native_Backend_Device != nil {
+		var report []byte = []byte{id}
+		report = append(report, data...)
+		if _, err := hd.Native_Backend_Device.Device.SendFeatureReport(report); err != nil {
 			return err
 		}
 		return nil
 	}
 
-	if hd.Native_Backend_Device != nil {
-		var report []byte = []byte{id}
-		report = append(report, data...)
-		if _, err := hd.Native_Backend_Device.Device.SendFeatureReport(report); err != nil {
+	if hd.Go_Backend_Device != nil {
+		err := hd.Go_Backend_Device.SetFeatureReport(id, data)
+		if err != nil {
 			return err
 		}
 		return nil
