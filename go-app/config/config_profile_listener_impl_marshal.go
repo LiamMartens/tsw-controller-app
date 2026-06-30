@@ -84,7 +84,7 @@ func (c *Config_Controller_Profile_Listener) UnmarshalJSON(data []byte) error {
 		}
 		c.Control = &control
 		return nil
-	case "cab_state":
+	case "cab_state_value":
 		var cabstate Config_Controller_Profile_Listener_Type_CabStateValue
 		if err := json.Unmarshal(data, &cabstate); err != nil {
 			return err

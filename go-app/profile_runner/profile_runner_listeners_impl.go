@@ -8,6 +8,8 @@ import (
 	"tsw_controller_app/controller_mgr"
 	"tsw_controller_app/logger"
 	"tsw_controller_app/sdl_mgr"
+
+	"github.com/goforj/godump"
 )
 
 var ErrNoAction = errors.New("no action defined")
@@ -256,6 +258,7 @@ func (p *ProfileRunner) processActiveProfileCabStateListeners() {
 			}
 
 			actions, err := p.filterMatchingCabStateListenerActions(&listener)
+			godump.Dump(actions)
 			if err != nil {
 				logger.Logger.Error("[ProfileRunner::processActiveProfileApiListeners] could not filter Cab State listener actions", "error", err)
 				continue
