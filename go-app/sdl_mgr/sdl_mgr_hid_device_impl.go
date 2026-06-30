@@ -63,14 +63,22 @@ func (hd *SDLMgr_HIDDevice) Serial() string {
 }
 
 func (hd *SDLMgr_HIDDevice) Open() error {
-	if hd.Go_Backend_Device != nil && !hd.Go_Backend_Device.IsOpen() {
+	if hd.Go_Backend_Device != nil {
+		if hd.Go_Backend_Device.IsOpen() {
+			return nil
+		}
+
 		err := hd.Go_Backend_Device.Open(false)
 		if errors.Is(err, usbhid.ErrDeviceIsOpen) {
 			return nil
 		}
 		return err
 	}
-	if hd.Native_Backend_Device != nil && !hd.Native_Backend_Device.IsOpen() {
+	if hd.Native_Backend_Device != nil {
+		if hd.Native_Backend_Device.IsOpen() {
+			return nil
+		}
+
 		return hd.Native_Backend_Device.Open()
 	}
 	return fmt.Errorf("no device available")
