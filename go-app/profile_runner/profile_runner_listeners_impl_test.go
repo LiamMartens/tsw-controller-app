@@ -81,7 +81,7 @@ func TestExecuteProfileListenerAction_HIDFeatureReport_AND(t *testing.T) {
 	mockHID := new(mockHIDDevice)
 	sdlDev := newSDLDeviceWithMockHID(t, mockHID)
 
-	mockHID.On("ReadFeatureReport", uint8(1)).Return([]byte{0b00011101}, nil)
+	mockHID.On("ReadFeatureReport", uint8(1), uint8(1)).Return([]byte{0b00011101}, nil)
 	mockHID.On("SendFeatureReport", uint8(1), []byte{0b00001101}).Return(nil)
 	action := config.Config_Controller_Profile_Listener_Action{
 		HIDFeatureReport: &config.Config_Controller_Profile_Listener_Action_HIDFeatureReport{
@@ -102,7 +102,7 @@ func TestExecuteProfileListenerAction_HIDFeatureReport_OR(t *testing.T) {
 	mockHID := new(mockHIDDevice)
 	sdlDev := newSDLDeviceWithMockHID(t, mockHID)
 
-	mockHID.On("ReadFeatureReport", uint8(1)).Return([]byte{0b00011101}, nil)
+	mockHID.On("ReadFeatureReport", uint8(1), uint8(1)).Return([]byte{0b00011101}, nil)
 	mockHID.On("SendFeatureReport", uint8(1), []byte{0b00011111}).Return(nil)
 	action := config.Config_Controller_Profile_Listener_Action{
 		HIDFeatureReport: &config.Config_Controller_Profile_Listener_Action_HIDFeatureReport{
@@ -123,7 +123,7 @@ func TestExecuteProfileListenerAction_HIDFeatureReport_AND_MultiByte(t *testing.
 	mockHID := new(mockHIDDevice)
 	sdlDev := newSDLDeviceWithMockHID(t, mockHID)
 
-	mockHID.On("ReadFeatureReport", uint8(1)).Return([]byte{0b00011101, 0b10000000}, nil)
+	mockHID.On("ReadFeatureReport", uint8(1), uint8(2)).Return([]byte{0b00011101, 0b10000000}, nil)
 	mockHID.On("SendFeatureReport", uint8(1), []byte{0b00001101, 0b10000000}).Return(nil)
 	action := config.Config_Controller_Profile_Listener_Action{
 		HIDFeatureReport: &config.Config_Controller_Profile_Listener_Action_HIDFeatureReport{

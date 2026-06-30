@@ -145,6 +145,9 @@ func (hd *SDLMgr_HIDDevice) SetOutputReport(id byte, data []byte) error {
 }
 
 func (hd *SDLMgr_HIDDevice) ReadFeatureReport(id byte, length uint8) ([]byte, error) {
+	hd.fatureReportsState.Lock.Lock()
+	defer hd.fatureReportsState.Lock.Unlock()
+
 	if err := hd.Open(); err != nil {
 		return nil, err
 	}
@@ -185,6 +188,9 @@ func (hd *SDLMgr_HIDDevice) ReadFeatureReport(id byte, length uint8) ([]byte, er
 }
 
 func (hd *SDLMgr_HIDDevice) SendFeatureReport(id byte, data []byte) error {
+	hd.fatureReportsState.Lock.Lock()
+	defer hd.fatureReportsState.Lock.Unlock()
+
 	if err := hd.Open(); err != nil {
 		return err
 	}
@@ -195,6 +201,7 @@ func (hd *SDLMgr_HIDDevice) SendFeatureReport(id byte, data []byte) error {
 		if _, err := hd.Native_Backend_Device.Device.SendFeatureReport(report); err != nil {
 			return err
 		}
+		hd.fatureReportsState.State[id] = data
 		return nil
 	}
 
@@ -203,6 +210,7 @@ func (hd *SDLMgr_HIDDevice) SendFeatureReport(id byte, data []byte) error {
 		if err != nil {
 			return err
 		}
+		hd.fatureReportsState.State[id] = data
 		return nil
 	}
 
