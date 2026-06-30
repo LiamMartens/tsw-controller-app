@@ -165,6 +165,8 @@ func (hd *SDLMgr_HIDDevice) ReadFeatureReport(id byte, length uint8) ([]byte, er
 			}
 			return report, nil
 		}
+
+		return nil, fmt.Errorf("no hid device available")
 	}
 
 	report, err := read_from_device()
