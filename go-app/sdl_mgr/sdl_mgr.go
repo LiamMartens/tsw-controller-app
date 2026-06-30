@@ -53,7 +53,9 @@ type SDLMgr_HIDDevice_ReportsState struct {
 }
 
 type SDLMgr_HIDDevice struct {
-	outputReportsState    SDLMgr_HIDDevice_ReportsState
+	outputReportsState SDLMgr_HIDDevice_ReportsState
+	fatureReportsState SDLMgr_HIDDevice_ReportsState
+
 	Go_Backend_Device     *usbhid.Device
 	Native_Backend_Device *SDLMgr_HIDDevice_Native
 }
