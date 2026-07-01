@@ -60,7 +60,7 @@ func (p *ProfileRunner) executeProfileListenerAction(
 			return fmt.Errorf("unable to execute HID Output Report action due to missing SDL device: %w", ErrNoHIDDevice)
 		}
 
-		report, err := sdl_device.HIDDevice.ReadFeatureReport(byte(action.HIDFeatureReport.ReportID))
+		report, err := sdl_device.HIDDevice.ReadFeatureReport(byte(action.HIDFeatureReport.ReportID), uint8(len(action.HIDFeatureReport.Mask)))
 		if err != nil {
 			logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] could not read feature report", "id", action.HIDFeatureReport.ReportID, "error", err)
 			return fmt.Errorf("could not read feature report: %w: %w", ErrHIDFailure, err)
@@ -91,31 +91,63 @@ func (p *ProfileRunner) filterMatchingAPIListenerActions(listener *config.Config
 		return nil, fmt.Errorf("listener has invalid action definition: %w", ErrInvalidAction)
 	}
 
-	values, err := p.API.GetByPath(listener.API.Path)
-	if err != nil {
-		logger.Logger.Error("[ProfileRunner::processActiveProfileApiListeners] failed to get value from API path", "path", listener.API.Path, "error", err)
-		return nil, err
+	var extract_path_and_key_from_name = func(name string) ([]string, bool) {
+		idx := strings.LastIndex(name, ".")
+		if idx == -1 {
+			return nil, false
+		}
+		return []string{name[:idx], name[idx+1:]}, true
 	}
 
-	value, has_value := values[listener.API.ValuesKey]
-	if !has_value {
-		/* can't do anything if there is no value */
-		return nil, fmt.Errorf("could not find listener value: %w", ErrNoListenerValue)
+	var evaluate_condition = func(condition config.Config_Controller_Profile_Listener_Action_Condition) (bool, error) {
+		path_and_key, has_path_and_key := extract_path_and_key_from_name(condition.Name)
+		if !has_path_and_key {
+			return false, fmt.Errorf("invalid listener name %s", condition.Name)
+		}
+
+		values, err := p.API.GetByPath(path_and_key[0])
+		if err != nil {
+			return false, fmt.Errorf("failed to get value from API path %s", path_and_key[0])
+		}
+
+		value, has_value := values[path_and_key[1]]
+		if !has_value {
+			/* can't do anything if there is no value */
+			return false, fmt.Errorf("could not find listener value for key %s: %w", path_and_key[1], ErrNoListenerValue)
+		}
+
+		return condition.Matches(value), nil
 	}
 
 	matching_actions := []config.Config_Controller_Profile_Listener_Action{}
 action_loop:
 	for _, action := range listener.API.Actions {
+		condition_evaluation_strategy := action.GetConditionEvaluationStrategy()
 		conditions := action.GetConditions()
+
 		for _, condition := range conditions {
-			if !condition.Matches(value) {
-				/* if any condition does not match skip action */
+			condition_match, err := evaluate_condition(condition)
+			if err != nil {
+				logger.Logger.Debug("could not evaluate listener action condition", "error", err)
+			}
+
+			if condition_match && condition_evaluation_strategy == "any" {
+				/* if condition strategy is any -> append and skip to next action */
+				matching_actions = append(matching_actions, action)
+				continue action_loop
+			}
+
+			if !condition_match && condition_evaluation_strategy == "all" {
+				/* if all conditions must match and this one didn't -> skip action */
 				continue action_loop
 			}
 		}
 
-		/* if all conditions passed - execute action (might need to deduplicate actions?) */
-		matching_actions = append(matching_actions, action)
+		/* if we reach the end of the conditions loop we should only add if all ; otherwise it would mean no condition was matched */
+		if condition_evaluation_strategy == "all" {
+			/* if all conditions passed - execute action (might need to deduplicate actions?) */
+			matching_actions = append(matching_actions, action)
+		}
 	}
 
 	return matching_actions, nil
@@ -129,33 +161,50 @@ func (p *ProfileRunner) filterMatchingControlListenerActions(
 		return nil, fmt.Errorf("listener has invalid action definition: %w", ErrInvalidAction)
 	}
 
-	var dependecy_control controller_mgr.IControllerManager_Controller_Control = nil
-	if strings.HasPrefix(listener.Control.Name, "virtual:") {
-		/* virtual controls always exist - they just start at 0 */
-		virtual_control, has_dependency_control := controller.VirtualControls().Get(listener.Control.Name)
-		if !has_dependency_control {
-			controller.RegisterVirtualControl(listener.Control.Name, 0.0)
-			virtual_control, _ = controller.VirtualControls().Get(listener.Control.Name)
+	var evaluate_condition = func(condition config.Config_Controller_Profile_Listener_Action_Condition) (bool, error) {
+		var dependecy_control controller_mgr.IControllerManager_Controller_Control = nil
+		if strings.HasPrefix(condition.Name, "virtual:") {
+			/* virtual controls always exist - they just start at 0 */
+			virtual_control, has_dependency_control := controller.VirtualControls().Get(condition.Name)
+			if !has_dependency_control {
+				controller.RegisterVirtualControl(condition.Name, 0.0)
+				virtual_control, _ = controller.VirtualControls().Get(condition.Name)
+			}
+			dependecy_control = virtual_control
+		} else if joy_control, has_dependency_control := controller.Controls().Get(condition.Name); has_dependency_control {
+			dependecy_control = joy_control
 		}
-		dependecy_control = virtual_control
-	} else if joy_control, has_dependency_control := controller.Controls().Get(listener.Control.Name); has_dependency_control {
-		dependecy_control = joy_control
+		return dependecy_control != nil && condition.Matches(dependecy_control.GetState().NormalizedValues.Value), nil
 	}
-	control_value := dependecy_control.GetState().NormalizedValues.Value
 
 	matching_actions := []config.Config_Controller_Profile_Listener_Action{}
 action_loop:
 	for _, action := range listener.Control.Actions {
+		condition_evaluation_strategy := action.GetConditionEvaluationStrategy()
 		conditions := action.GetConditions()
 		for _, condition := range conditions {
-			if !condition.Matches(control_value) {
-				/* if any condition does not match skip action */
+			condition_match, err := evaluate_condition(condition)
+			if err != nil {
+				logger.Logger.Debug("could not evaluate listener action condition", "error", err)
+			}
+
+			if condition_match && condition_evaluation_strategy == "any" {
+				/* if condition strategy is any -> append and skip to next action */
+				matching_actions = append(matching_actions, action)
+				continue action_loop
+			}
+
+			if !condition_match && condition_evaluation_strategy == "all" {
+				/* if all conditions must match and this one didn't -> skip action */
 				continue action_loop
 			}
 		}
 
-		/* if all conditions passed - execute action (might need to deduplicate actions?) */
-		matching_actions = append(matching_actions, action)
+		/* if we reach the end of the conditions loop we should only add if all ; otherwise it would mean no condition was matched */
+		if condition_evaluation_strategy == "all" {
+			/* if all conditions passed - execute action (might need to deduplicate actions?) */
+			matching_actions = append(matching_actions, action)
+		}
 	}
 
 	return matching_actions, nil
@@ -166,25 +215,40 @@ func (p *ProfileRunner) filterMatchingCabStateListenerActions(listener *config.C
 		return nil, fmt.Errorf("listener has invalid action definition: %w", ErrInvalidAction)
 	}
 
-	value, has_value := p.CabDebugger.State.Controls.Get(listener.CabState.Name)
-	if !has_value {
-		/* can't do anything if there is no value */
-		return nil, fmt.Errorf("could not find listener value: %w", ErrNoListenerValue)
+	var evaluate_condition = func(condition config.Config_Controller_Profile_Listener_Action_Condition) (bool, error) {
+		value, has_value := p.CabDebugger.State.Controls.Get(condition.Name)
+
+		return has_value && condition.Matches(value.CurrentValue), nil
 	}
 
 	matching_actions := []config.Config_Controller_Profile_Listener_Action{}
 action_loop:
 	for _, action := range listener.CabState.Actions {
+		condition_evaluation_strategy := action.GetConditionEvaluationStrategy()
 		conditions := action.GetConditions()
 		for _, condition := range conditions {
-			if !condition.Matches(value.CurrentValue) {
-				/* if any condition does not match skip action */
+			condition_match, err := evaluate_condition(condition)
+			if err != nil {
+				logger.Logger.Debug("could not evaluate listener action condition", "error", err)
+			}
+
+			if condition_match && condition_evaluation_strategy == "any" {
+				/* if condition strategy is any -> append and skip to next action */
+				matching_actions = append(matching_actions, action)
+				continue action_loop
+			}
+
+			if !condition_match && condition_evaluation_strategy == "all" {
+				/* if all conditions must match and this one didn't -> skip action */
 				continue action_loop
 			}
 		}
 
-		/* if all conditions passed - execute action (might need to deduplicate actions?) */
-		matching_actions = append(matching_actions, action)
+		/* if we reach the end of the conditions loop we should only add if all ; otherwise it would mean no condition was matched */
+		if condition_evaluation_strategy == "all" {
+			/* if all conditions passed - execute action (might need to deduplicate actions?) */
+			matching_actions = append(matching_actions, action)
+		}
 	}
 
 	return matching_actions, nil

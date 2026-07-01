@@ -53,6 +53,16 @@ func (condition *Config_Controller_Profile_Listener_Action_Condition) Matches(va
 	return false
 }
 
+func (action *Config_Controller_Profile_Listener_Action) GetConditionEvaluationStrategy() string {
+	if action.HIDOutputReport != nil && action.HIDOutputReport.ConditionsEvaluationStrategy != "" {
+		return action.HIDOutputReport.ConditionsEvaluationStrategy
+	}
+	if action.HIDFeatureReport != nil && action.HIDFeatureReport.ConditionsEvaluationStrategy != "" {
+		return action.HIDFeatureReport.ConditionsEvaluationStrategy
+	}
+	return "all"
+}
+
 func (action *Config_Controller_Profile_Listener_Action) GetConditions() []Config_Controller_Profile_Listener_Action_Condition {
 	if action.HIDOutputReport != nil {
 		return action.HIDOutputReport.Conditions

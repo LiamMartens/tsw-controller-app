@@ -1,6 +1,9 @@
 {
   "type": "object",
   "properties": {
+    "conditions_evaluation_strategy": {
+      "enum": ["all", "any"]
+    },
     "conditions": {
       "type": "array",
       "description": "The conditions that must be met for this action to trigger",

@@ -6,10 +6,6 @@
       "type": "string",
       "enum": ["cab_state_value"]
     },
-    "name": {
-      "type": "string",
-      "description": "The name of the cab state to watch"
-    },
     "actions": {
       "type": "array",
       "description": "The actions to perform when the cab state value changes and conditions are met",

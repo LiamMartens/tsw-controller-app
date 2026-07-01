@@ -33,8 +33,8 @@ func (m *mockHIDDevice) SetOutputReport(id byte, data []byte) error {
 	return args.Error(0)
 }
 
-func (m *mockHIDDevice) ReadFeatureReport(id byte) ([]byte, error) {
-	args := m.Called(id)
+func (m *mockHIDDevice) ReadFeatureReport(id byte, length uint8) ([]byte, error) {
+	args := m.Called(id, length)
 	return args.Get(0).([]byte), args.Error(1)
 }
 

@@ -6,14 +6,6 @@
       "type": "string",
       "enum": ["api_value"]
     },
-    "path": {
-      "type": "string",
-      "description": "The API path to watch for changes"
-    },
-    "values_key": {
-      "type": "string",
-      "description": "The key within the API response to extract the value from"
-    },
     "actions": {
       "type": "array",
       "description": "The actions to perform when the API value changes and conditions are met",

@@ -14,7 +14,6 @@ import (
 	"github.com/Zyko0/go-sdl3/bin/binsdl"
 	"github.com/Zyko0/go-sdl3/sdl"
 	"github.com/bearsh/hid"
-	"github.com/goforj/godump"
 	usbhid "rafaelmartins.com/p/usbhid"
 )
 
@@ -43,17 +42,19 @@ type ISDLMgr_HIDDevice interface {
 	Close() error
 	GetOutputReport(id byte, length uint8) ([]byte, error)
 	SetOutputReport(id byte, data []byte) error
-	ReadFeatureReport(id byte) ([]byte, error)
+	ReadFeatureReport(id byte, length uint8) ([]byte, error)
 	SendFeatureReport(id byte, data []byte) error
 }
 
-type SDLMgr_HIDDevice_OutputReportsState struct {
+type SDLMgr_HIDDevice_ReportsState struct {
 	Lock  sync.Mutex
 	State map[byte][]byte
 }
 
 type SDLMgr_HIDDevice struct {
-	outputReportsState    SDLMgr_HIDDevice_OutputReportsState
+	outputReportsState SDLMgr_HIDDevice_ReportsState
+	fatureReportsState SDLMgr_HIDDevice_ReportsState
+
 	Go_Backend_Device     *usbhid.Device
 	Native_Backend_Device *SDLMgr_HIDDevice_Native
 }
@@ -97,7 +98,11 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 	for _, go_dev := range go_devices {
 		if strings.ToLower(go_dev.Path()) == path_lower {
 			return &SDLMgr_HIDDevice{
-				outputReportsState: SDLMgr_HIDDevice_OutputReportsState{
+				outputReportsState: SDLMgr_HIDDevice_ReportsState{
+					Lock:  sync.Mutex{},
+					State: map[byte][]byte{},
+				},
+				fatureReportsState: SDLMgr_HIDDevice_ReportsState{
 					Lock:  sync.Mutex{},
 					State: map[byte][]byte{},
 				},
@@ -110,7 +115,11 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 		native_device := &native_devices[ix]
 		if strings.ToLower(native_device.Path) == path_lower {
 			return &SDLMgr_HIDDevice{
-				outputReportsState: SDLMgr_HIDDevice_OutputReportsState{
+				outputReportsState: SDLMgr_HIDDevice_ReportsState{
+					Lock:  sync.Mutex{},
+					State: map[byte][]byte{},
+				},
+				fatureReportsState: SDLMgr_HIDDevice_ReportsState{
 					Lock:  sync.Mutex{},
 					State: map[byte][]byte{},
 				},
@@ -131,7 +140,11 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 	if len(go_serial_devices_by_path) == 1 {
 		for _, device := range go_serial_devices_by_path {
 			return &SDLMgr_HIDDevice{
-				outputReportsState: SDLMgr_HIDDevice_OutputReportsState{
+				outputReportsState: SDLMgr_HIDDevice_ReportsState{
+					Lock:  sync.Mutex{},
+					State: map[byte][]byte{},
+				},
+				fatureReportsState: SDLMgr_HIDDevice_ReportsState{
 					Lock:  sync.Mutex{},
 					State: map[byte][]byte{},
 				},
@@ -151,7 +164,11 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 	if len(native_serial_devices_by_path) == 1 {
 		for _, native_device := range native_serial_devices_by_path {
 			return &SDLMgr_HIDDevice{
-				outputReportsState: SDLMgr_HIDDevice_OutputReportsState{
+				outputReportsState: SDLMgr_HIDDevice_ReportsState{
+					Lock:  sync.Mutex{},
+					State: map[byte][]byte{},
+				},
+				fatureReportsState: SDLMgr_HIDDevice_ReportsState{
 					Lock:  sync.Mutex{},
 					State: map[byte][]byte{},
 				},
@@ -173,7 +190,11 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 	if len(go_deviceid_devices_by_path) == 1 {
 		for _, device := range go_deviceid_devices_by_path {
 			return &SDLMgr_HIDDevice{
-				outputReportsState: SDLMgr_HIDDevice_OutputReportsState{
+				outputReportsState: SDLMgr_HIDDevice_ReportsState{
+					Lock:  sync.Mutex{},
+					State: map[byte][]byte{},
+				},
+				fatureReportsState: SDLMgr_HIDDevice_ReportsState{
 					Lock:  sync.Mutex{},
 					State: map[byte][]byte{},
 				},
@@ -190,11 +211,14 @@ func (mgr *SDLMgr) hidDeviceFromJoystick(joysyick *SDLMgr_Joystick) (*SDLMgr_HID
 			native_deviceid_devices_by_path[native_device.Path] = native_device
 		}
 	}
-	godump.Dump(native_deviceid_devices_by_path)
 	if len(native_deviceid_devices_by_path) == 1 {
 		for _, native_device := range native_deviceid_devices_by_path {
 			return &SDLMgr_HIDDevice{
-				outputReportsState: SDLMgr_HIDDevice_OutputReportsState{
+				outputReportsState: SDLMgr_HIDDevice_ReportsState{
+					Lock:  sync.Mutex{},
+					State: map[byte][]byte{},
+				},
+				fatureReportsState: SDLMgr_HIDDevice_ReportsState{
 					Lock:  sync.Mutex{},
 					State: map[byte][]byte{},
 				},
