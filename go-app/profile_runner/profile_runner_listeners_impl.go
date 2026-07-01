@@ -143,8 +143,11 @@ action_loop:
 			}
 		}
 
-		/* if all conditions passed - execute action (might need to deduplicate actions?) */
-		matching_actions = append(matching_actions, action)
+		/* if we reach the end of the conditions loop we should only add if all ; otherwise it would mean no condition was matched */
+		if condition_evaluation_strategy == "all" {
+			/* if all conditions passed - execute action (might need to deduplicate actions?) */
+			matching_actions = append(matching_actions, action)
+		}
 	}
 
 	return matching_actions, nil
@@ -197,8 +200,11 @@ action_loop:
 			}
 		}
 
-		/* if all conditions passed - execute action (might need to deduplicate actions?) */
-		matching_actions = append(matching_actions, action)
+		/* if we reach the end of the conditions loop we should only add if all ; otherwise it would mean no condition was matched */
+		if condition_evaluation_strategy == "all" {
+			/* if all conditions passed - execute action (might need to deduplicate actions?) */
+			matching_actions = append(matching_actions, action)
+		}
 	}
 
 	return matching_actions, nil
@@ -238,8 +244,11 @@ action_loop:
 			}
 		}
 
-		/* if all conditions passed - execute action (might need to deduplicate actions?) */
-		matching_actions = append(matching_actions, action)
+		/* if we reach the end of the conditions loop we should only add if all ; otherwise it would mean no condition was matched */
+		if condition_evaluation_strategy == "all" {
+			/* if all conditions passed - execute action (might need to deduplicate actions?) */
+			matching_actions = append(matching_actions, action)
+		}
 	}
 
 	return matching_actions, nil
