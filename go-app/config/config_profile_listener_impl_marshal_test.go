@@ -59,16 +59,15 @@ func TestAction_MarshalJSON_NoType(t *testing.T) {
 }
 
 func TestListener_UnmarshalJSON_APIValue(t *testing.T) {
-	input := `{"type":"api_value","path":"/api/status","values_key":"Status","actions":[{"type":"hid_output_report","report_id":1,"mask":[64],"operation":"or","conditions":[{"operator":"eq","value":1.0}]}]}`
+	input := `{"type":"api_value","actions":[{"type":"hid_output_report","report_id":1,"mask":[64],"operation":"or","conditions":[{"name":"CurrentDrivableActor.Function.HUD_GetAlerter.AleterState","operator":"eq","value":1.0}]}]}`
 	var l Config_Controller_Profile_Listener
 	err := json.Unmarshal([]byte(input), &l)
 	assert.NoError(t, err)
 	assert.NotNil(t, l.API)
 	assert.Equal(t, "api_value", l.API.Type)
-	assert.Equal(t, "/api/status", l.API.Path)
-	assert.Equal(t, "Status", l.API.ValuesKey)
 	assert.Equal(t, 1, len(l.API.Actions))
 	assert.NotNil(t, l.API.Actions[0].HIDOutputReport)
+	assert.Equal(t, "CurrentDrivableActor.Function.HUD_GetAlerter.AleterState", l.API.Actions[0].HIDOutputReport.Conditions[0].Name)
 	assert.Equal(t, "eq", l.API.Actions[0].HIDOutputReport.Conditions[0].Operator)
 	assert.Equal(t, 1.0, l.API.Actions[0].HIDOutputReport.Conditions[0].Value)
 	assert.Equal(t, uint8(1), l.API.Actions[0].HIDOutputReport.ReportID)
@@ -86,16 +85,14 @@ func TestListener_UnmarshalJSON_InvalidType(t *testing.T) {
 func TestListener_MarshalJSON_APIValue(t *testing.T) {
 	l := Config_Controller_Profile_Listener{
 		API: &Config_Controller_Profile_Listener_Type_APIValue{
-			Type:      "api_value",
-			Path:      "/api/status",
-			ValuesKey: "items",
+			Type: "api_value",
 			Actions: []Config_Controller_Profile_Listener_Action{
 				{
 					HIDOutputReport: &Config_Controller_Profile_Listener_Action_HIDOutputReport{
 						Type: "hid_output_report",
 						Config_Controller_Profile_Listener_SharedAction: Config_Controller_Profile_Listener_SharedAction{
 							Conditions: []Config_Controller_Profile_Listener_Action_Condition{
-								{Operator: "eq", Value: 1.0},
+								{Name: "CurrentDrivableActor.Function.HUD_GetAlerter.AleterState", Operator: "eq", Value: 1.0},
 							},
 						},
 						ReportID:  1,

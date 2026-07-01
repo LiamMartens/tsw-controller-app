@@ -1,12 +1,15 @@
 package config
 
 type Config_Controller_Profile_Listener_Action_Condition struct {
+	Name     string `json:"name" validate:"required"`
 	Operator string `json:"operator" validate:"required,oneof=eq gt lt gte lte"`
 	Value    any    `json:"value" validate:"required"`
 }
 
 type Config_Controller_Profile_Listener_SharedAction struct {
-	Conditions []Config_Controller_Profile_Listener_Action_Condition `json:"conditions,omitempty"`
+	/* defaults to "all" */
+	ConditionsEvaluationStrategy string                                                `json:"conditions_evaluation_strategy,omitempty" validate:"omitempty,oneof=all any"`
+	Conditions                   []Config_Controller_Profile_Listener_Action_Condition `json:"conditions,omitempty"`
 }
 
 type Config_Controller_Profile_Listener_Action_HIDOutputReport struct {
@@ -37,10 +40,8 @@ type Config_Controller_Profile_Listener_Action struct {
  * Listens to the TSW API (only Train Sim World)
  */
 type Config_Controller_Profile_Listener_Type_APIValue struct {
-	Type      string                                      `json:"type" validate:"required,eq=api_value"`
-	Path      string                                      `json:"path" validate:"required"`
-	ValuesKey string                                      `json:"values_key" validate:"required"`
-	Actions   []Config_Controller_Profile_Listener_Action `json:"actions" validate:"required"`
+	Type    string                                      `json:"type" validate:"required,eq=api_value"`
+	Actions []Config_Controller_Profile_Listener_Action `json:"actions" validate:"required"`
 }
 
 /**
@@ -48,7 +49,6 @@ type Config_Controller_Profile_Listener_Type_APIValue struct {
  */
 type Config_Controller_Profile_Listener_Type_ControlValue struct {
 	Type    string                                      `json:"type" validate:"required,eq=control_value"`
-	Name    string                                      `json:"name" validate:"required"`
 	Actions []Config_Controller_Profile_Listener_Action `json:"actions" validate:"required"`
 }
 
@@ -57,7 +57,6 @@ type Config_Controller_Profile_Listener_Type_ControlValue struct {
  */
 type Config_Controller_Profile_Listener_Type_CabStateValue struct {
 	Type    string                                      `json:"type" validate:"required,eq=cab_state_value"`
-	Name    string                                      `json:"name" validate:"required"`
 	Actions []Config_Controller_Profile_Listener_Action `json:"actions" validate:"required"`
 }
 
