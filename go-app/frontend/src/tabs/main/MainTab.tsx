@@ -101,7 +101,17 @@ export const MainTab = ({ onOpenCabDebuggerTab }: Props) => {
   const handleRemoveControllerOverride = (profile: ProfileInfo) => {
     RemoveProfileControllerOverride(profile.Id)
       .then(() => {
-        LoadConfiguration().then(() => refetchProfiles());
+        LoadConfiguration()
+          .then(() => refetchProfiles())
+          .then(() => {
+            const profiles = form.getValues("profiles");
+            for (const guid in profiles) {
+              if (profiles[guid] && profiles[guid].Id === profile.Id) {
+                form.setValue(`profiles.${guid}`, { ...profiles[guid] });
+                SelectProfile(guid, profile.Id);
+              }
+            }
+          });
         if (
           document.activeElement &&
           document.activeElement instanceof HTMLElement
@@ -122,8 +132,8 @@ export const MainTab = ({ onOpenCabDebuggerTab }: Props) => {
           .then(() => {
             const profiles = form.getValues("profiles");
             for (const guid in profiles) {
-              form.setValue(`profiles.${guid}`, undefined);
               ClearProfile(guid);
+              form.setValue(`profiles.${guid}`, undefined);
             }
             LoadConfiguration();
           })
