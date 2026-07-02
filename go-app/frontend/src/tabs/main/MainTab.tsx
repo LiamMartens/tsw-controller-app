@@ -10,6 +10,7 @@ import {
   OpenProfileBuilder,
   DeleteProfile,
   OpenNewProfileBuilder,
+  RemoveProfileControllerOverride,
   OpenNewProfileBuilderForDeviceID,
   InstallTrainSimClassicMod,
   InstallWondersOfSodorMod,
@@ -95,6 +96,19 @@ export const MainTab = ({ onOpenCabDebuggerTab }: Props) => {
 
   const handleEditProfile = (profile: ProfileInfo) => {
     OpenProfileBuilder(profile.Id).catch((err) => alert(String(err), "error"));
+  };
+
+  const handleRemoveControllerOverride = (profile: ProfileInfo) => {
+    RemoveProfileControllerOverride(profile.Id)
+      .then(() => {
+        LoadConfiguration().then(() => refetchProfiles());
+        if (
+          document.activeElement &&
+          document.activeElement instanceof HTMLElement
+        )
+          document.activeElement?.blur();
+      })
+      .catch((err) => alert(String(err), "error"));
   };
 
   const handleDeleteProfile = (profile: ProfileInfo) => {
@@ -222,6 +236,7 @@ export const MainTab = ({ onOpenCabDebuggerTab }: Props) => {
             onReloadConfiguration={handleReloadConfiguration}
             onSaveProfile={handleSaveProfileForSharing}
             onEditProfile={handleEditProfile}
+            onRemoveControllerOverride={handleRemoveControllerOverride}
             onDeleteProfileForController={handleDeleteProfile}
           />
         )}
@@ -236,6 +251,7 @@ export const MainTab = ({ onOpenCabDebuggerTab }: Props) => {
               onReloadConfiguration={handleReloadConfiguration}
               onSaveProfile={handleSaveProfileForSharing}
               onEditProfile={handleEditProfile}
+              onRemoveControllerOverride={handleRemoveControllerOverride}
               onDeleteProfileForController={handleDeleteProfile}
             />
           </div>

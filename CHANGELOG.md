@@ -1,6 +1,9 @@
 
 # CHANGELOG
 
+## v1.19.2
+- Added option to remove controller information from profile
+
 ## v1.19.1
 - Fix `cab_state_value` listener config
 - Fix HID handling

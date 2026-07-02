@@ -118,6 +118,10 @@ export function OpenProfileBuilder(arg1) {
   return window['go']['main']['App']['OpenProfileBuilder'](arg1);
 }
 
+export function RemoveProfileControllerOverride(arg1) {
+  return window['go']['main']['App']['RemoveProfileControllerOverride'](arg1);
+}
+
 export function ResetCabControlState() {
   return window['go']['main']['App']['ResetCabControlState']();
 }

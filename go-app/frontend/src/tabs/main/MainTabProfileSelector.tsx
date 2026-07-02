@@ -22,6 +22,7 @@ type Props = {
     controller: main.Interop_GenericController | null,
   ) => void;
   onEditProfile: (profile: ProfileInfo) => void;
+  onRemoveControllerOverride: (profile: ProfileInfo) => void;
   onDeleteProfileForController: (profile: ProfileInfo) => void;
 };
 
@@ -34,6 +35,7 @@ export function MainTabProfileSelector({
   onCreateProfile,
   onSaveProfile,
   onEditProfile,
+  onRemoveControllerOverride,
   onDeleteProfileForController,
 }: Props) {
   const { control } = form;
@@ -145,6 +147,7 @@ export function MainTabProfileSelector({
           onCreateProfile={onCreateProfile}
           onSavePofile={onSaveProfile}
           onEditProfile={onEditProfile}
+          onRemoveControllerOverride={onRemoveControllerOverride}
           onDeleteProfile={onDeleteProfileForController}
         />
       </div>

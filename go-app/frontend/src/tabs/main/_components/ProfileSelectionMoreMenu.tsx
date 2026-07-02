@@ -18,6 +18,7 @@ type Props = {
     controller: main.Interop_GenericController | null,
   ) => void;
   onEditProfile: (profile: ProfileInfo) => void;
+  onRemoveControllerOverride: (profile: ProfileInfo) => void;
   onDeleteProfile: (profile: ProfileInfo) => void;
 };
 
@@ -29,6 +30,7 @@ export const ProfileSelectionMoreMenu = ({
   onCreateProfile,
   onSavePofile,
   onEditProfile,
+  onRemoveControllerOverride,
   onDeleteProfile,
 }: Props) => {
   const handleReloadConfiguration = useCallback(() => {
@@ -57,6 +59,11 @@ export const ProfileSelectionMoreMenu = ({
     onEditProfile(profile);
   }, [profile, onEditProfile]);
 
+  const handleRemoveControllverOverride = useCallback(() => {
+    if (!profile) return;
+    onRemoveControllerOverride(profile);
+  }, [profile, onEditProfile]);
+
   const handleDeleteProfile = useCallback(() => {
     if (!profile) return;
     onDeleteProfile(profile);
@@ -64,7 +71,12 @@ export const ProfileSelectionMoreMenu = ({
 
   return (
     <div className="dropdown dropdown-end">
-      <button tabIndex={0} role="button" className="btn" title="Configure Control">
+      <button
+        tabIndex={0}
+        role="button"
+        className="btn"
+        title="Configure Control"
+      >
         More
       </button>
       <ul
@@ -100,6 +112,17 @@ export const ProfileSelectionMoreMenu = ({
             className="disabled:opacity-50 disabled:pointer-events-none"
           >
             Open profile in builder
+          </button>
+        </li>
+        <li>
+          <button
+            disabled={
+              !profile || !profile.Metadata.ContainsControllerConfiguration
+            }
+            onClick={handleRemoveControllverOverride}
+            className="disabled:opacity-50 disabled:pointer-events-none"
+          >
+            Remove Controller Override
           </button>
         </li>
         <li>

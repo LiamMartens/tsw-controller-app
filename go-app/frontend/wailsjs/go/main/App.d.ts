@@ -60,6 +60,8 @@ export function OpenNewProfileBuilderForDeviceID(arg1:string):Promise<void>;
 
 export function OpenProfileBuilder(arg1:string):Promise<void>;
 
+export function RemoveProfileControllerOverride(arg1:string):Promise<void>;
+
 export function ResetCabControlState():Promise<void>;
 
 export function SaveCalibration(arg1:main.Interop_ControllerCalibration):Promise<void>;
