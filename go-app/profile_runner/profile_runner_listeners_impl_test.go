@@ -144,6 +144,7 @@ func TestFilterMatchingAPIListenerActions_APIValueNotFound(t *testing.T) {
 	runner := &ProfileRunner{}
 
 	mockAPI := new(mockAPI)
+	mockAPI.On("CanConnect").Return(true)
 	mockAPI.On("GetByPath", "CurrentDrivableActor.Function.IS_TractionLocked").Return(map[string]any{}, nil)
 	runner.API = mockAPI
 
@@ -173,6 +174,7 @@ func TestFilterMatchingAPIListenerActions_AllConditionsMatch(t *testing.T) {
 	runner := &ProfileRunner{}
 
 	mockAPI := new(mockAPI)
+	mockAPI.On("CanConnect").Return(true)
 	mockAPI.On("GetByPath", "CurrentDrivableActor.Function.IS_TractionLocked").Return(map[string]any{"IsLocked": true}, nil)
 	runner.API = mockAPI
 
@@ -203,6 +205,7 @@ func TestFilterMatchingAPIListenerActions_OneConditionFails(t *testing.T) {
 	runner := &ProfileRunner{}
 
 	mockAPI := new(mockAPI)
+	mockAPI.On("CanConnect").Return(true)
 	mockAPI.On("GetByPath", "CurrentDrivableActor.Function.Get_Speed").Return(map[string]any{"Speed": 5.0}, nil)
 	runner.API = mockAPI
 
@@ -234,6 +237,7 @@ func TestFilterMatchingAPIListenerActions_AnyConditionMatches(t *testing.T) {
 	runner := &ProfileRunner{}
 
 	mockAPI := new(mockAPI)
+	mockAPI.On("CanConnect").Return(true)
 	mockAPI.On("GetByPath", "CurrentDrivableActor.Function.Get_Speed").Return(map[string]any{"Speed": 5.0}, nil)
 	runner.API = mockAPI
 

@@ -87,7 +87,7 @@ func (p *ProfileRunner) executeProfileListenerAction(
 		}
 
 		if should_send_report {
-			err = sdl_device.HIDDevice.SendFeatureReport(byte(action.HIDFeatureReport.ReportID), report)
+			err = sdl_device.HIDDevice.SendFeatureReport(byte(action.HIDFeatureReport.ReportID), report_to_send)
 			if err != nil {
 				logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] could not send feature report", "id", action.HIDFeatureReport.ReportID, "error", err)
 				return fmt.Errorf("could not send feature report: %w: %w", ErrHIDFailure, err)
@@ -117,6 +117,10 @@ func (p *ProfileRunner) filterMatchingAPIListenerActions(listener *config.Config
 		path_and_key, has_path_and_key := extract_path_and_key_from_name(condition.Name)
 		if !has_path_and_key {
 			return false, fmt.Errorf("invalid listener name %s", condition.Name)
+		}
+
+		if !p.API.CanConnect() {
+			return false, fmt.Errorf("API is not available to retrieve value from path: %s", path_and_key[0])
 		}
 
 		values, err := p.API.GetByPath(path_and_key[0])
