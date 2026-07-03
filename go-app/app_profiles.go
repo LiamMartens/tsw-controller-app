@@ -49,10 +49,11 @@ func (a *App) GetProfiles() []Interop_Profile {
 			AutoSelect: profile.AutoSelect,
 			Apps:       profile.Apps,
 			Metadata: Interop_Profile_Metadata{
-				Path:       profile.Metadata.Path,
-				IsEmbedded: profile.Metadata.IsEmbedded,
-				UpdatedAt:  profile.Metadata.UpdatedAt.Format(time.RFC3339),
-				Warnings:   warnings,
+				Path:                            profile.Metadata.Path,
+				IsEmbedded:                      profile.Metadata.IsEmbedded,
+				ContainsControllerConfiguration: profile.Controller != nil && profile.Controller.Mapping != nil,
+				UpdatedAt:                       profile.Metadata.UpdatedAt.Format(time.RFC3339),
+				Warnings:                        warnings,
 			},
 		})
 		return true
@@ -85,6 +86,18 @@ func (a *App) SelectProfile(unique_id controller_mgr.DeviceUniqueID, id string) 
 
 func (a *App) ClearProfile(unique_id controller_mgr.DeviceUniqueID) {
 	a.profile_runner.ClearProfile(unique_id)
+}
+
+func (a *App) RemoveProfileControllerOverride(id string) error {
+	if profile, has_profile := a.profile_runner.Profiles.Get(id); has_profile {
+		profile.Controller = nil
+		profile_json, err := json.Marshal(profile)
+		if err != nil {
+			return fmt.Errorf("could not save profile: %w", err)
+		}
+		return os.WriteFile(profile.Metadata.Path, profile_json, 0644)
+	}
+	return fmt.Errorf("could not find profile")
 }
 
 func (a *App) DeleteProfile(id string) error {

@@ -35,18 +35,25 @@ func (p *ProfileRunner) executeProfileListenerAction(
 			return fmt.Errorf("could not read output report: %w: %w", ErrHIDFailure, err)
 		}
 
-		for ix := range report {
+		should_send_report := false
+		report_to_send := append([]byte{}, report...)
+		for ix := range report_to_send {
 			if action.HIDOutputReport.Operation == "and" {
-				report[ix] = report[ix] & action.HIDOutputReport.Mask[ix]
+				report_to_send[ix] = report_to_send[ix] & action.HIDOutputReport.Mask[ix]
 			} else if action.HIDOutputReport.Operation == "or" {
-				report[ix] = report[ix] | action.HIDOutputReport.Mask[ix]
+				report_to_send[ix] = report_to_send[ix] | action.HIDOutputReport.Mask[ix]
+			}
+			if report[ix] != report_to_send[ix] {
+				should_send_report = true
 			}
 		}
 
-		err = sdl_device.HIDDevice.SetOutputReport(byte(action.HIDOutputReport.ReportID), report)
-		if err != nil {
-			logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] could not send output report", "id", action.HIDOutputReport.ReportID, "error", err)
-			return fmt.Errorf("could not send output report: %w: %w", ErrHIDFailure, err)
+		if should_send_report {
+			err = sdl_device.HIDDevice.SetOutputReport(byte(action.HIDOutputReport.ReportID), report_to_send)
+			if err != nil {
+				logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] could not send output report", "id", action.HIDOutputReport.ReportID, "error", err)
+				return fmt.Errorf("could not send output report: %w: %w", ErrHIDFailure, err)
+			}
 		}
 
 		return nil
@@ -66,18 +73,25 @@ func (p *ProfileRunner) executeProfileListenerAction(
 			return fmt.Errorf("could not read feature report: %w: %w", ErrHIDFailure, err)
 		}
 
-		for ix := range report {
+		should_send_report := false
+		report_to_send := append([]byte{}, report...)
+		for ix := range report_to_send {
 			if action.HIDFeatureReport.Operation == "and" {
-				report[ix] = report[ix] & action.HIDFeatureReport.Mask[ix]
+				report_to_send[ix] = report_to_send[ix] & action.HIDFeatureReport.Mask[ix]
 			} else if action.HIDFeatureReport.Operation == "or" {
-				report[ix] = report[ix] | action.HIDFeatureReport.Mask[ix]
+				report_to_send[ix] = report_to_send[ix] | action.HIDFeatureReport.Mask[ix]
+			}
+			if report[ix] != report_to_send[ix] {
+				should_send_report = true
 			}
 		}
 
-		err = sdl_device.HIDDevice.SendFeatureReport(byte(action.HIDFeatureReport.ReportID), report)
-		if err != nil {
-			logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] could not send feature report", "id", action.HIDFeatureReport.ReportID, "error", err)
-			return fmt.Errorf("could not send feature report: %w: %w", ErrHIDFailure, err)
+		if should_send_report {
+			err = sdl_device.HIDDevice.SendFeatureReport(byte(action.HIDFeatureReport.ReportID), report_to_send)
+			if err != nil {
+				logger.Logger.Error("[ProfileRunner::executeProfileListenerAction] could not send feature report", "id", action.HIDFeatureReport.ReportID, "error", err)
+				return fmt.Errorf("could not send feature report: %w: %w", ErrHIDFailure, err)
+			}
 		}
 
 		return nil
@@ -103,6 +117,10 @@ func (p *ProfileRunner) filterMatchingAPIListenerActions(listener *config.Config
 		path_and_key, has_path_and_key := extract_path_and_key_from_name(condition.Name)
 		if !has_path_and_key {
 			return false, fmt.Errorf("invalid listener name %s", condition.Name)
+		}
+
+		if !p.API.CanConnect() {
+			return false, fmt.Errorf("API is not available to retrieve value from path: %s", path_and_key[0])
 		}
 
 		values, err := p.API.GetByPath(path_and_key[0])

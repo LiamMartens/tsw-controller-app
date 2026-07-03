@@ -24,6 +24,7 @@ type Props = {
     controller: main.Interop_GenericController | null,
   ) => void;
   onEditProfile: (profile: ProfileInfo) => void;
+  onRemoveControllerOverride: (profile: ProfileInfo) => void;
   onDeleteProfileForController: (profile: ProfileInfo) => void;
 };
 
@@ -36,10 +37,10 @@ export function MainTabControllerProfileSelector({
   onCreateProfile,
   onSaveProfile,
   onEditProfile,
+  onRemoveControllerOverride,
   onDeleteProfileForController,
 }: Props) {
   const { watch, control } = form;
-  const { data: settings } = useSettings();
   const selectedProfileInfo = watch(`profiles.${controller.UniqueID}`);
   const selectedProfile = useMemo(
     () =>
@@ -166,6 +167,7 @@ export function MainTabControllerProfileSelector({
           onCreateProfile={onCreateProfile}
           onSavePofile={onSaveProfile}
           onEditProfile={onEditProfile}
+          onRemoveControllerOverride={onRemoveControllerOverride}
           onDeleteProfile={onDeleteProfileForController}
         />
       </div>

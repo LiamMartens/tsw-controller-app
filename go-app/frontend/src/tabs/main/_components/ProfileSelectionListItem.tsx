@@ -32,7 +32,7 @@ export const ProfileSelectionListItem = ({
     >
       <button
         disabled={!!disabled}
-        className="grid grid-cols-1 grid-flow-row auto-rows-max gap-2"
+        className="grid grid-cols-1 grid-flow-row auto-rows-max gap-1"
         onClick={handleClick}
       >
         <div>
@@ -48,17 +48,17 @@ export const ProfileSelectionListItem = ({
             <span className="text-base-content/30 text-xs">{disabled}</span>
           )}
         </div>
-        {}
         {!!profile.Metadata.Warnings.length &&
           profile.Metadata.Warnings.map((warning) => (
             <div
               key={warning}
               role="alert"
-              className="alert alert-soft alert-warning my-2 p-2 text-xs"
+              className="alert alert-soft alert-warning p-1 text-xs"
             >
               {warning}
             </div>
           ))}
+
         <div className="flex flex-wrap gap-2 empty:hidden">
           {!!profile.AutoSelect && (
             <div className="badge badge-sm badge-soft badge-info">
@@ -68,14 +68,27 @@ export const ProfileSelectionListItem = ({
           {!!profile.Metadata.IsEmbedded && (
             <div className="badge badge-sm badge-soft badge-info">Built-In</div>
           )}
-          {profile.Apps?.map((app) => (
+          {profile.Metadata.ContainsControllerConfiguration && (
+            <div
+              className="tooltip tooltip-bottom tooltip-start"
+              data-tip="This profile contains controller mapping information which will override your own controller configuration. To remove it use the 'More' menu."
+            >
               <div
-                key={`app-${app}`}
+                role="alert"
                 className="badge badge-sm badge-soft badge-info"
               >
-                {app}
+                Contains Controller Mapping Override
               </div>
-            ))}
+            </div>
+          )}
+          {profile.Apps?.map((app) => (
+            <div
+              key={`app-${app}`}
+              className="badge badge-sm badge-soft badge-info"
+            >
+              {app}
+            </div>
+          ))}
         </div>
       </button>
     </li>

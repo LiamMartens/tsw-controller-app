@@ -290,6 +290,7 @@ export namespace main {
 	export class Interop_Profile_Metadata {
 	    Path: string;
 	    IsEmbedded: boolean;
+	    ContainsControllerConfiguration: boolean;
 	    UpdatedAt: string;
 	    Warnings: string[];
 	
@@ -301,6 +302,7 @@ export namespace main {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.Path = source["Path"];
 	        this.IsEmbedded = source["IsEmbedded"];
+	        this.ContainsControllerConfiguration = source["ContainsControllerConfiguration"];
 	        this.UpdatedAt = source["UpdatedAt"];
 	        this.Warnings = source["Warnings"];
 	    }

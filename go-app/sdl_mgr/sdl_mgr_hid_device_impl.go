@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"tsw_controller_app/logger"
 
+	"github.com/goforj/godump"
 	usbhid "rafaelmartins.com/p/usbhid"
 )
 
@@ -194,6 +195,9 @@ func (hd *SDLMgr_HIDDevice) ReadFeatureReport(id byte, length uint8) ([]byte, er
 func (hd *SDLMgr_HIDDevice) SendFeatureReport(id byte, data []byte) error {
 	hd.fatureReportsState.Lock.Lock()
 	defer hd.fatureReportsState.Lock.Unlock()
+
+	logger.Logger.Debug("sending feature report")
+	godump.Dump(data)
 
 	if err := hd.Open(); err != nil {
 		return err
