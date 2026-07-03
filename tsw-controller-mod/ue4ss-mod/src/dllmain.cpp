@@ -131,7 +131,7 @@ class TSWControllerMod : public RC::CppUserModBase
 
     static inline std::shared_mutex CURRENT_DRIVABLE_ACTOR_CLASS_NAME_MUTEX;
     static inline float TIME_SINCE_CURRENT_DRIVABLE_ACTOR_REPORTED = 0;
-    static inline RC::StringType CURRENT_DRIVABLE_ACTOR_CLASS_NAME = STR("");
+    static inline Unreal::TWeakObjectPtr<Unreal::UObject> CURRENT_DRIVABLE_ACTOR;
 
     /* map of control names and their target value and flags */
     static inline std::shared_mutex DIRECT_CONTROL_TARGET_STATE_MUTEX;
@@ -332,11 +332,12 @@ class TSWControllerMod : public RC::CppUserModBase
         TSWControllerMod::TIME_SINCE_CURRENT_DRIVABLE_ACTOR_REPORTED += delta_secs;
         auto drivable_actor_name = drivable_actor_result.DrivableActor->GetClassPrivate()->GetName();
         if (
-            TSWControllerMod::CURRENT_DRIVABLE_ACTOR_CLASS_NAME != drivable_actor_name ||
-            TSWControllerMod::TIME_SINCE_CURRENT_DRIVABLE_ACTOR_REPORTED > 2.0f
+            TSWControllerMod::TIME_SINCE_CURRENT_DRIVABLE_ACTOR_REPORTED > 2.0f ||
+            TSWControllerMod::CURRENT_DRIVABLE_ACTOR.Get() == nullptr ||
+            TSWControllerMod::CURRENT_DRIVABLE_ACTOR.Get()->GetClassPrivate()->GetName() != drivable_actor_name
         ) {
             TSWControllerMod::TIME_SINCE_CURRENT_DRIVABLE_ACTOR_REPORTED = 0.0f;
-            TSWControllerMod::CURRENT_DRIVABLE_ACTOR_CLASS_NAME = drivable_actor_name;
+            TSWControllerMod::CURRENT_DRIVABLE_ACTOR = Unreal::TWeakObjectPtr<Unreal::UObject>(drivable_actor_result.DrivableActor);
             auto message = STR("current_drivable_actor,name=") + drivable_actor_name;
             auto message_str = std::string(message.begin(), message.end());
             Output::send<LogLevel::Normal>(STR("[TSWControllerMod] sending current drivable actor information {}\n"), message);
@@ -513,37 +514,48 @@ class TSWControllerMod : public RC::CppUserModBase
 
     static void on_ts2_virtualhidcomponent_inputvaluechanged(Unreal::UnrealScriptFunctionCallableContext context, void* custom_data)
     {
+        std::shared_lock<std::shared_mutex> current_drivable_actor_lock(TSWControllerMod::CURRENT_DRIVABLE_ACTOR_CLASS_NAME_MUTEX);
+
         Unreal::FName* input_identifier = TSWControllerMod::get_vhid_component_input_identifier(context.Context);
         Unreal::UFunction* get_currently_changing_controller_func = context.Context->GetFunctionByNameInChain(STR("GetCurrentlyChangingController"));
-        if (!get_currently_changing_controller_func) return;
-
-        VirtualHIDComponent_GetCurrentlyChangingControllerParams get_currently_changing_controller_params{};
-        context.Context->ProcessEvent(get_currently_changing_controller_func, &get_currently_changing_controller_params);
-        /* don't do anything if no controller or it's not the player controller */
-        if (!get_currently_changing_controller_params.Controller || !TSWControllerMod::is_player_controller(get_currently_changing_controller_params.Controller))
+        if (!get_currently_changing_controller_func)
         {
             return;
         }
 
-        /* find drivable actor*/
-        Unreal::UFunction* get_drivable_actor_fn = get_currently_changing_controller_params.Controller->GetFunctionByNameInChain(STR("GetDrivableActor"));
-        if (!get_drivable_actor_fn) {
-            Output::send<LogLevel::Error>(STR("[TSWControllerMod] Can't find GetDrivableActor function\n"));
-            return;
-        }
+        Unreal::UObject* drivable_actor = TSWControllerMod::CURRENT_DRIVABLE_ACTOR.Get();
+        if (!drivable_actor)
+        {
+            VirtualHIDComponent_GetCurrentlyChangingControllerParams get_currently_changing_controller_params{};
+            context.Context->ProcessEvent(get_currently_changing_controller_func, &get_currently_changing_controller_params);
 
-        DriverController_GetDrivableActorParams drivable_actor_result;
-        get_currently_changing_controller_params.Controller->ProcessEvent(get_drivable_actor_fn, &drivable_actor_result);
-        if (!drivable_actor_result.DrivableActor) {
-            return;
+            /* don't do anything if no controller or it's not the player controller */
+            if (!get_currently_changing_controller_params.Controller || !TSWControllerMod::is_player_controller(get_currently_changing_controller_params.Controller))
+            {
+                Output::send<LogLevel::Normal>(STR("[TSWControllerMod] currently changing controller is not a player controller\n"));
+                return;
+            }
+
+            /* find drivable actor*/
+            Unreal::UFunction* get_drivable_actor_fn = get_currently_changing_controller_params.Controller->GetFunctionByNameInChain(STR("GetDrivableActor"));
+            if (!get_drivable_actor_fn) {
+                return;
+            }
+
+            DriverController_GetDrivableActorParams drivable_actor_result;
+            controller->ProcessEvent(get_drivable_actor_fn, &drivable_actor_result);
+            drivable_actor = drivable_actor_result.DrivableActor
+            /* skip if drivable actor can still not be found */
+            if (!drivable_actor) return;
         }
 
         /* loop over class properties to find raw controller identifier */
-        auto control_property_name = TSWControllerMod::find_property_name_from_context(drivable_actor_result.DrivableActor, context.Context);
+        auto control_property_name = TSWControllerMod::find_property_name_from_context(drivable_actor, context.Context);
 
         /* if we can't find a property it's likely not relevant so we can ignore */
         if (control_property_name.empty())
         {
+            Output::send<LogLevel::Error>(STR("[TSWControllerMod] could not find property from context\n"));
             return;
         }
 
