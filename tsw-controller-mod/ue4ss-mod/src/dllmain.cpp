@@ -515,48 +515,49 @@ class TSWControllerMod : public RC::CppUserModBase
     {
         Unreal::FName* input_identifier = TSWControllerMod::get_vhid_component_input_identifier(context.Context);
         Unreal::UFunction* get_currently_changing_controller_func = context.Context->GetFunctionByNameInChain(STR("GetCurrentlyChangingController"));
-        if (input_identifier && get_currently_changing_controller_func)
+        if (!get_currently_changing_controller_func) return;
+
+        VirtualHIDComponent_GetCurrentlyChangingControllerParams get_currently_changing_controller_params{};
+        context.Context->ProcessEvent(get_currently_changing_controller_func, &get_currently_changing_controller_params);
+        /* don't do anything if no controller or it's not the player controller */
+        if (!get_currently_changing_controller_params.Controller || !TSWControllerMod::is_player_controller(get_currently_changing_controller_params.Controller))
         {
-            VirtualHIDComponent_GetCurrentlyChangingControllerParams get_currently_changing_controller_params{};
-            context.Context->ProcessEvent(get_currently_changing_controller_func, &get_currently_changing_controller_params);
-            /* don't do anything if it's a none identifier, there is no controller or it's not the player controller */
-            if (!get_currently_changing_controller_params.Controller || !TSWControllerMod::is_player_controller(get_currently_changing_controller_params.Controller))
-            {
-                return;
-            }
-
-            /* find drivable actor*/
-            Unreal::UFunction* get_drivable_actor_fn = get_currently_changing_controller_params.Controller->GetFunctionByNameInChain(STR("GetDrivableActor"));
-            if (!get_drivable_actor_fn) {
-                Output::send<LogLevel::Error>(STR("[TSWControllerMod] Can't find GetDrivableActor function\n"));
-                return;
-            }
-            DriverController_GetDrivableActorParams drivable_actor_result;
-            get_currently_changing_controller_params.Controller->ProcessEvent(get_drivable_actor_fn, &drivable_actor_result);
-            if (!drivable_actor_result.DrivableActor) {
-                return;
-            }
-
-            /* loop over class properties to find raw controller identifier */
-            auto control_property_name = TSWControllerMod::find_property_name_from_context(drivable_actor_result.DrivableActor, context.Context);
-
-            /* if we can't find a property it's likely not relevant so we can ignore */
-            if (control_property_name.empty())
-            {
-                return;
-            }
-
-            /* get normalised input value */
-            auto normalized_value = TSWControllerMod::get_current_vhid_component_normalized_input_value(context.Context);
-
-            /* send updated value */
-            VirtualHIDComponent_InputValueChangedParams input_value_changed_params = context.GetParams<VirtualHIDComponent_InputValueChangedParams>();
-            /* message format = sync_control,name={name},property={control_property_name},value={value},normal_value={normal_value} */
-            auto message = STR("sync_control_value,name=") + input_identifier->ToString() + STR(",property=") + control_property_name + STR(",value=") + std::to_wstring(input_value_changed_params.NewValue) + STR(",normalized_value=") + std::to_wstring(normalized_value);
-            auto message_str = std::string(message.begin(), message.end());
-            Output::send<LogLevel::Normal>(STR("[TSWControllerMod] sending updated control value: {}\n"), message);
-            tsw_controller_mod_send_message((char*)message_str.c_str());
+            return;
         }
+
+        /* find drivable actor*/
+        Unreal::UFunction* get_drivable_actor_fn = get_currently_changing_controller_params.Controller->GetFunctionByNameInChain(STR("GetDrivableActor"));
+        if (!get_drivable_actor_fn) {
+            Output::send<LogLevel::Error>(STR("[TSWControllerMod] Can't find GetDrivableActor function\n"));
+            return;
+        }
+
+        DriverController_GetDrivableActorParams drivable_actor_result;
+        get_currently_changing_controller_params.Controller->ProcessEvent(get_drivable_actor_fn, &drivable_actor_result);
+        if (!drivable_actor_result.DrivableActor) {
+            return;
+        }
+
+        /* loop over class properties to find raw controller identifier */
+        auto control_property_name = TSWControllerMod::find_property_name_from_context(drivable_actor_result.DrivableActor, context.Context);
+
+        /* if we can't find a property it's likely not relevant so we can ignore */
+        if (control_property_name.empty())
+        {
+            return;
+        }
+
+        /* get normalised input value */
+        auto normalized_value = TSWControllerMod::get_current_vhid_component_normalized_input_value(context.Context);
+
+        /* send updated value */
+        VirtualHIDComponent_InputValueChangedParams input_value_changed_params = context.GetParams<VirtualHIDComponent_InputValueChangedParams>();
+        /* message format = sync_control,name={name},property={control_property_name},value={value},normal_value={normal_value} */
+        auto input_identifier_str = input_identifier ? input_identifier->ToString() : STR("");
+        auto message = STR("sync_control_value,name=") + input_identifier_str + STR(",property=") + control_property_name + STR(",value=") + std::to_wstring(input_value_changed_params.NewValue) + STR(",normalized_value=") + std::to_wstring(normalized_value);
+        auto message_str = std::string(message.begin(), message.end());
+        Output::send<LogLevel::Normal>(STR("[TSWControllerMod] sending updated control value: {}\n"), message);
+        tsw_controller_mod_send_message((char*)message_str.c_str());
     }
 
   public:
