@@ -71,7 +71,7 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 	}()
 
 	go func() {
-		ticker := time.NewTicker(100 * time.Millisecond)
+		ticker := time.NewTicker(333 * time.Millisecond)
 		defer ticker.Stop()
 
 		for {
