@@ -518,46 +518,15 @@ class TSWControllerMod : public RC::CppUserModBase
 
         Unreal::FName* input_identifier = TSWControllerMod::get_vhid_component_input_identifier(context.Context);
         Unreal::UFunction* get_currently_changing_controller_func = context.Context->GetFunctionByNameInChain(STR("GetCurrentlyChangingController"));
-        if (!get_currently_changing_controller_func)
-        {
-            return;
-        }
+        if (!get_currently_changing_controller_func) return;
 
         Unreal::UObject* drivable_actor = TSWControllerMod::CURRENT_DRIVABLE_ACTOR.Get();
-        if (!drivable_actor)
-        {
-            VirtualHIDComponent_GetCurrentlyChangingControllerParams get_currently_changing_controller_params{};
-            context.Context->ProcessEvent(get_currently_changing_controller_func, &get_currently_changing_controller_params);
-
-            /* don't do anything if no controller or it's not the player controller */
-            if (!get_currently_changing_controller_params.Controller || !TSWControllerMod::is_player_controller(get_currently_changing_controller_params.Controller))
-            {
-                Output::send<LogLevel::Normal>(STR("[TSWControllerMod] currently changing controller is not a player controller\n"));
-                return;
-            }
-
-            /* find drivable actor*/
-            Unreal::UFunction* get_drivable_actor_fn = get_currently_changing_controller_params.Controller->GetFunctionByNameInChain(STR("GetDrivableActor"));
-            if (!get_drivable_actor_fn) {
-                return;
-            }
-
-            DriverController_GetDrivableActorParams drivable_actor_result;
-            controller->ProcessEvent(get_drivable_actor_fn, &drivable_actor_result);
-            drivable_actor = drivable_actor_result.DrivableActor
-            /* skip if drivable actor can still not be found */
-            if (!drivable_actor) return;
-        }
+        if (!drivable_actor) return;
 
         /* loop over class properties to find raw controller identifier */
-        auto control_property_name = TSWControllerMod::find_property_name_from_context(drivable_actor, context.Context);
-
         /* if we can't find a property it's likely not relevant so we can ignore */
-        if (control_property_name.empty())
-        {
-            Output::send<LogLevel::Error>(STR("[TSWControllerMod] could not find property from context\n"));
-            return;
-        }
+        auto control_property_name = TSWControllerMod::find_property_name_from_context(drivable_actor, context.Context);
+        if (control_property_name.empty()) return;
 
         /* get normalised input value */
         auto normalized_value = TSWControllerMod::get_current_vhid_component_normalized_input_value(context.Context);

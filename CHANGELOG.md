@@ -3,6 +3,7 @@
 
 ## v1.19.2
 - Added option to remove controller information from profile
+- Updated TSW mod to send more accurate information in direct control mode
 
 ## v1.19.1
 - Fix `cab_state_value` listener config
