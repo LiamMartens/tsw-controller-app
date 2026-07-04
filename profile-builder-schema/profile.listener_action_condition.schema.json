@@ -3,6 +3,10 @@
   "title": "Listener Action Condition",
   "required": ["operator", "value"],
   "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["api_value", "control_value", "cab_state_value"]
+    },
     "name": {
       "type": "string",
       "description": "The name to watch (could be a simple name or for API watchers should be path.key)"

@@ -1,7 +1,18 @@
 {
-  "oneOf": [
-    { "$ref": "./profile.listener_type_api_value.schema.json" },
-    { "$ref": "./profile.listener_type_control_value.schema.json" },
-    { "$ref": "./profile.listener_type_cab_state_value.schema.json" }
-  ]
+  "type": "object",
+  "title": "API Value Listener",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["api_value"]
+    },
+    "actions": {
+      "type": "array",
+      "description": "The actions to perform when the API value changes and conditions are met",
+      "items": {
+        "$ref": "./profile.listener_action.schema.json"
+      }
+    }
+  },
+  "required": ["type", "path", "values_key", "actions"]
 }

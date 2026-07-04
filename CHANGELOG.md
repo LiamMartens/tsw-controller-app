@@ -1,5 +1,7 @@
-
 # CHANGELOG
+
+## v1.20.0
+- Updated listeners schema
 
 ## v1.19.2
 - Added option to remove controller information from profile
