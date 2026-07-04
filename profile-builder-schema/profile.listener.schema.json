@@ -1,11 +1,6 @@
 {
   "type": "object",
-  "title": "API Value Listener",
   "properties": {
-    "type": {
-      "type": "string",
-      "enum": ["api_value"]
-    },
     "actions": {
       "type": "array",
       "description": "The actions to perform when the API value changes and conditions are met",
@@ -14,5 +9,5 @@
       }
     }
   },
-  "required": ["type", "path", "values_key", "actions"]
+  "required": ["type", "actions"]
 }
