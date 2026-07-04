@@ -100,11 +100,7 @@ func (p *ProfileRunner) executeProfileListenerAction(
 	return fmt.Errorf("no valid action to execute: %w", ErrNoAction)
 }
 
-func (p *ProfileRunner) filterMatchingAPIListenerActions(listener *config.Config_Controller_Profile_Listener) ([]config.Config_Controller_Profile_Listener_Action, error) {
-	if listener.API == nil {
-		return nil, fmt.Errorf("listener has invalid action definition: %w", ErrInvalidAction)
-	}
-
+func (p *ProfileRunner) evaluateListenerActionApiValueCondition(condition config.Config_Controller_Profile_Listener_Action_Condition) (bool, error) {
 	var extract_path_and_key_from_name = func(name string) ([]string, bool) {
 		idx := strings.LastIndex(name, ".")
 		if idx == -1 {
@@ -113,95 +109,85 @@ func (p *ProfileRunner) filterMatchingAPIListenerActions(listener *config.Config
 		return []string{name[:idx], name[idx+1:]}, true
 	}
 
-	var evaluate_condition = func(condition config.Config_Controller_Profile_Listener_Action_Condition) (bool, error) {
-		path_and_key, has_path_and_key := extract_path_and_key_from_name(condition.Name)
-		if !has_path_and_key {
-			return false, fmt.Errorf("invalid listener name %s", condition.Name)
-		}
-
-		if !p.API.CanConnect() {
-			return false, fmt.Errorf("API is not available to retrieve value from path: %s", path_and_key[0])
-		}
-
-		values, err := p.API.GetByPath(path_and_key[0])
-		if err != nil {
-			return false, fmt.Errorf("failed to get value from API path %s", path_and_key[0])
-		}
-
-		value, has_value := values[path_and_key[1]]
-		if !has_value {
-			/* can't do anything if there is no value */
-			return false, fmt.Errorf("could not find listener value for key %s: %w", path_and_key[1], ErrNoListenerValue)
-		}
-
-		return condition.Matches(value), nil
+	path_and_key, has_path_and_key := extract_path_and_key_from_name(condition.Name)
+	if !has_path_and_key {
+		return false, fmt.Errorf("invalid listener name %s", condition.Name)
 	}
 
-	matching_actions := []config.Config_Controller_Profile_Listener_Action{}
-action_loop:
-	for _, action := range listener.API.Actions {
-		condition_evaluation_strategy := action.GetConditionEvaluationStrategy()
-		conditions := action.GetConditions()
-
-		for _, condition := range conditions {
-			condition_match, err := evaluate_condition(condition)
-			if err != nil {
-				logger.Logger.Debug("could not evaluate listener action condition", "error", err)
-			}
-
-			if condition_match && condition_evaluation_strategy == "any" {
-				/* if condition strategy is any -> append and skip to next action */
-				matching_actions = append(matching_actions, action)
-				continue action_loop
-			}
-
-			if !condition_match && condition_evaluation_strategy == "all" {
-				/* if all conditions must match and this one didn't -> skip action */
-				continue action_loop
-			}
-		}
-
-		/* if we reach the end of the conditions loop we should only add if all ; otherwise it would mean no condition was matched */
-		if condition_evaluation_strategy == "all" {
-			/* if all conditions passed - execute action (might need to deduplicate actions?) */
-			matching_actions = append(matching_actions, action)
-		}
+	if !p.API.CanConnect() {
+		return false, fmt.Errorf("API is not available to retrieve value from path: %s", path_and_key[0])
 	}
 
-	return matching_actions, nil
+	values, err := p.API.GetByPath(path_and_key[0])
+	if err != nil {
+		return false, fmt.Errorf("failed to get value from API path %s", path_and_key[0])
+	}
+
+	value, has_value := values[path_and_key[1]]
+	if !has_value {
+		/* can't do anything if there is no value */
+		return false, fmt.Errorf("could not find listener value for key %s: %w", path_and_key[1], ErrNoListenerValue)
+	}
+
+	return condition.Matches(value), nil
 }
 
-func (p *ProfileRunner) filterMatchingControlListenerActions(
+func (p *ProfileRunner) evaluateListenerActionControlValueCondition(
+	condition config.Config_Controller_Profile_Listener_Action_Condition,
+	controller controller_mgr.IControllerManager_Controller,
+) (bool, error) {
+	var dependecy_control controller_mgr.IControllerManager_Controller_Control = nil
+	if strings.HasPrefix(condition.Name, "virtual:") {
+		/* virtual controls always exist - they just start at 0 */
+		virtual_control, has_dependency_control := controller.VirtualControls().Get(condition.Name)
+		if !has_dependency_control {
+			controller.RegisterVirtualControl(condition.Name, 0.0)
+			virtual_control, _ = controller.VirtualControls().Get(condition.Name)
+		}
+		dependecy_control = virtual_control
+	} else if joy_control, has_dependency_control := controller.Controls().Get(condition.Name); has_dependency_control {
+		dependecy_control = joy_control
+	}
+	return dependecy_control != nil && condition.Matches(dependecy_control.GetState().NormalizedValues.Value), nil
+}
+
+func (p *ProfileRunner) evaluateListenerActionCabStateValueCondition(condition config.Config_Controller_Profile_Listener_Action_Condition) (bool, error) {
+	value, has_value := p.CabDebugger.State.Controls.Get(condition.Name)
+
+	return has_value && condition.Matches(value.CurrentValue), nil
+}
+
+func (p *ProfileRunner) evaluateListenerActionCondition(
+	condition config.Config_Controller_Profile_Listener_Action_Condition,
+	controller controller_mgr.IControllerManager_Controller,
+) (bool, error) {
+	if condition.Type == "api_value" {
+		return p.evaluateListenerActionApiValueCondition(condition)
+	}
+
+	if condition.Type == "control_value" {
+		return p.evaluateListenerActionControlValueCondition(condition, controller)
+	}
+
+	if condition.Type == "cab_state_value" {
+		return p.evaluateListenerActionCabStateValueCondition(condition)
+	}
+
+	return false, fmt.Errorf("invalid condition type")
+}
+
+func (p *ProfileRunner) filterMatchingListenerActions(
 	listener *config.Config_Controller_Profile_Listener,
 	controller controller_mgr.IControllerManager_Controller,
 ) ([]config.Config_Controller_Profile_Listener_Action, error) {
-	if listener.Control == nil {
-		return nil, fmt.Errorf("listener has invalid action definition: %w", ErrInvalidAction)
-	}
-
-	var evaluate_condition = func(condition config.Config_Controller_Profile_Listener_Action_Condition) (bool, error) {
-		var dependecy_control controller_mgr.IControllerManager_Controller_Control = nil
-		if strings.HasPrefix(condition.Name, "virtual:") {
-			/* virtual controls always exist - they just start at 0 */
-			virtual_control, has_dependency_control := controller.VirtualControls().Get(condition.Name)
-			if !has_dependency_control {
-				controller.RegisterVirtualControl(condition.Name, 0.0)
-				virtual_control, _ = controller.VirtualControls().Get(condition.Name)
-			}
-			dependecy_control = virtual_control
-		} else if joy_control, has_dependency_control := controller.Controls().Get(condition.Name); has_dependency_control {
-			dependecy_control = joy_control
-		}
-		return dependecy_control != nil && condition.Matches(dependecy_control.GetState().NormalizedValues.Value), nil
-	}
-
 	matching_actions := []config.Config_Controller_Profile_Listener_Action{}
 action_loop:
-	for _, action := range listener.Control.Actions {
+	for _, action := range listener.Actions {
 		condition_evaluation_strategy := action.GetConditionEvaluationStrategy()
 		conditions := action.GetConditions()
+
 		for _, condition := range conditions {
-			condition_match, err := evaluate_condition(condition)
+			condition_match, err := p.evaluateListenerActionCondition(condition, controller)
 			if err != nil {
 				logger.Logger.Debug("could not evaluate listener action condition", "error", err)
 			}
@@ -228,51 +214,7 @@ action_loop:
 	return matching_actions, nil
 }
 
-func (p *ProfileRunner) filterMatchingCabStateListenerActions(listener *config.Config_Controller_Profile_Listener) ([]config.Config_Controller_Profile_Listener_Action, error) {
-	if listener.CabState == nil {
-		return nil, fmt.Errorf("listener has invalid action definition: %w", ErrInvalidAction)
-	}
-
-	var evaluate_condition = func(condition config.Config_Controller_Profile_Listener_Action_Condition) (bool, error) {
-		value, has_value := p.CabDebugger.State.Controls.Get(condition.Name)
-
-		return has_value && condition.Matches(value.CurrentValue), nil
-	}
-
-	matching_actions := []config.Config_Controller_Profile_Listener_Action{}
-action_loop:
-	for _, action := range listener.CabState.Actions {
-		condition_evaluation_strategy := action.GetConditionEvaluationStrategy()
-		conditions := action.GetConditions()
-		for _, condition := range conditions {
-			condition_match, err := evaluate_condition(condition)
-			if err != nil {
-				logger.Logger.Debug("could not evaluate listener action condition", "error", err)
-			}
-
-			if condition_match && condition_evaluation_strategy == "any" {
-				/* if condition strategy is any -> append and skip to next action */
-				matching_actions = append(matching_actions, action)
-				continue action_loop
-			}
-
-			if !condition_match && condition_evaluation_strategy == "all" {
-				/* if all conditions must match and this one didn't -> skip action */
-				continue action_loop
-			}
-		}
-
-		/* if we reach the end of the conditions loop we should only add if all ; otherwise it would mean no condition was matched */
-		if condition_evaluation_strategy == "all" {
-			/* if all conditions passed - execute action (might need to deduplicate actions?) */
-			matching_actions = append(matching_actions, action)
-		}
-	}
-
-	return matching_actions, nil
-}
-
-func (p *ProfileRunner) processActiveProfileApiListeners() {
+func (p *ProfileRunner) processActiveProfileListeners() {
 	p.SDLControllerManager.ConfiguredControllers.ForEach(func(controller controller_mgr.SDL_ControllerManager_ConfiguredController, key controller_mgr.DeviceUniqueID) bool {
 		selected_profile, has_selected_profile := p.getSelectedProfileForDevice(controller.Device())
 		if !has_selected_profile {
@@ -281,65 +223,10 @@ func (p *ProfileRunner) processActiveProfileApiListeners() {
 		}
 
 		for _, listener := range selected_profile.Profile.Listeners {
-			if listener.API == nil {
-				continue
-			}
+			actions, err := p.filterMatchingListenerActions(&listener, &controller)
 
-			actions, err := p.filterMatchingAPIListenerActions(&listener)
 			if err != nil {
-				logger.Logger.Error("[ProfileRunner::processActiveProfileApiListeners] could not filter API listener actions", "error", err)
-				continue
-			}
-
-			for _, action := range actions {
-				go p.executeProfileListenerAction(controller.Device(), action)
-			}
-		}
-
-		return true
-	})
-}
-
-func (p *ProfileRunner) processActiveProfileControlListeners(change_event controller_mgr.ControllerManager_Control_ChangeEvent) {
-	selected_profile, has_selected_profile := p.getSelectedProfileForDevice(change_event.Device)
-	if !has_selected_profile {
-		/* skip if no profile selected for controller */
-		return
-	}
-
-	for _, listener := range selected_profile.Profile.Listeners {
-		if listener.Control == nil {
-			continue
-		}
-
-		actions, err := p.filterMatchingControlListenerActions(&listener, change_event.Controller)
-		if err != nil {
-			logger.Logger.Error("[ProfileRunner::processActiveProfileApiListeners] could not filter control listener actions", "error", err)
-			continue
-		}
-
-		for _, action := range actions {
-			go p.executeProfileListenerAction(change_event.Controller.Device(), action)
-		}
-	}
-}
-
-func (p *ProfileRunner) processActiveProfileCabStateListeners() {
-	p.SDLControllerManager.ConfiguredControllers.ForEach(func(controller controller_mgr.SDL_ControllerManager_ConfiguredController, key controller_mgr.DeviceUniqueID) bool {
-		selected_profile, has_selected_profile := p.getSelectedProfileForDevice(controller.Device())
-		if !has_selected_profile {
-			/* skip if no profile selected for controller */
-			return true
-		}
-
-		for _, listener := range selected_profile.Profile.Listeners {
-			if listener.CabState == nil {
-				continue
-			}
-
-			actions, err := p.filterMatchingCabStateListenerActions(&listener)
-			if err != nil {
-				logger.Logger.Error("[ProfileRunner::processActiveProfileApiListeners] could not filter Cab State listener actions", "error", err)
+				logger.Logger.Error("[ProfileRunner::processActiveProfileApiListeners] could not filter listener actions", "error", err)
 				continue
 			}
 
