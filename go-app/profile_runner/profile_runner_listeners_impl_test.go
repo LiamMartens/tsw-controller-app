@@ -138,9 +138,7 @@ func TestExecuteProfileListenerAction_HIDFeatureReport_AND_MultiByte(t *testing.
 	mockHID.AssertExpectations(t)
 }
 
-// --- filterMatchingAPIListenerActions ---
-
-func TestFilterMatchingAPIListenerActions_APIValueNotFound(t *testing.T) {
+func TestFilterMatchingListenerActions_APIValueConditions_APIValueNotFound(t *testing.T) {
 	runner := &ProfileRunner{}
 
 	mockAPI := new(mockAPI)
@@ -149,15 +147,13 @@ func TestFilterMatchingAPIListenerActions_APIValueNotFound(t *testing.T) {
 	runner.API = mockAPI
 
 	listener := &config.Config_Controller_Profile_Listener{
-		API: &config.Config_Controller_Profile_Listener_Type_APIValue{
-			Actions: []config.Config_Controller_Profile_Listener_Action{
-				{
-					HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
-						Type: "hid_output_report",
-						Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
-							Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
-								{Name: "CurrentDrivableActor.Function.IS_TractionLocked.IsLocked", Operator: "eq", Value: true},
-							},
+		Actions: []config.Config_Controller_Profile_Listener_Action{
+			{
+				HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
+					Type: "hid_output_report",
+					Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
+						Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
+							{Type: "api_value", Name: "CurrentDrivableActor.Function.IS_TractionLocked.IsLocked", Operator: "eq", Value: true},
 						},
 					},
 				},
@@ -165,12 +161,12 @@ func TestFilterMatchingAPIListenerActions_APIValueNotFound(t *testing.T) {
 		},
 	}
 
-	actions, _ := runner.filterMatchingAPIListenerActions(listener)
+	actions, _ := runner.filterMatchingListenerActions(listener, nil)
 	assert.Len(t, actions, 0)
 	mockAPI.AssertExpectations(t)
 }
 
-func TestFilterMatchingAPIListenerActions_AllConditionsMatch(t *testing.T) {
+func TestFilterMatchingListenerActions_APIValueConditions_AllConditionsMatch(t *testing.T) {
 	runner := &ProfileRunner{}
 
 	mockAPI := new(mockAPI)
@@ -179,15 +175,13 @@ func TestFilterMatchingAPIListenerActions_AllConditionsMatch(t *testing.T) {
 	runner.API = mockAPI
 
 	listener := &config.Config_Controller_Profile_Listener{
-		API: &config.Config_Controller_Profile_Listener_Type_APIValue{
-			Actions: []config.Config_Controller_Profile_Listener_Action{
-				{
-					HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
-						Type: "hid_output_report",
-						Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
-							Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
-								{Name: "CurrentDrivableActor.Function.IS_TractionLocked.IsLocked", Operator: "eq", Value: true},
-							},
+		Actions: []config.Config_Controller_Profile_Listener_Action{
+			{
+				HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
+					Type: "hid_output_report",
+					Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
+						Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
+							{Type: "api_value", Name: "CurrentDrivableActor.Function.IS_TractionLocked.IsLocked", Operator: "eq", Value: true},
 						},
 					},
 				},
@@ -195,13 +189,13 @@ func TestFilterMatchingAPIListenerActions_AllConditionsMatch(t *testing.T) {
 		},
 	}
 
-	actions, err := runner.filterMatchingAPIListenerActions(listener)
+	actions, err := runner.filterMatchingListenerActions(listener, nil)
 	assert.NoError(t, err)
 	assert.Len(t, actions, 1)
 	mockAPI.AssertExpectations(t)
 }
 
-func TestFilterMatchingAPIListenerActions_OneConditionFails(t *testing.T) {
+func TestFilterMatchingAPIListenerActions_APIValueCondition_OneConditionFails(t *testing.T) {
 	runner := &ProfileRunner{}
 
 	mockAPI := new(mockAPI)
@@ -210,16 +204,14 @@ func TestFilterMatchingAPIListenerActions_OneConditionFails(t *testing.T) {
 	runner.API = mockAPI
 
 	listener := &config.Config_Controller_Profile_Listener{
-		API: &config.Config_Controller_Profile_Listener_Type_APIValue{
-			Actions: []config.Config_Controller_Profile_Listener_Action{
-				{
-					HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
-						Type: "hid_output_report",
-						Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
-							Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
-								{Name: "CurrentDrivableActor.Function.Get_Speed.Speed", Operator: "eq", Value: 5.0},
-								{Name: "CurrentDrivableActor.Function.Get_Speed.Speed", Operator: "eq", Value: 10.0},
-							},
+		Actions: []config.Config_Controller_Profile_Listener_Action{
+			{
+				HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
+					Type: "hid_output_report",
+					Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
+						Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
+							{Type: "api_value", Name: "CurrentDrivableActor.Function.Get_Speed.Speed", Operator: "eq", Value: 5.0},
+							{Type: "api_value", Name: "CurrentDrivableActor.Function.Get_Speed.Speed", Operator: "eq", Value: 10.0},
 						},
 					},
 				},
@@ -227,13 +219,13 @@ func TestFilterMatchingAPIListenerActions_OneConditionFails(t *testing.T) {
 		},
 	}
 
-	actions, err := runner.filterMatchingAPIListenerActions(listener)
+	actions, err := runner.filterMatchingListenerActions(listener, nil)
 	assert.NoError(t, err)
 	assert.Len(t, actions, 0)
 	mockAPI.AssertExpectations(t)
 }
 
-func TestFilterMatchingAPIListenerActions_AnyConditionMatches(t *testing.T) {
+func TestFilterMatchingAPIListenerActions_APIValueCondition_AnyConditionMatches(t *testing.T) {
 	runner := &ProfileRunner{}
 
 	mockAPI := new(mockAPI)
@@ -242,17 +234,15 @@ func TestFilterMatchingAPIListenerActions_AnyConditionMatches(t *testing.T) {
 	runner.API = mockAPI
 
 	listener := &config.Config_Controller_Profile_Listener{
-		API: &config.Config_Controller_Profile_Listener_Type_APIValue{
-			Actions: []config.Config_Controller_Profile_Listener_Action{
-				{
-					HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
-						Type: "hid_output_report",
-						Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
-							ConditionsEvaluationStrategy: "any",
-							Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
-								{Name: "CurrentDrivableActor.Function.Get_Speed.Speed", Operator: "eq", Value: 5.0},
-								{Name: "CurrentDrivableActor.Function.Get_Speed.Speed", Operator: "eq", Value: 10.0},
-							},
+		Actions: []config.Config_Controller_Profile_Listener_Action{
+			{
+				HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
+					Type: "hid_output_report",
+					Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
+						ConditionsEvaluationStrategy: "any",
+						Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
+							{Type: "api_value", Name: "CurrentDrivableActor.Function.Get_Speed.Speed", Operator: "eq", Value: 5.0},
+							{Type: "api_value", Name: "CurrentDrivableActor.Function.Get_Speed.Speed", Operator: "eq", Value: 10.0},
 						},
 					},
 				},
@@ -260,15 +250,13 @@ func TestFilterMatchingAPIListenerActions_AnyConditionMatches(t *testing.T) {
 		},
 	}
 
-	actions, err := runner.filterMatchingAPIListenerActions(listener)
+	actions, err := runner.filterMatchingListenerActions(listener, nil)
 	assert.NoError(t, err)
 	assert.Len(t, actions, 1)
 	mockAPI.AssertExpectations(t)
 }
 
-// --- filterMatchingControlListenerActions ---
-
-func TestFilterMatchingControlListenerActions_ControlValueMatches(t *testing.T) {
+func TestFilterMatchingControlListenerActions_ControlValueCondition_ControlValueMatches(t *testing.T) {
 	runner := &ProfileRunner{}
 
 	mockController := new(mockController)
@@ -280,15 +268,13 @@ func TestFilterMatchingControlListenerActions_ControlValueMatches(t *testing.T) 
 	runner.VirtualControllerManager = &controller_mgr.VirtualControllerManager{}
 
 	listener := &config.Config_Controller_Profile_Listener{
-		Control: &config.Config_Controller_Profile_Listener_Type_ControlValue{
-			Actions: []config.Config_Controller_Profile_Listener_Action{
-				{
-					HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
-						Type: "hid_output_report",
-						Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
-							Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
-								{Name: "axis0", Operator: "gte", Value: 0.5},
-							},
+		Actions: []config.Config_Controller_Profile_Listener_Action{
+			{
+				HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
+					Type: "hid_output_report",
+					Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
+						Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
+							{Type: "control_value", Name: "axis0", Operator: "gte", Value: 0.5},
 						},
 					},
 				},
@@ -296,14 +282,14 @@ func TestFilterMatchingControlListenerActions_ControlValueMatches(t *testing.T) 
 		},
 	}
 
-	actions, err := runner.filterMatchingControlListenerActions(listener, mockController)
+	actions, err := runner.filterMatchingListenerActions(listener, mockController)
 	assert.NoError(t, err)
 	assert.Len(t, actions, 1)
 	mockController.AssertExpectations(t)
 	mockControl.AssertExpectations(t)
 }
 
-func TestFilterMatchingControlListenerActions_ControlValueDoesNotMatch(t *testing.T) {
+func TestFilterMatchingControlListenerActions_ControlValueCondition_ControlValueDoesNotMatch(t *testing.T) {
 	runner := &ProfileRunner{}
 
 	mockController := new(mockController)
@@ -315,15 +301,13 @@ func TestFilterMatchingControlListenerActions_ControlValueDoesNotMatch(t *testin
 	runner.VirtualControllerManager = &controller_mgr.VirtualControllerManager{}
 
 	listener := &config.Config_Controller_Profile_Listener{
-		Control: &config.Config_Controller_Profile_Listener_Type_ControlValue{
-			Actions: []config.Config_Controller_Profile_Listener_Action{
-				{
-					HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
-						Type: "hid_output_report",
-						Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
-							Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
-								{Name: "axis0", Operator: "lt", Value: 0.5},
-							},
+		Actions: []config.Config_Controller_Profile_Listener_Action{
+			{
+				HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
+					Type: "hid_output_report",
+					Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
+						Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
+							{Type: "control_value", Name: "axis0", Operator: "lt", Value: 0.5},
 						},
 					},
 				},
@@ -331,14 +315,14 @@ func TestFilterMatchingControlListenerActions_ControlValueDoesNotMatch(t *testin
 		},
 	}
 
-	actions, err := runner.filterMatchingControlListenerActions(listener, mockController)
+	actions, err := runner.filterMatchingListenerActions(listener, mockController)
 	assert.NoError(t, err)
 	assert.Len(t, actions, 0)
 	mockController.AssertExpectations(t)
 	mockControl.AssertExpectations(t)
 }
 
-func TestFilterMatchingControlListenerActions_AnyConditionMatches(t *testing.T) {
+func TestFilterMatchingControlListenerActions_ControlValueCondition_AnyConditionMatches(t *testing.T) {
 	runner := &ProfileRunner{}
 
 	mockController := new(mockController)
@@ -350,17 +334,15 @@ func TestFilterMatchingControlListenerActions_AnyConditionMatches(t *testing.T) 
 	runner.VirtualControllerManager = &controller_mgr.VirtualControllerManager{}
 
 	listener := &config.Config_Controller_Profile_Listener{
-		Control: &config.Config_Controller_Profile_Listener_Type_ControlValue{
-			Actions: []config.Config_Controller_Profile_Listener_Action{
-				{
-					HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
-						Type: "hid_output_report",
-						Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
-							ConditionsEvaluationStrategy: "any",
-							Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
-								{Name: "axis0", Operator: "gte", Value: 0.5},
-								{Name: "axis0", Operator: "lt", Value: 0.5},
-							},
+		Actions: []config.Config_Controller_Profile_Listener_Action{
+			{
+				HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
+					Type: "hid_output_report",
+					Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
+						ConditionsEvaluationStrategy: "any",
+						Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
+							{Type: "control_value", Name: "axis0", Operator: "gte", Value: 0.5},
+							{Type: "control_value", Name: "axis0", Operator: "lt", Value: 0.5},
 						},
 					},
 				},
@@ -368,16 +350,14 @@ func TestFilterMatchingControlListenerActions_AnyConditionMatches(t *testing.T) 
 		},
 	}
 
-	actions, err := runner.filterMatchingControlListenerActions(listener, mockController)
+	actions, err := runner.filterMatchingListenerActions(listener, mockController)
 	assert.NoError(t, err)
 	assert.Len(t, actions, 1)
 	mockController.AssertExpectations(t)
 	mockControl.AssertExpectations(t)
 }
 
-// --- filterMatchingCabStateistenerActions ---
-
-func TestFilterMatchingCabStateListenerActions_CabStateValueMatches(t *testing.T) {
+func TestFilterMatchingCabStateListenerActions_CabStateValueCondition_CabStateValueMatches(t *testing.T) {
 	runner := &ProfileRunner{}
 
 	controls := map_utils.NewLockMap[cabdebugger.PropertyName, cabdebugger.CabDebugger_ControlState_Control]()
@@ -393,16 +373,13 @@ func TestFilterMatchingCabStateListenerActions_CabStateValueMatches(t *testing.T
 	})
 
 	listener := &config.Config_Controller_Profile_Listener{
-		CabState: &config.Config_Controller_Profile_Listener_Type_CabStateValue{
-			Type: "cab_state_value",
-			Actions: []config.Config_Controller_Profile_Listener_Action{
-				{
-					HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
-						Type: "hid_output_report",
-						Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
-							Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
-								{Name: "Throttle", Operator: "gte", Value: 0.5},
-							},
+		Actions: []config.Config_Controller_Profile_Listener_Action{
+			{
+				HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
+					Type: "hid_output_report",
+					Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
+						Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
+							{Type: "cab_state_value", Name: "Throttle", Operator: "gte", Value: 0.5},
 						},
 					},
 				},
@@ -410,12 +387,12 @@ func TestFilterMatchingCabStateListenerActions_CabStateValueMatches(t *testing.T
 		},
 	}
 
-	actions, err := runner.filterMatchingCabStateListenerActions(listener)
+	actions, err := runner.filterMatchingListenerActions(listener, nil)
 	assert.NoError(t, err)
 	assert.Len(t, actions, 1)
 }
 
-func TestFilterMatchingCabStateListenerActions_CabStateValueDoesNotMatch(t *testing.T) {
+func TestFilterMatchingCabStateListenerActions_CabStateValueCondition_CabStateValueDoesNotMatch(t *testing.T) {
 	runner := &ProfileRunner{}
 
 	controls := map_utils.NewLockMap[cabdebugger.PropertyName, cabdebugger.CabDebugger_ControlState_Control]()
@@ -431,16 +408,13 @@ func TestFilterMatchingCabStateListenerActions_CabStateValueDoesNotMatch(t *test
 	})
 
 	listener := &config.Config_Controller_Profile_Listener{
-		CabState: &config.Config_Controller_Profile_Listener_Type_CabStateValue{
-			Type: "cab_state_value",
-			Actions: []config.Config_Controller_Profile_Listener_Action{
-				{
-					HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
-						Type: "hid_output_report",
-						Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
-							Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
-								{Name: "Throttle", Operator: "gte", Value: 0.5},
-							},
+		Actions: []config.Config_Controller_Profile_Listener_Action{
+			{
+				HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
+					Type: "hid_output_report",
+					Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
+						Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
+							{Type: "cab_state_value", Name: "Throttle", Operator: "gte", Value: 0.5},
 						},
 					},
 				},
@@ -448,12 +422,12 @@ func TestFilterMatchingCabStateListenerActions_CabStateValueDoesNotMatch(t *test
 		},
 	}
 
-	actions, err := runner.filterMatchingCabStateListenerActions(listener)
+	actions, err := runner.filterMatchingListenerActions(listener, nil)
 	assert.NoError(t, err)
 	assert.Len(t, actions, 0)
 }
 
-func TestFilterMatchingCabStateListenerActions_AnyConditionMatches(t *testing.T) {
+func TestFilterMatchingCabStateListenerActions_CabStateValueCondition_AnyConditionMatches(t *testing.T) {
 	runner := &ProfileRunner{}
 
 	controls := map_utils.NewLockMap[cabdebugger.PropertyName, cabdebugger.CabDebugger_ControlState_Control]()
@@ -469,18 +443,15 @@ func TestFilterMatchingCabStateListenerActions_AnyConditionMatches(t *testing.T)
 	})
 
 	listener := &config.Config_Controller_Profile_Listener{
-		CabState: &config.Config_Controller_Profile_Listener_Type_CabStateValue{
-			Type: "cab_state_value",
-			Actions: []config.Config_Controller_Profile_Listener_Action{
-				{
-					HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
-						Type: "hid_output_report",
-						Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
-							ConditionsEvaluationStrategy: "any",
-							Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
-								{Name: "Throttle", Operator: "gte", Value: 0.5},
-								{Name: "Throttle", Operator: "lt", Value: 0.5},
-							},
+		Actions: []config.Config_Controller_Profile_Listener_Action{
+			{
+				HIDOutputReport: &config.Config_Controller_Profile_Listener_Action_HIDOutputReport{
+					Type: "hid_output_report",
+					Config_Controller_Profile_Listener_SharedAction: config.Config_Controller_Profile_Listener_SharedAction{
+						ConditionsEvaluationStrategy: "any",
+						Conditions: []config.Config_Controller_Profile_Listener_Action_Condition{
+							{Type: "cab_state_value", Name: "Throttle", Operator: "gte", Value: 0.5},
+							{Type: "cab_state_value", Name: "Throttle", Operator: "lt", Value: 0.5},
 						},
 					},
 				},
@@ -488,7 +459,7 @@ func TestFilterMatchingCabStateListenerActions_AnyConditionMatches(t *testing.T)
 		},
 	}
 
-	actions, err := runner.filterMatchingCabStateListenerActions(listener)
+	actions, err := runner.filterMatchingListenerActions(listener, nil)
 	assert.NoError(t, err)
 	assert.Len(t, actions, 1)
 }

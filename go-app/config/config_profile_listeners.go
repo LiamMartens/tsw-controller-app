@@ -1,6 +1,7 @@
 package config
 
 type Config_Controller_Profile_Listener_Action_Condition struct {
+	Type     string `json:"type" validate:"oneof=cab_state_value api_value control_value"`
 	Name     string `json:"name" validate:"required"`
 	Operator string `json:"operator" validate:"required,oneof=eq gt lt gte lte"`
 	Value    any    `json:"value" validate:"required"`
@@ -37,34 +38,8 @@ type Config_Controller_Profile_Listener_Action struct {
 }
 
 /**
- * Listens to the TSW API (only Train Sim World)
- */
-type Config_Controller_Profile_Listener_Type_APIValue struct {
-	Type    string                                      `json:"type" validate:"required,eq=api_value"`
-	Actions []Config_Controller_Profile_Listener_Action `json:"actions" validate:"required"`
-}
-
-/**
- * Listens to the physical control values
- */
-type Config_Controller_Profile_Listener_Type_ControlValue struct {
-	Type    string                                      `json:"type" validate:"required,eq=control_value"`
-	Actions []Config_Controller_Profile_Listener_Action `json:"actions" validate:"required"`
-}
-
-/**
- * Listen to the cab state values (CabDebugger)
- */
-type Config_Controller_Profile_Listener_Type_CabStateValue struct {
-	Type    string                                      `json:"type" validate:"required,eq=cab_state_value"`
-	Actions []Config_Controller_Profile_Listener_Action `json:"actions" validate:"required"`
-}
-
-/**
  * Can match either API or Control struct depending on the internal type
  */
 type Config_Controller_Profile_Listener struct {
-	API      *Config_Controller_Profile_Listener_Type_APIValue      `json:"-"`
-	Control  *Config_Controller_Profile_Listener_Type_ControlValue  `json:"-"`
-	CabState *Config_Controller_Profile_Listener_Type_CabStateValue `json:"-"`
+	Actions []Config_Controller_Profile_Listener_Action `json:"actions" validate:"required"`
 }

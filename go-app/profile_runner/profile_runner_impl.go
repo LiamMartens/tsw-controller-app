@@ -65,21 +65,7 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 			case <-context_with_cancel.Done():
 				return
 			case <-ticker.C:
-				go p.processActiveProfileApiListeners()
-			}
-		}
-	}()
-
-	go func() {
-		ticker := time.NewTicker(333 * time.Millisecond)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-context_with_cancel.Done():
-				return
-			case <-ticker.C:
-				go p.processActiveProfileCabStateListeners()
+				go p.processActiveProfileListeners()
 			}
 		}
 	}()
@@ -97,10 +83,8 @@ func (p *ProfileRunner) Run(ctx context.Context) context.CancelFunc {
 				return
 			case change_event := <-virtual_channel:
 				p.processControllerChangeEvent(change_event)
-				go p.processActiveProfileControlListeners(change_event)
 			case change_event := <-sdl_channel:
 				p.processControllerChangeEvent(change_event)
-				go p.processActiveProfileControlListeners(change_event)
 			}
 		}
 	}()
