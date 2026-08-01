@@ -11,26 +11,26 @@
   },
   "dependencies": {
     "@json-editor/json-editor": "^2.17.1",
-    "next": "^16.2.9",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
+    "next": "^16.2.12",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "react-error-boundary": "^6.1.2",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "swr": "^2.4.2"
   },
   "devDependencies": {
-    "@apidevtools/json-schema-ref-parser": "^15.4.0",
-    "@tailwindcss/postcss": "^4.3.1",
-    "@tailwindcss/typography": "^0.5.19",
+    "@apidevtools/json-schema-ref-parser": "^15.5.1",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@tailwindcss/typography": "^0.5.20",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "daisyui": "^5.5.19",
-    "oxfmt": "^0.45.0",
-    "oxlint": "^1.71.0",
-    "postcss": "^8.5.15",
-    "tailwindcss": "^4.3.1",
+    "daisyui": "^5.7.9",
+    "oxfmt": "^0.61.0",
+    "oxlint": "^1.76.0",
+    "postcss": "^8.5.25",
+    "tailwindcss": "^4.3.3",
     "typescript": "^5"
   }
 }
