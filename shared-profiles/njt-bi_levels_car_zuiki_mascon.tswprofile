@@ -1,0 +1,343 @@
+{
+  "name": "RVM_NYT_NJT_BiLevels_CabCar_C_ZUIKI_MASCON",
+  "controls": [
+    {
+      "name": "MaterControl",
+      "assignments": [
+        {
+          "type": "direct_control",
+          "controls": "MasterController",
+          "input_value": {
+            "min": -1.0,
+            "max": 1.0,
+            "steps": [
+              -1,
+              -0.9,
+              -0.8,
+              -0.7,
+              -0.5,
+              -0.4,
+              -0.3,
+              -0.2,
+              -0.1,
+              0,
+              0.1,
+              0.2,
+              0.4,
+              0.7,
+              1
+            ],
+            "step_thresholds": [
+              {
+                "threshold": -1.0,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.96,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.85,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.75,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.64,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.53,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.43,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.32,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.21,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": 0.0,
+                "threshold_tolerance": 0.03
+              },
+              {
+                "threshold": 0.24,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": 0.43,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": 0.61,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": 0.8,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": 1.0,
+                "threshold_tolerance": 0.02
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "B",
+      "assignments": [],
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "h",
+          "press_time": 0.3,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "X",
+      "assignments": [],
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "l",
+          "press_time": 0.3,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "A",
+      "assignments": [],
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "space"
+        }
+      },
+      "description": "Horn"
+    },
+    {
+      "name": "Y",
+      "assignments": [],
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "x"
+        }
+      },
+      "description": "Sand"
+    },
+    {
+      "name": "L",
+      "assignments": [],
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "y"
+        }
+      },
+      "description": "Open Close Left Doors"
+    },
+    {
+      "name": "R",
+      "assignments": [],
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "u"
+        }
+      },
+      "description": "Open Close Right Doors"
+    },
+    {
+      "name": "Arrow",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 1,
+          "action_activate": {
+            "keys": "w",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          },
+          "conditions": [
+            {
+              "control": "Arrow",
+              "value": 1,
+              "operator": "lte"
+            }
+          ]
+        },
+        {
+          "type": "momentary",
+          "threshold": 2,
+          "action_activate": {
+            "keys": "t",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          },
+          "conditions": [
+            {
+              "control": "Arrow",
+              "value": 2,
+              "operator": "lte"
+            }
+          ]
+        },
+        {
+          "type": "momentary",
+          "threshold": 4,
+          "action_activate": {
+            "keys": "s",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          },
+          "conditions": [
+            {
+              "control": "Arrow",
+              "value": 4,
+              "operator": "lte"
+            }
+          ]
+        },
+        {
+          "type": "momentary",
+          "threshold": 8,
+          "action_activate": {
+            "keys": "q",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          },
+          "conditions": [
+            {
+              "control": "Arrow",
+              "value": 8,
+              "operator": "lte"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ZL",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "controls": "AutomaticBrake",
+            "value": 0.6
+          },
+          "action_deactivate": {
+            "controls": "AutomaticBrake",
+            "value": 0.2
+          }
+        }
+      ]
+    },
+    {
+      "name": "ZR",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "controls": "AutomaticBrake",
+            "value": 0
+          },
+          "action_deactivate": {
+            "controls": "AutomaticBrake",
+            "value": 0.2
+          }
+        }
+      ]
+    }
+  ],
+  "controller": {
+    "usb_id": "33DD:0002",
+    "mapping": {
+      "name": "ZUIKI",
+      "usb_id": "33DD:0002",
+      "data": [
+        {
+          "kind": "axis",
+          "index": 1,
+          "name": "MaterControl"
+        },
+        {
+          "kind": "button",
+          "index": 0,
+          "name": "B"
+        },
+        {
+          "kind": "button",
+          "index": 1,
+          "name": "A"
+        },
+        {
+          "kind": "button",
+          "index": 10,
+          "name": "R"
+        },
+        {
+          "kind": "button",
+          "index": 11,
+          "name": "Shot"
+        },
+        {
+          "kind": "button",
+          "index": 2,
+          "name": "Y"
+        },
+        {
+          "kind": "button",
+          "index": 3,
+          "name": "X"
+        },
+        {
+          "kind": "button",
+          "index": 4,
+          "name": "-"
+        },
+        {
+          "kind": "button",
+          "index": 5,
+          "name": "Home"
+        },
+        {
+          "kind": "button",
+          "index": 6,
+          "name": " + "
+        },
+        {
+          "kind": "button",
+          "index": 9,
+          "name": "L"
+        },
+        {
+          "kind": "hat",
+          "index": 0,
+          "name": "Arrow"
+        }
+      ]
+    }
+  }
+}
