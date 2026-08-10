@@ -1,165 +1,170 @@
 {
-  "name": "Class_150_ZUIKI",
+  "name": "RVM_PNZ_BR_Class150_DMS_C-ZUIKI_MASCON",
   "controls": [
     {
       "name": "MaterControl",
       "assignments": [
         {
-          "type": "linear",
-          "thresholds": [
-            {
-              "value": 0.0195,
-              "action_activate": {
-                "controls": "TrainBrake (Irregular Lever)",
-                "value": 0.75
+          "type": "direct_control",
+          "controls": "TrainBrake (Irregular Lever)",
+          "input_value": {
+            "min": 0,
+            "max": 1.0,
+            "steps": [
+              0,
+              0.25,
+              0.5,
+              0.75,
+              0.76,
+              1.0
+            ],
+            "step_thresholds": [
+              {
+                "threshold": 0.0,
+                "threshold_tolerance": 0.03
               },
-              "action_deactivate": {
-                "controls": "TrainBrake (Irregular Lever)",
-                "value": 0.75
+              {
+                "threshold": 0.24,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": 0.43,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": 0.61,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": 0.8,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": 1.0,
+                "threshold_tolerance": 0.02
               }
+            ]
+          },
+          "conditions": [
+            {
+              "control": "MaterControl",
+              "operator": "gt",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "type": "direct_control",
+          "controls": "Throttle (Irregular Lever)",
+          "input_value": {
+            "min": 0,
+            "max": 1.0,
+            "steps": [
+              0,
+              0.14,
+              0.28,
+              0.42,
+              0.56,
+              0.7,
+              0.84,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "step_thresholds": [
+              {
+                "threshold": 0.0,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.21,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.32,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.43,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.53,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.64,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.75,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.85,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.96,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -1.0,
+                "threshold_tolerance": 0.02
+              }
+            ]
+          },
+          "conditions": [
+            {
+              "control": "MaterControl",
+              "operator": "lt",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "type": "direct_control",
+          "controls": "TrainBrake (Irregular Lever)",
+          "input_value": {
+            "min": 0,
+            "max": 1.0,
+            "steps": [
+              0
+            ]
+          },
+          "conditions": [
+            {
+              "control": "MaterControl",
+              "operator": "gte",
+              "value": -0.02
             },
             {
-              "value": 0.0742,
-              "action_activate": {
-                "controls": "TrainBrake (Irregular Lever)",
-                "value": 0.75
-              },
-              "action_deactivate": {
-                "controls": "TrainBrake (Irregular Lever)",
-                "value": 0.75
-              }
+              "control": "MaterControl",
+              "operator": "lte",
+              "value": 0.02
+            }
+          ]
+        },
+        {
+          "type": "direct_control",
+          "controls": "Throttle (Irregular Lever)",
+          "input_value": {
+            "min": 0,
+            "max": 1.0,
+            "steps": [
+              0
+            ]
+          },
+          "conditions": [
+            {
+              "control": "MaterControl",
+              "operator": "gte",
+              "value": -0.02
             },
             {
-              "value": 0.125,
-              "action_activate": {
-                "controls": "TrainBrake (Irregular Lever)",
-                "value": 0.75
-              },
-              "action_deactivate": {
-                "controls": "TrainBrake (Irregular Lever)",
-                "value": 0.75
-              }
-            },
-            {
-              "value": 0.1797,
-              "action_activate": {
-                "controls": "TrainBrake (Irregular Lever)",
-                "value": 0.75
-              },
-              "action_deactivate": {
-                "controls": "TrainBrake (Irregular Lever)",
-                "value": 0.75
-              }
-            },
-            {
-              "value": 0.2344,
-              "action_activate": {
-                "controls": "TrainBrake (Irregular Lever)",
-                "value": 0.5
-              },
-              "action_deactivate": {
-                "controls": "TrainBrake (Irregular Lever)",
-                "value": 0.75
-              }
-            },
-            {
-              "value": 0.2852,
-              "action_activate": {
-                "controls": "TrainBrake (Irregular Lever)",
-                "value": 0.25
-              },
-              "action_deactivate": {
-                "controls": "TrainBrake (Irregular Lever)",
-                "value": 0.5
-              }
-            },
-            {
-              "value": 0.3398,
-              "action_activate": {
-                "controls": "TrainBrake (Irregular Lever)",
-                "value": 0
-              },
-              "action_deactivate": {
-                "controls": "TrainBrake (Irregular Lever)",
-                "value": 0.25
-              }
-            },
-            {
-              "value": 0.3945,
-              "action_activate": {
-                "controls": "Throttle (Irregular Lever)",
-                "value": 0.14
-              },
-              "action_deactivate": {
-                "controls": "Throttle (Irregular Lever)",
-                "value": 0
-              }
-            },
-            {
-              "value": 0.5,
-              "action_activate": {
-                "controls": "Throttle (Irregular Lever)",
-                "value": 0.28
-              },
-              "action_deactivate": {
-                "controls": "Throttle (Irregular Lever)",
-                "value": 0.14
-              }
-            },
-            {
-              "value": 0.6191,
-              "action_activate": {
-                "controls": "Throttle (Irregular Lever)",
-                "value": 0.42
-              },
-              "action_deactivate": {
-                "controls": "Throttle (Irregular Lever)",
-                "value": 0.28
-              }
-            },
-            {
-              "value": 0.7143,
-              "action_activate": {
-                "controls": "Throttle (Irregular Lever)",
-                "value": 0.56
-              },
-              "action_deactivate": {
-                "controls": "Throttle (Irregular Lever)",
-                "value": 0.42
-              }
-            },
-            {
-              "value": 0.8056,
-              "action_activate": {
-                "controls": "Throttle (Irregular Lever)",
-                "value": 0.7
-              },
-              "action_deactivate": {
-                "controls": "Throttle (Irregular Lever)",
-                "value": 0.56
-              }
-            },
-            {
-              "value": 0.9008,
-              "action_activate": {
-                "controls": "Throttle (Irregular Lever)",
-                "value": 0.84
-              },
-              "action_deactivate": {
-                "controls": "Throttle (Irregular Lever)",
-                "value": 0.7
-              }
-            },
-            {
-              "value": 1,
-              "action_activate": {
-                "controls": "Throttle (Irregular Lever)",
-                "value": 1
-              },
-              "action_deactivate": {
-                "controls": "Throttle (Irregular Lever)",
-                "value": 0.84
-              }
+              "control": "MaterControl",
+              "operator": "lte",
+              "value": 0.02
             }
           ]
         }
@@ -307,23 +312,6 @@
           ]
         }
       ]
-    },
-    {
-      "name": "ZL",
-      "assignments": [
-        {
-          "type": "momentary",
-          "threshold": 0.9,
-          "action_activate": {
-            "controls": "TrainBrake (Irregular Lever)",
-            "value": 1
-          },
-          "action_deactivate": {
-            "controls": "TrainBrake (Irregular Lever)",
-            "value": 0.75
-          }
-        }
-      ]
     }
   ],
   "controller": {
@@ -340,27 +328,27 @@
         {
           "kind": "button",
           "index": 0,
-          "name": "Y"
-        },
-        {
-          "kind": "button",
-          "index": 1,
           "name": "B"
         },
         {
           "kind": "button",
-          "index": 12,
-          "name": "Home"
+          "index": 1,
+          "name": "A"
         },
         {
           "kind": "button",
-          "index": 13,
+          "index": 10,
+          "name": "R"
+        },
+        {
+          "kind": "button",
+          "index": 11,
           "name": "Shot"
         },
         {
           "kind": "button",
           "index": 2,
-          "name": "A"
+          "name": "Y"
         },
         {
           "kind": "button",
@@ -370,32 +358,22 @@
         {
           "kind": "button",
           "index": 4,
-          "name": "L"
-        },
-        {
-          "kind": "button",
-          "index": 5,
-          "name": "R"
-        },
-        {
-          "kind": "button",
-          "index": 6,
-          "name": "ZL"
-        },
-        {
-          "kind": "button",
-          "index": 7,
-          "name": "ZR"
-        },
-        {
-          "kind": "button",
-          "index": 8,
           "name": "-"
         },
         {
           "kind": "button",
+          "index": 5,
+          "name": "Home"
+        },
+        {
+          "kind": "button",
+          "index": 6,
+          "name": " + "
+        },
+        {
+          "kind": "button",
           "index": 9,
-          "name": "+"
+          "name": "L"
         },
         {
           "kind": "hat",
@@ -404,8 +382,5 @@
         }
       ]
     }
-  },
-  "apps": [
-    "Train Sim World"
-  ]
+  }
 }

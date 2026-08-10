@@ -1,167 +1,95 @@
 {
-  "name": "Class 170 - ZUIKI MASCON",
+  "name": "RVM_BR_Class170_DMCL_W_C-ZUIKI_MASCON",
   "controls": [
     {
       "name": "MaterControl",
       "assignments": [
         {
-          "type": "linear",
-          "thresholds": [
-            {
-              "value": 0.0195,
-              "action_activate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0
+          "type": "direct_control",
+          "controls": "IrregularLever_ThrottleBrake",
+          "input_value": {
+            "min": 0,
+            "max": 1.0,
+            "steps": [
+              0.0,
+              0.19,
+              0.2,
+              0.3,
+              0.4,
+              0.5,
+              0.5714,
+              0.6429,
+              0.7143,
+              0.7857,
+              0.8571,
+              0.9286,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "step_thresholds": [
+              {
+                "threshold": 1.0,
+                "threshold_tolerance": 0.02
               },
-              "action_deactivate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0
-              }
-            },
-            {
-              "value": 0.0742,
-              "action_activate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.2
+              {
+                "threshold": 0.8,
+                "threshold_tolerance": 0.02
               },
-              "action_deactivate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0
-              }
-            },
-            {
-              "value": 0.125,
-              "action_activate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.2
+              {
+                "threshold": 0.61,
+                "threshold_tolerance": 0.02
               },
-              "action_deactivate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.2
-              }
-            },
-            {
-              "value": 0.1797,
-              "action_activate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.2
+              {
+                "threshold": 0.43,
+                "threshold_tolerance": 0.02
               },
-              "action_deactivate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.2
-              }
-            },
-            {
-              "value": 0.2344,
-              "action_activate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.3
+              {
+                "threshold": 0.24,
+                "threshold_tolerance": 0.02
               },
-              "action_deactivate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.2
-              }
-            },
-            {
-              "value": 0.2852,
-              "action_activate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.4
+              {
+                "threshold": 0.0,
+                "threshold_tolerance": 0.03
               },
-              "action_deactivate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.3
-              }
-            },
-            {
-              "value": 0.3398,
-              "action_activate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.5
+              {
+                "threshold": -0.21,
+                "threshold_tolerance": 0.02
               },
-              "action_deactivate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.4
-              }
-            },
-            {
-              "value": 0.3945,
-              "action_activate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.5714
+              {
+                "threshold": -0.32,
+                "threshold_tolerance": 0.02
               },
-              "action_deactivate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.5
-              }
-            },
-            {
-              "value": 0.5,
-              "action_activate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.6429
+              {
+                "threshold": -0.43,
+                "threshold_tolerance": 0.02
               },
-              "action_deactivate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.5714
-              }
-            },
-            {
-              "value": 0.6191,
-              "action_activate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.7143
+              {
+                "threshold": -0.53,
+                "threshold_tolerance": 0.02
               },
-              "action_deactivate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.6429
-              }
-            },
-            {
-              "value": 0.7143,
-              "action_activate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.7857
+              {
+                "threshold": -0.64,
+                "threshold_tolerance": 0.02
               },
-              "action_deactivate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.7143
-              }
-            },
-            {
-              "value": 0.8056,
-              "action_activate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.8571
+              {
+                "threshold": -0.75,
+                "threshold_tolerance": 0.02
               },
-              "action_deactivate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.7857
-              }
-            },
-            {
-              "value": 0.9008,
-              "action_activate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.9286
+              {
+                "threshold": -0.85,
+                "threshold_tolerance": 0.02
               },
-              "action_deactivate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.8571
-              }
-            },
-            {
-              "value": 1,
-              "action_activate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 1
+              {
+                "threshold": -0.96,
+                "threshold_tolerance": 0.02
               },
-              "action_deactivate": {
-                "controls": "IrregularLever_ThrottleBrake",
-                "api_value": 0.9286
+              {
+                "threshold": -1.0,
+                "threshold_tolerance": 0.02
               }
-            }
-          ]
+            ]
+          }
         }
       ],
       "description": "Power and Brake Handle"
@@ -324,27 +252,27 @@
         {
           "kind": "button",
           "index": 0,
-          "name": "Y"
-        },
-        {
-          "kind": "button",
-          "index": 1,
           "name": "B"
         },
         {
           "kind": "button",
-          "index": 12,
-          "name": "Home"
+          "index": 1,
+          "name": "A"
         },
         {
           "kind": "button",
-          "index": 13,
+          "index": 10,
+          "name": "R"
+        },
+        {
+          "kind": "button",
+          "index": 11,
           "name": "Shot"
         },
         {
           "kind": "button",
           "index": 2,
-          "name": "A"
+          "name": "Y"
         },
         {
           "kind": "button",
@@ -354,32 +282,22 @@
         {
           "kind": "button",
           "index": 4,
-          "name": "L"
-        },
-        {
-          "kind": "button",
-          "index": 5,
-          "name": "R"
-        },
-        {
-          "kind": "button",
-          "index": 6,
-          "name": "ZL"
-        },
-        {
-          "kind": "button",
-          "index": 7,
-          "name": "ZR"
-        },
-        {
-          "kind": "button",
-          "index": 8,
           "name": "-"
         },
         {
           "kind": "button",
+          "index": 5,
+          "name": "Home"
+        },
+        {
+          "kind": "button",
+          "index": 6,
+          "name": " + "
+        },
+        {
+          "kind": "button",
           "index": 9,
-          "name": "+"
+          "name": "L"
         },
         {
           "kind": "hat",
@@ -388,8 +306,5 @@
         }
       ]
     }
-  },
-  "apps": [
-    "Train Sim World"
-  ]
+  }
 }
