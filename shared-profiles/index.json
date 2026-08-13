@@ -1323,6 +1323,42 @@
       "apps": [
         "Train Sim World"
       ]
+    },
+    {
+      "usb_id": "33DD:0002",
+      "file": "./m3_zuiki_mascon.tswprofile",
+      "name": "M3 - ZUIKI MASCON",
+      "author": {
+        "name": "WaylonMao",
+        "url": "https://github.com/WaylonMao"
+      },
+      "apps": [
+        "Train Sim World"
+      ]
+    },
+    {
+      "usb_id": "33DD:0002",
+      "file": "./njt-arrow3_zuiki_mascon.tswprofile",
+      "name": "NJT Arrow III - ZUIKI MASCON",
+      "author": {
+        "name": "WaylonMao",
+        "url": "https://github.com/WaylonMao"
+      },
+      "apps": [
+        "Train Sim World"
+      ]
+    },
+    {
+      "usb_id": "33DD:0002",
+      "file": "./njt-bi_levels_car_zuiki_mascon.tswprofile",
+      "name": "NJT Bi-Level Car - ZUIKI MASCON",
+      "author": {
+        "name": "WaylonMao",
+        "url": "https://github.com/WaylonMao"
+      },
+      "apps": [
+        "Train Sim World"
+      ]
     }
   ]
 }
