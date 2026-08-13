@@ -1,5 +1,5 @@
 {
-  "name": "RVM_NYH_MNR_M7a-A_C/RVM_LIRREX_M7-A_C/RVM_LIRREX_M9-A_C-ZUIKI_MASCON",
+  "name": "RVM_LIRR_M3-A_C/RVM_NYH_MNR_M3a-A_C-ZUIKI_MASCON",
   "controls": [
     {
       "name": "MaterControl",
@@ -11,20 +11,19 @@
             "min": 0.0,
             "max": 1.0,
             "steps": [
-              0,
-              0.1,
-              0.1429,
-              0.1857,
-              0.2286,
-              0.2714,
-              0.3143,
-              0.3571,
-              0.4,
-              0.5,
-              0.6,
-              0.7,
-              0.8,
+              0.0,
+              0.27,
+              0.3229,
+              0.3757,
+              0.4286,
+              0.4814,
+              0.5343,
+              0.5871,
+              0.64,
+              0.72,
+              0.85,
               0.9,
+              0.95,
               1.0
             ],
             "step_thresholds": [
@@ -248,7 +247,7 @@
           },
           "action_deactivate": {
             "controls": "MasterController",
-            "value": 0.1
+            "value": 0.27
           }
         }
       ]

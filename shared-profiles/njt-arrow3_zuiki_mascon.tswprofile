@@ -1,63 +1,30 @@
 {
-  "name": "RVM_NYH_MNR_M7a-A_C/RVM_LIRREX_M7-A_C/RVM_LIRREX_M9-A_C-ZUIKI_MASCON",
+  "name": "RVM_MRT_NJT_ArrowIII_B_Car_C_ZUIKI_MASCON",
   "controls": [
     {
       "name": "MaterControl",
       "assignments": [
         {
           "type": "direct_control",
-          "controls": "MasterController",
+          "controls": "AutomaticBrake_26C",
           "input_value": {
-            "min": 0.0,
+            "min": 0,
             "max": 1.0,
             "steps": [
               0,
-              0.1,
-              0.1429,
-              0.1857,
-              0.2286,
-              0.2714,
-              0.3143,
-              0.3571,
+              0.25,
+              0.3,
+              0.35,
               0.4,
+              0.425,
               0.5,
-              0.6,
-              0.7,
-              0.8,
-              0.9,
-              1.0
+              0.575,
+              0.65,
+              1
             ],
             "step_thresholds": [
               {
-                "threshold": -1.0,
-                "threshold_tolerance": 0.02
-              },
-              {
-                "threshold": -0.96,
-                "threshold_tolerance": 0.02
-              },
-              {
-                "threshold": -0.85,
-                "threshold_tolerance": 0.02
-              },
-              {
-                "threshold": -0.75,
-                "threshold_tolerance": 0.02
-              },
-              {
-                "threshold": -0.64,
-                "threshold_tolerance": 0.02
-              },
-              {
-                "threshold": -0.53,
-                "threshold_tolerance": 0.02
-              },
-              {
-                "threshold": -0.43,
-                "threshold_tolerance": 0.02
-              },
-              {
-                "threshold": -0.32,
+                "threshold": 0.0,
                 "threshold_tolerance": 0.02
               },
               {
@@ -65,8 +32,65 @@
                 "threshold_tolerance": 0.02
               },
               {
+                "threshold": -0.32,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.43,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.53,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.64,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.75,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.85,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -0.96,
+                "threshold_tolerance": 0.02
+              },
+              {
+                "threshold": -1.0,
+                "threshold_tolerance": 0.02
+              }
+            ]
+          },
+          "conditions": [
+            {
+              "control": "MaterControl",
+              "operator": "lt",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "type": "direct_control",
+          "controls": "Throttle",
+          "input_value": {
+            "min": 0,
+            "max": 1.0,
+            "steps": [
+              0,
+              0.2,
+              0.4,
+              0.6,
+              0.8,
+              1.0
+            ],
+            "step_thresholds": [
+              {
                 "threshold": 0.0,
-                "threshold_tolerance": 0.03
+                "threshold_tolerance": 0.02
               },
               {
                 "threshold": 0.24,
@@ -89,7 +113,60 @@
                 "threshold_tolerance": 0.02
               }
             ]
-          }
+          },
+          "conditions": [
+            {
+              "control": "MaterControl",
+              "operator": "gt",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "type": "direct_control",
+          "controls": "AutomaticBrake_26C",
+          "input_value": {
+            "min": 0,
+            "max": 1.0,
+            "steps": [
+              0
+            ]
+          },
+          "conditions": [
+            {
+              "control": "MaterControl",
+              "operator": "gte",
+              "value": -0.02
+            },
+            {
+              "control": "MaterControl",
+              "operator": "lte",
+              "value": 0.02
+            }
+          ]
+        },
+        {
+          "type": "direct_control",
+          "controls": "Throttle",
+          "input_value": {
+            "min": 0,
+            "max": 1.0,
+            "steps": [
+              0
+            ]
+          },
+          "conditions": [
+            {
+              "control": "MaterControl",
+              "operator": "gte",
+              "value": -0.02
+            },
+            {
+              "control": "MaterControl",
+              "operator": "lte",
+              "value": 0.02
+            }
+          ]
         }
       ]
     },
@@ -243,12 +320,24 @@
           "type": "momentary",
           "threshold": 0.9,
           "action_activate": {
-            "controls": "MasterController",
-            "value": 0
+            "controls": "AutomaticBrake_26C",
+            "value": 1
           },
           "action_deactivate": {
-            "controls": "MasterController",
-            "value": 0.1
+            "controls": "AutomaticBrake_26C",
+            "value": 0.65
+          }
+        }
+      ]
+    },
+    {
+      "name": "ZR",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": ";"
           }
         }
       ]

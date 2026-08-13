@@ -1,5 +1,5 @@
 {
-  "name": "RVM_NYH_MNR_M7a-A_C/RVM_LIRREX_M7-A_C/RVM_LIRREX_M9-A_C-ZUIKI_MASCON",
+  "name": "RVM_NYT_NJT_BiLevels_CabCar_C_ZUIKI_MASCON",
   "controls": [
     {
       "name": "MaterControl",
@@ -8,24 +8,24 @@
           "type": "direct_control",
           "controls": "MasterController",
           "input_value": {
-            "min": 0.0,
+            "min": -1.0,
             "max": 1.0,
             "steps": [
+              -1,
+              -0.9,
+              -0.8,
+              -0.7,
+              -0.5,
+              -0.4,
+              -0.3,
+              -0.2,
+              -0.1,
               0,
               0.1,
-              0.1429,
-              0.1857,
-              0.2286,
-              0.2714,
-              0.3143,
-              0.3571,
+              0.2,
               0.4,
-              0.5,
-              0.6,
               0.7,
-              0.8,
-              0.9,
-              1.0
+              1
             ],
             "step_thresholds": [
               {
@@ -243,12 +243,29 @@
           "type": "momentary",
           "threshold": 0.9,
           "action_activate": {
-            "controls": "MasterController",
+            "controls": "AutomaticBrake",
+            "value": 0.6
+          },
+          "action_deactivate": {
+            "controls": "AutomaticBrake",
+            "value": 0.2
+          }
+        }
+      ]
+    },
+    {
+      "name": "ZR",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "controls": "AutomaticBrake",
             "value": 0
           },
           "action_deactivate": {
-            "controls": "MasterController",
-            "value": 0.1
+            "controls": "AutomaticBrake",
+            "value": 0.2
           }
         }
       ]
