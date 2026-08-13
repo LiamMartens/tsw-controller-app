@@ -1,0 +1,497 @@
+{
+  "name": "OBB 4024 Zuiki Mascon",
+  "controls": [
+    {
+      "name": "MasterControle",
+      "description": "MasterController (Mascon lever - 14 notches)",
+      "assignments": [
+        {
+          "type": "linear",
+          "thresholds": [
+            {
+              "value": 0.0195,
+              "action_activate": {
+                "controls": "MasterController",
+                "value": 0.0
+              },
+              "action_deactivate": {
+                "controls": "MasterController",
+                "value": 0.0
+              }
+            },
+            {
+              "value": 0.0742,
+              "action_activate": {
+                "controls": "MasterController",
+                "value": 0.099
+              },
+              "action_deactivate": {
+                "controls": "MasterController",
+                "value": 0.0
+              }
+            },
+            {
+              "value": 0.125,
+              "action_activate": {
+                "controls": "MasterController",
+                "value": 0.16
+              },
+              "action_deactivate": {
+                "controls": "MasterController",
+                "value": 0.099
+              }
+            },
+            {
+              "value": 0.1797,
+              "action_activate": {
+                "controls": "MasterController",
+                "value": 0.22
+              },
+              "action_deactivate": {
+                "controls": "MasterController",
+                "value": 0.16
+              }
+            },
+            {
+              "value": 0.2344,
+              "action_activate": {
+                "controls": "MasterController",
+                "value": 0.29
+              },
+              "action_deactivate": {
+                "controls": "MasterController",
+                "value": 0.22
+              }
+            },
+            {
+              "value": 0.2852,
+              "action_activate": {
+                "controls": "MasterController",
+                "value": 0.35
+              },
+              "action_deactivate": {
+                "controls": "MasterController",
+                "value": 0.29
+              }
+            },
+            {
+              "value": 0.3398,
+              "action_activate": {
+                "controls": "MasterController",
+                "value": 0.41
+              },
+              "action_deactivate": {
+                "controls": "MasterController",
+                "value": 0.35
+              }
+            },
+            {
+              "value": 0.3945,
+              "action_activate": {
+                "controls": "MasterController",
+                "value": 0.5
+              },
+              "action_deactivate": {
+                "controls": "MasterController",
+                "value": 0.41
+              }
+            },
+            {
+              "value": 0.5,
+              "action_activate": {
+                "controls": "MasterController",
+                "value": 0.59
+              },
+              "action_deactivate": {
+                "controls": "MasterController",
+                "value": 0.5
+              }
+            },
+            {
+              "value": 0.6191,
+              "action_activate": {
+                "controls": "MasterController",
+                "value": 0.68
+              },
+              "action_deactivate": {
+                "controls": "MasterController",
+                "value": 0.59
+              }
+            },
+            {
+              "value": 0.7143,
+              "action_activate": {
+                "controls": "MasterController",
+                "value": 0.77
+              },
+              "action_deactivate": {
+                "controls": "MasterController",
+                "value": 0.68
+              }
+            },
+            {
+              "value": 0.8056,
+              "action_activate": {
+                "controls": "MasterController",
+                "value": 0.85
+              },
+              "action_deactivate": {
+                "controls": "MasterController",
+                "value": 0.77
+              }
+            },
+            {
+              "value": 0.9008,
+              "action_activate": {
+                "controls": "MasterController",
+                "value": 0.92
+              },
+              "action_deactivate": {
+                "controls": "MasterController",
+                "value": 0.85
+              }
+            },
+            {
+              "value": 1,
+              "action_activate": {
+                "controls": "MasterController",
+                "value": 1
+              },
+              "action_deactivate": {
+                "controls": "MasterController",
+                "value": 0.92
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "A",
+      "description": "Headlights Increase",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "h",
+          "press_time": 0.2,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "B",
+      "description": "Wipers Increase",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "v",
+          "press_time": 0.2,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "X",
+      "description": "Wipers Decrease",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "shift+v",
+          "press_time": 0.2,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "Y",
+      "description": "Headlights Decrease",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "shift+h",
+          "press_time": 0.2,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "L",
+      "description": "Doors Left",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "y",
+          "press_time": 0.3,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "R",
+      "description": "Doors Right",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "u",
+          "press_time": 0.3,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "ZL",
+      "description": "SIFA + PZB Wachsam",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "Q+PageDown"
+        }
+      }
+    },
+    {
+      "name": "ZR",
+      "description": "Master Key",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "ctrl+w",
+          "press_time": 0.3,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "-",
+      "description": "PZB Frei",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "end",
+          "press_time": 0.3,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "+",
+      "description": "PZB Befehl",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "delete",
+          "press_time": 0.3,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "directional",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 1,
+          "action_activate": {
+            "keys": "w",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          },
+          "conditions": [
+            {
+              "control": "directional",
+              "value": 1,
+              "operator": "lte"
+            }
+          ]
+        },
+        {
+          "type": "momentary",
+          "threshold": 2,
+          "action_activate": {
+            "controls": "TrainBrake",
+            "value": 0.75
+          },
+          "conditions": [
+            {
+              "control": "directional",
+              "value": 2,
+              "operator": "lte"
+            }
+          ]
+        },
+        {
+          "type": "momentary",
+          "threshold": 4,
+          "action_activate": {
+            "keys": "s",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          },
+          "conditions": [
+            {
+              "control": "directional",
+              "value": 4,
+              "operator": "lte"
+            }
+          ]
+        },
+        {
+          "type": "momentary",
+          "threshold": 8,
+          "action_activate": {
+            "controls": "TrainBrake",
+            "value": 0
+          },
+          "conditions": [
+            {
+              "control": "directional",
+              "value": 8,
+              "operator": "lte"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "controller": {
+    "usb_id": "33DD:0002",
+    "mapping": {
+      "name": " ZUIKI MasCon",
+      "usb_id": "33DD:0002",
+      "data": [
+        {
+          "kind": "axis",
+          "index": 1,
+          "name": "MasterControle"
+        },
+        {
+          "kind": "axis",
+          "index": 4,
+          "name": "ZL"
+        },
+        {
+          "kind": "button",
+          "index": 0,
+          "name": "B"
+        },
+        {
+          "kind": "button",
+          "index": 1,
+          "name": "A"
+        },
+        {
+          "kind": "button",
+          "index": 2,
+          "name": "Y"
+        },
+        {
+          "kind": "button",
+          "index": 3,
+          "name": "X"
+        },
+        {
+          "kind": "hat",
+          "index": 0,
+          "name": "directional"
+        },
+        {
+          "kind": "button",
+          "index": 9,
+          "name": "L"
+        },
+        {
+          "kind": "button",
+          "index": 4,
+          "name": "-"
+        },
+        {
+          "kind": "button",
+          "index": 6,
+          "name": "+"
+        },
+        {
+          "kind": "axis",
+          "index": 5,
+          "name": "ZR"
+        },
+        {
+          "kind": "button",
+          "index": 10,
+          "name": "R"
+        },
+        {
+          "kind": "button",
+          "index": 5,
+          "name": "Home"
+        },
+        {
+          "kind": "button",
+          "index": 11,
+          "name": "Start"
+        }
+      ]
+    },
+    "calibration": {
+      "usb_id": "33DD:0002",
+      "data": [
+        {
+          "id": "MasterControle",
+          "deadzone": 649,
+          "invert": false,
+          "min": -32440,
+          "max": 32439,
+          "idle": -32440,
+          "easing_curve": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "anti_jitter": 0
+        },
+        {
+          "id": "ZL",
+          "deadzone": 649,
+          "invert": false,
+          "min": -32440,
+          "max": 32439,
+          "idle": -32440,
+          "easing_curve": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "anti_jitter": 0
+        },
+        {
+          "id": "ZR",
+          "deadzone": 649,
+          "invert": false,
+          "min": -32440,
+          "max": 32439,
+          "idle": -32440,
+          "easing_curve": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "anti_jitter": 0
+        }
+      ]
+    }
+  },
+  "apps": [
+    "Train Sim World"
+  ]
+}
