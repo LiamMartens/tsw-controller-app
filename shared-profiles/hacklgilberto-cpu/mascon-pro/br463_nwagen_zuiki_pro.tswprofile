@@ -307,152 +307,176 @@
     {
       "name": "L",
       "description": "Headlights Increase",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "h",
-          "press_time": 0.2,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "h",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "-",
       "description": "Headlights Decrease",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "shift+h",
-          "press_time": 0.2,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "shift+h",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "+",
       "description": "Wipers Increase",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "v",
-          "press_time": 0.2,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "v",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "R",
       "description": "Wipers Decrease",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "shift+v",
-          "press_time": 0.2,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "shift+v",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "Y",
       "description": "PZB Wachsam",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "end",
-          "press_time": 0.3,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "end",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "B",
       "description": "PZB Frei",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "pagedown",
-          "press_time": 0.3,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "pagedown",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "A",
       "description": "PZB Befehl",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "delete",
-          "press_time": 0.3,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "delete",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "X",
       "description": "Sander",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "x"
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "x"
+          }
         }
-      }
+      ]
     },
     {
       "name": "ETS",
       "description": "SIFA",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "q"
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "q"
+          }
         }
-      }
+      ]
     },
     {
       "name": "ZR",
       "description": "Cab Light",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "ctrl+w",
-          "press_time": 0.3,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "ctrl+w",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "white",
       "description": "Horn",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "space"
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "space"
+          }
         }
-      }
+      ]
     },
     {
       "name": "EB",
       "description": "Parking Brake",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "insert",
-          "press_time": 0.3,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "insert",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "Power",

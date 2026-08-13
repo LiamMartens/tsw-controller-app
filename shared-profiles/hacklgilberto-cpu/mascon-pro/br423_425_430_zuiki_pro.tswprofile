@@ -207,141 +207,165 @@
     },
     {
       "name": "L",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "h",
-          "press_time": 0.2,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "h",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "-",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "shift+h",
-          "press_time": 0.2,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "shift+h",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "+",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "v",
-          "press_time": 0.2,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "v",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "R",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "shift+v",
-          "press_time": 0.2,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "shift+v",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "Y",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "end",
-          "press_time": 0.3,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "end",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "B",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "pagedown",
-          "press_time": 0.3,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "pagedown",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "A",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "delete",
-          "press_time": 0.3,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "delete",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "X",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "x"
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "x"
+          }
         }
-      }
+      ]
     },
     {
       "name": "ETS",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "q"
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "q"
+          }
         }
-      }
+      ]
     },
     {
       "name": "ZR",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "ctrl+w",
-          "press_time": 0.3,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "ctrl+w",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "white",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "space"
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "space"
+          }
         }
-      }
+      ]
     },
     {
       "name": "EB",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "insert",
-          "press_time": 0.3,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "insert",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "Power",

@@ -169,128 +169,148 @@
     {
       "name": "A",
       "description": "Headlights Increase",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "h",
-          "press_time": 0.2,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "h",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "B",
       "description": "Wipers Increase",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "v",
-          "press_time": 0.2,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "v",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "X",
       "description": "Wipers Decrease",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "shift+v",
-          "press_time": 0.2,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "shift+v",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "Y",
       "description": "Headlights Decrease",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "shift+h",
-          "press_time": 0.2,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "shift+h",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "L",
       "description": "Doors Left",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "y",
-          "press_time": 0.3,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "y",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "R",
       "description": "Doors Right",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "u",
-          "press_time": 0.3,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "u",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "ZL",
       "description": "SIFA (Q)",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "q"
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "q"
+          }
         }
-      }
+      ]
     },
     {
       "name": "ZR",
       "description": "Master Key",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "keys": "ctrl+w",
-          "press_time": 0.3,
-          "wait_time": 0.2
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "keys": "ctrl+w",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          }
         }
-      }
+      ]
     },
     {
       "name": "-",
       "description": "TrainBrake Release",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "controls": "IrregularLever_TrainBrake",
-          "value": 0
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "controls": "IrregularLever_TrainBrake",
+            "value": 0
+          }
         }
-      }
+      ]
     },
     {
       "name": "+",
       "description": "TrainBrake Full Service",
-      "assignment": {
-        "type": "momentary",
-        "threshold": 0.9,
-        "action_activate": {
-          "controls": "IrregularLever_TrainBrake",
-          "value": 0.8
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 0.9,
+          "action_activate": {
+            "controls": "IrregularLever_TrainBrake",
+            "value": 0.8
+          }
         }
-      }
+      ]
     },
     {
       "name": "directional",
