@@ -1,0 +1,732 @@
+{
+  "name": "DB Bnrdzf 463 Zuiki Pro",
+  "controls": [
+    {
+      "name": "main lever",
+      "description": "Throttle + Dynamic Brake (Mascon lever)",
+      "assignments": [
+        {
+          "type": "linear",
+          "thresholds": [
+            {
+              "value": 0.0195,
+              "action_activate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0
+              },
+              "action_deactivate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0
+              }
+            },
+            {
+              "value": 0.0742,
+              "action_activate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0
+              },
+              "action_deactivate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0
+              }
+            },
+            {
+              "value": 0.125,
+              "action_activate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0
+              },
+              "action_deactivate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0
+              }
+            },
+            {
+              "value": 0.1797,
+              "action_activate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0
+              },
+              "action_deactivate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0
+              }
+            },
+            {
+              "value": 0.2344,
+              "action_activate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0
+              },
+              "action_deactivate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0
+              }
+            },
+            {
+              "value": 0.2852,
+              "action_activate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0
+              },
+              "action_deactivate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0
+              }
+            },
+            {
+              "value": 0.3398,
+              "action_activate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0
+              },
+              "action_deactivate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0
+              }
+            },
+            {
+              "value": 0.3945,
+              "action_activate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0
+              },
+              "action_deactivate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0
+              }
+            },
+            {
+              "value": 0.5,
+              "action_activate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0.3
+              },
+              "action_deactivate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0
+              }
+            },
+            {
+              "value": 0.6191,
+              "action_activate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0.6
+              },
+              "action_deactivate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0.3
+              }
+            },
+            {
+              "value": 0.7143,
+              "action_activate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 1,
+                "hold": true
+              },
+              "action_deactivate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0.6
+              }
+            },
+            {
+              "value": 0.8056,
+              "action_activate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 1,
+                "hold": true
+              },
+              "action_deactivate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0.6
+              }
+            },
+            {
+              "value": 0.9008,
+              "action_activate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 1,
+                "hold": true
+              },
+              "action_deactivate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0.6
+              }
+            },
+            {
+              "value": 1,
+              "action_activate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 1,
+                "hold": true
+              },
+              "action_deactivate": {
+                "controls": "Throttle_{SIDE}",
+                "value": 0.6
+              }
+            }
+          ]
+        },
+        {
+          "type": "linear",
+          "thresholds": [
+            {
+              "value": 0.0195,
+              "action_activate": {
+                "controls": "DynamicBrake_{SIDE}",
+                "value": 1
+              },
+              "action_deactivate": {
+                "controls": "DynamicBrake_{SIDE}",
+                "value": 1
+              }
+            },
+            {
+              "value": 0.0742,
+              "action_activate": {
+                "controls": "DynamicBrake_{SIDE}",
+                "value": 0.9
+              },
+              "action_deactivate": {
+                "controls": "DynamicBrake_{SIDE}",
+                "value": 1
+              }
+            },
+            {
+              "value": 0.125,
+              "action_activate": {
+                "controls": "DynamicBrake_{SIDE}",
+                "value": 0.7
+              },
+              "action_deactivate": {
+                "controls": "DynamicBrake_{SIDE}",
+                "value": 0.9
+              }
+            },
+            {
+              "value": 0.1797,
+              "action_activate": {
+                "controls": "DynamicBrake_{SIDE}",
+                "value": 0.6
+              },
+              "action_deactivate": {
+                "controls": "DynamicBrake_{SIDE}",
+                "value": 0.7
+              }
+            },
+            {
+              "value": 0.2344,
+              "action_activate": {
+                "controls": "DynamicBrake_{SIDE}",
+                "value": 0.5
+              },
+              "action_deactivate": {
+                "controls": "DynamicBrake_{SIDE}",
+                "value": 0.6
+              }
+            },
+            {
+              "value": 0.2852,
+              "action_activate": {
+                "controls": "DynamicBrake_{SIDE}",
+                "value": 0.4
+              },
+              "action_deactivate": {
+                "controls": "DynamicBrake_{SIDE}",
+                "value": 0.5
+              }
+            },
+            {
+              "value": 0.3398,
+              "action_activate": {
+                "controls": "DynamicBrake_{SIDE}",
+                "value": 0.2
+              },
+              "action_deactivate": {
+                "controls": "DynamicBrake_{SIDE}",
+                "value": 0.4
+              }
+            },
+            {
+              "value": 0.3945,
+              "action_activate": {
+                "controls": "DynamicBrake_{SIDE}",
+                "value": 0
+              },
+              "action_deactivate": {
+                "controls": "DynamicBrake_{SIDE}",
+                "value": 0.2
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reverser",
+      "description": "Reverser lever (absolute: 0=Neutral, 0.5=Forward, 1=Reverse)",
+      "assignments": [
+        {
+          "conditions": [
+            {
+              "control": "reverser",
+              "operator": "lte",
+              "value": 0.6
+            }
+          ],
+          "type": "momentary",
+          "threshold": 0.4,
+          "action_activate": {
+            "keys": "w",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          },
+          "action_deactivate": {
+            "keys": "s",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          }
+        },
+        {
+          "type": "momentary",
+          "threshold": 1,
+          "action_activate": {
+            "keys": "s",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          },
+          "action_deactivate": {
+            "keys": "w",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          }
+        }
+      ]
+    },
+    {
+      "name": "L",
+      "description": "Headlights Increase",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "h",
+          "press_time": 0.2,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "-",
+      "description": "Headlights Decrease",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "shift+h",
+          "press_time": 0.2,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "+",
+      "description": "Wipers Increase",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "v",
+          "press_time": 0.2,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "R",
+      "description": "Wipers Decrease",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "shift+v",
+          "press_time": 0.2,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "Y",
+      "description": "PZB Wachsam",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "end",
+          "press_time": 0.3,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "B",
+      "description": "PZB Frei",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "pagedown",
+          "press_time": 0.3,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "A",
+      "description": "PZB Befehl",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "delete",
+          "press_time": 0.3,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "X",
+      "description": "Sander",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "x"
+        }
+      }
+    },
+    {
+      "name": "ETS",
+      "description": "SIFA",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "q"
+        }
+      }
+    },
+    {
+      "name": "ZR",
+      "description": "Cab Light",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "ctrl+w",
+          "press_time": 0.3,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "white",
+      "description": "Horn",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "space"
+        }
+      }
+    },
+    {
+      "name": "EB",
+      "description": "Parking Brake",
+      "assignment": {
+        "type": "momentary",
+        "threshold": 0.9,
+        "action_activate": {
+          "keys": "insert",
+          "press_time": 0.3,
+          "wait_time": 0.2
+        }
+      }
+    },
+    {
+      "name": "Power",
+      "description": "Master Key",
+      "assignments": [
+        {
+          "type": "linear",
+          "neutral": 0.5,
+          "thresholds": [
+            {
+              "value": -0.5,
+              "action_activate": {
+                "keys": "\\",
+                "press_time": 0.3,
+                "wait_time": 0.2
+              }
+            },
+            {
+              "value": 0.5,
+              "action_activate": {
+                "keys": "shift+\\",
+                "press_time": 0.3,
+                "wait_time": 0.2
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "directional",
+      "assignments": [
+        {
+          "type": "momentary",
+          "threshold": 1,
+          "action_activate": {
+            "keys": "1",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          },
+          "conditions": [
+            {
+              "control": "directional",
+              "value": 1,
+              "operator": "lte"
+            }
+          ]
+        },
+        {
+          "type": "momentary",
+          "threshold": 2,
+          "action_activate": {
+            "keys": "u",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          },
+          "conditions": [
+            {
+              "control": "directional",
+              "value": 2,
+              "operator": "lte"
+            }
+          ]
+        },
+        {
+          "type": "momentary",
+          "threshold": 4,
+          "action_activate": {
+            "keys": "2",
+            "press_time": 0.2,
+            "wait_time": 0.2
+          },
+          "conditions": [
+            {
+              "control": "directional",
+              "value": 4,
+              "operator": "lte"
+            }
+          ]
+        },
+        {
+          "type": "momentary",
+          "threshold": 8,
+          "action_activate": {
+            "keys": "y",
+            "press_time": 0.3,
+            "wait_time": 0.2
+          },
+          "conditions": [
+            {
+              "control": "directional",
+              "value": 8,
+              "operator": "lte"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "controller": {
+    "usb_id": "33DD:0006",
+    "mapping": {
+      "name": "Zuiki Pro",
+      "usb_id": "33DD:0006",
+      "data": [
+        {
+          "kind": "hat",
+          "index": 0,
+          "name": "directional"
+        },
+        {
+          "kind": "button",
+          "index": 3,
+          "name": "Y"
+        },
+        {
+          "kind": "button",
+          "index": 2,
+          "name": "X"
+        },
+        {
+          "kind": "button",
+          "index": 0,
+          "name": "A"
+        },
+        {
+          "kind": "button",
+          "index": 1,
+          "name": "B"
+        },
+        {
+          "kind": "button",
+          "index": 9,
+          "name": "L"
+        },
+        {
+          "kind": "button",
+          "index": 10,
+          "name": "R"
+        },
+        {
+          "kind": "axis",
+          "index": 5,
+          "name": "ZR"
+        },
+        {
+          "kind": "button",
+          "index": 5,
+          "name": "Home"
+        },
+        {
+          "kind": "button",
+          "index": 4,
+          "name": "-"
+        },
+        {
+          "kind": "button",
+          "index": 6,
+          "name": "+"
+        },
+        {
+          "kind": "axis",
+          "index": 2,
+          "name": "Power"
+        },
+        {
+          "kind": "axis",
+          "index": 0,
+          "name": "white"
+        },
+        {
+          "kind": "button",
+          "index": 7,
+          "name": "EB"
+        },
+        {
+          "kind": "button",
+          "index": 8,
+          "name": "ETS"
+        },
+        {
+          "kind": "axis",
+          "index": 3,
+          "name": "reverser"
+        },
+        {
+          "kind": "axis",
+          "index": 1,
+          "name": "main lever"
+        }
+      ]
+    },
+    "calibration": {
+      "usb_id": "33DD:0006",
+      "data": [
+        {
+          "id": "ZR",
+          "deadzone": 649,
+          "invert": false,
+          "min": -32440,
+          "max": 32439,
+          "idle": -32440,
+          "easing_curve": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "anti_jitter": 0
+        },
+        {
+          "id": "Power",
+          "deadzone": 649,
+          "invert": false,
+          "min": -32440,
+          "max": 32439,
+          "idle": -32440,
+          "easing_curve": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "anti_jitter": 0
+        },
+        {
+          "id": "white",
+          "deadzone": 324,
+          "invert": false,
+          "min": 0,
+          "max": 32439,
+          "idle": 0,
+          "easing_curve": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "anti_jitter": 0
+        },
+        {
+          "id": "reverser",
+          "deadzone": 649,
+          "invert": false,
+          "min": -32440,
+          "max": 32439,
+          "idle": -32440,
+          "easing_curve": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "anti_jitter": 0
+        },
+        {
+          "id": "main lever",
+          "deadzone": 636,
+          "invert": false,
+          "min": -31168,
+          "max": 32439,
+          "idle": -31168,
+          "easing_curve": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "anti_jitter": 0
+        }
+      ]
+    }
+  },
+  "apps": [
+    "Train Sim World"
+  ]
+}
